@@ -286,7 +286,7 @@ def getEXPMeter(i2, bv):
 def getEXPMeter_Rate(v, bv, el, seeing, decker="W"):
     alpha = -0.908
     beta = 0.0852
-    Const = -22.55
+    Const = -21.8
     if seeing == 0:
         apflog( "Warning: AVG_FWHM seems to be 0. Using 15 instead.",level="Warn")
 
@@ -304,7 +304,7 @@ def getEXPMeter_Rate(v, bv, el, seeing, decker="W"):
 def getEXPTime(cnts, v, bv, el, seeing, decker="W"):
     alpha = -0.0311
     beta = 0.158
-    Const = -11.95
+    Const = -11.2
     if seeing <= 0:
         seeing = np.array(15)
     # seeing  = 13.99
@@ -812,7 +812,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False):
                                         star_table[f,DS_ERR], star_elevations[f], seeing, \
                                         star_table[f,DS_BV], star_table[f,DS_APFPRI])
         
-        # exp_times = exp_times * slowdown
+        exp_times = exp_times * slowdown
 #        print exp_times[0]
 #        print exp_times[1]
 

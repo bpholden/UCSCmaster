@@ -244,6 +244,40 @@ class Master(threading.Thread):
 
             apflog("getTarget(): Target= %s" % target["NAME"])
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  APFPri=%.2f" % (target["COUNTS"], target["EXP_TIME"], target["PRI"]))
+
+
+        def opening(sunset=False):
+            apflog("Running open at sunset as sunel = %4.2f" % el)
+            result = APF.openat(sunset=sunset)
+            if not result:
+                apflog("After two tries openatsunset hasn't successfully opened. \
+                        Emailing for help and exiting.", level='error', echo=True)
+                APF.close()
+                os._exit(1)
+            # ok, the problem is that checkClouds calls scriptobs
+            APF.DMReset()
+            while float(APF.sunel) > SUNEL_LIM:
+                chk_done = "$eostele.SUNEL < %f" % (SUNEL_LIM)
+                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
+                APF.DMReset()
+            # if APF.isReadyForObserving()[0] and APF.openOK:
+            #     targ = ds.getNext(time.time(), 1.0, 1.0, bstar=True)
+            #     apflog("Slewing to %s to start building up seeing values." % targ['NAME'], echo=True)
+            #     APF.checkClouds(targ)
+            #     try:
+            #         backup_obsNum = int(apf.robot["MASTER_VAR_2"].read(binary=True))
+            #     except:
+            #         backup_obsNum = -1
+            #     if  APF.ucam['OBSNUM'].read(binary=True) < backup_obsNum:
+            #         apflog("Something went awry with file numbering in checkClouds, wtf?",echo=True)
+            #         try:
+            #             APF.ucam['OBSNUM'].write(backup_obsNum)
+            #         except Exception, e:
+            #             apflog("Error writing apfucam.OBSNUM %s" % (e),echo=True)
+            #     self.VMAG = targ["VMAG"]
+            #     self.BV   = targ["BV"]
+            return
+
 ###############################
 
         # Actual Watching loop
@@ -354,60 +388,11 @@ class Master(threading.Thread):
             # Open at sunset
             sun_between_limits = el < SUNEL_HOR and el > SUNEL_LIM 
             if not APF.isReadyForObserving()[0] and el < SUNEL_HOR and el > SUNEL_LIM and APF.openOK and not rising:
-                apflog("Running open at sunset as sunel = %4.2f" % el)
-                result = APF.openat(sunset=True)
-                if not result:
-                    apflog("After two tries openatsunset hasn't successfully opened. \
-                               Emailing for help and exiting.", level='error', echo=True)
-                    APF.close()
-                    os._exit(1)
-                # ok, the problem is that checkClouds calls scriptobs
-                APF.DMReset()
-                while float(APF.sunel) > SUNEL_LIM:
-                    chk_done = "$eostele.SUNEL < %f" % (SUNEL_LIM)
-                    result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
-                    APF.DMReset()
-                # if APF.isReadyForObserving()[0] and APF.openOK:
-                #     targ = ds.getNext(time.time(), 1.0, 1.0, bstar=True)
-                #     apflog("Slewing to %s to start building up seeing values." % targ['NAME'], echo=True)
-                #     APF.checkClouds(targ)
-                #     try:
-                #         backup_obsNum = int(apf.robot["MASTER_VAR_2"].read(binary=True))
-                #     except:
-                #         backup_obsNum = -1
-                #     if  APF.ucam['OBSNUM'].read(binary=True) < backup_obsNum:
-                #         apflog("Something went awry with file numbering in checkClouds, wtf?",echo=True)
-                #         try:
-                #             APF.ucam['OBSNUM'].write(backup_obsNum)
-                #         except Exception, e:
-                #             apflog("Error writing apfucam.OBSNUM %s" % (e),echo=True)
-                #     self.VMAG = targ["VMAG"]
-                #     self.BV   = targ["BV"]
-
+                opening(sunset=True)
+                
             # Open at night
             if not APF.isReadyForObserving()[0]  and el < SUNEL_LIM and APF.openOK:
-                apflog("Running open at night at sunel =%4.2f" % el)
-                result = APF.openat(sunset=False)
-                if not result:
-                    apflog("After two tries openatnight couldn't succeed. \
-                               Emailing for help and exiting.", level='error', echo=True)
-                    APF.close()
-                    os._exit(1)
-                targ = ds.getNext(time.time(), 1.0, 1.0, bstar=True)
-                apflog("Slewing to %s to start building up seeing values." % targ['NAME'], echo=True)
-                # APF.checkClouds(targ)
-                # try:
-                #     backup_obsNum = int(apf.robot["MASTER_VAR_2"].read(binary=True))
-                # except:
-                #     backup_obsNum = -1
-                # if  APF.ucam['OBSNUM'].read(binary=True) < backup_obsNum:
-                #     apflog("Something went awry with file numbering in checkClouds, wtf?",echo=True)
-                #     try:
-                #         APF.ucam['OBSNUM'].write(backup_obsNum)
-                #     except Exception, e:
-                #         apflog("Error writing apfucam.OBSNUM %s" % (e),echo=True)
-                # self.VMAG = targ["VMAG"]
-                # self.BV   = targ["BV"]
+                opening()
 
             # Check for servo errors
             if APF.isOpen()[0] and APF.slew_allowed == False:
@@ -424,7 +409,6 @@ class Master(threading.Thread):
                     apflog("Cannot reset telescope after servo failure",level="error", echo=True)
                     os._exit(1)
                 
-
 
             # If we are open and scriptobs isn't running, start it up
             if APF.isReadyForObserving()[0] and not running and el <= SUNEL_LIM:

@@ -24,7 +24,8 @@ WINDSHIELD_LIMIT = 10.
 wxtimeout = timedelta(seconds=1800)
 SUNEL_HOR = -3.2
 
-ScriptDir = '$LROOT/bin/robot/'
+#ScriptDir = '@LROOT@/bin/robot/'
+ScriptDir = '/usr/local/lick/bin/robot/'
 
 deckscale = {'M': 1.0, 'W':1.0, 'N': 3.0, 'B': 0.5, 'S':2.0, 'P':1.0}
 
@@ -168,6 +169,7 @@ class APF:
     seeinglist = []
     speedlist  = []
     conditions = 'bad'
+    cwd        = "/u/rjhanson/master/"
     slowdown   = 0.0 
 
     # Initial Wind conditions
@@ -328,16 +330,17 @@ class APF:
         
 
     def calibrate(self, script, time):
+        s_calibrate = os.path.join(ScriptDir,"calibrate")
         if self.test: 
             print "Test Mode: calibrate %s %s." % (script, time)
             APFTask.waitFor(self.task, True, timeout=10)
             return True
         if time == 'pre' or 'post':
             apflog("Running calibrate %s %s" % (script, time), level = 'info')
-            cmd = '/usr/local/lick/bin/robot/calibrate %s %s' % (script, time)
+            cmd = '%s %s %s' % (s_calibrate,script, time)
             result, code = cmdexec(cmd)
             if not result:
-                apflog("Calibrate %s %s failed with return code %d" % (script, time, code),echo=True)
+                apflog("%s %s %s failed with return code %d" % (s_calibrate,script, time, code),echo=True)
             return result
         else:
             print "Couldn't understand argument %s, nothing was done." % time
@@ -515,7 +518,7 @@ class APF:
             apflog("Number of last observation is %s" % self.ucam('OBSNUM').read())
             return
         APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], self.ucam["OBSNUM"].read())
-        with open('/u/rjhanson/master/lastObs.txt','w') as f:
+        with open(os.path.join(self.cwd,'lastObs.txt'),'w') as f:
                 f.write("%s\n" % self.ucam('OBSNUM').read())
                 apflog("Recording last ObsNum as %d" % int(self.ucam["OBSNUM"].read()))
 
@@ -588,7 +591,7 @@ class APF:
         lines_done = int(self.robot["SCRIPTOBS_LINES_DONE"])
         APFLib.write(self.autofoc, "robot_autofocus_enable")
 
-	apflog("checkClouds(): File name=%s - Number=%d - Lines Done=%d" % (obs_file, int(obs_num), lines_done) )
+        apflog("checkClouds(): File name=%s - Number=%d - Lines Done=%d" % (obs_file, int(obs_num), lines_done) )
 
         APFLib.write(self.ucam["OUTFILE"], "heimdallr")
         APFLib.write(self.ucam["OBSNUM"], self.cloudObsNum)
@@ -596,7 +599,7 @@ class APF:
 
 
         cmdexec('/usr/local/lick/bin/robot/prep-obs')
-        args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', '/u/rjhanson/master/checkClouds/']
+        args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.path.join(self.cwd,'checkClouds/')]
 
         apflog("checkClouds(): Observing %s as a test star to check the clouds/seeing/transparency" % target["NAME"], echo=True)
         outfile = open('robot.log', 'a')
