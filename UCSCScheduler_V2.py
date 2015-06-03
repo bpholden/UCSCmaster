@@ -7,13 +7,14 @@ import ephem
 import gspread
 import json
 from oauth2client.client import SignedJwtAssertionCredentials
+from ExposureCalculations import getI2_M, getI2_K, getEXPMeter, getEXPMeter, getEXPTime
 
 import numpy as np
 import os
 import pickle
 import sys
 import time
-#from apflog import *
+from apflog import *
 
 # Some variables that will soon be moved to a separate file
 TARGET_ELEVATION_MIN = 20
