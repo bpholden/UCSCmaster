@@ -393,7 +393,7 @@ def calculate_ucsc_exposure_time( vmag, precision, elevation, seeing, bv=None, p
 	precision = np.array(precision)
 	
 	if bv is None:
-	    bv = np.array( [0.8] * len(vmag) )
+	    bv = np.array( [1.0] * len(vmag) )
 	else:
 	    bv = np.array(bv)
 		
@@ -741,9 +741,6 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False):
                                         star_table[f,DS_BV], star_table[f,DS_APFPRI])
         
         exp_times = exp_times * slowdown
-#        print exp_times[0]
-#        print exp_times[1]
-
 
         star_table[f, DS_COUNTS] = exp_counts
         star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times)

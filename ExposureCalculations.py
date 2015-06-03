@@ -3,7 +3,6 @@ from x_gaussslit import *
     
 def getI2_K(unc):
 
-
     A = 4.47
     B = -1.58
     return 10 ** ( A + B*np.log10(unc))

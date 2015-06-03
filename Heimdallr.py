@@ -515,10 +515,10 @@ if __name__ == '__main__':
     APFTask.waitFor(parent, True, timeout=5)
 
     # Check to see if the instrument has been released
-    if not debug:
-        if apf.checkapf['INSTRELE'].read().strip().lower() != 'yes':
-            apflog("The instrument has not been released. Check that Observer Location has been submitted.", echo=True, level='error')
-            sys.exit(1)
+    # if not debug:
+    #     if apf.checkapf['INSTRELE'].read().strip().lower() != 'yes':
+    #         apflog("The instrument has not been released. Check that Observer Location has been submitted.", echo=True, level='error')
+    #         sys.exit(1)
         
 
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
