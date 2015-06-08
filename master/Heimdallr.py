@@ -138,18 +138,18 @@ class Master(threading.Thread):
         self.VMAG = None
         self.obsBstar = False
         self.targetlogname = "/u/rjhanson/master/targetlog.txt"
-        try:
-            self.targetlog = open(self.targetlogname,"w+")
-        except Exception, e:
-            self.targetlog = None
-            apflog("cannot open %s: %s" % (self.targetlogname,e),level="error")
+#        try:
+#            self.targetlog = open(self.targetlogname,"w+")
+#        except Exception, e:
+self.targetlog = None
+#            apflog("cannot open %s: %s" % (self.targetlogname,e),level="error")
 
         self.nighttargetlogname = "/u/rjhanson/master/nighttargetlog.txt"
-        try:
-            self.nighttargetlog = open(self.nighttargetlogname,"w+")
-        except Exception, e:
-            self.nighttargetlog = None
-            apflog("cannot open %s: %s" % (self.nighttargetlogname,e),level="error")
+#        try:
+#            self.nighttargetlog = open(self.nighttargetlogname,"w+")
+#        except Exception, e:
+        self.nighttargetlog = None
+#            apflog("cannot open %s: %s" % (self.nighttargetlogname,e),level="error")
 
     def run(self):
         APF = self.APF
@@ -625,7 +625,7 @@ if __name__ == '__main__':
 
         try:
             if opt.fixed == None:
-                ds.get_spreadsheet()
+                (names,) = ds.parseGoogledex()
         except:
             apflog("Cannot download googledex?!",level="Error")
 
@@ -713,7 +713,11 @@ if __name__ == '__main__':
 #    logpush(os.path.join(os.getcwd(), "robot.log"))
     logpush(os.path.join("/u/rjhanson/master/observed_targets"))
     logpush(os.path.join("/u/rjhanson/master/robot.log"))
-    logpush(master.nighttargetlogname)
+    if master.nighttargetlog:
+        try:
+            logpush(master.nighttargetlogname)
+        except:
+            apflog("cannot roll %s" % (master.nighttargetlogname))
 
     # If there is a copy of the googledex laying around, remove it so it gets re-downloaded tomorrow.
     try:
@@ -728,6 +732,7 @@ if __name__ == '__main__':
         apflog("Calibrate Post has failed.", level='error',echo=True)
 
     # Focus the instrument once more
+    APFTask.phase(parent, "Focus")
     apflog("Running Focus Post", echo=True)
     result = apf.focus(user='ucsc')
     if not result:

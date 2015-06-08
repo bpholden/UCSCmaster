@@ -45,7 +45,7 @@ def logpush(filename, keep=4):
     
 
 
-def apflog(msg, level='Notice', echo=False):
+def apflog(msg, level='Notice', echo=True):
     """Wraps the APF.log function. Messages are logged as 'master'."""
 
     APF.log(str(msg), level=level, echo=echo)

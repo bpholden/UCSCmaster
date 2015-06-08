@@ -336,6 +336,10 @@ class APF:
             APFTask.waitFor(self.task, True, timeout=10)
             return True
         if time == 'pre' or 'post':
+            try:
+                APFLib.write("apfmot.DEWARFOCRAW",ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True))
+            except:
+                apflog("Cannot read the last best fitting focus value or write the dewar focus value", level='error')
             apflog("Running calibrate %s %s" % (script, time), level = 'info')
             cmd = '%s %s %s' % (s_calibrate,script, time)
             result, code = cmdexec(cmd)
@@ -374,6 +378,25 @@ class APF:
         if not result:
             apflog("Error setting the TEQMODE.")
             raise RuntimeError, "Couldn't set TEQ mode"
+
+
+    def clearestop(self):
+        if self.test: return True
+        if self.mv_perm.binary == False:
+            apflog("Waiting for permission to move...", echo=True)
+            chk_move = "$checkapf.MOVE_PERM == true"
+            result = APFTask.waitFor(self.task, False, chk_move, timeout=600)
+            if not result:
+                apflog("Can't open. No move permission.",echo=True)
+                return False
+
+        cmd = '/usr/local/lick/bin/robot/clear_estop'
+        result, code = cmdexec(cmd)
+        if result:
+            return True
+        else:
+            return False
+
 
     def openat(self, sunset=False):
         """Function to ready the APF for observing. Calls either openatsunset or openatnight.
@@ -419,11 +442,20 @@ class APF:
             APFTask.waitFor(self.task, True, timeout=10)
             result, code = cmdexec(cmd)
             if result:
+                try:
+                    APFLib.write("eostele.FOCUS",ktl.read("apftask","FOCUSTEL_LASTFOCUS",binary=True))
+                except:
+                    apflog("Cannot move secondary focus.",level="error")
                 return True
             else:
                 apflog("Second openup attempt also failed. Exit code %d. Giving up." % code,echo=True)
                 return False
         else:
+            try:
+                APFLib.write("eostele.FOCUS",ktl.read("apftask","FOCUSTEL_LASTFOCUS",binary=True))
+            except:
+                apflog("Cannot move secondary focus.",level="error")
+
             return True
 
     def power_down_telescope(self):
@@ -642,8 +674,10 @@ class APF:
         if self.teqmode.read() != 'Night':
             self.setTeqMode('Night')
         # Check the instrument focus for a reasonable value
-        if self.dewarfoc > 8550 or self.dewarfoc < 8400:
-            apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % self.dewarfoc, level = "error", echo=True)
+        if self.dewarfoc > 8600 or self.dewarfoc < 8400:
+            lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
+            apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
+            APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
             
         # Check Telescope M2 Focus
         
@@ -689,8 +723,10 @@ class APF:
         if self.teqmode.read() != 'Night':
             self.setTeqMode('Night')
         # Check the instrument focus for a reasonable value
-        if self.dewarfoc > 8550 or self.dewarfoc < 8400:
-            apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % self.dewarfoc, level = "error", echo=True)
+        if self.dewarfoc > 8600 or self.dewarfoc < 8400:
+            lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
+            apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
+            APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
          
         # Start scriptobs
         robotdir = "/usr/local/lick/bin/robot/"

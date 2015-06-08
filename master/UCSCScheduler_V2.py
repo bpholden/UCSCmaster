@@ -54,7 +54,7 @@ def parseStarlist(starlist):
     try:
         f = open(starlist,'r')
     except IOError:
-        apflog("Warning: Could not open %s. No target can be selected." % starlist)
+        apflog("Warning: Could not open %s. No target can be selected." % starlist,echo=True)
         return None
     else:
         for line in f:
@@ -110,11 +110,11 @@ def get_spreadsheet(filen='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)
     gs = gspread.authorize(credentials)
 
-    print "Successfully logged in."
+    apflog("Successfully logged in.", echo=True)
     spreadsheet = gs.open("The Googledex")
-    print "Loaded Main Googledex"
+    apflog("Loaded Main Googledex",echo=True)
     worksheet = spreadsheet.sheet1
-    print "Got spreadsheet"
+    apflog("Got spreadsheet", echo=True)
     start = datetime.now()
 
     return worksheet
@@ -126,7 +126,7 @@ def parseGoogledex():
     try:
         f = open("./googledex.dat",'r')
     except IOError:
-        print "Starting Googledex parse"
+        apflog( "Starting Googledex parse")
         worksheet = get_spreadsheet()
         full_codex = worksheet.get_all_values()
         #time = (datetime.now() - start).total_seconds()
@@ -151,7 +151,7 @@ def parseGoogledex():
     try:
         idx = [col_names.index(v) for v in req_cols]
     except ValueError:
-        print v, " Not found in list"    
+        apflog("%s Not found in list" % (v) , level="warn")
     names = []
     star_table = []
     do_flag = []
@@ -209,7 +209,7 @@ def update_googledex_lastobs(filename, time=None):
             t = datetime(time.year, time.month, time.day, hr, min)
             jd = float(ephem.julian_date(t))
             ws.update_cell(i+1, col, round(jd, 1) )
-    print "Updated Googledex"
+    apflog( "Updated Googledex")
 
 def update_local_googledex(googledex_file="/u/rjhanson/master/googledex.dat", observed_file="/u/rjhanson/master/observed_targets"):
     """
@@ -243,7 +243,7 @@ def update_local_googledex(googledex_file="/u/rjhanson/master/googledex.dat", ob
             # This keeps the JD precision to one decimal point. There is no real reason for this other than
             # the googledex currently only stores the lastObs field to one decimal precision. Legacy styles FTW.
             jd = round(float(ephem.julian_date(t)), 1) 
-            print "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd))
+            apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)))
             row[lastObsIdx] = str(jd)
             full_codex[i] = row
 
@@ -364,7 +364,7 @@ def getObserved(filename):
     try:
         f = open(filename, 'r')
     except IOError:
-        print "Couldn't open %s" % filename
+        apflog( "Couldn't open %s" % filename,level="warn")
         return obs, times
     else: 
         for line in f:
@@ -398,13 +398,6 @@ def calculate_ucsc_exposure_time( vmag, precision, elevation, seeing, bv=None, p
 	else:
 	    bv = np.array(bv)
 		
-	if priority is not None:
-        # set the minimum precision for stars less than APFPri 10 to 1.
-	    priority = np.array(priority)
-	    x = np.where(precision < 1.5, True, False)
-	    y = np.where(priority < 10, True, False)
-	    precision[x & y] = 1.5
-	
 	# Now lets calculate the exposure times
 	
 	# Desired I2 counts for precision
@@ -514,7 +507,7 @@ def smartList(starlist, time, seeing, slowdown, az, el):
         sn, star_table, lines, stars = parseStarlist(starlist)
     except ValueError:
         # This will be raised when the starlist could not be parsed successfully.
-        print "No target could be selected because starlist could not be parsed."
+        apflog( "No target could be selected because starlist could not be parsed.", level="warn")
         return None
     targNum = len(sn)
 
@@ -574,7 +567,7 @@ def smartList(starlist, time, seeing, slowdown, az, el):
             #print sn[i], "behind moon"
 
     if done:
-        print "All targets have been observed"
+        apflog( "All targets have been observed",level="warn")
         return None
 
     # Prioritize higher elevation targets
