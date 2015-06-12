@@ -401,7 +401,7 @@ def calculate_ucsc_exposure_time( vmag, precision, elevation, seeing, bv=None, p
 	# Now lets calculate the exposure times
 	
 	# Desired I2 counts for precision
-	i2counts = getI2_K(precision)
+    i2counts = getI2_K(precision)
     mstars = np.where(bv > 1.2)
     if len(mstars) > 0:
         i2counts[mstars] = getI2_M(precision[mstars])
