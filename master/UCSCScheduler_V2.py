@@ -375,42 +375,25 @@ def getObserved(filename):
             
     return obs, times
 	
-def calculate_ucsc_exposure_time( vmag, precision, elevation, seeing, bv=None, priority=None, decker="W"):
-	"""
-		Args:
-			vmag: List of V magnitudes for targets
-			precision: List of desired RV precisions for targets
-			elevation: The last target elevation ( Used for the last airmass )
-			seeing: Current FWHM
-		Optional Args:
-			priority: List of priorities for targets
-			bv: List of B-V magnitudes for targets
-			decker: The current decker being used, defaults to the standard UCSC 'W' decker
-		Returns: tuple( exp_time, exp_counts )
-			exp_time: List of exposure times in seconds for the given targets
-			exp_counts: List of expected exposure meter counts for given target
-	"""
-	vmag = np.array(vmag)
-	precision = np.array(precision)
-	
-	if bv is None:
-	    bv = np.array( [1.0] * len(vmag) )
-	else:
-	    bv = np.array(bv)
+def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W"):
+    vmag = np.array(vmag)
+    precision = np.array(precision)
+    bmv = np.array(bmv)
+    precision = np.array(precision)
 		
 	# Now lets calculate the exposure times
 	
 	# Desired I2 counts for precision
     i2counts = getI2_K(precision)
-    mstars = np.where(bv > 1.2)
+    mstars = np.where(bmv > 1.2)
     if len(mstars) > 0:
         i2counts[mstars] = getI2_M(precision[mstars])
 	
 	# Exposure Meter counts to reach desired I2 counts
-	exp_counts = getEXPMeter(i2counts, bv)
+	exp_counts = getEXPMeter(i2counts, bmv)
 	
 	# Exposure time to reach desired I2 counts
-	exp_time = getEXPTime(i2counts, vmag, bv, elevation, seeing, decker=decker)
+	exp_time = getEXPTime(i2counts, vmag, bmv, elevation, seeing, decker=decker)
 	
 	return exp_time, exp_counts
 
@@ -732,7 +715,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False):
         
         exp_times, exp_counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
                                         star_table[f,DS_ERR], star_elevations[f], seeing, \
-                                        star_table[f,DS_BV], star_table[f,DS_APFPRI])
+                                        star_table[f,DS_BV])
         
         exp_times = exp_times * slowdown
 
