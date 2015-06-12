@@ -23,6 +23,7 @@ import APFControl as ad
 from apflog import *
 import UCSCScheduler_V2 as ds
 from x_gaussslit import *
+import ExposureCalculations
 
 os.umask(0007)
 
@@ -181,7 +182,7 @@ self.targetlog = None
             else:
                 apflog("Calculating expected counts")
                 apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
-                exp_cnts_sec = ds.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm)
+                exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm)
                 try:
                     slowdown = exp_cnts_sec / APF.countrate
                     if slowdown < 0:
@@ -306,7 +307,7 @@ self.targetlog = None
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
-                exp_cntrate = ds.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm)
+                exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm)
                 try:
                     slow = exp_cntrate / APF.countrate
                     if slow < 0:
