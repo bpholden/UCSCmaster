@@ -138,14 +138,14 @@ class Master(threading.Thread):
         self.BV = None
         self.VMAG = None
         self.obsBstar = False
-        self.targetlogname = "/u/rjhanson/master/targetlog.txt"
+        self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
 #        try:
 #            self.targetlog = open(self.targetlogname,"w+")
 #        except Exception, e:
-self.targetlog = None
+        self.targetlog = None
 #            apflog("cannot open %s: %s" % (self.targetlogname,e),level="error")
 
-        self.nighttargetlogname = "/u/rjhanson/master/nighttargetlog.txt"
+        self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
 #        try:
 #            self.nighttargetlog = open(self.nighttargetlogname,"w+")
 #        except Exception, e:
@@ -705,15 +705,15 @@ if __name__ == '__main__':
     apf.setTeqMode('Morning')
 
     try:
-        ds.update_googledex_lastobs("/u/rjhanson/master/observed_targets") 
+        ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"))
     except:
         apflog("Updating the online googledex has failed.", level="Error")
 
     # Keep a copy of observed_targets around for a bit just in case
 #    logpush(os.path.join(os.getcwd(), "observed_targets"))
 #    logpush(os.path.join(os.getcwd(), "robot.log"))
-    logpush(os.path.join("/u/rjhanson/master/observed_targets"))
-    logpush(os.path.join("/u/rjhanson/master/robot.log"))
+    logpush(os.path.join(os.getcwd(),"observed_targets"))
+    logpush(os.path.join(os.getcwd(),"robot.log"))
     if master.nighttargetlog:
         try:
             logpush(master.nighttargetlogname)
@@ -722,7 +722,7 @@ if __name__ == '__main__':
 
     # If there is a copy of the googledex laying around, remove it so it gets re-downloaded tomorrow.
     try:
-        os.remove("/u/rjhanson/master/googledex.dat")
+        os.remove(os.path.join(os.getcwd(),"googledex.dat"))
     except OSError:
         apflog("Note: There was no googledex save file to delete today.", echo=True)
         

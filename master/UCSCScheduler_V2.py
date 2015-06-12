@@ -124,14 +124,14 @@ def parseGoogledex():
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
     try:
-        f = open("./googledex.dat",'r')
+        f = open(os.path.join(os.getcwd(),"googledex.dat"),'r')
     except IOError:
         apflog( "Starting Googledex parse")
         worksheet = get_spreadsheet()
         full_codex = worksheet.get_all_values()
         #time = (datetime.now() - start).total_seconds()
         #print "Loaded Values. Took {0:f} seconds.".format(time)
-        f = open("/u/rjhanson/master/googledex.dat",'w')
+        f = open(os.path.join(os.getcwd(),"googledex.dat"),'w')
         pickle.dump(full_codex, f)
         f.close()
     else:
@@ -211,7 +211,7 @@ def update_googledex_lastobs(filename, time=None):
             ws.update_cell(i+1, col, round(jd, 1) )
     apflog( "Updated Googledex")
 
-def update_local_googledex(googledex_file="/u/rjhanson/master/googledex.dat", observed_file="/u/rjhanson/master/observed_targets"):
+def update_local_googledex(googledex_file="googledex.dat", observed_file="observed_targets"):
     """
         Update the local copy of the googledex with the last observed star time. 
     """
@@ -485,7 +485,7 @@ def smartList(starlist, time, seeing, slowdown, az, el):
         but those that rise above 85 degrees will be regected to avoid slewing through the zenith. """
     dt = datetime.utcfromtimestamp(int(time))    
 
-    observed, _ = getObserved("/u/rjhanson/master/observed_targets")
+    observed, _ = getObserved(os.path.join(os.getcwd(),"observed_targets"))
 
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
@@ -629,10 +629,10 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False):
     if verbose:
         print "getNext(): Finding target for time ", dt
 
-    update_local_googledex()
+    update_local_googledex(googledex_file=os.path.join(os.getcwd(),"googledex.dat"), observed_file=os.path.join(os.getcwd(),"observed_targets"))
 
     # List of targets already observed
-    observed, _ = getObserved('/u/rjhanson/master/observed_targets')
+    observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
     if observed == []:
         if verbose:
             print "getNext(): getObserved is empty, setting bstar to true"
