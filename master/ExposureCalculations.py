@@ -1,5 +1,7 @@
 import numpy as np
 from x_gaussslit import *
+
+slit_size = {'M': (9.52, 74.07), 'W': (9.26, 27.78), 'N': (4.63, 74.07), 'B': (18.52, 74.07), 'S': (6.94, 74.07), 'P': (1, 1) }
     
 def getI2_K(unc):
 

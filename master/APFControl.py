@@ -140,7 +140,25 @@ def windmon(wx):
 def dmtimemon(dmtime):
     APF.dmtime = dmtime.read(binary=True)
 
+def midptmon(midpt,outputfile):
+    midptval = midpt.read(binary=True)
+    objectval = ""
+    el = 100
+    try:
+        el = ktl.read('eostele','sunel',timeout=10)
+    except:
+        apflog("cannot read eostele sun elevation",level="warn")
+    try:
+        objectval = ktl.read('apfucam','object',timeout=10)
+    except:
+        apflog("cannot read apfucam.OBJECT value!",level="error")
+        return
+    if el < 0:
+        ostr = "%s %f\n" % (objectval,midptval)
+        outputfile.write(ostr)
+        outputfile.flush()
 
+    
 # Monitor for closing up
 def countdown(closetime):
     APF.seeinglist = []
@@ -169,7 +187,7 @@ class APF:
     seeinglist = []
     speedlist  = []
     conditions = 'bad'
-    cwd        = "/u/rjhanson/master/"
+    cwd        = os.getcwd()
     slowdown   = 0.0 
 
     # Initial Wind conditions
@@ -686,9 +704,9 @@ class APF:
         outfile = open("robot.log", 'a')
         
         if skip != 0:
-            args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', '/u/rjhanson/master/','-skip', str(skip)]
+            args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip', str(skip)]
         else:
-            args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', '/u/rjhanson/master/']
+            args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
 
         p = subprocess.Popen(args,stdin=infile, stdout=outfile,stderr = subprocess.PIPE, cwd=robotdir)
 
@@ -727,11 +745,15 @@ class APF:
             lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
             apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
             APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
-         
-        # Start scriptobs
+
         robotdir = "/usr/local/lick/bin/robot/"
+
+        rv, retc = cmd_exec(os.path.join(robotdir,"prep-obs"))
+        if not rv:
+            return rv
+        # Start scriptobs
         outfile = open("robot.log", 'a')
-        args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', '/u/rjhanson/master/']
+        args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
 
         p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=outfile, stderr=outfile)
         

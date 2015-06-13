@@ -255,28 +255,12 @@ class Master(threading.Thread):
                         Emailing for help and exiting.", level='error', echo=True)
                 APF.close()
                 os._exit(1)
-            # ok, the problem is that checkClouds calls scriptobs
+
             APF.DMReset()
             while float(APF.sunel) > SUNEL_LIM:
                 chk_done = "$eostele.SUNEL < %f" % (SUNEL_LIM)
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
                 APF.DMReset()
-            # if APF.isReadyForObserving()[0] and APF.openOK:
-            #     targ = ds.getNext(time.time(), 1.0, 1.0, bstar=True)
-            #     apflog("Slewing to %s to start building up seeing values." % targ['NAME'], echo=True)
-            #     APF.checkClouds(targ)
-            #     try:
-            #         backup_obsNum = int(apf.robot["MASTER_VAR_2"].read(binary=True))
-            #     except:
-            #         backup_obsNum = -1
-            #     if  APF.ucam['OBSNUM'].read(binary=True) < backup_obsNum:
-            #         apflog("Something went awry with file numbering in checkClouds, wtf?",echo=True)
-            #         try:
-            #             APF.ucam['OBSNUM'].write(backup_obsNum)
-            #         except Exception, e:
-            #             apflog("Error writing apfucam.OBSNUM %s" % (e),echo=True)
-            #     self.VMAG = targ["VMAG"]
-            #     self.BV   = targ["BV"]
             return
 
 ###############################
@@ -332,30 +316,6 @@ class Master(threading.Thread):
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
                     APFTask.waitfor(self.task, True, timeout=15)
-                    midpt = ktl.read("apfguide","MIDPTFIN",binary=True)
-                    target = ktl.read("apfucam","object")
-                    try:
-                        omidpt = float(ktl.read("apftask","master_var_1"))
-                    except:
-                        omidpt = 0
-                    if midpt > omidpt:
-                        s = "%s %f" %(target,midpt)
-                        try:
-                            APFTask.set(parent,"var_1",str(midpt))
-                        except:
-                            apflog("cannot write to apftask",level="Error")
-                        if self.targetlog:
-                            try:
-                                s = "%s %f\n" %(target,midpt)
-                                self.targetlog.write(s)
-                            except:
-                                apflog("cannot write to %s" % (self.targetlogname),level="Error")
-                        if self.nighttargetlog:
-                            try:
-                                s = "%s %f\n" %(target,midpt)
-                                self.nighttargetlog.write(s)
-                            except:
-                                apflog("cannot write to %s" % (self.nighttargetlogname),level="Error")
                 elif self.smartObs == True:
                     apflog("Scriptobs phase is input ( smartlist ), calling getTarget.")
                     getTarget()
@@ -385,7 +345,14 @@ class Master(threading.Thread):
                 self.exitMessage = msg
                 self.stop()
 
-
+            if APF.openOK and not rising and no APF.isOpen()[0]:
+                APF.clearestop()
+                try:
+                    APF.dome['AZENABLE'].write('enable')
+                except:
+                    apflog("cannot enable AZ drive",level="error")
+                apf.setTeqMode('Evening')
+                
             # Open at sunset
             sun_between_limits = el < SUNEL_HOR and el > SUNEL_LIM 
             if not APF.isReadyForObserving()[0] and el < SUNEL_HOR and el > SUNEL_LIM and APF.openOK and not rising:
