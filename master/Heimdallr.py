@@ -126,7 +126,7 @@ def getTotalLines(filename):
                
 
 class Master(threading.Thread):
-    def __init__(self, apf, user='ucsc'):
+    def __init__(self, apf, user='ucsc',sheetn="The Googledex"):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf
@@ -138,19 +138,20 @@ class Master(threading.Thread):
         self.BV = None
         self.VMAG = None
         self.obsBstar = False
+        self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
-#        try:
-#            self.targetlog = open(self.targetlogname,"w+")
-#        except Exception, e:
-        self.targetlog = None
-#            apflog("cannot open %s: %s" % (self.targetlogname,e),level="error")
+        try:
+            self.targetlog = open(self.targetlogname,"w+")
+        except Exception, e:
+            self.targetlog = None
+            apflog("cannot open %s: %s" % (self.targetlogname,e),level="error")
 
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
-#        try:
-#            self.nighttargetlog = open(self.nighttargetlogname,"w+")
-#        except Exception, e:
-        self.nighttargetlog = None
-#            apflog("cannot open %s: %s" % (self.nighttargetlogname,e),level="error")
+        try:
+            self.nighttargetlog = open(self.nighttargetlogname,"w+")
+        except Exception, e:
+            self.nighttargetlog = None
+            apflog("cannot open %s: %s" % (self.nighttargetlogname,e),level="error")
 
     def run(self):
         APF = self.APF
@@ -205,7 +206,7 @@ class Master(threading.Thread):
             
             if self.fixedList is None:
                 # Pull from the dynamic scheduler
-                target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True)
+                target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True,sheetn=self.sheetn)
             else:
                 # Get the best target from the star list
                 target = ds.smartList(self.fixedList, seeing, slowdown, APF.aaz, APF.ael)
@@ -263,6 +264,42 @@ class Master(threading.Thread):
                 APF.DMReset()
             return
 
+        def startScriptobs():
+            # Update the last obs file and hitlist if needed
+
+            APF.updateLastObs()
+            APF.updateWindshield(self.windshield)
+            apflog("Starting an instance of scriptobs",echo=True)
+
+            if self.fixedList is not None and self.smartObs == False:
+                # We wish to observe a fixed target list, in it's original order
+                tot = getTotalLines(self.fixedList)
+                apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
+                if APF.ldone == tot and APF.user != "ucsc":
+                    APF.close()
+                    APF.updateLastObs()
+                    self.exitMessage = "Fixed list is finished. Exiting the watcher."
+                    self.stop()
+                    # The fixed list has been completely observed so nothing left to do
+                else:
+                    apflog("Found Fixed list %s" % self.fixedList, echo=True)
+                    apflog("Starting fixed list on line %d" % int(APF.ldone), echo=True)
+                    APF.observe(str(self.fixedList), skip=int(APF.ldone))
+            else:
+                if self.BV is None:
+                    apflog("No B-V value at the moment", echo=True)
+                    #self.BV = 0.028
+                if self.VMAG is None:
+                    apflog("No VMag value at the moment", echo=True)
+                    #self.VMAG = None
+                # We wish to observe either a starlist with intelligent ordering, or the dynamic scheduler
+                apflog("Starting an instance of scriptobs for dynamic observing.",echo=True)
+                self.scriptobs = APF.startRobot()
+                            
+                # Don't let the watcher run over the robot starting up
+                APFTask.waitFor(self.task, True, timeout=5)
+            
+            return
 ###############################
 
         # Actual Watching loop
@@ -345,10 +382,11 @@ class Master(threading.Thread):
                 self.exitMessage = msg
                 self.stop()
 
-            if APF.openOK and not rising and no APF.isOpen()[0]:
+            # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
+            if APF.openOK and not rising and not APF.isOpen()[0]:
                 APF.clearestop()
                 try:
-                    APF.dome['AZENABLE'].write('enable')
+                    APFLib.write(APF.dome['AZENABLE'],'enable',timeout=10)
                 except:
                     apflog("cannot enable AZ drive",level="error")
                 apf.setTeqMode('Evening')
@@ -380,38 +418,8 @@ class Master(threading.Thread):
 
             # If we are open and scriptobs isn't running, start it up
             if APF.isReadyForObserving()[0] and not running and el <= SUNEL_LIM:
-                # Update the last obs file and hitlist if needed
-                APF.updateLastObs()
-                APF.updateWindshield(self.windshield)
-                apflog("Starting an instance of scriptobs",echo=True)
-
-                if self.fixedList is not None and self.smartObs == False:
-                    # We wish to observe a fixed target list, in it's original order
-                    tot = getTotalLines(self.fixedList)
-                    apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
-                    if APF.ldone == tot:
-                        APF.close()
-                        APF.updateLastObs()
-                        self.exitMessage = "Fixed list is finished. Exiting the watcher."
-                        self.stop()
-                        # The fixed list has been completely observed so nothing left to do
-                    else:
-                        apflog("Found Fixed list %s" % self.fixedList, echo=True)
-                        apflog("Starting fixed list on line %d" % int(APF.ldone), echo=True)
-                        APF.observe(str(self.fixedList), skip=int(APF.ldone))
-                else:
-                    if self.BV is None:
-                        apflog("No B-V value at the moment", echo=True)
-                        #self.BV = 0.028
-                    if self.VMAG is None:
-                        apflog("No VMag value at the moment", echo=True)
-                        #self.VMAG = None
-                    # We wish to observe either a starlist with intelligent ordering, or the dynamic scheduler
-                    apflog("Starting an instance of scriptobs for dynamic observing.",echo=True)
-                    self.scriptobs = APF.startRobot()
-                            
-                # Don't let the watcher run over the robot starting up
-                APFTask.waitFor(self.task, True, timeout=5)
+                startScriptobs()
+                
                     
                 
             # Keep an eye on the deadman timer if we are open 
@@ -598,6 +606,10 @@ if __name__ == '__main__':
             apflog("Cannot download googledex?!",level="Error")
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
+        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+        while not instr_perm:
+            apflog("Waiting for instrument permission to be true")
+            APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
         if not result:
             apflog("Calibrate Pre has failed. Observer is exiting.",level='error',echo=True)
@@ -672,7 +684,7 @@ if __name__ == '__main__':
     apf.setTeqMode('Morning')
 
     try:
-        ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"))
+        ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
     except:
         apflog("Updating the online googledex has failed.", level="Error")
 

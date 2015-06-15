@@ -92,7 +92,7 @@ def parseStarlist(starlist):
             
     return names, np.array(star_table), lines, stars
 
-def get_spreadsheet(filen='UCSC Dynamic Scheduler-5b98d1283a95.json'):
+def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
 
     # this downloads the googledex from the Google Drive
     # the certificate must be available
@@ -102,30 +102,30 @@ def get_spreadsheet(filen='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     # the certificate has an email associated with it, that email must
     # have the document shared with it to allow access 
 
-    json_key = json.load(open(filen))
+    json_key = json.load(open(certificate))
     scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://spreadsheets.google.com/feeds']
 
     credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)
     gs = gspread.authorize(credentials)
 
     apflog("Successfully logged in.", echo=True)
-    spreadsheet = gs.open("The Googledex")
-    apflog("Loaded Main Googledex",echo=True)
+    spreadsheet = gs.open(sheetn)
+    apflog("Loaded Main %s" % (sheetn),echo=True)
     worksheet = spreadsheet.sheet1
     apflog("Got spreadsheet", echo=True)
     start = datetime.now()
 
     return worksheet
 
-def parseGoogledex():
+def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat"):
 
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
     try:
-        f = open(os.path.join(os.getcwd(),"googledex.dat"),'r')
+        f = open(os.path.join(os.getcwd(),outfn),'r')
     except IOError:
         apflog( "Starting Googledex parse")
-        worksheet = get_spreadsheet()
+        worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
         full_codex = worksheet.get_all_values()
         #time = (datetime.now() - start).total_seconds()
         #print "Loaded Values. Took {0:f} seconds.".format(time)
@@ -182,7 +182,7 @@ def parseGoogledex():
 
     return (names, np.array(star_table), do_flag, stars)
     
-def update_googledex_lastobs(filename, time=None):
+def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
     """
@@ -600,7 +600,7 @@ def format_time(total, hitthemall=False):
     return times, exps
 
 
-def getNext(time, seeing, slowdown, bstar=False, verbose=False):
+def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex"):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time (Unix timestamp), seeing, slowdown, tele az, tele el
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -645,7 +645,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False):
     # Note -- RA and Dec are returned in Radians
     if verbose:
         print("getNext(): Parsing the Googledex...")
-    sn, star_table, do_flag, stars = parseGoogledex()
+    sn, star_table, do_flag, stars = parseGoogledex(sheetn=sheetn)
     sn = np.array(sn)
     targNum = len(sn)
 

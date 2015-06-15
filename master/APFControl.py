@@ -158,7 +158,8 @@ def midptmon(midpt,outputfile):
         outputfile.write(ostr)
         outputfile.flush()
 
-    
+    return
+
 # Monitor for closing up
 def countdown(closetime):
     APF.seeinglist = []
