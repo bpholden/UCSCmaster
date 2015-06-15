@@ -65,34 +65,14 @@ def args():
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
     parser.add_argument('-s', '--smartObs', default=False, action='store_true', help="When specified with a fixed starlist, this option will pass the starlist to a selection algorithm to choose the optimal unobserved target, regardless of starlist ordering.")
-
+    parser.add_argument('--sheet',default=None,help="Optional name for a Google spreadsheet")
+    
     opt = parser.parse_args()
     return opt
 
 
 def findObsNum(apf):
-    # Where the butler logsheet lives
-#    butlerPath = r"/u/user/starlists/ucsc/"
-    # # Grab the names of all the files in the butlerPath directory
-    # (_, _, filenames) = os.walk(butlerPath).next()
-    # # Open the latest logsheet and grab the last line
-    # with open(butlerPath+sorted(filenames)[-1],'r') as f:
-    #     txt = f.readlines()
-    # last = float(txt[-1].split()[0])
-    
-    # # Don't know if night_watchman or watcher was run last, so check obs num of both
-    # myPath = r"./"
-    # with open('/u/rjhanson/master/lastObs.txt','r') as f:
-    #     l = f.readline()
-    #     obs = float(l.strip())
 
-    # if obs > last: last = obs
-
-    # last += 100 - (last % 100)
-
-    # if last % 10000 > 9700:
-    #     last += 10000 - (last % 10000)
-            # Read the last obsNum, and format it to work in  the Butler system
     obsNum = int(apf.robot["MASTER_LAST_OBS_UCSC"].read().strip())
     try:
         backup_obsNum = int(apf.robot["MASTER_VAR_2"].read(binary=True))
@@ -100,14 +80,11 @@ def findObsNum(apf):
         backup_obsNum = -1
     if  backup_obsNum > obsNum:
         obsNum = backup_obsNum
-        # this is a fucking hack
 
     obsNum += 100 - (obsNum % 100)
 
     if obsNum % 10000 > 9700:
         obsNum += 10000 - (obsNum % 10000)
-
-    
 
     return obsNum
 
@@ -464,6 +441,9 @@ if __name__ == '__main__':
         parent = 'master'
 
 
+    if not opt.sheet:
+        opt.sheet = "The Googledex"
+        
     # Establish this as the only running master script ( Or example task in test mode )
     try:
         apflog("Attempting to establish apftask as %s" % parent)
@@ -601,7 +581,7 @@ if __name__ == '__main__':
 
         try:
             if opt.fixed == None:
-                (names,) = ds.parseGoogledex()
+                (names,) = ds.parseGoogledex(sheetn=opt.sheetn)
         except:
             apflog("Cannot download googledex?!",level="Error")
 
@@ -620,7 +600,7 @@ if __name__ == '__main__':
 
 
     # Start the main watcher thread
-    master = Master(apf)
+    master = Master(apf,user=opt.name)
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
         if opt.fixed != None:
