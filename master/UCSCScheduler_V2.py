@@ -202,9 +202,11 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
         if v[0] in names:
             # We observed this target, so update the cell in the worksheet
             # update_cell(row, col, val) - col and row are 1 indexed
-            hr, min = times[names.index(v[0])]
-            
-            t = datetime(time.year, time.month, time.day, hr, min)
+            otime = times[names.index(v[0])]
+            if len(otime) > 1:
+                t = datetime(time.year, time.month, time.day, hr, min)
+            else:
+                t = datetime.fromtimestamp(otime)
             jd = float(ephem.julian_date(t))
             ws.update_cell(i+1, col, round(jd, 1) )
     apflog( "Updated Googledex")
@@ -369,7 +371,10 @@ def getObserved(filename):
             if line.strip()[0] == '#' or line.strip() == "": continue
             ls = line.split()
             obs.append(ls[0])
-            times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
+            if len(ls) > 2:
+                times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
+            else:
+                times.append(ls[1])
             
     return obs, times
 	

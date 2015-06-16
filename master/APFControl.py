@@ -158,10 +158,12 @@ def midptmon(midpt,outputfile,permoutfile):
         return
     if el < 0:
         ostr = "%s %f\n" % (objectval,midptval)
-        outputfile.write(ostr)
-        outputfile.flush()
-        permoutfile.write(ostr)
-        permoutfile.flush()
+        if outputfile != None:
+            outputfile.write(ostr)
+            outputfile.flush()
+        if permoutfile != None:
+            permoutfile.write(ostr)
+            permoutfile.flush()
 
     return
 
