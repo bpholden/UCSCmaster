@@ -141,7 +141,10 @@ def dmtimemon(dmtime):
     APF.dmtime = dmtime.read(binary=True)
 
 def midptmon(midpt,outputfile):
-    midptval = midpt.read(binary=True)
+    if midpt['populated'] == False:
+        return
+    
+    midptval = midpt['binary']
     objectval = ""
     el = 100
     try:

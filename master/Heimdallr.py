@@ -8,12 +8,14 @@ import atexit
 from datetime import datetime, timedelta
 import numpy as np
 import os
+import os.path
 from select import select
 import subprocess
 import sys
 import threading
 import time
 import pickle
+import functools
 
 import ktl
 import APF as APFLib
@@ -601,8 +603,15 @@ if __name__ == '__main__':
 
     # Start the main watcher thread
     master = Master(apf,user=opt.name)
+    
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
+        try:
+            midpt= ktl.Keyword('apfguide','MIDPTFIN')
+            midpt.callback(functools.partial(APF.midptmon,outputfile=master.nighttargetlog))
+        except:
+            apflog("Cannot setup midpoint monitor",level="warn")
+            
         if opt.fixed != None:
             lastList = apf.robot["MASTER_STARLIST"].read()
             # This resets lines done if this is a new target list
@@ -664,7 +673,10 @@ if __name__ == '__main__':
     apf.setTeqMode('Morning')
 
     try:
-        ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
+        if os.path.exists(master.nighttargetlogname):
+            ds.update_googledex_lastobs(master.nighttargetlogname,sheetn=master.sheetn)
+        else:
+            ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
     except:
         apflog("Updating the online googledex has failed.", level="Error")
 
