@@ -140,7 +140,7 @@ def windmon(wx):
 def dmtimemon(dmtime):
     APF.dmtime = dmtime.read(binary=True)
 
-def midptmon(midpt,outputfile):
+def midptmon(midpt,outputfile,permoutfile):
     if midpt['populated'] == False:
         return
     
@@ -160,28 +160,11 @@ def midptmon(midpt,outputfile):
         ostr = "%s %f\n" % (objectval,midptval)
         outputfile.write(ostr)
         outputfile.flush()
+        permoutfile.write(ostr)
+        permoutfile.flush()
 
     return
 
-# Monitor for closing up
-def countdown(closetime):
-    APF.seeinglist = []
-    APF.speedlist  = []
-    APF.slowdown   = 2.0
-    APF.conditions = 'bad'
-    while (datetime.now() - closetime) < wxtimeout:
-        if not APF.openOK:
-            if ok2open.binary == False:
-                apflog("checkapf now agrees it is not okay to open. stopping countdown.",echo=True)
-                break
-            apflog("Not okay to open, resetting countdown.",echo=True)
-            closetime = datetime.now()
-        else:
-            apflog("Waiting to re-open...")
-            apflog("Closed at: %s" % closetime)
-            apflog("Earliest possible reopening: %s" % (closetime+wxtimeout))
-            apflog("%d seconds remaining..." % (wxtimeout - (datetime.now() - closetime)).seconds)
-        time.sleep(1)
     
 
 class APF:

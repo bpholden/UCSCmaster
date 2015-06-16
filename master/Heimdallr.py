@@ -63,7 +63,7 @@ def args():
     parser.add_argument('-f', '--fixed', help='Specify a fixed target list to observe. File will be searched for relative to the current working directory.')
     parser.add_argument('-t', '--test', action='store_true', help="Start the watcher in test mode. No modification to telescope, instrument, or observer settings will be made.")
     parser.add_argument('-r', '--restart', action='store_true', default=False, help="Restart the specified fixed star list from the begining. This resets scriptobs_lines_done to 0.")
-    parser.add_argument('-w', '--windshield', choices=w_c, default='auto', help="Turn windshielding on, off, or let the software decide based on the current average wind speed (Default is auto). Velocity > 5 mph turns windshielding on.")
+    parser.add_argument('-w', '--windshield', choices=w_c, default='auto', help="Turn windshielding on, off, or let the software decide based on the current average wind speed (Default is auto). Velocity > %d mph turns windshielding on." % (APF.WINDSHIELD_LIMIT))
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
     parser.add_argument('-s', '--smartObs', default=False, action='store_true', help="When specified with a fixed starlist, this option will pass the starlist to a selection algorithm to choose the optimal unobserved target, regardless of starlist ordering.")
@@ -608,7 +608,7 @@ if __name__ == '__main__':
         apflog("Starting the main watcher." ,echo=True)
         try:
             midpt= ktl.Keyword('apfguide','MIDPTFIN')
-            midpt.callback(functools.partial(APF.midptmon,outputfile=master.nighttargetlog))
+            midpt.callback(functools.partial(APF.midptmon,outputfile=master.nighttargetlog,permoutfile=master.targetlog))
         except:
             apflog("Cannot setup midpoint monitor",level="warn")
             
