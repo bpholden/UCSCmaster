@@ -582,25 +582,26 @@ def smartList(starlist, time, seeing, slowdown, az, el):
     
 def format_time(total, hitthemall=False):
     total = np.array(total)
-    idx = np.where(total < 300, True, False)
-    jdx = np.where(total > MAX_EXPTIME, True, False)
-    #kdx = not idx and not jdx
-    kdx = np.logical_not(np.logical_or(idx, jdx))
-
     times = np.zeros(len(total))
     exps  = np.zeros(len(total))
 
-    times[idx] = 300
-    times[jdx] = MAX_EXPTIME
-    times[kdx] = np.ceil(total[kdx])
+    short_idx = np.where(total < MIN_EXPTIME, True, False)
+    times[short_idx] = np.ceil(total[short_idx])
+    exps[idx] = [ min([np.ceil(MIN_EXPTIME/t), 4]) for t in total[short_idx] ]
 
-    exps[idx] = [ min([np.ceil(300/t), 4]) for t in total[idx] ]
-    
+
+    max_idx = np.where(total > MAX_EXPTIME, True, False)
     if hitthemall:
-        exps[jdx] = 1
+        exps[max_idx] = 1
     else:
-        exps[jdx] = np.ceil(total[jdx]/MAX_EXPTIME)
-    exps[kdx] = 1
+        exps[max_idx] = np.ceil(total[max_idx]/MAX_EXPTIME)
+    times[max_idx] = MAX_EXPTIME
+
+
+    middle_idx = np.logical_not(np.logical_or(short_idx, max_idx))
+    times[middle_idx] = np.ceil(total[middle_idx])
+    exps[middle_idx] = 1
+    
 
     return times, exps
 
