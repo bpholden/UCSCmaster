@@ -42,7 +42,7 @@ if __name__ == "__main__":
 #        exp_counts = ds.getEXPMeter(i2counts, star_table[:, ds.DS_BV])
 #    exp_time = ds.getEXPTime(i2counts, star_table[:, ds.DS_VMAG], star_table[:, ds.DS_BV], el, fwhm)
 
-    exp_times, exp_counts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,bv=star_table[:, ds.DS_BV],priority=star_table[:,ds.DS_APFPRI])
+    exp_times, exp_counts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV])
 
     etimes, nobs = ds.format_time(exp_times)
     fin_pre = precision
