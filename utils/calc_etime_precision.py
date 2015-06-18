@@ -10,7 +10,7 @@ import pickle
 THRESHOLD = 2* 60 * 60
 SLOWDOWN = 0.3
 STAR_EL = 70
-AVG_FWHM = 8
+AVG_FWHM = 10
 
 def calc_fin_pre(i2counts,exp_time,bmv):
     ratio = exp_time / THRESHOLD
