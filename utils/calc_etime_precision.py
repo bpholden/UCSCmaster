@@ -1,13 +1,16 @@
+import sys
+sys.path.append("../master")
 #from ExposureCalc import *
 import UCSCScheduler_V2 as ds
 import numpy as np
 import pickle
 
+
 #THRESHOLD = 2700.0
 THRESHOLD = 2* 60 * 60
-SLOWDOWN = 0.4
+SLOWDOWN = 0.3
 STAR_EL = 70
-AVG_FWHM = 14
+AVG_FWHM = 8
 
 def calc_fin_pre(i2counts,exp_time,bmv):
     ratio = exp_time / THRESHOLD

@@ -3,7 +3,7 @@ import gspread
 import pickle
 from oauth2client.client import SignedJwtAssertionCredentials
 
-json_key = json.load(open('UCSC Dynamic Scheduler-5b98d1283a95.json'))
+json_key = json.load(open('../master/UCSC Dynamic Scheduler-5b98d1283a95.json'))
 scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://spreadsheets.google.com/feeds']
 
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)

@@ -683,8 +683,6 @@ if __name__ == '__main__':
         apflog("Updating the online googledex has failed.", level="Error")
 
     # Keep a copy of observed_targets around for a bit just in case
-#    logpush(os.path.join(os.getcwd(), "observed_targets"))
-#    logpush(os.path.join(os.getcwd(), "robot.log"))
     logpush(os.path.join(os.getcwd(),"observed_targets"))
     logpush(os.path.join(os.getcwd(),"robot.log"))
     if master.nighttargetlog:
@@ -698,7 +696,19 @@ if __name__ == '__main__':
         os.remove(os.path.join(os.getcwd(),"googledex.dat"))
     except OSError:
         apflog("Note: There was no googledex save file to delete today.", echo=True)
-        
+
+    try:
+        cmd = '/bin/chgrp -R ucscapf '
+        fns = glob("%s/*" % (os.getcwd()))
+        ccmd = cmd + " ".join(fns)
+        ad.cmdexec(ccmd)
+        cmd = '/bin/chmod -R g+w '
+        fns = glob("%s/*" % (os.getcwd()))
+        ccmd = cmd + " ".join(fns)
+        ad.cmdexec(ccmd)
+    except:
+        apflog("cannot modify file permissions or group ownership, which is really super weird.",level="warn")
+                
     # Take morning calibration shots
     APFTask.phase(parent, "Cal-Post")
     result = apf.calibrate(script=opt.calibrate, time='post')
