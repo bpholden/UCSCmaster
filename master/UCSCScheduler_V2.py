@@ -587,7 +587,7 @@ def format_time(total, hitthemall=False):
 
     short_idx = np.where(total < MIN_EXPTIME, True, False)
     times[short_idx] = np.ceil(total[short_idx])
-    exps[short_idx] = [ min([np.ceil(MIN_EXPTIME/(t+40)), 4]) for t in total[short_idx] ]
+    exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ]
 
 
     max_idx = np.where(total > MAX_EXPTIME, True, False)
