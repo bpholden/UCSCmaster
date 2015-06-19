@@ -218,13 +218,11 @@ class Master(threading.Thread):
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = target["VMAG"]
             self.BV   = target["BV"]
-            apflog("getTarget(): V=%.2f  B-V=%.2f" % (self.VMAG, self.BV))
-            apflog("getTarget(): Pri=%.2f  Score=%.2f" % (target["PRI"], target["SCORE"]))
+            apflog("getTarget(): V=%.2f  B-V=%.2fPri=%.2f " % (self.VMAG, self.BV, target["PRI"]))
             apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (APF.avg_fwhm, slowdown, APF.countrate))
-            apflog("getTarget(): AZ=%.2f  EL=%.2f" % (APF.aaz, APF.ael))
 
             apflog("getTarget(): Target= %s" % target["NAME"])
-            apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  APFPri=%.2f" % (target["COUNTS"], target["EXP_TIME"], target["PRI"]))
+            apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["SCORE"]))
 
 
         def opening(sunset=False):
