@@ -608,7 +608,7 @@ if __name__ == '__main__':
         apflog("Starting the main watcher." ,echo=True)
         try:
             midpt= ktl.Keyword('apfguide','MIDPTFIN')
-            midpt.callback(functools.partial(APF.midptmon,outputfile=master.nighttargetlog,permoutfile=master.targetlog))
+            midpt.callback(functools.partial(ad.midptmon,outputfile=master.nighttargetlog,permoutfile=master.targetlog))
         except Exception, e:
             apflog("Cannot setup midpoint monitor: %s" % (e),level="warn")
             
