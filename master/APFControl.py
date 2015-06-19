@@ -737,7 +737,7 @@ class APF:
 
         robotdir = "/usr/local/lick/bin/robot/"
 
-        rv, retc = cmd_exec(os.path.join(robotdir,"prep-obs"))
+        rv, retc = cmdexec(os.path.join(robotdir,"prep-obs"))
         if not rv:
             return rv
         # Start scriptobs
