@@ -560,7 +560,7 @@ def smartList(starlist, time, seeing, slowdown, az, el):
     if max(elevation) > 0:
         score += elevation/max(elevation) * 100
     else:
-        print "No observable targets found."
+        apflog( "No observable targets found.",level="warn")
         return None
 
     idx = score.argsort()[-1]
@@ -614,7 +614,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     # Convert the unix timestamp into a python datetime
     dt = datetime.utcfromtimestamp(int(time))
     if verbose:
-        print "getNext(): Finding target for time ", dt
+        apflog( "getNext(): Finding target for time %s" % (dt))
 
     update_local_googledex(googledex_file=os.path.join(os.getcwd(),"googledex.dat"), observed_file=os.path.join(os.getcwd(),"observed_targets"))
 
@@ -622,7 +622,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
     if observed == []:
         if verbose:
-            print "getNext(): getObserved is empty, setting bstar to true"
+            apflog( "getNext(): getObserved is empty, setting bstar to true")
         bstar = True
 
     ###
@@ -650,7 +650,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
     if verbose:
-        print("getNext(): Parsing the Googledex...")
+        apflog("getNext(): Parsing the Googledex...")
     sn, star_table, do_flag, stars = parseGoogledex(sheetn=sheetn)
     sn = np.array(sn)
     targNum = len(sn)
@@ -674,7 +674,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     
     
     star_elevations = []
-    if len(stars) != len(available): print "Error, arrays didn't match"
+    if len(stars) != len(available): apflog( "Error, arrays didn't match in getNext",level="error")
     for idx in range(len(stars)):
         stars[idx].compute(apf_obs)
         
@@ -687,9 +687,9 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         star_elevations.append(star_el)
     star_elevations = np.array(star_elevations)
 
-    print "Pre loop elevations"
-    print star_elevations[available]
-    print len(star_elevations[available])
+    apflog( "Pre loop elevations", echo=True)
+    elstr = "Stars els not behind moon: %s %d" % ( star_elevations[available],len(star_elevations[available]))
+    apflog(elstr, echo=True)
 
     # We just need a B star, so restrict our math to those
     if bstar:
@@ -714,9 +714,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
         f = available
-        
-        print len(f), len(star_elevations)
-        
+
         exp_times, exp_counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
                                         star_table[f,DS_ERR], star_elevations[f], seeing, \
                                         star_table[f,DS_BV])
@@ -728,7 +726,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
         # Is the exposure time too long?
         time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
-        print time_check
+        
         available[f] = available[f] & time_check
         f = available
 
@@ -739,7 +737,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
     # Now just sort by priority, then cadence. Return top target
     if len(sn[available]) < 1:
-        print "Couldn't find any suitable targets!"
+        apflog( "Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
@@ -747,22 +745,31 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     pri = max(star_table[available, DS_APFPRI])
     sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
 
-    print sn[available][sort_i]
-    print star_table[available, DS_APFPRI][sort_i]
- 
-    sort_j = cadence_check[available][sort_i].argsort()[::-1]
-    print cadence_check[available][sort_i][sort_j][0]
+#    print sn[available][sort_i]
+#    print star_table[available, DS_APFPRI][sort_i]
+    starstr = "star table available: %s" % (sn[available][sort_i]) 
+    apflog(starstr,echo=True)
+
+    starstr = "star table available priorities: %s" % (star_table[available, DS_APFPRI][sort_i]) 
+    apflog(starstr,echo=True)
+     
+    if bstar:
+        sort_j = star_elevations[available][sort_i].argsort()[::-1]
+    else:
+        sort_j = cadence_check[available][sort_i].argsort()[::-1]
+        cstr= "cadence check: %s" %( cadence_check[available][sort_i][sort_j][0])
+        apflog(cstr,echo=True)
+    
+    t_n = sn[available][sort_i][sort_j][0]
+
+    elstr= "Star elevations %s" % (star_elevations[available][sort_i][sort_j])
+    apflog(elstr,echo=True)
 
     t_n = sn[available][sort_i][sort_j][0]
 
-    print "Star elevations"
-    print star_elevations[available][sort_i][sort_j]
-
-
-    print t_n
+    apflog("selected target %s" %( t_n) )
 
     idx, = np.where(sn == t_n)
-    print idx[0]
     idx = idx[0]
 
     stars[idx].compute(apf_obs)
