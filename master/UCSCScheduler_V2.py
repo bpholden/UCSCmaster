@@ -785,7 +785,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     res['COUNTS'] = star_table[idx, DS_COUNTS]
     res['EXP_TIME'] = star_table[idx, DS_EXPT]
     res['NAME']   = sn[idx]
-    res['SCORE']  = 0.0
+    res['SCORE']  = star_table[idx,DS_NSHOTS]
     res['PRI']    = star_table[idx, DS_APFPRI]
     res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], do_flag[idx], dt)
     return res
