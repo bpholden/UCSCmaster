@@ -218,7 +218,7 @@ class Master(threading.Thread):
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = target["VMAG"]
             self.BV   = target["BV"]
-            apflog("getTarget(): V=%.2f  B-V=%.2fPri=%.2f " % (self.VMAG, self.BV, target["PRI"]))
+            apflog("getTarget(): V=%.2f  B-V=%.2f Pri=%.2f " % (self.VMAG, self.BV, target["PRI"]))
             apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (APF.avg_fwhm, slowdown, APF.countrate))
 
             apflog("getTarget(): Target= %s" % target["NAME"])
