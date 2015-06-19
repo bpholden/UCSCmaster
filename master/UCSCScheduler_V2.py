@@ -124,7 +124,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     try:
         f = open(os.path.join(os.getcwd(),outfn),'r')
     except IOError:
-        apflog( "Starting Googledex parse")
+        apflog( "Starting Googledex parse",echo=True)
         worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
         full_codex = worksheet.get_all_values()
         #time = (datetime.now() - start).total_seconds()
@@ -149,7 +149,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     try:
         idx = [col_names.index(v) for v in req_cols]
     except ValueError:
-        apflog("%s Not found in list" % (v) , level="warn")
+        apflog("%s Not found in list" % (v) , level="warn",echo=True)
     names = []
     star_table = []
     do_flag = []
@@ -209,7 +209,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
                 t = datetime.fromtimestamp(otime)
             jd = float(ephem.julian_date(t))
             ws.update_cell(i+1, col, round(jd, 1) )
-    apflog( "Updated Googledex")
+    apflog( "Updated Googledex",echo=True)
 
 def update_local_googledex(googledex_file="googledex.dat", observed_file="observed_targets"):
     """
@@ -222,7 +222,7 @@ def update_local_googledex(googledex_file="googledex.dat", observed_file="observ
     try:
         g = open(googledex_file, 'r')
     except IOError:
-        apflog("googledex file did not exist, so can't be updated")
+        apflog("googledex file did not exist, so can't be updated",echo=True)
         return
 
     full_codex = pickle.load(g)
@@ -243,7 +243,7 @@ def update_local_googledex(googledex_file="googledex.dat", observed_file="observ
             # This keeps the JD precision to one decimal point. There is no real reason for this other than
             # the googledex currently only stores the lastObs field to one decimal precision. Legacy styles FTW.
             jd = round(float(ephem.julian_date(t)), 1) 
-            apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)))
+            apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
             row[lastObsIdx] = str(jd)
             full_codex[i] = row
 
@@ -364,7 +364,7 @@ def getObserved(filename):
     try:
         f = open(filename, 'r')
     except IOError:
-        apflog( "Couldn't open %s" % filename,level="warn")
+        apflog( "Couldn't open %s" % filename,level="warn",echo=True)
         return obs, times
     else: 
         for line in f:
@@ -493,7 +493,7 @@ def smartList(starlist, time, seeing, slowdown, az, el):
         sn, star_table, lines, stars = parseStarlist(starlist)
     except ValueError:
         # This will be raised when the starlist could not be parsed successfully.
-        apflog( "No target could be selected because starlist could not be parsed.", level="warn")
+        apflog( "No target could be selected because starlist could not be parsed.", level="warn",echo=True)
         return None
     targNum = len(sn)
 
@@ -553,14 +553,14 @@ def smartList(starlist, time, seeing, slowdown, az, el):
             #print sn[i], "behind moon"
 
     if done:
-        apflog( "All targets have been observed",level="warn")
+        apflog( "All targets have been observed",level="warn",echo=True)
         return None
 
     # Prioritize higher elevation targets
     if max(elevation) > 0:
         score += elevation/max(elevation) * 100
     else:
-        apflog( "No observable targets found.",level="warn")
+        apflog( "No observable targets found.",level="warn",echo=True)
         return None
 
     idx = score.argsort()[-1]
@@ -614,7 +614,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     # Convert the unix timestamp into a python datetime
     dt = datetime.utcfromtimestamp(int(time))
     if verbose:
-        apflog( "getNext(): Finding target for time %s" % (dt))
+        apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
     update_local_googledex(googledex_file=os.path.join(os.getcwd(),"googledex.dat"), observed_file=os.path.join(os.getcwd(),"observed_targets"))
 
@@ -622,7 +622,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
     if observed == []:
         if verbose:
-            apflog( "getNext(): getObserved is empty, setting bstar to true")
+            apflog( "getNext(): getObserved is empty, setting bstar to true",echo=True)
         bstar = True
 
     ###
@@ -650,7 +650,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
     if verbose:
-        apflog("getNext(): Parsing the Googledex...")
+        apflog("getNext(): Parsing the Googledex...",echo=True)
     sn, star_table, do_flag, stars = parseGoogledex(sheetn=sheetn)
     sn = np.array(sn)
     targNum = len(sn)
@@ -674,7 +674,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     
     
     star_elevations = []
-    if len(stars) != len(available): apflog( "Error, arrays didn't match in getNext",level="error")
+    if len(stars) != len(available): apflog( "Error, arrays didn't match in getNext",level="error",echo=True)
     for idx in range(len(stars)):
         stars[idx].compute(apf_obs)
         
