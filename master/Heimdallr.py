@@ -609,8 +609,8 @@ if __name__ == '__main__':
         try:
             midpt= ktl.Keyword('apfguide','MIDPTFIN')
             midpt.callback(functools.partial(APF.midptmon,outputfile=master.nighttargetlog,permoutfile=master.targetlog))
-        except:
-            apflog("Cannot setup midpoint monitor",level="warn")
+        except Exception, e:
+            apflog("Cannot setup midpoint monitor: %s" % (e),level="warn")
             
         if opt.fixed != None:
             lastList = apf.robot["MASTER_STARLIST"].read()
