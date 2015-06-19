@@ -119,18 +119,18 @@ class Master(threading.Thread):
         self.obsBstar = False
         self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
-        try:
-            self.targetlog = open(self.targetlogname,"w+")
-        except Exception, e:
-            self.targetlog = None
-            apflog("cannot open %s: %s" % (self.targetlogname,e),level="error")
+#        try:
+#            self.targetlog = open(self.targetlogname,"w+")
+#        except Exception, e:
+        self.targetlog = None
+#            apflog("cannot open %s: %s" % (self.targetlogname,e),level="error")
 
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
-        try:
-            self.nighttargetlog = open(self.nighttargetlogname,"w+")
-        except Exception, e:
-            self.nighttargetlog = None
-            apflog("cannot open %s: %s" % (self.nighttargetlogname,e),level="error")
+#        try:
+#            self.nighttargetlog = open(self.nighttargetlogname,"w+")
+#        except Exception, e:
+        self.nighttargetlog = None
+#            apflog("cannot open %s: %s" % (self.nighttargetlogname,e),level="error")
 
     def run(self):
         APF = self.APF
@@ -604,15 +604,16 @@ if __name__ == '__main__':
     
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
-        try:
-            apfguide = ktl.Service('apfguide')
-            midpt = apfguide['MIDPTFIN']
+        if master.nighttargetlog != None:
             try:
-                midpt.callback(functools.partial(ad.midptmon,outputfile=master.nighttargetlog,permoutfile=master.targetlog))
+                apfguide = ktl.Service('apfguide')
+                midpt = apfguide['MIDPTFIN']
+                try:
+                    midpt.callback(functools.partial(ad.midptmon,outputfile=master.nighttargetlog,permoutfile=master.targetlog))
+                except Exception, e:
+                    apflog("Cannot setup midpoint monitor: %s" % (e),level="warn")
             except Exception, e:
-                apflog("Cannot setup midpoint monitor: %s" % (e),level="warn")
-        except Exception, e:
-            apflog("Cannot setup midpoint keyword: %s" % (e),level="warn")
+                apflog("Cannot setup midpoint keyword: %s" % (e),level="warn")
             
         if opt.fixed != None:
             lastList = apf.robot["MASTER_STARLIST"].read()
