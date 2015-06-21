@@ -709,8 +709,8 @@ if __name__ == '__main__':
         fns = glob("%s/*" % (os.getcwd()))
         ccmd = cmd + " ".join(fns)
         ad.cmdexec(ccmd)
-    except:
-        apflog("cannot modify file permissions or group ownership, which is really super weird.",level="warn")
+    except Exception, e:
+        apflog("cannot modify file permissions or group ownership, which is really super weird. %s" % (e),level="warn")
                 
     # Take morning calibration shots
     APFTask.phase(parent, "Cal-Post")
