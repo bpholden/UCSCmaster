@@ -102,7 +102,9 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
     # the certificate has an email associated with it, that email must
     # have the document shared with it to allow access 
 
-    json_key = json.load(open(certificate))
+    certificate_path = os.path.dirname(UCSCScheduler_V2.__file__)
+    
+    json_key = json.load(open(os.path.join(certificate_path, certificate)))
     scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://spreadsheets.google.com/feeds']
 
     credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)
