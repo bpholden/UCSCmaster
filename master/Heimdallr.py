@@ -197,6 +197,10 @@ class Master(threading.Thread):
                 APF.close()
                 apf.countrate = -1.0
                 self.obsBstar = True
+                try:
+                    APFTask.set(parent,suffix="VAR_3",value="True")
+                except:
+                    pass 
                 APFTask.waitfor(self.task, True, timeout=60*30)
                 return
             else:
