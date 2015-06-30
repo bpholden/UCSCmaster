@@ -393,8 +393,8 @@ def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker
         i2counts[mstars] = getI2_M(precision[mstars])
 	
 	# Exposure Meter counts to reach desired I2 counts
-#	exp_counts = getEXPMeter(i2counts, bmv)
-	exp_counts = 1e9
+	exp_counts = getEXPMeter(i2counts, bmv)
+#	exp_counts = 1e9
 	# Exposure time to reach desired I2 counts
 	exp_time = getEXPTime(i2counts, vmag, bmv, elevation, seeing, decker=decker)
 	
@@ -719,7 +719,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
                                         star_table[f,DS_ERR], star_elevations[f], seeing, \
                                         star_table[f,DS_BV])
         
-#        exp_times = exp_times * slowdown
+        exp_times = exp_times * slowdown
 
         star_table[f, DS_COUNTS] = exp_counts
         star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times)

@@ -166,12 +166,12 @@ class Master(threading.Thread):
                 try:
                     slowdown = exp_cnts_sec / APF.countrate
                     if slowdown < 0:
-                        slowdown = 5
+                        slowdown = 1
                         apflog("Countrate non-sensical %g" % APF.countrate, echo=True)
                         # yes this happened.
                 except ZeroDivisionError:
                     apflog("Current countrate was 0. Slowdown will be set to 5.", echo=True)
-                    slowdown = 5
+                    slowdown = 1
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
             apflog("getTarget(): countrate = %.2f" % APF.countrate)
 
@@ -195,6 +195,8 @@ class Master(threading.Thread):
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
                 self.scriptobs.stdin.close()
                 APF.close()
+                apf.countrate = -1.0
+                self.obsBstar = True
                 APFTask.waitfor(self.task, True, timeout=60*30)
                 return
             else:
