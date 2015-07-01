@@ -33,7 +33,7 @@ success = False
 
 parent = 'master'
 
-SUNEL_LIM = -6.0
+SUNEL_LIM = -10.0
 SUNEL_HOR = -3.2
 
 def shutdown():
