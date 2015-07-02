@@ -114,8 +114,9 @@ if __name__ == "__main__":
         schedule = ktl.read('apfschedule','SCHEDULED_RUNS')
     except:
         sys.exit("cannot read apfschedule.SCHEDULED_RUNS")
-        
-    configfile = "/u/holden/src/master.config"
+
+    cpath = os.path.dirname(os.path.abspath(__file__))
+    configfile = os.path.join(cpath,"master.config")
     masterstatus=ktl.read('apftask','MASTER_PID',binary=True)
     config = read_config(configfile,schedule)
 
