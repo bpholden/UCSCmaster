@@ -196,11 +196,7 @@ class Master(threading.Thread):
                 self.scriptobs.stdin.close()
                 APF.close()
                 apf.countrate = -1.0
-                self.obsBstar = True
-                try:
-                    APFTask.set(parent,suffix="VAR_3",value="True")
-                except:
-                    pass 
+                # sleep for a half hour to see if the clouds blow by
                 APFTask.waitfor(self.task, True, timeout=60*30)
                 return
             else:
@@ -681,15 +677,16 @@ if __name__ == '__main__':
     # We have finished taking data, and presumably it is the morning.
     apf.setTeqMode('Morning')
 
-    try:
-        if os.path.exists(master.nighttargetlogname):
-            master.nighttargetlog.close()
-            master.targetlog.close()
-            ds.update_googledex_lastobs(master.nighttargetlogname,sheetn=master.sheetn)
-        else:
-            ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
-    except:
-        apflog("Updating the online googledex has failed.", level="Error")
+    if master.fixedList is None:
+        try:
+            if os.path.exists(master.nighttargetlogname):
+                master.nighttargetlog.close()
+                master.targetlog.close()
+                ds.update_googledex_lastobs(master.nighttargetlogname,sheetn=master.sheetn)
+            else:
+                ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
+        except:
+            apflog("Updating the online googledex has failed.", level="Error")
 
     # Keep a copy of observed_targets around for a bit just in case
     logpush(os.path.join(os.getcwd(),"observed_targets"))
