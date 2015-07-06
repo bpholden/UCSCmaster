@@ -625,7 +625,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     if observed == []:
         if verbose:
             apflog( "getNext(): getObserved is empty, setting bstar to true",echo=True)
-        bstar = True
+#        bstar = True
 
     ###
     # Need to update the googledex with the lastObserved date for observed targets
@@ -777,9 +777,10 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     stars[idx].compute(apf_obs)
     
     res = dict()
-    if pri == 10.0 and star_table[idx, DS_EXPT] < 300:
-        star_table[idx, DS_EXPT] = 1200.0
+    if pri == 10.0:
         star_table[idx, DS_COUNTS] /= star_table[idx,DS_NSHOTS]
+        if star_table[idx,DS_EXPT] < 300:
+            star_table[idx, DS_EXPT] = 1200.0
         # hack
         
     res['RA']     = stars[idx].a_ra
