@@ -662,7 +662,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
 
     # Distance to stay away from the moon
-    md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MAX
+    md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
     minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN  
 
 
@@ -777,7 +777,11 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     stars[idx].compute(apf_obs)
     
     res = dict()
-
+    if pri == 10.0 and star_table[idx, DS_EXPT] < 300:
+        star_table[idx, DS_EXPT] = 1200.0
+        star_table[idx, DS_COUNTS] /= star_table[idx,DS_NSHOTS]
+        # hack
+        
     res['RA']     = stars[idx].a_ra
     res['DEC']    = stars[idx].a_dec
     res['PM_RA']  = star_table[idx, DS_PMRA]
