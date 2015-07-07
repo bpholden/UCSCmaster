@@ -102,15 +102,19 @@ def fwhmmon(fwhm):
 # Callback for ok2open permission
 # -- Check that if we fall down a logic hole we don't error out
 def okmon(ok2open):
-    ok = ok2open.read(binary=True)
-    if not checkapf['MOVE_PERM'].read(binary=False):
-        ok = False
-    if APF.wvel > windlim:
-        apflog("Too windy!")
-        ok = False
-    # Also need to check for cloud cover. This could require moving this call below the condition checking code.
+    try:
+        ok = ok2open.read(binary=True)
+    except Exception, e:
+        apflog("Exception in okmon: %s" % (e), level='warn')
+        return
+    try:
+        if not checkapf['MOVE_PERM'].read(binary=False):
+            ok = False
+    except Exception, e:
+        apflog("Exception in okmon: %s" % (e), level='warn')
+        return
     APF.openOK = ok
-
+    return
 
 # Callback for the windspeed
 def windmon(wx):
