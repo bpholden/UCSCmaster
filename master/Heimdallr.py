@@ -16,6 +16,7 @@ import threading
 import time
 import pickle
 import functools
+import glob
 
 import ktl
 import APF as APFLib
@@ -705,11 +706,11 @@ if __name__ == '__main__':
 
     try:
         cmd = '/bin/chgrp -R ucscapf '
-        fns = glob("%s/*" % (os.getcwd()))
+        fns = glob.glob("%s/*" % (os.getcwd()))
         ccmd = cmd + " ".join(fns)
         ad.cmdexec(ccmd)
         cmd = '/bin/chmod -R g+w '
-        fns = glob("%s/*" % (os.getcwd()))
+        fns = glob.glob("%s/*" % (os.getcwd()))
         ccmd = cmd + " ".join(fns)
         ad.cmdexec(ccmd)
     except Exception, e:
