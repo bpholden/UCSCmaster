@@ -594,7 +594,7 @@ def format_time(total, i2counts, hitthemall=False):
 
     bright_idx = np.where(i2counts > MAX_I2, True, False)
     exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
-    times[bright_idx] = np.ceil(times[bright_idx]/exps[bright_idx])
+    times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
 
     max_idx = np.where(total > MAX_EXPTIME, True, False)
     if hitthemall:
