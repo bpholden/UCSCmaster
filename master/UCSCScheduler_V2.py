@@ -26,6 +26,7 @@ TARGET_MOON_DIST_MAX = 25
 # Maximum single exposure time in seconds
 MAX_EXPTIME = 1200.
 MIN_EXPTIME = 300.
+MAX_I2 = 40000
 
 # A few constants to make accessing the star table more readable
 DS_RA     = 0
@@ -400,7 +401,7 @@ def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker
 	# Exposure time to reach desired I2 counts
 	exp_time = getEXPTime(i2counts, vmag, bmv, elevation, seeing, decker=decker)
 	
-	return exp_time, exp_counts
+	return exp_time, exp_counts, i2counts
 
 def is_visible(stars, observer, obs_len, min_el, max_el):
     """ Args:
@@ -582,15 +583,18 @@ def smartList(starlist, time, seeing, slowdown, az, el):
     res['SCRIPTOBS'] = lines[idx]
     return res
     
-def format_time(total, hitthemall=False):
+def format_time(total, i2counts, hitthemall=False):
     total = np.array(total)
     times = np.zeros(len(total))
     exps  = np.zeros(len(total))
 
-    short_idx = np.where(total < MIN_EXPTIME, True, False)
+    short_idx = np.where((total < MIN_EXPTIME, True, False)
     times[short_idx] = np.ceil(total[short_idx])
     exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ]
 
+    bright_idx = np.where((i2counts < MAX_I2, True, False)
+    exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
+    times[bright_idx] = np.ceil(times[bright_idx]/exps[bright_idx])
 
     max_idx = np.where(total > MAX_EXPTIME, True, False)
     if hitthemall:
@@ -717,14 +721,14 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         # Want to pass the entire list of targets to this function
         f = available
 
-        exp_times, exp_counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
-                                        star_table[f,DS_ERR], star_elevations[f], seeing, \
-                                        star_table[f,DS_BV])
+        exp_times, exp_counts, i2counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
+                                            star_table[f,DS_ERR], star_elevations[f], seeing, \
+                                            star_table[f,DS_BV])
         
         exp_times = exp_times * slowdown
 
         star_table[f, DS_COUNTS] = exp_counts
-        star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times)
+        star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times,i2counts)
 
         # Is the exposure time too long?
         time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
