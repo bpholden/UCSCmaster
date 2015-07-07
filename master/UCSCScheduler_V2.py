@@ -592,10 +592,6 @@ def format_time(total, i2counts, hitthemall=False):
     times[short_idx] = np.ceil(total[short_idx])
     exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ]
 
-    bright_idx = np.where(i2counts > MAX_I2, True, False)
-    exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
-    times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
-
     max_idx = np.where(total > MAX_EXPTIME, True, False)
     if hitthemall:
         exps[max_idx] = 1
@@ -607,6 +603,11 @@ def format_time(total, i2counts, hitthemall=False):
     middle_idx = np.logical_not(np.logical_or(short_idx, max_idx))
     times[middle_idx] = np.ceil(total[middle_idx])
     exps[middle_idx] = 1
+
+    bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
+    exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
+    times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
+
     
 
     return times, exps
