@@ -206,11 +206,11 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
             # We observed this target, so update the cell in the worksheet
             # update_cell(row, col, val) - col and row are 1 indexed
             otime = times[names.index(v[0])]
-            if len(otime) > 1:
+            if isinstance(otime,float):
+                t = datetime.fromtimestamp(otime)
+            else:
                 hr, min = otime
                 t = datetime(time.year, time.month, time.day, hr, min)
-            else:
-                t = datetime.fromtimestamp(otime)
             jd = float(ephem.julian_date(t))
             ws.update_cell(i+1, col, round(jd, 1) )
     apflog( "Updated Googledex",echo=True)
@@ -242,11 +242,11 @@ def update_local_googledex(googledex_file="googledex.dat", observed_file="observ
         if row[starNameIdx] in names:
             # We have observed this star, so lets update the last obs field
             otime = times[names.index(row[starNameIdx])]
-            if len(otime) > 1:
+            if isinstance(otime,float):
+                t = datetime.fromtimestamp(otime)
+            else:
                 hr, min = otime
                 t = datetime(time.year, time.month, time.day, hr, min)
-            else:
-                t = datetime.fromtimestamp(otime)
 
             # This keeps the JD precision to one decimal point. There is no real reason for this other than
             # the googledex currently only stores the lastObs field to one decimal precision. Legacy styles FTW.
@@ -382,7 +382,7 @@ def getObserved(filename):
             if len(ls) > 2:
                 times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
             else:
-                times.append(ls[1])
+                times.append(float(ls[1]))
             
     obs.reverse()
     times.reverse()
