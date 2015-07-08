@@ -317,7 +317,7 @@ def getElAz(ra, dec, lat, lng, time):
                          (np.cos(el) * np.cos(lat)))
     return (np.degrees(el), np.degrees(az))
 
-def makeScriptobsLine(name, row, do_flag, t):
+def makeScriptobsLine(name, row, do_flag, t, decker="W"):
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
     ret = name + ' '
@@ -353,9 +353,9 @@ def makeScriptobsLine(name, row, do_flag, t):
     ret += 'uth=' + str(t.hour) + ' '
     ret += 'utm=' + str(t.minute) + ' '
     # Exp Count
-    ret += 'expcount=' + str(round(row[DS_COUNTS],1)) + ' '
+    ret += 'expcount=%.3g' % (row[DS_COUNTS]) + ' '
     # Decker
-    ret += 'decker=W '
+    ret += 'decker=%s ' % (decker)
     # do flag
     if do_flag:
         ret += 'do=Y '
@@ -733,8 +733,9 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         
         exp_times = exp_times * slowdown
 
-        star_table[f, DS_COUNTS] = exp_counts
         star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times,i2counts)
+        exp_counts /= star_table[f, DS_NSHOTS]
+        star_table[f, DS_COUNTS] = exp_counts
 
         # Is the exposure time too long?
         time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
@@ -788,7 +789,6 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     
     res = dict()
     if pri == 10.0:
-        star_table[idx, DS_COUNTS] /= star_table[idx,DS_NSHOTS]
         if star_table[idx,DS_EXPT] < 300:
             star_table[idx, DS_EXPT] = 1200.0
         # hack
