@@ -242,7 +242,7 @@ def update_local_googledex(googledex_file="googledex.dat", observed_file="observ
         if row[starNameIdx] in names:
             # We have observed this star, so lets update the last obs field
             otime = times[names.index(row[starNameIdx])]
-            if len(otimes) > 1:
+            if len(otime) > 1:
                 hr, min = otime
                 t = datetime(time.year, time.month, time.day, hr, min)
             else:
@@ -384,7 +384,7 @@ def getObserved(filename):
             else:
                 times.append(ls[1])
             
-    return obs, times
+    return obs.reverse(), times.reverse()
 	
 def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W"):
     vmag = np.array(vmag)
