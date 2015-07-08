@@ -384,7 +384,9 @@ def getObserved(filename):
             else:
                 times.append(ls[1])
             
-    return obs.reverse(), times.reverse()
+    obs.reverse()
+    times.reverse()
+    return obs, times
 	
 def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W"):
     vmag = np.array(vmag)
