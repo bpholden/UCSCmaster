@@ -54,7 +54,7 @@ if __name__ == "__main__":
             if etimes[i] < 300:
                 etimes[i] = 1200.0
 
-        print "%15s %4.1f %3.1f %7.0f %7.0f %.1g %3.1f %.1g %.1f %d" % (allnames[i],star_table[i, ds.DS_APFPRI],precision[i],i2counts[i],exp_times[i],nobs[i],fin_pre[i],exp_counts[i],etimes[i],nobs[i])
+        print "%15s %4.1f %3.1f %7.0f %7.0f %.1g %3.1f %.3g %.1f %d" % (allnames[i],star_table[i, ds.DS_APFPRI],precision[i],i2counts[i],exp_times[i],nobs[i],fin_pre[i],exp_counts[i],etimes[i],nobs[i])
 
     # plt.scatter(times, err, c=pri, cmap=plt.get_cmap("jet"), edgecolor='none')
     # plt.xlabel("Exposure Time")
