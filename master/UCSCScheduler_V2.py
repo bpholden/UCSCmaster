@@ -816,13 +816,13 @@ if __name__ == '__main__':
     result = getNext(time.time(), 13.99, 1.8, bstar=False, verbose=True)
     #result = smartList("observed_targets.3", time.time(), 13.5, 2.4, 120, 60)
 
-    print "testing googledex updater"
-    update_googledex_lastobs('observed_targets')
-
     if result is None:
         print "Get None target"
     else:
         for k in result:
             print k, result[k]
+
+    print "testing googledex updater"
+    update_googledex_lastobs('observed_targets')
 
     print "Done"
