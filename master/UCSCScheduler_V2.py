@@ -207,7 +207,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
             # update_cell(row, col, val) - col and row are 1 indexed
             otime = times[names.index(v[0])]
             if len(otime) > 1:
-                hr, min = otimes
+                hr, min = otime
                 t = datetime(time.year, time.month, time.day, hr, min)
             else:
                 t = datetime.fromtimestamp(otime)
@@ -241,9 +241,9 @@ def update_local_googledex(googledex_file="googledex.dat", observed_file="observ
         row = full_codex[i]
         if row[starNameIdx] in names:
             # We have observed this star, so lets update the last obs field
-            otimes = times[names.index(row[starNameIdx])]
+            otime = times[names.index(row[starNameIdx])]
             if len(otimes) > 1:
-                hr, min = otimes
+                hr, min = otime
                 t = datetime(time.year, time.month, time.day, hr, min)
             else:
                 t = datetime.fromtimestamp(otime)
