@@ -207,6 +207,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
             # update_cell(row, col, val) - col and row are 1 indexed
             otime = times[names.index(v[0])]
             if len(otime) > 1:
+                hr, min = otimes
                 t = datetime(time.year, time.month, time.day, hr, min)
             else:
                 t = datetime.fromtimestamp(otime)
@@ -240,9 +241,13 @@ def update_local_googledex(googledex_file="googledex.dat", observed_file="observ
         row = full_codex[i]
         if row[starNameIdx] in names:
             # We have observed this star, so lets update the last obs field
-            hr, min = times[names.index(row[starNameIdx])]
-            
-            t = datetime(time.year, time.month, time.day, hr, min)
+            otimes = times[names.index(row[starNameIdx])]
+            if len(otimes) > 1:
+                hr, min = otimes
+                t = datetime(time.year, time.month, time.day, hr, min)
+            else:
+                t = datetime.fromtimestamp(otime)
+
             # This keeps the JD precision to one decimal point. There is no real reason for this other than
             # the googledex currently only stores the lastObs field to one decimal precision. Legacy styles FTW.
             jd = round(float(ephem.julian_date(t)), 1) 
