@@ -118,6 +118,7 @@ class Master(threading.Thread):
         self.BV = None
         self.VMAG = None
         self.obsBstar = False
+        self.fixedList = None
         self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
 #        try:
@@ -201,16 +202,6 @@ class Master(threading.Thread):
                 APFTask.waitfor(self.task, True, timeout=60*30)
                 return
             else:
-                if self.obsBstar:
-                    self.obsBstar = False
-                try:
-                    s=""
-                    if self.obsBstar:
-                        s="True"
-                    APFTask.set(parent,suffix="VAR_3",value=s)
-                except:
-                    apflog("Cannot communicate with apftask",level="error")
-
                 apflog("Observing target: %s" % target['NAME'], echo=True)
                 # Lets only refocus the telescope every 2nd observation
                 if int(self.APF.ldone) % 2 == 0:
@@ -280,7 +271,11 @@ class Master(threading.Thread):
                 APFTask.waitFor(self.task, True, timeout=5)
             
             return
-###############################
+
+       
+            
+
+        ###############################
 
         # Actual Watching loop
         apflog("Beginning observing process....",echo=True)                
@@ -333,6 +328,18 @@ class Master(threading.Thread):
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
                     APFTask.waitfor(self.task, True, timeout=15)
+                    
+                    if self.obsBstar:
+                        self.obsBstar = False
+                    try:
+                        s=""
+                        if self.obsBstar:
+                            s="True"
+                        APFTask.set(parent,suffix="VAR_3",value=s)
+                    except:
+                        apflog("Cannot communicate with apftask",level="error")
+
+
                 elif self.smartObs == True:
                     apflog("Scriptobs phase is input ( smartlist ), calling getTarget.")
                     getTarget()
