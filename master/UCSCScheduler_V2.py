@@ -379,7 +379,7 @@ def getObserved(filename):
             if line.strip()[0] == '#' or line.strip() == "": continue
             ls = line.split()
             obs.append(ls[0])
-            if len(ls) > 2:
+            if len(ls) > 15:
                 times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
             else:
                 times.append(float(ls[1]))
@@ -701,9 +701,9 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         star_elevations.append(star_el)
     star_elevations = np.array(star_elevations)
 
-    apflog( "Pre loop elevations", echo=True)
-    elstr = "Stars els not behind moon: %s %d" % ( star_elevations[available],len(star_elevations[available]))
-    apflog(elstr, echo=True)
+#    apflog( "Pre loop elevations", echo=True)
+#    elstr = "Stars els not behind moon: %s %d" % ( star_elevations[available],len(star_elevations[available]))
+#    apflog(elstr, echo=True)
 
     # We just need a B star, so restrict our math to those
     if bstar:
