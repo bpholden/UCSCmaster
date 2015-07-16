@@ -318,6 +318,10 @@ def getElAz(ra, dec, lat, lng, time):
     return (np.degrees(el), np.degrees(az))
 
 def makeScriptobsLine(name, row, do_flag, t, decker="W"):
+
+    focval = 0
+    if row[DS_APFPRI] > 9.9:
+        focval = 2
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
     ret = name + ' '
@@ -363,7 +367,9 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W"):
         ret += 'do= '
     # Count
     ret += 'count=' + str(int(row[DS_NSHOTS])) 
-    
+
+    ret += 'foc=' + str(int(focval))
+        
     return ret
 
 def getObserved(filename):
@@ -608,7 +614,7 @@ def format_time(total, i2counts, hitthemall=False):
 
 
     middle_idx = np.logical_not(np.logical_or(short_idx, max_idx))
-    times[middle_idx] = np.ceil(total[middle_idx])
+    times[middle_idx] = np.ceil(1.5*total[middle_idx]) # pad out to make it more likely exposure meter threshold sets actual limit
     exps[middle_idx] = 1
 
     bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
