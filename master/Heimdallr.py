@@ -203,11 +203,7 @@ class Master(threading.Thread):
                 return
             else:
                 apflog("Observing target: %s" % target['NAME'], echo=True)
-                # Lets only refocus the telescope every 2nd observation
-                if int(self.APF.ldone) % 2 == 0:
-                    APFLib.write(self.APF.robot["SCRIPTOBS_AUTOFOC"], "robot_autofocus_enable")
-                else:
-                    APFLib.write(self.APF.robot["SCRIPTOBS_AUTOFOC"], "robot_autofocus_disable")
+                APFLib.write(self.APF.robot["SCRIPTOBS_AUTOFOC"], "robot_autofocus_enable")
                 self.scriptobs.stdin.write(target["SCRIPTOBS"] + '\n')
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = target["VMAG"]
