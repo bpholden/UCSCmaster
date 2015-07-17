@@ -517,11 +517,10 @@ def smartList(starlist, time, seeing, slowdown, az, el):
     score = np.zeros(targNum) + 100
 
     # Minimum Brightness based on conditions
-    #VMIN = 12 - 2.5 * np.log10(slowdown)
-    VMIN = 18
+    VMAX = 15
 
     # Distance to stay away from the moon [Between 15 and 25 degrees]
-    minMoonDist = ((moon.phase / 100.) * 10.) + 15  
+    minMoonDist = ((moon.phase / 100.) * (TARGET_MOON_DIST_MIN)) + TARGET_MOON_DIST_MIN
 
     moonDist = np.degrees(np.sqrt((moon.ra - star_table[:,DS_RA])**2 + (moon.dec - star_table[:,DS_DEC])**2))
 
