@@ -368,7 +368,7 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W"):
     # Count
     ret += 'count=' + str(int(row[DS_NSHOTS])) 
 
-    ret += 'foc=' + str(int(focval))
+    ret += ' foc=' + str(int(focval))
         
     return ret
 
