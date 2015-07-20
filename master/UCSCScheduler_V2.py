@@ -15,6 +15,7 @@ import pickle
 import sys
 import time
 from apflog import *
+import re
 
 # Some variables that will soon be moved to a separate file
 TARGET_ELEVATION_MIN = 20
@@ -146,7 +147,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                 "APFtexp", "APFpri", "APFcad", "APFnshots", "lastobs", \
-                "B-V", "APF Desired Precision"
+                "B-V", "APF Desired Precision", "Close Companion"
                 ]
 
     try:
@@ -175,9 +176,14 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             row.append(float(ls[idx[-1]]))
         except ValueError:
             row.append(1.5)
+
+        match = re.search("\A(y|Y)",ls[idx[17]])
+        if match:
+            do_flag.append("y")
+        else:
+            do_flag.append("")
         
         star_table.append(row)
-        do_flag.append("")
         star = ephem.FixedBody()
         star._ra = ephem.hours(":".join([ls[idx[1]], ls[idx[2]], ls[idx[3]]]))
         star._dec = ephem.degrees(":".join([ls[idx[4]], ls[idx[5]], ls[idx[6]]]))
