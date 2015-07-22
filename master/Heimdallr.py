@@ -37,6 +37,35 @@ parent = 'master'
 SUNEL_LIM = -10.0
 SUNEL_HOR = -3.2
 
+def control_watch(keyword,parent):
+    if keyword['populated'] == False:
+        return
+    try:
+        value = keyword['ascii']
+        if value == "Abort":
+            subp.kill()
+            APF.log("Aborted by APFTask")
+            sys.exit("Aborted by APFTask")
+        elif value == "Pause":
+            try:
+                APFTask.set(parent,suffix='STATUS',value='PAUSED')
+            except:
+                subp.kill()
+                APF.log("Failure to set STATUS in APFTask",level=error)
+                sys.exit("Failure to communicate with APFTask")
+
+        else:
+            try:
+                APFTask.set(parent,suffix='STATUS',value='Running')
+            except:
+                subp.kill()
+                APF.log("Failure to set STATUS in APFTask",level=error)
+                sys.exit("Failure to communicate with APFTask")
+
+    except:
+        return
+
+
 def shutdown():
     if success == True:
         status = 'Exited/Success'
@@ -217,6 +246,12 @@ class Master(threading.Thread):
 
         def opening(sunset=False):
             apflog("Running open at sunset as sunel = %4.2f" % el)
+            (apfopen,what) =APF.isOpen()
+            if apfopen:
+                APF.DMReset()
+            else:
+                APF.DMZero()
+
             result = APF.openat(sunset=sunset)
             if not result:
                 apflog("After two tries openatsunset hasn't successfully opened. \
@@ -468,7 +503,12 @@ if __name__ == '__main__':
     apflog("Setting APFTask signal and tripwire.")
     APFTask.set(parent, "SIGNAL", "TERM")
     APFTask.set(parent, "TRIPWIRE", "TASK_ABORT")
-    
+
+    control = apftask[parent + '_CONTROL']
+    cw = functools.partial(control_watch,parent=parent)
+    control.callback(cw)
+    control.read()
+    control.monitor()
 
     apflog("Master initiallizing APF monitors.", echo=True)
 

@@ -705,6 +705,10 @@ class APF:
 
     def DMReset(self):
         APFLib.write(self.checkapf['ROBOSTATE'], "master operating")
+
+    def DMZero(self):
+        if self.checkapf['DMTIME'].read(binary=True) < 1:
+            APFLib.write(self.checkapf['DMTIME'], -1)
         
 
     def findRobot(self):
