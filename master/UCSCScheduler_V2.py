@@ -310,7 +310,6 @@ def getDECRad(deg, mn, sec, sign=None):
     else:
         return x
 
-
 def getElAz(ra, dec, lat, lng, time):
     """Given RA, DEC, Latitude, and a time, returns the corresponding elevation and azimuth angles
        Works with single values, or numpy arrays
