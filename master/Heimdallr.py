@@ -242,7 +242,11 @@ class Master(threading.Thread):
 
 
         def opening(sunset=False):
-            apflog("Running open at sunset as sunel = %4.2f" % el)
+            when = "night"
+            if sunset:
+                when = "sunset"
+                
+            apflog("Running open at %s as sunel = %4.2f" % (when,el))
             (apfopen,what) =APF.isOpen()
             if apfopen:
                 APF.DMReset()
