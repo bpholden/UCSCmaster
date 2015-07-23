@@ -1,3 +1,5 @@
+#!/usr/bin/env  /opt/kroot/bin/kpython
+
 import json
 import gspread
 import pickle

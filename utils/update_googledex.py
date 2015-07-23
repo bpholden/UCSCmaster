@@ -1,3 +1,5 @@
+#!/usr/bin/env  /opt/kroot/bin/kpython
+
 import sys
 sys.path.append("../master")
 import UCSCScheduler_V2 as ds

@@ -1,3 +1,4 @@
+#!/usr/bin/env  /opt/kroot/bin/kpython
 import sys
 sys.path.append("../master")
 #from ExposureCalc import *
@@ -8,9 +9,9 @@ import pickle
 
 #THRESHOLD = 2700.0
 THRESHOLD = 2* 60 * 60
-SLOWDOWN = 0.3
+SLOWDOWN = 0.4
 STAR_EL = 70
-AVG_FWHM = 10
+AVG_FWHM = 11
 
 def calc_fin_pre(i2counts,exp_time,bmv):
     ratio = exp_time / THRESHOLD
