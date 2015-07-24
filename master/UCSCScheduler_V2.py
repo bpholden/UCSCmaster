@@ -801,7 +801,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     
     res = dict()
     if pri > 9.9:
-        star_table[idx, DS_EXPT] = 1200.0
+        star_table[idx, DS_EXPT] = MAX_EXPTIME 
 
         
     res['RA']     = stars[idx].a_ra
