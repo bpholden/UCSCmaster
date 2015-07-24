@@ -13,19 +13,6 @@ SLOWDOWN = 0.4
 STAR_EL = 70
 AVG_FWHM = 11
 
-def calc_fin_pre(i2counts,exp_time,bmv):
-    ratio = exp_time / THRESHOLD
-    ni2counts = i2counts / ratio
-    if bmv > 1.2:
-        A = 4.14
-        B = -1.73
-    else:
-        A = 4.47
-        B = -1.58
-
-    log_npre = (np.log10(ni2counts) - A )/ B
-    return 10**log_npre,ni2counts
-
         
 if __name__ == "__main__":
 
