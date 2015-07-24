@@ -642,9 +642,9 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
     # List of targets already observed
     observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
-    if observed == []:
-        if verbose:
-            apflog( "getNext(): getObserved is empty, setting bstar to true",echo=True)
+#    if observed == []:
+#        if verbose:
+#            apflog( "getNext(): getObserved is empty, setting bstar to true",echo=True)
 #        bstar = True
 
     ###
