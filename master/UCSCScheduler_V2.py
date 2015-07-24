@@ -1,7 +1,5 @@
-#! /usr/bin/python
-# UCSCScheduler.py
+# UCSCScheduler_V2.py
 
-import calendar
 from datetime import datetime, timedelta
 import ephem
 import gspread
