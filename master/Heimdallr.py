@@ -648,6 +648,11 @@ if __name__ == '__main__':
 
     # Start the main watcher thread
     master = Master(apf,user=opt.name)
+    try:
+        if opt.fixed == None:
+                (names,) = ds.parseGoogledex(sheetn=opt.sheetn)
+    except:
+        apflog("Cannot download googledex?!",level="Error")
     
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
