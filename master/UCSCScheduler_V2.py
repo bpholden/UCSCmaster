@@ -12,6 +12,7 @@ import os
 import pickle
 import sys
 import time
+# from fake_apflog import *
 from apflog import *
 import re
 
@@ -764,31 +765,33 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         return None
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
-
-    pri = max(star_table[available, DS_APFPRI])
-    sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
+    good_cadence = np.where(cadence_check > 1, True, False)
+    good_cadence_available = available & good_cadence
+    
+    pri = max(star_table[good_cadence_available, DS_APFPRI])
+    sort_i = np.where(star_table[good_cadence_available, DS_APFPRI] == pri, True, False)
 
 #    print sn[available][sort_i]
 #    print star_table[available, DS_APFPRI][sort_i]
-    starstr = "star table available: %s" % (sn[available][sort_i]) 
+    starstr = "star table available: %s" % (sn[good_cadence_available][sort_i]) 
     apflog(starstr,echo=True)
 
-    starstr = "star table available priorities: %s" % (star_table[available, DS_APFPRI][sort_i]) 
+    starstr = "star table available priorities: %s" % (star_table[good_cadence_available, DS_APFPRI][sort_i]) 
     apflog(starstr,echo=True)
      
     if bstar:
-        sort_j = star_elevations[available][sort_i].argsort()[::-1]
+        sort_j = star_elevations[good_cadence_available][sort_i].argsort()[::-1]
     else:
-        sort_j = cadence_check[available][sort_i].argsort()[::-1]
-        cstr= "cadence check: %s" %( cadence_check[available][sort_i][sort_j][0])
+        sort_j = cadence_check[good_cadence_available][sort_i].argsort()[::-1]
+        cstr= "cadence check: %s" %( cadence_check[good_cadence_available][sort_i][sort_j][0])
         apflog(cstr,echo=True)
     
-    t_n = sn[available][sort_i][sort_j][0]
+    t_n = sn[good_cadence_available][sort_i][sort_j][0]
 
-    elstr= "Star elevations %s" % (star_elevations[available][sort_i][sort_j])
+    elstr= "Star elevations %s" % (star_elevations[good_cadence_available][sort_i][sort_j])
     apflog(elstr,echo=True)
 
-    t_n = sn[available][sort_i][sort_j][0]
+    t_n = sn[good_cadence_available][sort_i][sort_j][0]
 
     apflog("selected target %s" %( t_n) )
 
@@ -821,17 +824,28 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
 if __name__ == '__main__':
     # For some test input what would the best target be?
-    
-    result = getNext(time.time(), 13.99, 1.8, bstar=False, verbose=True)
-    #result = smartList("observed_targets.3", time.time(), 13.5, 2.4, 120, 60)
+    otfn = "observed_targets"
+    result = getNext(time.time(), 13.99, 1.8, bstar=True, verbose=True)
+    ot = open(otfn,"w")
+    ot.write("%s\n" % (result["SCRIPTOBS"]))
+    ot.close()
 
-    if result is None:
-        print "Get None target"
-    else:
-        for k in result:
-            print k, result[k]
+    for i in (1,2,3):
+        
+        result = getNext(time.time(), 13.99, 1.8, bstar=False, verbose=True)
+        #result = smartList("observed_targets.3", time.time(), 13.5, 2.4, 120, 60)
 
+        if result is None:
+            print "Get None target"
+        else:
+            for k in result:
+                print k, result[k]
+        ot = open(otfn,"a")
+        ot.write("%s\n" % (result["SCRIPTOBS"]))
+        ot.close()
+        
+                
     print "testing googledex updater"
-    update_googledex_lastobs('observed_targets')
+#    update_googledex_lastobs('observed_targets')
 
     print "Done"
