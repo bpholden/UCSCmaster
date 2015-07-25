@@ -754,7 +754,7 @@ if __name__ == '__main__':
         apflog("Note: There was no googledex save file to delete today.", echo=True)
 
               
-    # Take morning calibration shots
+    # Take morning calibrations
     APFTask.phase(parent, "Cal-Post")
     result = apf.calibrate(script=opt.calibrate, time='post')
     if not result:

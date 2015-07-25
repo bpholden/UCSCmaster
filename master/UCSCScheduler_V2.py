@@ -195,7 +195,8 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
         Update the online googledex lastobs column assuming things in filename have been observed.
     """
     names, times = getObserved(filename)
-    
+    if len(names) == 0:
+        return
     if time is None:
         time = datetime.utcnow()
     
@@ -605,7 +606,7 @@ def format_time(total, i2counts, hitthemall=False):
     exps  = np.zeros(len(total))
 
     short_idx = np.where(total < MIN_EXPTIME, True, False)
-    times[short_idx] = np.ceil(total[short_idx])
+    times[short_idx] = np.ceil(1.5*total[short_idx])
     exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ]
 
     max_idx = np.where(total > MAX_EXPTIME, True, False)
