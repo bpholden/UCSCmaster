@@ -753,18 +753,7 @@ if __name__ == '__main__':
     except OSError:
         apflog("Note: There was no googledex save file to delete today.", echo=True)
 
-    try:
-        cmd = '/bin/chgrp -R ucscapf '
-        fns = glob.glob("%s/*" % (os.getcwd()))
-        ccmd = cmd + " ".join(fns)
-        ad.cmdexec(ccmd)
-        cmd = '/bin/chmod -R g+w '
-        fns = glob.glob("%s/*" % (os.getcwd()))
-        ccmd = cmd + " ".join(fns)
-        ad.cmdexec(ccmd)
-    except Exception, e:
-        apflog("cannot modify file permissions or group ownership, which is really super weird. %s" % (e),level="warn")
-                
+              
     # Take morning calibration shots
     APFTask.phase(parent, "Cal-Post")
     result = apf.calibrate(script=opt.calibrate, time='post')
