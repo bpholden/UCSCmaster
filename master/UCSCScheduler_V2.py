@@ -606,8 +606,8 @@ def format_time(total, i2counts, hitthemall=False):
     exps  = np.zeros(len(total))
 
     short_idx = np.where(total < MIN_EXPTIME, True, False)
-    times[short_idx] = np.ceil(1.5*total[short_idx])
-    exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ]
+    times[short_idx] = np.ceil(1.5*total[short_idx])  # pad out to make it more likely exposure meter threshold sets actual limit
+    exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ] 
 
     max_idx = np.where(total > MAX_EXPTIME, True, False)
     if hitthemall:
