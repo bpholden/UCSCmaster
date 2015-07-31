@@ -167,10 +167,18 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         row.append(getRARad(ls[idx[1]], ls[idx[2]], ls[idx[3]]))
         # Get the DEC
         row.append(getDECRad(ls[idx[4]], ls[idx[5]], ls[idx[6]]))
-        for i in idx[7:11]: row.append(float(ls[i]))
+        for i in idx[7:11]:
+            try:
+                row.append(float(ls[i]))
+            except:
+                row.append(0.0)
         # For now use the old 1e9 count value
         row.append(1.e9)
-        for i in idx[11:-1]: row.append(float(ls[i]))
+        for i in idx[11:-1]:
+            try:
+                row.append(float(ls[i]))
+            except:
+                row.append(0.0)
         try:
             row.append(float(ls[idx[-1]]))
         except ValueError:
@@ -609,6 +617,10 @@ def format_time(total, i2counts, hitthemall=False):
     times[short_idx] = np.ceil(1.5*total[short_idx])  # pad out to make it more likely exposure meter threshold sets actual limit
     exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ] 
 
+    middle_idx = np.where((total > MIN_EXPTIME ) &(total < MAX_EXPTIME))
+    times[middle_idx] = np.ceil(1.5*total[middle_idx]) # pad out to make it more likely exposure meter threshold sets actual limit
+    exps[middle_idx] = 1
+
     max_idx = np.where(total > MAX_EXPTIME, True, False)
     if hitthemall:
         exps[max_idx] = 1
@@ -617,9 +629,6 @@ def format_time(total, i2counts, hitthemall=False):
     times[max_idx] = MAX_EXPTIME
 
 
-    middle_idx = np.logical_not(np.logical_or(short_idx, max_idx))
-    times[middle_idx] = np.ceil(1.5*total[middle_idx]) # pad out to make it more likely exposure meter threshold sets actual limit
-    exps[middle_idx] = 1
 
     bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
     exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
