@@ -746,7 +746,7 @@ if __name__ == '__main__':
     # We have finished taking data, and presumably it is the morning.
     apf.setTeqMode('Morning')
 
-    if master.fixedList is None:
+    if opt.fixed is None:
         try:
             if os.path.exists(master.nighttargetlogname):
                 master.nighttargetlog.close()
@@ -766,7 +766,7 @@ if __name__ == '__main__':
         except:
             apflog("cannot roll %s" % (master.nighttargetlogname))
 
-    # If there is a copy of the googledex laying around, remove it so it gets re-downloaded tomorrow.
+    # If there is a copy of the googledex laying around, remove it so it gets re-downloaded.
     try:
         os.remove(os.path.join(os.getcwd(),"googledex.dat"))
     except OSError:
