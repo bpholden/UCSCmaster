@@ -34,7 +34,8 @@ success = False
 
 parent = 'master'
 
-SUNEL_LIM = -10.0
+SUNEL_ENDLIM = -10.0
+SUNEL_STARTLIM = -9.0
 SUNEL_HOR = -3.2
 
 def control_watch(keyword,parent):
@@ -261,8 +262,8 @@ class Master(threading.Thread):
                 os._exit(1)
 
             APF.DMReset()
-            while float(APF.sunel) > SUNEL_LIM:
-                chk_done = "$eostele.SUNEL < %f" % (SUNEL_LIM)
+            while float(APF.sunel) > SUNEL_STARTLIM:
+                chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM)
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
                 APF.DMReset()
             return
@@ -315,12 +316,16 @@ class Master(threading.Thread):
             # Check on everything
             if datetime.now().strftime("%p") == 'AM':
                 rising = True
+                sunel_lim = SUNEL_ENDLIM
             else:
                 rising = False
+                sunel_lim = SUNEL_STARTLIM
             wind_vel = APF.wvel
             ripd, running = APF.findRobot()
             el = float(APF.sunel)          
 
+
+            
             # Check and close for weather
             if APF.isOpen()[0] and not APF.openOK:
                 closetime = datetime.now()
@@ -358,7 +363,7 @@ class Master(threading.Thread):
                     APF.countrate = 0
 
             # If scriptobs is running and waiting for input, give it a target
-            if running == True and el < SUNEL_LIM and APF.sop.read().strip() == 'Input':
+            if running == True and el < sunel_lim and APF.sop.read().strip() == 'Input':
                 if self.fixedList is None:
                     APFTask.set(parent,suffix="VAR_1",value="Calling getTarget",wait=False)
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
@@ -386,7 +391,7 @@ class Master(threading.Thread):
                     
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation
-            if el >= SUNEL_LIM and running == True:
+            if el >= sunel_lim and running == True:
                 APFTask.set(parent,suffix="VAR_1",value="Last call",wait=False)
                 if self.scriptobs is None:
                     apflog("Robot claims to be running, but no self.scriptobs instance can be found. Instead calling killRobot().", echo=True)
@@ -395,7 +400,7 @@ class Master(threading.Thread):
                     self.scriptobs.stdin.close()
             
             # If the sun is rising and scriptobs has stopped, run closeup
-            if el > SUNEL_LIM and running == False and rising == True:
+            if el > sunel_lim and running == False and rising == True:
                 apflog("Closing due to sun elevation. El = % 4.2f" % el, echo=True)
                 APFTask.set(parent,suffix="VAR_1",value="Closing, sun is rising",wait=False)
                 if APF.isOpen()[0]:
@@ -421,13 +426,13 @@ class Master(threading.Thread):
                 apf.setTeqMode('Evening')
                 
             # Open at sunset
-            sun_between_limits = el < SUNEL_HOR and el > SUNEL_LIM 
-            if not APF.isReadyForObserving()[0] and el < SUNEL_HOR and el > SUNEL_LIM and APF.openOK and not rising:
+            sun_between_limits = el < SUNEL_HOR and el > sunel_lim 
+            if not APF.isReadyForObserving()[0] and el < SUNEL_HOR and el > sunel_lim and APF.openOK and not rising:
                 APFTask.set(parent,suffix="VAR_1",value="Open at sunset",wait=False)                    
                 opening(sunset=True)
                 
             # Open at night
-            if not APF.isReadyForObserving()[0]  and el < SUNEL_LIM and APF.openOK:
+            if not APF.isReadyForObserving()[0]  and el < sunel_lim and APF.openOK:
                 APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
                 opening()
 
@@ -450,7 +455,7 @@ class Master(threading.Thread):
                 
 
             # If we are open and scriptobs isn't running, start it up
-            if APF.isReadyForObserving()[0] and not running and el <= SUNEL_LIM:
+            if APF.isReadyForObserving()[0] and not running and el <= sunel_lim:
                 APFTask.set(parent,suffix="VAR_1",value="Starting scriptobs",wait=False)                    
                 startScriptobs()
                 
@@ -465,7 +470,7 @@ class Master(threading.Thread):
             if not APF.isOpen()[0]:
                 APFTask.set(parent,suffix="VAR_1",value="Waiting for sunset",wait=False)
                 APFTask.waitFor(self.task, True, timeout=5)
-            if  APF.isOpen()[0] and el > SUNEL_LIM:
+            if  APF.isOpen()[0] and el > sunel_lim:
                 APFTask.set(parent,suffix="VAR_1",value="Waiting for the end of twilight",wait=False)
                 APFTask.waitFor(self.task, True, timeout=5)
             
