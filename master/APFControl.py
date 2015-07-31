@@ -209,6 +209,7 @@ class APF:
     autofoc    = robot["SCRIPTOBS_AUTOFOC"]
     slew_allowed = robot['slew_allowed']
     ucam       = ktl.Service('apfucam')
+    user       = ucam['OUTFILE']
     elapsed    = ucam['elapsed']
     apfteq     = ktl.Service('apfteq')
     teqmode    = apfteq['MODE']
