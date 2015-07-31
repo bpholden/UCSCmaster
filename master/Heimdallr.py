@@ -38,6 +38,9 @@ SUNEL_ENDLIM = -10.0
 SUNEL_STARTLIM = -9.0
 SUNEL_HOR = -3.2
 
+def sunel_startlim():
+    return SUNEL_STARTLIM
+
 def control_watch(keyword,parent):
     if keyword['populated'] == False:
         return
@@ -319,7 +322,7 @@ class Master(threading.Thread):
                 sunel_lim = SUNEL_ENDLIM
             else:
                 rising = False
-                sunel_lim = SUNEL_STARTLIM
+                sunel_lim = sun_startlim()
             wind_vel = APF.wvel
             ripd, running = APF.findRobot()
             el = float(APF.sunel)          
