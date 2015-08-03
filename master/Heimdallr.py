@@ -199,7 +199,11 @@ class Master(threading.Thread):
                     slowdown = exp_cnts_sec / APF.countrate
                     if slowdown < 0:
                         slowdown = 1
-                        apflog("Countrate non-sensical %g" % APF.countrate, echo=True)
+                        apflog("Countrate non-sensical %g" % APF.countrate, echo=True, level='warn')
+                        # yes this happened.
+                    if slowdown < 0.4:
+                        slowdown = 0.4
+                        apflog("slowdown too low %g" % APF.countrate, echo=True, level='debug')
                         # yes this happened.
                 except ZeroDivisionError:
                     apflog("Current countrate was 0. Slowdown will be set to 5.", echo=True)
