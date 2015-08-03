@@ -468,7 +468,7 @@ class Master(threading.Thread):
             if APF.isOpen()[0] and APF.dmtime <= 1140:
                 APFTask.set(parent,suffix="VAR_1",value="Reseting DM timer",wait=False)                    
                 APF.DMReset()
-                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)))
+                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
 
             if not APF.isOpen()[0]:
                 APFTask.set(parent,suffix="VAR_1",value="Waiting for sunset",wait=False)
@@ -638,6 +638,7 @@ if __name__ == '__main__':
         while not instr_perm:
             apflog("Waiting for instrument permission to be true")
             APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
+            instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
         result = apf.focus(user='ucsc')
         if not result:
             apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
