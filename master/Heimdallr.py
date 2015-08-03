@@ -201,8 +201,8 @@ class Master(threading.Thread):
                         slowdown = 1
                         apflog("Countrate non-sensical %g" % APF.countrate, echo=True, level='warn')
                         # yes this happened.
-                    if slowdown < 0.4:
-                        slowdown = 0.4
+                    if slowdown < ds.SLOWDOWN_MIN:
+                        slowdown = ds.SLOWDOWN_MIN
                         apflog("slowdown too low %g" % APF.countrate, echo=True, level='debug')
                         # yes this happened.
                 except ZeroDivisionError:
