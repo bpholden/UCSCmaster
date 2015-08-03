@@ -51,14 +51,14 @@ def apflog(msg, level='Notice', echo=True):
     APF.log(str(msg), level=level, echo=echo)
     
     if level in ['error', 'Crit', 'Alert', 'Emerg']:
-        subject = "[APF] An Error has occured in Observe.py"
-        sendmail(subject, msg, to=['rjhanson@ucsc.edu'])
+        subject = "[APF] An Error has occured in Heimdallr.py"
+        sendmail(subject, msg, to=['holden@ucolick.org'])
 
 
-def sendmail(subject, body, to=['rjhanson@ucsc.edu']):
+def sendmail(subject, body, to=['holden@ucolick.org']):
     APF.log("Sending error message to" + str(to))
     
-    me = "APF <rjhanson@ucsc.edu>"
+    me = "APF <holden@ucolick.org>"
 
     msg = MIMEMultipart()
     msg["Subject"] = subject
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     body = "This is a test message. Error messages from the APF observe script will be sent with this function."
     subject = "[APF] Required Monthly Test"
-    sendmail(subject, body, to=['rjhanson@ucsc.edu','9099048200@txt.att.net'])
+    sendmail(subject, body, to=['holden@ucolick.org','8314211210@txt.att.net'])
 
 
 
