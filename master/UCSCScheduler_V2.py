@@ -618,7 +618,7 @@ def format_time(total, i2counts, hitthemall=False):
 
     short_idx = np.where(total < MIN_EXPTIME, True, False)
     times[short_idx] = MIN_EXPTIME  # pad out to make it more likely exposure meter threshold sets actual limit
-    exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ] 
+    exps[short_idx] = [ (np.ceil(MIN_EXPTIME/(t+40)) + 1) for t in total[short_idx] ] 
 
     middle_idx = np.where((total > MIN_EXPTIME ) &(total < MAX_EXPTIME))
     times[middle_idx] = np.ceil(1.5*total[middle_idx]) # pad out to make it more likely exposure meter threshold sets actual limit
@@ -719,6 +719,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
             available[idx] = False
 
         star_elevations.append(star_el)
+        #
     star_elevations = np.array(star_elevations)
 
 #    apflog( "Pre loop elevations", echo=True)
@@ -818,7 +819,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     
     res = dict()
     if pri > 9.9:
-        star_table[idx, DS_EXPT] = MAX_EXPTIME 
+        star_table[idx, DS_EXPT] = MAX_EXPTIME
 
         
     res['RA']     = stars[idx].a_ra
