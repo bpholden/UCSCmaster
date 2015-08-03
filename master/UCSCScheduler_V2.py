@@ -26,6 +26,7 @@ TARGET_MOON_DIST_MAX = 25
 # Maximum single exposure time in seconds
 MAX_EXPTIME = 1200.
 MIN_EXPTIME = 300.
+MIN_SHUTTERTIME = 60
 MAX_I2 = 40000
 
 # A few constants to make accessing the star table more readable
@@ -42,6 +43,8 @@ DS_NSHOTS = 9
 DS_LAST   = 10
 DS_BV     = 11
 DS_ERR    = 12
+
+SLOWDOWN_MIN = 0.4
 
 
 def parseStarlist(starlist):
@@ -614,7 +617,7 @@ def format_time(total, i2counts, hitthemall=False):
     exps  = np.zeros(len(total))
 
     short_idx = np.where(total < MIN_EXPTIME, True, False)
-    times[short_idx] = np.ceil(1.5*total[short_idx])  # pad out to make it more likely exposure meter threshold sets actual limit
+    times[short_idx] = MIN_EXPTIME  # pad out to make it more likely exposure meter threshold sets actual limit
     exps[short_idx] = [ np.ceil(MIN_EXPTIME/(t+40)) for t in total[short_idx] ] 
 
     middle_idx = np.where((total > MIN_EXPTIME ) &(total < MAX_EXPTIME))
@@ -633,8 +636,6 @@ def format_time(total, i2counts, hitthemall=False):
     bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
     exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
     times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
-
-    
 
     return times, exps
 
@@ -744,6 +745,11 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         done = [ True if n in observed else False for n in sn ]
         available = available & np.logical_not(done) # Available and not observed
 
+        mag_limit = 12
+        if slowdown > 1.0:
+            mag_limit = -2.5*np.log10(slowdown/SLOWDOWN_MIN) + 10
+        bright_enough = np.where(star_table[:,DS_VMAG] < mag_limit, True, False)
+        available = available & bright_enough
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
         f = available
@@ -835,14 +841,15 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 if __name__ == '__main__':
     # For some test input what would the best target be?
     otfn = "observed_targets"
-    result = getNext(time.time(), 13.99, 1.8, bstar=True, verbose=True)
     ot = open(otfn,"w")
+    starttime = time.time()
+    result = getNext(starttime, 13.99, 1.8, bstar=True, verbose=True)
     ot.write("%s\n" % (result["SCRIPTOBS"]))
     ot.close()
-
+    starttime += 400
     for i in (1,2,3):
         
-        result = getNext(time.time(), 13.99, 1.8, bstar=False, verbose=True)
+        result = getNext(starttime, 13.99, 1.8, bstar=False, verbose=True)
         #result = smartList("observed_targets.3", time.time(), 13.5, 2.4, 120, 60)
 
         if result is None:
@@ -853,7 +860,7 @@ if __name__ == '__main__':
         ot = open(otfn,"a")
         ot.write("%s\n" % (result["SCRIPTOBS"]))
         ot.close()
-        
+        starttime += result["EXP_TIME"]
                 
     print "testing googledex updater"
 #    update_googledex_lastobs('observed_targets')
