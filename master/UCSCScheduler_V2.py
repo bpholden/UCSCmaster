@@ -170,14 +170,14 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         for i in idx[7:11]:
             try:
                 row.append(float(ls[i]))
-            except:
+            except ValueError:
                 row.append(0.0)
         # For now use the old 1e9 count value
         row.append(1.e9)
         for i in idx[11:-1]:
             try:
                 row.append(float(ls[i]))
-            except:
+            except ValueError:
                 row.append(0.0)
         try:
             row.append(float(ls[idx[-1]]))
