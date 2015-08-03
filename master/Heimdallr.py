@@ -322,7 +322,7 @@ class Master(threading.Thread):
                 sunel_lim = SUNEL_ENDLIM
             else:
                 rising = False
-                sunel_lim = sun_startlim()
+                sunel_lim = sunel_startlim()
             wind_vel = APF.wvel
             ripd, running = APF.findRobot()
             el = float(APF.sunel)          
