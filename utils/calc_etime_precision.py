@@ -5,22 +5,27 @@ sys.path.append("../master")
 import UCSCScheduler_V2 as ds
 import numpy as np
 import pickle
+from optparse import OptionParser
 
-
-#THRESHOLD = 2700.0
-THRESHOLD = 2* 60 * 60
-SLOWDOWN = 0.4
-STAR_EL = 70
-AVG_FWHM = 11
-
-        
 if __name__ == "__main__":
 
+    #THRESHOLD = 2700.0
+    THRESHOLD = 60 * 60
+    #SLOWDOWN = 0.4
+    #STAR_EL = 70
+    #AVG_FWHM = 11
+    parser = OptionParser()
+    parser.add_option("-s","--slowdown",dest="slowdown",default=0.4,type="float")
+    parser.add_option("-f","--fwhm",dest="fwhm",default=11,type="float")
+    parser.add_option("-e","--el",dest="el",default=70,type="float")
+    (options, args) = parser.parse_args(args)    
+
+    
     allnames, star_table, do_flag, stars  = ds.parseGoogledex()
 
     el = np.zeros_like(star_table[:, ds.DS_BV])
-    el += STAR_EL
-    fwhm = np.array(AVG_FWHM)
+    el += options.el
+    fwhm = np.array(options.fwhm)
     i2counts = np.zeros_like(star_table[:, ds.DS_BV])
 
     precision = star_table[:, ds.DS_ERR]
@@ -31,7 +36,7 @@ if __name__ == "__main__":
 #    exp_time = ds.getEXPTime(i2counts, star_table[:, ds.DS_VMAG], star_table[:, ds.DS_BV], el, fwhm)
 
     exp_times, exp_counts, i2cnts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV])
-
+    exp_times *= options.slowdown
     etimes, nobs = ds.format_time(exp_times,i2cnts)
     fin_pre = precision
     exp_counts /= nobs
