@@ -4,7 +4,6 @@ sys.path.append("../master")
 #from ExposureCalc import *
 import UCSCScheduler_V2 as ds
 import numpy as np
-import pickle
 from optparse import OptionParser
 
 if __name__ == "__main__":
