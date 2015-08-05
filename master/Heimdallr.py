@@ -669,10 +669,15 @@ if __name__ == '__main__':
         while not instr_perm:
             apflog("Waiting for instrument permission to be true")
             APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
+            instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
         if not result:
-            apflog("Calibrate Pre has failed. Observer is exiting.",level='error',echo=True)
-            sys.exit(2)
+            apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
+            result = apf.calibrate(script = opt.calibrate, time = 'pre')
+            if not result:
+                apflog("Calibrate Pre has failed twice. Observer is exiting.",level='error',echo=True)
+                sys.exit(2)
         apflog("Calibrate Pre has finished. Setting phase to Watching.")
         APFTask.phase(parent, "Watching")
         apflog("Phase is now %s" % phase)
@@ -790,7 +795,10 @@ if __name__ == '__main__':
     APFTask.phase(parent, "Cal-Post")
     result = apf.calibrate(script=opt.calibrate, time='post')
     if not result:
-        apflog("Calibrate Post has failed.", level='error',echo=True)
+        apflog("Calibrate Post has failed.", level='warn',echo=True)
+        result = apf.calibrate(script=opt.calibrate, time='post')
+        if not result:
+            apflog("Calibrate Post has failed twice.", level='error',echo=True)
 
     # Focus the instrument once more
     APFTask.phase(parent, "Focus")
