@@ -701,6 +701,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     moonDist = np.degrees(np.sqrt((moon.ra - star_table[:,DS_RA])**2 + (moon.dec - star_table[:,DS_DEC])**2))
 
     available = np.ones(targNum, dtype=bool)
+    totexptimes = np.zeros(targNum, dtype=float)
+    i2cnts = np.zeros(targNum, dtype=float)
 
     # Is the target behind the moon?
     moon_check = np.where(moonDist > minMoonDist, True, False)
@@ -760,7 +762,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
                                             star_table[f,DS_BV])
         
         exp_times = exp_times * slowdown
-
+        totexptimes[f] += exp_times
+        i2cnts[f] += i2counts
         star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times,i2counts)
         exp_counts /= star_table[f, DS_NSHOTS]
         star_table[f, DS_COUNTS] = exp_counts
@@ -830,6 +833,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     res['BV']     = star_table[idx, DS_BV]
     res['COUNTS'] = star_table[idx, DS_COUNTS]
     res['EXP_TIME'] = star_table[idx, DS_EXPT]
+    res['TOTEXP_TIME'] = totexptimes[idx]
+    res['I2CNTS'] = i2cnts[idx]
     res['NAME']   = sn[idx]
     res['SCORE']  = star_table[idx,DS_NSHOTS]
     res['PRI']    = star_table[idx, DS_APFPRI]
