@@ -283,9 +283,7 @@ class Master(threading.Thread):
             apflog("Starting an instance of scriptobs",echo=True)
             ripd, running = APF.findRobot()
             if running:
-                APF.killRobot(now=True)
-                APFTask.waitfor(self.task, True, timeout=3)
-
+                return
 
             if self.fixedList is not None and self.smartObs == False:
                 # We wish to observe a fixed target list, in it's original order
@@ -301,6 +299,7 @@ class Master(threading.Thread):
                     apflog("Found Fixed list %s" % self.fixedList, echo=True)
                     apflog("Starting fixed list on line %d" % int(APF.ldone), echo=True)
                     APF.observe(str(self.fixedList), skip=int(APF.ldone))
+                    APFTask.waitFor(self.task, True, timeout=10)
             else:
                 if self.BV is None:
                     apflog("No B-V value at the moment", echo=True)
@@ -313,7 +312,7 @@ class Master(threading.Thread):
                 self.scriptobs = APF.startRobot()
                             
                 # Don't let the watcher run over the robot starting up
-                APFTask.waitFor(self.task, True, timeout=5)
+                APFTask.waitFor(self.task, True, timeout=10)
             
             return
 
