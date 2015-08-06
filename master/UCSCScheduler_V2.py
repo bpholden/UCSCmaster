@@ -646,7 +646,16 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
     """
     # Convert the unix timestamp into a python datetime
-    dt = datetime.utcfromtimestamp(int(time))
+    if type(time) == float:
+        dt = datetime.utcfromtimestamp(int(time))
+    elif type(time) == datetime:
+        dt = time
+    elif type(time) == ephem.Date:
+        dt = time.datetime()
+    else:
+        dt = datetime.utcnow()
+        # punt
+        
     if verbose:
         apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
