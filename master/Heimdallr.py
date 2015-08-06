@@ -283,6 +283,7 @@ class Master(threading.Thread):
             apflog("Starting an instance of scriptobs",echo=True)
             ripd, running = APF.findRobot()
             if running:
+                apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
 
             if self.fixedList is not None and self.smartObs == False:
@@ -469,7 +470,8 @@ class Master(threading.Thread):
             if APF.isReadyForObserving()[0] and not running and el <= sunel_lim:
                 APFTask.set(parent,suffix="VAR_1",value="Starting scriptobs",wait=False)                    
                 startScriptobs()
-                
+                if not APFTask.waitFor(self.task,expression="$apftask.SCRIPTOBS_STATUS == 'Running'",timeout=10):
+                    apflog("scriptobs is not running just after being started!", level="warn", echo=True)
                     
                 
             # Keep an eye on the deadman timer if we are open 
