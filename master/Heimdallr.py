@@ -281,6 +281,11 @@ class Master(threading.Thread):
             APF.updateLastObs()
             APF.updateWindshield(self.windshield)
             apflog("Starting an instance of scriptobs",echo=True)
+            ripd, running = APF.findRobot()
+            if running:
+                APF.killRobot(now=True)
+                APFTask.waitfor(self.task, True, timeout=3)
+
 
             if self.fixedList is not None and self.smartObs == False:
                 # We wish to observe a fixed target list, in it's original order
