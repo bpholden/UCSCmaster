@@ -296,6 +296,13 @@ class Master(threading.Thread):
                     self.exitMessage = "Fixed list is finished. Exiting the watcher."
                     self.stop()
                     # The fixed list has been completely observed so nothing left to do
+                elif APF.ldone == tot and APF.user != "ucsc":
+                    self.fixedList = None
+                    self.smartObs = False
+                    ripd, running = APF.findRobot()
+                    if running:
+                        APF.killRobot(now=True)
+                    apflog("Finished fixed list on line %d, will start dynamic scheduler" % int(APF.ldone), echo=True)
                 else:
                     apflog("Found Fixed list %s" % self.fixedList, echo=True)
                     apflog("Starting fixed list on line %d" % int(APF.ldone), echo=True)
@@ -654,6 +661,8 @@ if __name__ == '__main__':
             apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
             sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
+        apflog("Restart specified. Setting scriptobs_lines_done=0")
+        APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
 
