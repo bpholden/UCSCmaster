@@ -303,6 +303,9 @@ class Master(threading.Thread):
                     if running:
                         APF.killRobot(now=True)
                     apflog("Finished fixed list on line %d, will start dynamic scheduler" % int(APF.ldone), echo=True)
+                    if APFTask.waitFor(self.task,True,expression="$apftask.SCRIPTOBS_STATUS != 'Running'",timeout=30)
+                        apflog("Starting an instance of scriptobs for dynamic observing.",echo=True)
+                        self.scriptobs = APF.startRobot()
                 else:
                     apflog("Found Fixed list %s" % self.fixedList, echo=True)
                     apflog("Starting fixed list on line %d" % int(APF.ldone), echo=True)
