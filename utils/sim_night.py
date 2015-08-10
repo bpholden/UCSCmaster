@@ -19,7 +19,7 @@ def sun_times(datestr):
     apf_obs.horizon = -9.0*np.pi / 180.0
     apf_obs.date = datestr
     sunset = apf_obs.next_setting(ephem.Sun())
-    sunset = apf_obs.next_rising(ephem.Sun())    
+    sunrise = apf_obs.next_rising(ephem.Sun())    
     return sunset,sunrise, apf_obs
     
 def make_obs_sample(fn):
@@ -39,7 +39,10 @@ def compute_el(curtime,star,apf_obs):
     actel = np.degrees(star.alt)
     return actel
 
-datestr = "2015/08/07"
+
+today = datetime.now()
+datestr = "%d/%02d/%02d" % (today.year,today.month,today.day)
+
 allnames, star_table, do_flag, stars  = ds.parseGoogledex()
 slowdowns, fwhms = make_obs_sample("slowdowns")
 lastslow = 5
@@ -51,26 +54,26 @@ curtime, endtime, apf_obs = sun_times(datestr)
 
 while observing:
 
-    result = getNext(curtime, lastfwhm, lastslow, bstar=True, verbose=True)
+    result = ds.getNext(curtime, lastfwhm, lastslow, bstar=True, verbose=True)
+    curtime += 70./86400 # acquisition time
     idx = allnames.index(result['NAME'])
-    for i in range(0,result['COUNTS']):
+    for i in range(0,int(result['NEXP'])):
         actslow, actfwhm = rand_obs_sample(slowdowns,fwhms)
         actel = compute_el(curtime,stars[idx],apf_obs)
         
-        meterrate = getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+        meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
         meterrate *= 1 + 0.11*np.random.randn(1)
         meterrate *= actslow
-        exp_time = getEXPTime(results['I2CNTS'],result['VMAG'],result['BV'],actel,actfwhm)
-        exp_time *= 1 + 0.11*np.random.randn(1)
-        exp_time *= actslow
-        metertime = res['COUNTS'] / meterrate
+        metertime = result['COUNTS'] / meterrate
+        exp_time = result['TOTEXP_TIME'] / result['NEXP']
         if metertime < exp_time:
-            curtime += metertime/86400
+            curtime += (metertime+40.)/86400
         else:
-            curtime += exp_time/86400
-        curtime = ephem.Date(curtime)
-        if currtime > endtime:
+            curtime += (exp_time+40.)/86400
+        if curtime > endtime:
             observing = False
+
+    curtime = ephem.Date(curtime)
         
     ot.write("%s\n" % (result["SCRIPTOBS"]))
     ot.close()
