@@ -49,12 +49,15 @@ lastslow = 5
 lastfwhm = 10
 otfn = "observed_targets"
 ot = open(otfn,"w")
+ot.close()
 observing = True
 curtime, endtime, apf_obs = sun_times(datestr)
-
+bstar = True
 while observing:
 
-    result = ds.getNext(curtime, lastfwhm, lastslow, bstar=True, verbose=True)
+    result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, verbose=True)
+    if bstar:
+        bstar = False
     curtime += 70./86400 # acquisition time
     idx = allnames.index(result['NAME'])
     for i in range(0,int(result['NEXP'])):
@@ -64,16 +67,23 @@ while observing:
         meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
         meterrate *= 1 + 0.11*np.random.randn(1)
         meterrate *= actslow
+        specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+        specrate *= 1 + 0.11*np.random.randn(1)
+        specrate *= actslow
         metertime = result['COUNTS'] / meterrate
-        exp_time = result['TOTEXP_TIME'] / result['NEXP']
+        exp_time = result['EXP_TIME']
         if metertime < exp_time:
             curtime += (metertime+40.)/86400
+            totcounts = metertime * specrate
         else:
             curtime += (exp_time+40.)/86400
+            totcounts = exp_time * specrate
         if curtime > endtime:
             observing = False
-
+        print "%s %.1f %.1f %.1f\n" %( ephem.Date(curtime), exp_time, metertime, totcounts)
     curtime = ephem.Date(curtime)
         
+    ot = open(otfn,"a+")
     ot.write("%s\n" % (result["SCRIPTOBS"]))
     ot.close()
+print "sun rose"
