@@ -41,8 +41,7 @@ def getEXPMeter_Rate(v, bv, el, seeing, decker="W"):
     x = (-1/2.5) * (VC + alpha*bv + beta*(1/np.cos(np.radians(90-el))) + Const)
     return (10 ** x)
 
-
-def getEXPTime(cnts, v, bv, el, seeing, decker="W"):
+def getSpec_Rate( v, bv, el, seeing, decker="W"):
     alpha = -0.0311
     beta = 0.158
     Const = -11.2
@@ -56,10 +55,15 @@ def getEXPTime(cnts, v, bv, el, seeing, decker="W"):
      #   el = 15.0
         # bogus exposure time but the APF does not work this low anyway
         
-    if len(bv) != len(el): print "Error: getEXPTime arrays don't match"
+#    if len(bv) != len(el): print "Error: getEXPTime arrays don't match"
     VC = v - 2.5*np.log10(light)
     x = (-1/2.5) * (VC + alpha*bv + beta*(1/np.cos(np.radians(90-el))) + Const)
     cnt_rate = 10**x
+    return cnt_rate
+
+def getEXPTime(cnts, v, bv, el, seeing, decker="W"):
+
     time = 0
+    cnt_rate = getSpec_Rate(v, bv, el, seeing, decker="W")
     time = cnts/cnt_rate
     return time
