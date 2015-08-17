@@ -356,7 +356,11 @@ class APF:
             cmd = '%s %s %s' % (s_calibrate,script, time)
             result, code = cmdexec(cmd)
             if not result:
-                apflog("%s %s %s failed with return code %d" % (s_calibrate,script, time, code),echo=True)
+                apflog("%s %s failed with return code %d" % (s_calibrate, script, code),echo=True)
+            expression="($apftask.CALIBRATE_STATUS != 0) and ($apftask.CALIBRATE_STATUS != 1) "
+            if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                apflog("%s %s failed to exit" % (s_calibrate,script),echo=True)
+                
             return result
         else:
             print "Couldn't understand argument %s, nothing was done." % time
@@ -375,7 +379,10 @@ class APF:
                 cmd = os.path.join(cmdpath,'focusinstr -b')
                 result, code = cmdexec(cmd,cwd=os.path.curdir)
                 if not result:
-                    apflog("Focuscube failed with code %d" % code, echo=True)
+                    apflog("focusinstr failed with code %d" % code, echo=True)
+                expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
+                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                    apflog("focusinstr failed to exit" ,echo=True)
                 return result
         else:
             print "Don't recognize user %s. Nothing was done." % style
