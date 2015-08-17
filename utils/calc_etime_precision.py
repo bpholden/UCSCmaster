@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser.add_option("-s","--slowdown",dest="slowdown",default=0.4,type="float")
     parser.add_option("-f","--fwhm",dest="fwhm",default=11,type="float")
     parser.add_option("-e","--el",dest="el",default=70,type="float")
-    (options, args) = parser.parse_args(args)    
+    (options, args) = parser.parse_args()    
 
     
     allnames, star_table, do_flag, stars  = ds.parseGoogledex()
