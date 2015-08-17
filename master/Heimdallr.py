@@ -183,7 +183,7 @@ class Master(threading.Thread):
             # Calculate the slowdown factor.
             if self.BV is None:
                 apflog("Warning!: Ended up in getTarget() with no B Magnitude value, slowdown can't be computed.", echo=True)
-                self.BV = 0.8 # use a default average
+                self.BV = 0.6 # use a default average
                 slowdown = 5
             elif self.VMAG is None:
                 apflog("Warning!: Ended up in getTarget() with no V Magnitude value, slowdown can't be computed.", echo=True)
@@ -206,7 +206,7 @@ class Master(threading.Thread):
                         apflog("slowdown too low %g" % APF.countrate, echo=True, level='debug')
                         # yes this happened.
                 except ZeroDivisionError:
-                    apflog("Current countrate was 0. Slowdown will be set to 5.", echo=True)
+                    apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                     slowdown = 1
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
             apflog("getTarget(): countrate = %.2f" % APF.countrate)
@@ -224,7 +224,7 @@ class Master(threading.Thread):
                 target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True,sheetn=self.sheetn)
             else:
                 # Get the best target from the star list
-                target = ds.smartList(self.fixedList, seeing, slowdown, APF.aaz, APF.ael)
+                target = ds.smartList(self.fixedList, seeing, slowdown)
 
             if target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
@@ -296,9 +296,10 @@ class Master(threading.Thread):
                     self.exitMessage = "Fixed list is finished. Exiting the watcher."
                     self.stop()
                     # The fixed list has been completely observed so nothing left to do
-                elif APF.ldone == tot and APF.user != "ucsc":
+                elif APF.ldone == tot and APF.user == "ucsc":
                     self.fixedList = None
                     self.smartObs = False
+                    APFTask.set(self.task,suffix="STARLIST",value="")
                     ripd, running = APF.findRobot()
                     if running:
                         APF.killRobot(now=True)
