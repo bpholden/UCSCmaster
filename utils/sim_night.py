@@ -9,6 +9,7 @@ import pickle
 import ephem
 import optparse
 from datetime import datetime
+import re
 
 def sun_times(datestr):
     apf_obs = ephem.Observer()
@@ -40,8 +41,38 @@ def compute_el(curtime,star,apf_obs):
     return actel
 
 
-today = datetime.now()
-datestr = "%d/%02d/%02d" % (today.year,today.month,today.day)
+def checkdate(datestr):
+    match = re.match("(\d{4})\/(\d{1,2})\/(\d{1,2})",datestr)
+    if not match:
+        return False
+    if int(match.group(2)) < 1 or int(match.group(2)) > 12:
+        return False
+    if int(match.group(3)) < 1 or int(match.group(3)) > 31:
+        return False
+    
+    return True
+
+#######
+parser = optparse.OptionParser()
+parser.add_option("-d","--date",dest="date",default="today")
+parser.add_option("-f","--fixed",dest="fixed",default="")
+parser.add_option("-s","--smartlist",dest="smartlist",default="")
+(options, args) = parser.parse_args()    
+
+if options.date == "today":
+    today = datetime.now()
+    datestr = "%d/%02d/%02d" % (today.year,today.month,today.day)
+else:
+    datestr = options.date
+
+if options.fixed != "":
+    if not os.path.isfile(options.fixed):
+        print "%s is not a file" % (options.fixed)
+
+if not checkdate(datestr):
+    print "%s is not an acceptable date string" % (datestr)
+    sys.exit()
+    
 
 allnames, star_table, do_flag, stars  = ds.parseGoogledex()
 slowdowns, fwhms = make_obs_sample("slowdowns")
@@ -55,35 +86,41 @@ curtime, endtime, apf_obs = sun_times(datestr)
 bstar = True
 while observing:
 
-    result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, verbose=True)
-    if bstar:
-        bstar = False
-    curtime += 70./86400 # acquisition time
-    idx = allnames.index(result['NAME'])
-    for i in range(0,int(result['NEXP'])):
-        actslow, actfwhm = rand_obs_sample(slowdowns,fwhms)
-        actel = compute_el(curtime,stars[idx],apf_obs)
-        
-        meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
-        meterrate *= 1 + 0.11*np.random.randn(1)
-        meterrate *= actslow
-        specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm)
-        specrate *= 1 + 0.11*np.random.randn(1)
-        specrate *= actslow
-        metertime = result['COUNTS'] / meterrate
-        exp_time = result['EXP_TIME']
-        if metertime < exp_time:
-            curtime += (metertime+40.)/86400
-            totcounts = metertime * specrate
-        else:
-            curtime += (exp_time+40.)/86400
-            totcounts = exp_time * specrate
-        if curtime > endtime:
-            observing = False
-        print "%s %.1f %.1f %.1f\n" %( ephem.Date(curtime), exp_time, metertime, totcounts)
+    if options.smartlist and options.fixed != "":
+        result = ds.smarList(options.fixed, curtime, lastfwhm, lastslow)
+    else:
+        result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, verbose=True)
+    if result:
+        if bstar:
+            bstar = False
+        curtime += 70./86400 # acquisition time
+        idx = allnames.index(result['NAME'])
+        for i in range(0,int(result['NEXP'])):
+            actslow, actfwhm = rand_obs_sample(slowdowns,fwhms)
+            actel = compute_el(curtime,stars[idx],apf_obs)
+            
+            meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+            meterrate *= 1 + 0.11*np.random.randn(1)
+            meterrate *= actslow
+            specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+            specrate *= 1 + 0.11*np.random.randn(1)
+            specrate *= actslow
+            metertime = result['COUNTS'] / meterrate
+            exp_time = result['EXP_TIME']
+            if metertime < exp_time:
+                curtime += (metertime+40.)/86400
+                totcounts = metertime * specrate
+            else:
+                curtime += (exp_time+40.)/86400
+                totcounts = exp_time * specrate
+            if curtime > endtime:
+                observing = False
+            print "%s %.1f %.1f %.1f\n" %( ephem.Date(curtime), exp_time, metertime, totcounts)
+        ot = open(otfn,"a+")
+        ot.write("%s\n" % (result["SCRIPTOBS"]))
+        ot.close()
+    else:
+        curtime += 2100./86400 # close for lack of target
     curtime = ephem.Date(curtime)
         
-    ot = open(otfn,"a+")
-    ot.write("%s\n" % (result["SCRIPTOBS"]))
-    ot.close()
 print "sun rose"
