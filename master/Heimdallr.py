@@ -683,8 +683,8 @@ if __name__ == '__main__':
         try:
             if opt.fixed == None:
                 (names,) = ds.parseGoogledex(sheetn=opt.sheetn)
-        except:
-            apflog("Cannot download googledex?!",level="Error")
+        except Exception as e:
+            apflog("Cannot download googledex?! %s" % (e),level="Error")
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
@@ -710,8 +710,8 @@ if __name__ == '__main__':
     try:
         if opt.fixed == None:
                 (names,) = ds.parseGoogledex(sheetn=opt.sheetn)
-    except:
-        apflog("Cannot download googledex?!",level="Error")
+    except Exception as e:
+        apflog("Cannot download googledex?!  %s" % (e),level="Error")
     
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
