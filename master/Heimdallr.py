@@ -21,8 +21,8 @@ import glob
 import ktl
 import APF as APFLib
 import APFTask
-import APFControl as ad
 
+import APFControl as ad
 from apflog import *
 import UCSCScheduler_V2 as ds
 from x_gaussslit import *
@@ -682,7 +682,7 @@ if __name__ == '__main__':
 
         try:
             if opt.fixed == None:
-                (names,) = ds.parseGoogledex(sheetn=opt.sheetn)
+                (names,) = ds.parseGoogledex(sheetn=opt.sheet)
         except Exception as e:
             apflog("Cannot download googledex?! %s" % (e),level="Error")
 
@@ -709,7 +709,7 @@ if __name__ == '__main__':
     master = Master(apf,user=opt.name)
     try:
         if opt.fixed == None:
-                (names,) = ds.parseGoogledex(sheetn=opt.sheetn)
+                (names,) = ds.parseGoogledex(sheetn=opt.sheet)
     except Exception as e:
         apflog("Cannot download googledex?!  %s" % (e),level="Error")
     
