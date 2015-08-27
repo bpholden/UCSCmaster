@@ -119,25 +119,19 @@ def okmon(ok2open):
 # Callback for the windspeed
 def windmon(wx):
     windshield = robot["scriptobs_windshield"].read()
-    wvel = checkapf['AVGWSPEED'].read(binary=True)
-    # Direction needs to be stored in Radians for the calcs below
-    waz  = checkapf['AVGWDIR'].read(binary=True) * np.pi/180.
+    try:
+        wvel = float(checkapf['AVGWSPEED'].read(binary=True))
+    except:
+        wvel = WINDSHIELD_LIMIT + 1.
+        
     if APF.wslist == []:
         APF.wslist = [wvel]*20
-        APF.wdlist = [waz]*20
+
     else:
         APF.wslist.append(wvel)
-        APF.wdlist.append(waz)
         APF.wslist = APF.wslist[-20:]
-        APF.wdlist = APF.wdlist[-20:]
 
     APF.wvel = np.median(APF.wslist)
-    # This is to find the average wind direction angle 
-    # It handles the wrap around of the angle correctly ( I believe )
-    x = np.median(np.cos(APF.wdlist))
-    y = np.median(np.sin(APF.wdlist))
-    waz_rad = np.arctan2(y, x)
-    APF.waz = np.mod(math.degrees(waz_rad), 360.)
 
 
 # Callback for Deadman timer
@@ -285,7 +279,7 @@ class APF:
         s += "Sun elevation = %4.2f %s\n" % (self.sunel, "Rising" if rising else "Setting")
         s += "Telescope -- AZ=%4.2f  EL=%4.2f \n" % (self.aaz, self.ael)
         s += "Front/Rear Shutter=%4.2f / %4.2f\n"%(self.fspos, self.rspos)
-        s += "Wind = %3.1f mph @ %4.1f deg\n" % (self.wvel, self.waz)
+        s += "Wind = %3.1f mph \n" % (self.wvel)
         s += "Seeing %4.2f arcsec\n" % self.seeing
         s += "Slowdown = %5.2f x\n" % self.slowdown
         #s += "Conditions are - %s\n" % self.conditions
