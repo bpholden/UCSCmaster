@@ -74,6 +74,8 @@ def cmdexec(cmd, debug=False, cwd='./'):
 
 
 def countmon(countrate):
+    if countrate['populated'] == False:
+        return
 
     avgcntrate = -1.0
     try:
@@ -91,7 +93,12 @@ def countmon(countrate):
 # Callback for the FWHM
 def fwhmmon(fwhm):
     """ Callback for FWHM. Tracks seeing conditions, stored in self.seeing."""
-    seeing = fwhm.read(binary=True)*0.109
+        
+    try:
+        seeing = float(fwhm.read(binary=True))*0.109
+    except Exception, e:
+        apflog("Exception in fwhmmon: %s" % (e), level='warn')
+        return
     if APF.seeinglist == []:
         APF.seeinglist = [seeing]*15
     else:
@@ -102,6 +109,8 @@ def fwhmmon(fwhm):
 # Callback for ok2open permission
 # -- Check that if we fall down a logic hole we don't error out
 def okmon(ok2open):
+    if ok2open['populated'] == False:
+        return
     try:
         ok = ok2open.read(binary=True)
     except Exception, e:
@@ -118,11 +127,14 @@ def okmon(ok2open):
 
 # Callback for the windspeed
 def windmon(wx):
+    if wx['populated'] == False:
+        return
     windshield = robot["scriptobs_windshield"].read()
     try:
         wvel = float(checkapf['AVGWSPEED'].read(binary=True))
-    except:
-        wvel = WINDSHIELD_LIMIT + 1.
+    except Exception, e:
+        apflog("Exception in windmon: %s" % (e), level='warn')
+        return
         
     if APF.wslist == []:
         APF.wslist = [wvel]*20
@@ -136,7 +148,13 @@ def windmon(wx):
 
 # Callback for Deadman timer
 def dmtimemon(dmtime):
-    APF.dmtime = dmtime.read(binary=True)
+    if dmtime['populated'] == False:
+        return
+    try:
+        APF.dmtime = dmtime.read(binary=True)
+    except Exception, e:
+        apflog("Exception in dmtimemon: %s" % (e), level='warn')
+
 
 def midptmon(midpt,outputfile,permoutfile):
     if midpt['populated'] == False:
