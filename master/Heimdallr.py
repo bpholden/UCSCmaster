@@ -682,7 +682,7 @@ if __name__ == '__main__':
 
         try:
             if opt.fixed == None:
-                (names,) = ds.parseGoogledex(sheetn=opt.sheet)
+                names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
         except Exception as e:
             apflog("Cannot download googledex?! %s" % (e),level="Error")
 
@@ -709,7 +709,7 @@ if __name__ == '__main__':
     master = Master(apf,user=opt.name)
     try:
         if opt.fixed == None:
-                (names,) = ds.parseGoogledex(sheetn=opt.sheet)
+                names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
     except Exception as e:
         apflog("Cannot download googledex?!  %s" % (e),level="Error")
     
