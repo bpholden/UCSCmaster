@@ -34,19 +34,20 @@ deckscale = {'M': 1.0, 'W':1.0, 'N': 3.0, 'B': 0.5, 'S':2.0, 'P':1.0}
 tel        = ktl.Service('eostele')
 sunelServ  = tel('SUNEL')
 checkapf   = ktl.Service('checkapf')
-ok2open    = checkapf('OPEN_OK')
-dmtimer    = checkapf('DMTIME')
-wx         = checkapf('WX_BYSTN')
+apfmet     = ktl.Service('apfmet')
+ok2open    = ktl.cache('checkapf','OPEN_OK')
+dmtimer    = ktl.cache('checkapf','DMTIME')
+wx         = ktl.cache('apfmet','M5WIND')
 robot      = ktl.Service('apftask')
 vmag       = robot['scriptobs_vmag']
 ucam       = ktl.Service('apfucam')
 apfteq     = ktl.Service('apfteq')
 teqmode    = apfteq['MODE']
 guide      = ktl.Service('apfguide')
-counts     = guide['counts']
+counts     = ktl.cache('apfguide','COUNTS')
 countrate  = guide['countrate']
 thresh     = guide['xpose_thresh']
-fwhm       = guide['fwhm']
+
 elapsed    = ucam['elapsed']
 motor      = ktl.Service('apfmot')
 decker     = motor['DECKERNAM']
@@ -73,38 +74,21 @@ def cmdexec(cmd, debug=False, cwd='./'):
 
 
 
-def countmon(countrate):
-    if countrate['populated'] == False:
+def countmon(counts):
+    APF.countrate = -1.0
+    if counts['populated'] == False:
         return
 
-    avgcntrate = -1.0
     try:
-        cnts = float(counts.read(binary=True))
+        cnts = float(counts)
         time = float(elapsed.read(binary=True))
-        avgcntrate = cnts/time
-        APF.countrate = avgcntrate
+        APF.countrate = cnts/time
     except ZeroDivisionError:
-        avgcntrate = -1.0
+        return
     except:
         apflog("Cannot read apfguide.counts or apfucam.elapsed")
-        avgcntrate = -1.0
-
-
-# Callback for the FWHM
-def fwhmmon(fwhm):
-    """ Callback for FWHM. Tracks seeing conditions, stored in self.seeing."""
-        
-    try:
-        seeing = float(fwhm.read(binary=True))*0.109
-    except Exception, e:
-        apflog("Exception in fwhmmon: %s" % (e), level='warn')
         return
-    if APF.seeinglist == []:
-        APF.seeinglist = [seeing]*15
-    else:
-        APF.seeinglist.append(seeing)
-        APF.seeinglist = APF.seeinglist[-15:]
-    APF.seeing = np.median(np.array(APF.seeinglist,dtype=float))
+
 
 # Callback for ok2open permission
 # -- Check that if we fall down a logic hole we don't error out
@@ -112,7 +96,7 @@ def okmon(ok2open):
     if ok2open['populated'] == False:
         return
     try:
-        ok = ok2open.read(binary=True)
+        ok = ok2open # historical
     except Exception, e:
         apflog("Exception in okmon: %s" % (e), level='warn')
         return
@@ -131,7 +115,7 @@ def windmon(wx):
         return
     windshield = robot["scriptobs_windshield"].read()
     try:
-        wvel = float(checkapf['AVGWSPEED'].read(binary=True))
+        wvel = float(wx)
     except Exception, e:
         apflog("Exception in windmon: %s" % (e), level='warn')
         return
@@ -151,39 +135,10 @@ def dmtimemon(dmtime):
     if dmtime['populated'] == False:
         return
     try:
-        APF.dmtime = dmtime.read(binary=True)
+        APF.dmtime = dmtime
     except Exception, e:
         apflog("Exception in dmtimemon: %s" % (e), level='warn')
 
-
-def midptmon(midpt,outputfile,permoutfile):
-    if midpt['populated'] == False:
-        return
-    
-    midptval = midpt['binary']
-    objectval = ""
-    el = 100
-    try:
-        el = ktl.read('eostele','sunel',timeout=10)
-    except:
-        apflog("cannot read eostele sun elevation",level="warn")
-    try:
-        objectval = ktl.read('apfucam','object',timeout=10)
-    except:
-        apflog("cannot read apfucam.OBJECT value!",level="error")
-        return
-    if el < 0:
-        ostr = "%s %f\n" % (objectval,midptval)
-        if outputfile != None:
-            outputfile.write(ostr)
-            outputfile.flush()
-        if permoutfile != None:
-            permoutfile.write(ostr)
-            permoutfile.flush()
-
-    return
-
-    
 
 class APF:
     """ Class which creates a monitored state object to track the condition of the APF telescope. """
@@ -209,9 +164,10 @@ class APF:
     rspos      = dome('RSCURPOS')
     fspos      = dome('FSCURPOS')
     checkapf   = ktl.Service('checkapf')
+    apfmet     = ktl.Service('apfmet')
     ok2open    = checkapf('OPEN_OK')
     dmtimer    = checkapf('DMTIME')
-    wx         = checkapf('WX_BYSTN')
+    wx         = apfmet('M5WIND')
     mv_perm    = checkapf('MOVE_PERM')
     chk_close  = checkapf('CHK_CLOSE')
     robot      = ktl.Service('apftask')
@@ -226,11 +182,10 @@ class APF:
     apfteq     = ktl.Service('apfteq')
     teqmode    = apfteq['MODE']
     guide      = ktl.Service('apfguide')
-    counts     = guide['counts']
+    counts     = guide['COUNTS']
     countrate  = guide['countrate']
     thresh     = guide['xpose_thresh']
-    fwhm       = guide['fwhm']
-    avg_fwhm   = guide["avg_fwhm"]
+    avg_fwhm   = guide['AVG_FWHM']
     motor      = ktl.Service('apfmot')
     decker     = motor['DECKERNAM']
     dewarfoc   = motor["DEWARFOCRAW"]
@@ -244,21 +199,18 @@ class APF:
         self.cloudObsNum = 1
   
         # Set the callbacks and monitors
-        self.wx.callback(windmon)
         self.wx.monitor()
+        self.wx.callback(windmon)
 
-        self.ok2open.callback(okmon)
         self.ok2open.monitor()
+        self.ok2open.callback(okmon)
 
-        self.dmtimer.callback(dmtimemon)
         self.dmtimer.monitor()
+        self.dmtimer.callback(dmtimemon)
 
-        self.counts.callback(countmon)
         self.counts.monitor()
- 
-        self.fwhm.callback(fwhmmon)
-        self.fwhm.monitor()
-   
+        self.counts.callback(countmon)
+
         self.teqmode.monitor()
         self.vmag.monitor()
         self.autofoc.monitor()
@@ -281,7 +233,6 @@ class APF:
         # Grab some initial values for the state of the telescope
         
         self.wx.poll()
-        self.fwhm.poll()
         self.counts.poll()
         self.ok2open.poll()
 
