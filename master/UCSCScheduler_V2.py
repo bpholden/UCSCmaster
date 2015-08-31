@@ -60,39 +60,40 @@ def parseStarlist(starlist):
         return None
     else:
         for line in f:
-            ls = line.split()
-            names.append(ls[0])
-            row = []
-            # RA value in radians
-            row.append(getRARad(ls[1], ls[2], ls[3]))
-            # Dec value in radians
-            row.append(getDECRad(ls[4], ls[5], ls[6]))
-            # PM RA
-            row.append(float(ls[8].split('=')[-1]))
-            # PM Dec
-            row.append(float(ls[9].split('=')[-1]))
-            # V mag
-            row.append(float(ls[10].split('=')[-1]))
-            # Exposure time
-            row.append(float(ls[11].split('=')[-1]))
-            # Desired Counts
-            row.append(float(ls[16].split('=')[-1]))
-            # Filler not used here
-            row.append(0.)
-            row.append(0.)
-            # Number of exposures
-            row.append(int(ls[19].split('=')[-1]))
+            if not re.search("\A\#",line):
+                ls = line.split()
+                names.append(ls[0])
+                row = []
+                # RA value in radians
+                row.append(getRARad(ls[1], ls[2], ls[3]))
+                # Dec value in radians
+                row.append(getDECRad(ls[4], ls[5], ls[6]))
+                # PM RA
+                row.append(float(ls[8].split('=')[-1]))
+                # PM Dec
+                row.append(float(ls[9].split('=')[-1]))
+                # V mag
+                row.append(float(ls[10].split('=')[-1]))
+                # Exposure time
+                row.append(float(ls[11].split('=')[-1]))
+                # Desired Counts
+                row.append(float(ls[16].split('=')[-1]))
+                # Filler not used here
+                row.append(0.)
+                row.append(0.)
+                # Number of exposures
+                row.append(int(ls[19].split('=')[-1]))
 
-            star_table.append(row)
+                star_table.append(row)
 
-            # Save the scriptobs line for later
-            lines.append(line)
+                # Save the scriptobs line for later
+                lines.append(line)
 
-            # Generate a pyEphem object for this target
-            star = ephem.FixedBody()
-            star._ra = ephem.hours(":".join([ls[1], ls[2], ls[3]]))
-            star._dec = ephem.degrees(":".join([ls[4], ls[5], ls[6]]))
-            stars.append(star)
+                # Generate a pyEphem object for this target
+                star = ephem.FixedBody()
+                star._ra = ephem.hours(":".join([ls[1], ls[2], ls[3]]))
+                star._dec = ephem.degrees(":".join([ls[4], ls[5], ls[6]]))
+                stars.append(star)
             
     return names, np.array(star_table), lines, stars
 
@@ -156,38 +157,37 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         idx = [col_names.index(v) for v in req_cols]
     except ValueError:
         apflog("%s Not found in list" % (v) , level="warn",echo=True)
+    didx = dict()
+    for i,n in enumerate(req_cols):
+        didx[n] = idx[i]
     names = []
     star_table = []
     do_flag = []
     stars = []
     # Build the star table to return to 
     for ls in codex:
-        if float(ls[idx[11]]) < 0.5: continue
+        if float(ls[didx["APFpri"]]) < 0.5: continue
         row = []
         # Get the star name
-        names.append(ls[idx[0]])
+        names.append(ls[didx["Star Name"]])
         # Get the RA
-        row.append(getRARad(ls[idx[1]], ls[idx[2]], ls[idx[3]]))
+        row.append(getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]))
         # Get the DEC
-        row.append(getDECRad(ls[idx[4]], ls[idx[5]], ls[idx[6]]))
-        for i in idx[7:11]:
+        row.append(getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]))
+        for i in ("pmRA", "pmDEC", "Vmag","APFtexp"):
             try:
-                row.append(float(ls[i]))
+                row.append(float(ls[didx[i]]))
             except ValueError:
                 row.append(0.0)
         # For now use the old 1e9 count value
         row.append(1.e9)
-        for i in idx[11:-1]:
+        for i in ("APFpri", "APFcad", "APFnshots", "lastobs", "B-V", "APF Desired Precision" ):
             try:
-                row.append(float(ls[i]))
+                row.append(float(ls[didx[i]]))
             except ValueError:
                 row.append(0.0)
-        try:
-            row.append(float(ls[idx[-1]]))
-        except ValueError:
-            row.append(1.5)
 
-        match = re.search("\A(y|Y)",ls[idx[17]])
+        match = re.search("\A(y|Y)",ls[didx["Close Companion"]])
         if match:
             do_flag.append("y")
         else:
@@ -195,8 +195,8 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         
         star_table.append(row)
         star = ephem.FixedBody()
-        star._ra = ephem.hours(":".join([ls[idx[1]], ls[idx[2]], ls[idx[3]]]))
-        star._dec = ephem.degrees(":".join([ls[idx[4]], ls[idx[5]], ls[idx[6]]]))
+        star._ra = ephem.hours(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]]))
+        star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
         stars.append(star)
 
     return (names, np.array(star_table), do_flag, stars)
@@ -446,12 +446,22 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
     """
     # Store the previous observer horizon and date since we change these
     prev_horizon = observer.horizon
-
+    cdate = observer.date
     ret = []
-
+    elevations = []
     observer.horizon = min_el
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
+        observer.date = ephem.Date(cdate + dt/86400.)
+        s.compute(observer)
+        fin_el = np.degrees(s.alt)
+        elevations.append(fin_el)
+        if fin_el < min_el or fin_el > max_el:
+            ret.append(False)
+            continue
+
+        observer.date = ephem.Date(cdate)
+
         s.compute(observer)
 
         # Is the target visible now?
@@ -459,7 +469,6 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
         if cur_el < min_el or cur_el > max_el:
             ret.append(False)
             continue
-		
         # Does the target remain visible through the observation?
         # The next setting/rising functions throw an exception if the body never sets or rises
         # ex. circumpolar 
@@ -493,15 +502,25 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
         ret.append(True)
 	
     observer.horizon = prev_horizon
-    return ret
+    return ret, np.array(elevations)
 
 
-def smartList(starlist, time, seeing, slowdown, az, el):
+def smartList(starlist, time, seeing, slowdown):
     """ Determine the best target to observe from the provided scriptobs-compatible starlist.
         Here the best target is defined as an unobserved target (ie not in observed targets )
         that is visible above 30 degrees elevation. Higher elevation targets are prefered,
         but those that rise above 85 degrees will be regected to avoid slewing through the zenith. """
-    dt = datetime.utcfromtimestamp(int(time))    
+    # Convert the unix timestamp into a python datetime
+
+    # punt
+    dt = datetime.utcnow()
+
+    if type(time) == float:
+        dt = datetime.utcfromtimestamp(int(time))
+    elif type(time) == datetime:
+        dt = time
+    elif type(time) == ephem.Date:
+        dt = time.datetime()
 
     observed, _ = getObserved(os.path.join(os.getcwd(),"observed_targets"))
 
@@ -529,73 +548,63 @@ def smartList(starlist, time, seeing, slowdown, az, el):
         return None
     targNum = len(sn)
 
-    # A place to hold star scores. Everything starts with a 0
-    score = np.zeros(targNum) + 100
-
     # Minimum Brightness based on conditions
-    VMAX = 15
+    VMAX = 14
 
     # Distance to stay away from the moon [Between 15 and 25 degrees]
-    minMoonDist = ((moon.phase / 100.) * (TARGET_MOON_DIST_MIN)) + TARGET_MOON_DIST_MIN
 
     moonDist = np.degrees(np.sqrt((moon.ra - star_table[:,DS_RA])**2 + (moon.dec - star_table[:,DS_DEC])**2))
+    md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
+    minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN  
 
-    elevation = np.zeros(targNum)
+    available = np.ones(targNum, dtype=bool)
+    moon_check = np.where(moonDist > minMoonDist, True, False)
+    available = available & moon_check
 
-    done = True
-    # Loop over each star 
-    for i in range(targNum):
-        # Have we already observed this target?
-        if sn[i] in observed:
-            score[i] = 5.
-        else:
-            done = False
 
-        # If seeing is bad, only observe bright targets ( Large VMAG is dim star )       
-        if star_table[i, DS_VMAG] > VMIN:
-            score[i] = 0.
+    totexptimes = np.zeros(targNum, dtype=float)
+    totexptimes += star_table[:,DS_COUNTS]*star_table[:,DS_EXPT] + 40*(star_table[:,DS_COUNTS] - 1) 
+    
 
-        # Is the star visible?
-        # Version 2.0
-        obs_length = star_table[i,DS_EXPT] * star_table[i,DS_NSHOTS] + 45 * star_table[i,DS_NSHOTS]
+    star_elevations = []
 
-        # Finishing position
-        apf_obs.date = dt + timedelta(seconds = obs_length)
-        stars[i].compute(apf_obs)
-        el = np.degrees(stars[i].alt)
-        if el < 30. or el > 80.:
-            score[i] = 0.
-            continue
-        apf_obs.date = dt
-        stars[i].compute(apf_obs)
-        el = np.degrees(stars[i].alt)
-        if el < 30. or el > 80.:
-            score[i] = 0.
-            continue
-
+    for idx in range(len(stars)):
+        stars[idx].compute(apf_obs)
+        star_el = np.degrees(stars[idx].alt)
         
-        elevation[i] = el
-        score[i] += 5
-        
+        if star_el < TARGET_ELEVATION_MIN or star_el > TARGET_ELEVATION_MAX:
+            # This star is outside our visible range
+            available[idx] = False
 
-        # Is the star behind the moon?
-        if moonDist[i] < minMoonDist:
-            score[i] = 0.
-            #print sn[i], "behind moon"
-
-    if done:
-        apflog( "All targets have been observed",level="warn",echo=True)
-        return None
-
-    # Prioritize higher elevation targets
-    if max(elevation) > 0:
-        score += elevation/max(elevation) * 100
-    else:
+        star_elevations.append(star_el)
+        #
+    star_elevations = np.array(star_elevations)
+    if max(star_elevations) < 0:
         apflog( "No observable targets found.",level="warn",echo=True)
         return None
 
-    idx = score.argsort()[-1]
 
+
+    # If seeing is bad, only observe bright targets ( Large VMAG is dim star )       
+    brightenough = np.where(star_table[:, DS_VMAG] < VMAX,True,False)
+    available = available & brightenough
+
+    obs_length = star_table[:,DS_EXPT] * star_table[:,DS_NSHOTS] + 45 * (star_table[:,DS_NSHOTS]-1)
+    vis, fin_els = is_visible(stars,apf_obs,obs_length,TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+    available = available & vis
+        
+    done = [ True if n in observed else False for n in sn ]
+    availableandnotdone = available & np.logical_not(done)
+    
+    if len(availableandnotdone) <= 0:
+        apflog( "All visible targets have been observed",level="warn",echo=True)
+        (good,) = np.where(available)
+    else:
+        (good,) = np.where(availableandnotdone)
+
+    sort_fin_els_idx = fin_els[good].argsort()
+    idx = sort_fin_els_idx[0]
+                  
     res = dict()
 
     res['RA']     = stars[idx].a_ra
@@ -603,11 +612,10 @@ def smartList(starlist, time, seeing, slowdown, az, el):
     res['PM_RA']  = star_table[idx, DS_PMRA]
     res['PM_DEC'] = star_table[idx, DS_PMDEC]
     res['VMAG']   = star_table[idx, DS_VMAG]
-    res['BV'] = 0.8
+    res['BV'] = 0.6
     res['COUNTS'] = star_table[idx, DS_COUNTS]
     res['EXP_TIME'] = star_table[idx, DS_EXPT]
     res['NAME']   = sn[idx]
-    res['SCORE']  = score[idx]
     res['SCRIPTOBS'] = lines[idx]
     return res
     
@@ -741,15 +749,16 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     if bstar:
         available = available & bstars
         f = available
-        vis = is_visible([s for s,_ in zip(stars,f) if _ ], apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,fin_star_elevations = is_visible([s for s,_ in zip(stars,f) if _ ], apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
 		
         available[f] = available[f] & vis
 		
         star_table[available, DS_COUNTS] = 1e9
         star_table[available, DS_EXPT] = 200
         star_table[available, DS_NSHOTS] = 2
-		
-	# Just need a normal star for observing
+        totexptimes[available] = 400
+
+    # Just need a normal star for observing
     else:
         # Available and not a BStar
         available = np.logical_and(available, np.logical_not(bstars))
@@ -784,7 +793,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         f = available
 
         # Is the star currently visible?
-        vis = is_visible([s for s,_ in zip(stars,f) if _ ], apf_obs, exp_times, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,fin_star_elevations = is_visible([s for s,_ in zip(stars,f) if _ ], apf_obs, exp_times, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         if vis != []:
             available[f] = available[f] & vis
 
@@ -796,10 +805,18 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
     good_cadence = np.where(cadence_check > 1, True, False)
     good_cadence_available = available & good_cadence
-    
-    pri = max(star_table[good_cadence_available, DS_APFPRI])
-    sort_i = np.where(star_table[good_cadence_available, DS_APFPRI] == pri, True, False)
 
+    if len(good_cadence_available): 
+        pri = max(star_table[good_cadence_available, DS_APFPRI])
+        sort_i = np.where(star_table[good_cadence_available, DS_APFPRI] == pri, True, False)
+    elif len(available):
+        pri = max(star_table[available, DS_APFPRI])
+        sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
+    else:
+        apflog( "Couldn't find any suitable targets!",level="error",echo=True)
+        return None
+
+        
 #    print sn[available][sort_i]
 #    print star_table[available, DS_APFPRI][sort_i]
     starstr = "star table available: %s" % (sn[good_cadence_available][sort_i]) 
@@ -817,7 +834,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     
     t_n = sn[good_cadence_available][sort_i][sort_j][0]
 
-    elstr= "Star elevations %s" % (star_elevations[good_cadence_available][sort_i][sort_j])
+    elstr= "star elevations %s" % (star_elevations[good_cadence_available][sort_i][sort_j])
     apflog(elstr,echo=True)
 
     t_n = sn[good_cadence_available][sort_i][sort_j][0]
@@ -842,6 +859,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     res['BV']     = star_table[idx, DS_BV]
     res['COUNTS'] = star_table[idx, DS_COUNTS]
     res['EXP_TIME'] = star_table[idx, DS_EXPT]
+    res['NEXP'] = star_table[idx, DS_NSHOTS]
     res['TOTEXP_TIME'] = totexptimes[idx]
     res['I2CNTS'] = i2cnts[idx]
     res['NAME']   = sn[idx]
@@ -877,7 +895,7 @@ if __name__ == '__main__':
         ot.close()
         starttime += result["EXP_TIME"]
                 
-    print "testing googledex updater"
+#    print "testing googledex updater"
 #    update_googledex_lastobs('observed_targets')
 
     print "Done"
