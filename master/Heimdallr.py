@@ -715,16 +715,6 @@ if __name__ == '__main__':
     
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
-        if master.nighttargetlog != None:
-            try:
-                apfguide = ktl.Service('apfguide')
-                midpt = apfguide['MIDPTFIN']
-                try:
-                    midpt.callback(functools.partial(ad.midptmon,outputfile=master.nighttargetlog,permoutfile=master.targetlog))
-                except Exception, e:
-                    apflog("Cannot setup midpoint monitor: %s" % (e),level="warn")
-            except Exception, e:
-                apflog("Cannot setup midpoint keyword: %s" % (e),level="warn")
             
         if opt.fixed != None:
             lastList = apf.robot["MASTER_STARLIST"].read()
