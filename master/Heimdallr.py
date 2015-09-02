@@ -778,12 +778,7 @@ if __name__ == '__main__':
 
     if opt.fixed is None:
         try:
-            if os.path.exists(master.nighttargetlogname):
-                master.nighttargetlog.close()
-                master.targetlog.close()
-                ds.update_googledex_lastobs(master.nighttargetlogname,sheetn=master.sheetn)
-            else:
-                ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
+            ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
         except:
             apflog("Updating the online googledex has failed.", level="Error")
 
