@@ -398,13 +398,17 @@ def getObserved(filename):
         return obs, times
     else: 
         for line in f:
-            if line.strip()[0] == '#' or line.strip() == "": continue
-            ls = line.split()
-            obs.append(ls[0])
-            if len(ls) > 15:
-                times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
-            else:
-                times.append(float(ls[1]))
+            line = line.strip()
+            if len(line) > 0:
+                if line[0] == '#' or line == "":
+                    pass
+                else:
+                    ls = line.split()
+                    obs.append(ls[0])
+                    if len(ls) > 15:
+                        times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
+                    else:
+                        times.append(float(ls[1]))
             
     obs.reverse()
     times.reverse()
