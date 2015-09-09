@@ -670,6 +670,12 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     if verbose:
         apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
+    try:
+        apfguide = ktl.Service('apfguide')
+        ptime = apfguide['midptfin'].read(binary=True)
+    except:
+        ptime = datetime.utcnow()
+    update_local_googledex(ptime,googledex_file=os.path.join(os.getcwd(),"googledex.dat"), observed_file=os.path.join(os.getcwd(),"observed_targets"))
 
     # List of targets already observed
     observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
