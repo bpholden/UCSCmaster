@@ -599,14 +599,14 @@ def smartList(starlist, time, seeing, slowdown):
     done = [ True if n in observed else False for n in sn ]
     availableandnotdone = available & np.logical_not(done)
     
-    if len(availableandnotdone) <= 0:
+    if not any(availableandnotdone):
         apflog( "All visible targets have been observed",level="warn",echo=True)
         (good,) = np.where(available)
     else:
         (good,) = np.where(availableandnotdone)
 
     sort_fin_els_idx = fin_els[good].argsort()
-    idx = sort_fin_els_idx[0]
+    idx = good[sort_fin_els_idx[0]]
                   
     res = dict()
 
