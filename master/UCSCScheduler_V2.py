@@ -15,6 +15,7 @@ import time
 # from fake_apflog import *
 from apflog import *
 import re
+import ktl
 
 # Some variables that will soon be moved to a separate file
 TARGET_ELEVATION_MIN = 20
@@ -669,7 +670,6 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     if verbose:
         apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
-    update_local_googledex(googledex_file=os.path.join(os.getcwd(),"googledex.dat"), observed_file=os.path.join(os.getcwd(),"observed_targets"))
 
     # List of targets already observed
     observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
