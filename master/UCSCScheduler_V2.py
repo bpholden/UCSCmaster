@@ -215,7 +215,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
     ws = get_spreadsheet()
     vals = ws.get_all_values()
 
-    col = vals[0].index("lastobs") + 1
+    col = vals[0].index("lastobs") 
     
     for i, v in enumerate(vals):
         # Did we observe this target tonight?
@@ -229,7 +229,8 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
                 hr, min = otime
                 t = datetime(time.year, time.month, time.day, hr, min)
             jd = float(ephem.julian_date(t))
-            ws.update_cell(i+1, col, round(jd, 1) )
+            if jd > float(v[col]):
+                ws.update_cell(i+1, col+1, round(jd, 2) )
     apflog( "Updated Googledex",echo=True)
 
 def update_local_googledex(googledex_file="googledex.dat", observed_file="observed_targets"):
