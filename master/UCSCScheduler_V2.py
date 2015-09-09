@@ -120,7 +120,6 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
     apflog("Loaded Main %s" % (sheetn),echo=True)
     worksheet = spreadsheet.sheet1
     apflog("Got spreadsheet", echo=True)
-    start = datetime.now()
 
     return worksheet
 
@@ -233,13 +232,11 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
                 ws.update_cell(i+1, col+1, round(jd, 2) )
     apflog( "Updated Googledex",echo=True)
 
-def update_local_googledex(googledex_file="googledex.dat", observed_file="observed_targets"):
+def update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets"):
     """
         Update the local copy of the googledex with the last observed star time. 
     """
     names, times = getObserved(observed_file)
-
-    time = datetime.utcnow()
 
     try:
         g = open(googledex_file, 'r')
