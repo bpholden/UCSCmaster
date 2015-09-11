@@ -618,6 +618,7 @@ def smartList(starlist, time, seeing, slowdown):
     res['BV'] = 0.6
     res['COUNTS'] = star_table[idx, DS_COUNTS]
     res['EXP_TIME'] = star_table[idx, DS_EXPT]
+    res['NEXP'] = star_table[idx, DS_NSHOTS]
     res['NAME']   = sn[idx]
     res['SCRIPTOBS'] = lines[idx]
     return res
