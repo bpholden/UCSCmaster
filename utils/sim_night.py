@@ -10,6 +10,7 @@ import ephem
 import optparse
 from datetime import datetime
 import re
+import os
 
 def sun_times(datestr):
     apf_obs = ephem.Observer()
@@ -56,7 +57,7 @@ def checkdate(datestr):
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
 parser.add_option("-f","--fixed",dest="fixed",default="")
-parser.add_option("-s","--smartlist",dest="smartlist",default="")
+parser.add_option("-s","--smartlist",dest="smartlist",default=False,action="store_true")
 (options, args) = parser.parse_args()    
 
 if options.date == "today":
@@ -73,8 +74,11 @@ if not checkdate(datestr):
     print "%s is not an acceptable date string" % (datestr)
     sys.exit()
     
+if options.fixed != "":
+    allnames, star_table, lines, stars = ds.parseStarlist(options.fixed)
+else:
+    allnames, star_table, do_flag, stars  = ds.parseGoogledex()
 
-allnames, star_table, do_flag, stars  = ds.parseGoogledex()
 slowdowns, fwhms = make_obs_sample("slowdowns")
 lastslow = 5
 lastfwhm = 10
@@ -87,7 +91,7 @@ bstar = True
 while observing:
 
     if options.smartlist and options.fixed != "":
-        result = ds.smarList(options.fixed, curtime, lastfwhm, lastslow)
+        result = ds.smartList(options.fixed, curtime, lastfwhm, lastslow)
     else:
         result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, verbose=True)
     if result:
@@ -115,7 +119,7 @@ while observing:
                 totcounts = exp_time * specrate
             if curtime > endtime:
                 observing = False
-            print "%s %.1f %.1f %.1f\n" %( ephem.Date(curtime), exp_time, metertime, totcounts)
+            print "%s %s %.1f %.1f %.1f\n" %(result['NAME'] , ephem.Date(curtime), exp_time, metertime, totcounts)
         ot = open(otfn,"a+")
         ot.write("%s\n" % (result["SCRIPTOBS"]))
         ot.close()
