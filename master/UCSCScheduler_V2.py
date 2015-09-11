@@ -12,10 +12,10 @@ import os
 import pickle
 import sys
 import time
-from fake_apflog import *
-# from apflog import *
+# from fake_apflog import *
+from apflog import *
 import re
-#import ktl
+import ktl
 
 # Some variables that will soon be moved to a separate file
 TARGET_ELEVATION_MIN = 20
@@ -565,6 +565,9 @@ def smartList(starlist, time, seeing, slowdown):
     available = available & moon_check
 
 
+    totexptimes = np.zeros(targNum, dtype=float)
+    totexptimes += star_table[:,DS_COUNTS]*star_table[:,DS_EXPT] + 40*(star_table[:,DS_COUNTS] - 1) 
+    
 
     star_elevations = []
 
@@ -615,7 +618,6 @@ def smartList(starlist, time, seeing, slowdown):
     res['BV'] = 0.6
     res['COUNTS'] = star_table[idx, DS_COUNTS]
     res['EXP_TIME'] = star_table[idx, DS_EXPT]
-    res['NEXP'] = star_table[idx, DS_NSHOTS]
     res['NAME']   = sn[idx]
     res['SCRIPTOBS'] = lines[idx]
     return res
