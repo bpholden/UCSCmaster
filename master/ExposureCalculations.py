@@ -29,10 +29,8 @@ def getEXPMeter_Rate(v, bv, el, seeing, decker="W"):
     beta = 0.0852
     Const = -21.8
     if seeing == 0:
-        apflog( "Warning: AVG_FWHM seems to be 0. Using 15 instead.",level="Warn")
-
-        
-        seeing = 15
+#        apflog( "Warning: AVG_FWHM seems to be 0. Using 15 instead.",level="Warn")
+        seeing = np.array(15)
     # seeing  = 13.99
     light = x_gaussslit(slit_size[decker][0]/seeing, slit_size[decker][1]/seeing, 0, 0)
     # light = 0.442272
