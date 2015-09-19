@@ -616,6 +616,7 @@ def smartList(starlist, time, seeing, slowdown):
     res['PM_DEC'] = star_table[idx, DS_PMDEC]
     res['VMAG']   = star_table[idx, DS_VMAG]
     res['BV'] = 0.6
+    res['PRI'] = 1.0
     res['COUNTS'] = star_table[idx, DS_COUNTS]
     res['EXP_TIME'] = star_table[idx, DS_EXPT]
     res['NEXP'] = star_table[idx, DS_NSHOTS]
