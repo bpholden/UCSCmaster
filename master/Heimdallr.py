@@ -224,7 +224,7 @@ class Master(threading.Thread):
                 target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True,sheetn=self.sheetn)
             else:
                 # Get the best target from the star list
-                target = ds.smartList(self.fixedList, seeing, slowdown)
+                target = ds.smartList(self.fixedList, time.time(), seeing, slowdown)
 
             if target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
