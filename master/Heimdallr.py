@@ -246,7 +246,7 @@ class Master(threading.Thread):
             apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (APF.avg_fwhm, slowdown, APF.countrate))
 
             apflog("getTarget(): Target= %s" % target["NAME"])
-            apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["SCORE"]))
+            apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
 
 
         def opening(sunset=False):
