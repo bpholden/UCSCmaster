@@ -414,6 +414,8 @@ class Master(threading.Thread):
                     APFTask.set(parent,suffix="VAR_1",value="Calling getTarget for a smartlist",wait=False)
                     getTarget()
                     APFTask.waitfor(self.task, True, timeout=15)
+                    apflog("Observing target")
+                    APFTask.set(parent,suffix="VAR_1",value="Observing Target",wait=False)
                     
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation
@@ -424,6 +426,7 @@ class Master(threading.Thread):
                     APF.killRobot()
                 else:
                     self.scriptobs.stdin.close()
+                    APF.killRobot()
             
             # If the sun is rising and scriptobs has stopped, run closeup
             if el > sunel_lim and running == False and rising == True:
@@ -494,7 +497,7 @@ class Master(threading.Thread):
                 APF.DMReset()
                 apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
 
-            if not APF.isOpen()[0]:
+            if not APF.isOpen()[0] and not rising:
                 APFTask.set(parent,suffix="VAR_1",value="Waiting for sunset",wait=False)
                 APFTask.waitFor(self.task, True, timeout=5)
             if  APF.isOpen()[0] and el > sunel_lim:
