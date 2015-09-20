@@ -598,6 +598,11 @@ if __name__ == '__main__':
     if opt.restart:
         apflog("Restart specified. Setting scriptobs_lines_done=0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
+    if not opt.fixed:
+        APFTask.set(parent,"STARLIST","")
+    else:
+        APFTask.set(parent,"STARLIST",opt.fixed)
+
     if str(phase).strip() != "ObsInfo":
         if opt.obsnum:
             apflog("option -o specified. Setting UCAM OBSNUM to %d." % int(opt.obsnum)) 
