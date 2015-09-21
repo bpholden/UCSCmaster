@@ -166,6 +166,7 @@ class Master(threading.Thread):
 
     def run(self):
         APF = self.APF
+
         # This is called when an observation finishes, and selects the next target
         def getTarget():
             apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
@@ -176,6 +177,11 @@ class Master(threading.Thread):
             except:
                 self.obsBstar = True
 
+            try:
+                lastline = ktl.read("apftask","SCRIPTOBS_LINE")
+            except:
+                lastline = ""
+                
             if self.scriptobs is None:
                 apflog("Called getTarget, but there is not instance of scriptobs associated with Heimdallr. This is an error condition.", echo=True)
                 return None
