@@ -606,7 +606,7 @@ def smartList(starlist, time, seeing, slowdown):
     else:
         (good,) = np.where(availableandnotdone)
 
-    sort_fin_els_idx = fin_els[good].argsort()
+    sort_fin_els_idx = np.argsort(fin_els[good] - star_elevations[good])
     idx = good[sort_fin_els_idx[0]]
                   
     res = dict()
