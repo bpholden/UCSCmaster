@@ -772,7 +772,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         available[f] = available[f] & vis
 		
         star_table[available, DS_COUNTS] = 1e9
-        star_table[available, DS_EXPT] = 200
+        star_table[available, DS_EXPT] = 900
         star_table[available, DS_NSHOTS] = 2
         totexptimes[available] = 400
 
