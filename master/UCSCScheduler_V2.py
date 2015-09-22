@@ -894,14 +894,14 @@ if __name__ == '__main__':
     otfn = "observed_targets"
     ot = open(otfn,"w")
     starttime = time.time()
-#    result = getNext(starttime, 13.99, 1.8, bstar=True, verbose=True)
-#    ot.write("%s\n" % (result["SCRIPTOBS"]))
+    result = getNext(starttime, 13.99, 1.8, bstar=True, verbose=True)
+    ot.write("%s\n" % (result["SCRIPTOBS"]))
     ot.close()
     starttime += 400
-    for i in range(27):
+    for i in range(5):
         
-        #result = getNext(starttime, 13.99, 1.8, bstar=False, verbose=True)
-        result = smartList("tst_targets", time.time(), 13.5, 2.4)
+        result = getNext(starttime, 13.99, 1.8, bstar=False, verbose=True)
+        #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:
             print "Get None target"
