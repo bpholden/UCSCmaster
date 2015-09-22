@@ -176,11 +176,6 @@ class Master(threading.Thread):
                 self.obsBstar = bool(ktl.read("apftask","master_var_3"))
             except:
                 self.obsBstar = True
-
-            try:
-                lastline = ktl.read("apftask","SCRIPTOBS_LINE")
-            except:
-                lastline = ""
                 
             if self.scriptobs is None:
                 apflog("Called getTarget, but there is not instance of scriptobs associated with Heimdallr. This is an error condition.", echo=True)
