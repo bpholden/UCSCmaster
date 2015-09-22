@@ -333,7 +333,7 @@ def getElAz(ra, dec, lat, lng, time):
                          (np.cos(el) * np.cos(lat)))
     return (np.degrees(el), np.degrees(az))
 
-def makeScriptobsLine(name, row, do_flag, t, decker="W"):
+def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y"):
 
     focval = 0
     if row[DS_APFPRI] > 9.9:
@@ -366,7 +366,7 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W"):
     else:
         ret += 'texp=' + str(int(row[DS_EXPT])) + ' '
     # I2
-    ret += 'I2=Y '
+    ret += 'I2=%s ' % (I2)
     # lamp
     ret += 'lamp=none '
     # start time
