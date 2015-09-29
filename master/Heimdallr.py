@@ -234,7 +234,7 @@ class Master(threading.Thread):
                 APF.close()
                 apf.countrate = -1.0
                 # sleep for a half hour to see if the clouds blow by
-                APFTask.waitfor(self.task, True, timeout=60*30)
+                APFTask.waitfor(self.task, True, timeout=60*45)
                 return
             else:
                 apflog("Observing target: %s" % target['NAME'], echo=True)

@@ -46,6 +46,7 @@ DS_BV     = 11
 DS_ERR    = 12
 
 SLOWDOWN_MIN = 0.4
+SLOWDOWN_MAX = 10.0
 
 ###
 # arGGGGGG!!
@@ -685,6 +686,11 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     if verbose:
         apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
+    if slowdown > SLOWDOWN_MAX:
+        apflog( "getNext(): Slowndown value of %f exceeds maximum of %f at time %s" % (slowdown,SLOWDOWN_MAX,dt),echo=True)
+        return None
+
+
     try:
         apfguide = ktl.Service('apfguide')
         ptime = apfguide['midptfin'].read(binary=True)
@@ -702,7 +708,6 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         lastobj = None
 
     if lastobj:
-        print lastobj, lastobj not in observed, last_objs_attempted
         if lastobj not in observed and lastobj not in last_objs_attempted:
             last_objs_attempted.append(lastobj)
             if len(last_objs_attempted) > 5:
@@ -842,12 +847,16 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         return None
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
-    good_cadence = np.where(cadence_check > 1, True, False)
+    good_cadence = np.where(cadence_check > 0, True, False)
     good_cadence_available = available & good_cadence
 
-    if len(good_cadence_available): 
-        pri = max(star_table[good_cadence_available, DS_APFPRI])
-        sort_i = np.where(star_table[good_cadence_available, DS_APFPRI] == pri, True, False)
+    if len(good_cadence_available):
+        try:
+            pri = max(star_table[good_cadence_available, DS_APFPRI])
+            sort_i = np.where(star_table[good_cadence_available, DS_APFPRI] == pri, True, False)
+        except:
+            pri = max(star_table[available, DS_APFPRI])
+            sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
     elif len(available):
         pri = max(star_table[available, DS_APFPRI])
         sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
