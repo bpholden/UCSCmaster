@@ -14,8 +14,8 @@ import sys
 import time
 # from fake_apflog import *
 from apflog import *
-import re
 import ktl
+import re
 
 # Some variables that will soon be moved to a separate file
 TARGET_ELEVATION_MIN = 20
@@ -47,6 +47,11 @@ DS_ERR    = 12
 
 SLOWDOWN_MIN = 0.4
 
+###
+# arGGGGGG!!
+###
+
+last_objs_attempted = []
 
 def parseStarlist(starlist):
     """ Parse a scriptobs-compatible starlist for the scheduler."""
@@ -689,6 +694,22 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
     # List of targets already observed
     observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
+    global last_objs_attempted
+    try:
+        lastline = ktl.read("apftask","SCRIPTOBS_LINE")
+        lastobj = lastline.split()[0]
+    except:
+        lastobj = None
+
+    if lastobj:
+        print lastobj, lastobj not in observed, last_objs_attempted
+        if lastobj not in observed and lastobj not in last_objs_attempted:
+            last_objs_attempted.append(lastobj)
+            if len(last_objs_attempted) > 5:
+                last_objs_attempted = []
+                return None
+    if len (last_objs_attempted) > 0:
+        observed += last_objs_attempted
 #    if observed == []:
 #        if verbose:
 #            apflog( "getNext(): getObserved is empty, setting bstar to true",echo=True)
