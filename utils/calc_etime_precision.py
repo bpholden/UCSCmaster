@@ -15,10 +15,13 @@ if __name__ == "__main__":
     #AVG_FWHM = 11
     parser = OptionParser()
     parser.add_option("-s","--slowdown",dest="slowdown",default=0.4,type="float")
-    parser.add_option("-f","--fwhm",dest="fwhm",default=11,type="float")
+    parser.add_option("-f","--fwhm",dest="fwhm",default=13,type="float")
     parser.add_option("-e","--el",dest="el",default=70,type="float")
     (options, args) = parser.parse_args()    
 
+#    ws = ds.get_speadsheet(sheetn="The Googledex")
+#    vals = ws.get_all_values()
+#    texpcol = vals[0].index("APFtexp") 
     
     allnames, star_table, do_flag, stars  = ds.parseGoogledex()
 

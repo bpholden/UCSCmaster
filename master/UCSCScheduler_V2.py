@@ -12,9 +12,11 @@ import os
 import pickle
 import sys
 import time
-# from fake_apflog import *
-from apflog import *
-import ktl
+try:
+    from apflog import *
+    import ktl
+except:
+    from fake_apflog import *
 import re
 
 # Some variables that will soon be moved to a separate file
@@ -207,7 +209,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
 
     return (names, np.array(star_table), do_flag, stars)
     
-def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
+def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
     """
@@ -218,7 +220,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None):
         time = datetime.utcnow()
     
 
-    ws = get_spreadsheet()
+    ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
     vals = ws.get_all_values()
 
     col = vals[0].index("lastobs") 
