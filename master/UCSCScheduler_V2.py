@@ -648,11 +648,11 @@ def format_time(total, i2counts, hitthemall=False):
     exps  = np.zeros(len(total))
 
     short_idx = np.where(total < MIN_EXPTIME, True, False)
-    times[short_idx] = MIN_EXPTIME  # pad out to make it more likely exposure meter threshold sets actual limit
+    times[short_idx] = MAX_EXPTIME  # pad out to make it more likely exposure meter threshold sets actual limit
     exps[short_idx] = [ (np.ceil(MIN_EXPTIME/(t+40)) + 1) for t in total[short_idx] ] 
 
     middle_idx = np.where((total > MIN_EXPTIME ) &(total < MAX_EXPTIME))
-    times[middle_idx] = np.ceil(1.5*total[middle_idx]) # pad out to make it more likely exposure meter threshold sets actual limit
+    times[middle_idx] = MAX_EXPTIME # pad out to make it more likely exposure meter threshold sets actual limit
     exps[middle_idx] = 1
 
     max_idx = np.where(total > MAX_EXPTIME, True, False)
@@ -832,7 +832,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         i2cnts[f] += i2counts
         star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times,i2counts)
 #        exp_counts /= star_table[f, DS_NSHOTS]
-        star_table[f, DS_COUNTS] = exp_counts
+        star_table[f, DS_COUNTS] = 1.1*exp_counts
 
         # Is the exposure time too long?
         time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
