@@ -174,6 +174,8 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     stars = []
     # Build the star table to return to 
     for ls in codex:
+        if ls[0] == '':
+            continue
         if float(ls[didx["APFpri"]]) < 0.5: continue
         row = []
         # Get the star name
@@ -829,7 +831,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         totexptimes[f] += exp_times
         i2cnts[f] += i2counts
         star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times,i2counts)
-        exp_counts /= star_table[f, DS_NSHOTS]
+#        exp_counts /= star_table[f, DS_NSHOTS]
         star_table[f, DS_COUNTS] = exp_counts
 
         # Is the exposure time too long?
