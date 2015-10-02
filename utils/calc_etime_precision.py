@@ -41,7 +41,7 @@ if __name__ == "__main__":
     exp_times *= options.slowdown
     etimes, nobs = ds.format_time(exp_times,i2cnts)
     fin_pre = precision
-    exp_counts /= nobs
+#    exp_counts /= nobs
     for i in range(len(stars)):
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
