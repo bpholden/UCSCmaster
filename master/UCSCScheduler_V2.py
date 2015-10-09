@@ -132,6 +132,24 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
 
     return worksheet
 
+def findColumns(col_names,req_cols):
+    
+    idx = []
+    didx = dict()
+
+    for r in req_cols:
+        if r in col_names:
+            didx[r] = col_names.index(r)
+        else:
+            apflog("%s Not found in column names from google spreadsheet" % (r) , level="Alert",echo=True)
+
+    # hack to handle an error
+    if req_cols[0] == "Star Name" and req_cols[0] not in didx.keys():
+        didx[req_cols[0]] = 0
+        apflog("Pasting 'Star Name' into column 0 of google spreadsheet" , level="Error",echo=True)
+
+    return didx
+
 def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat"):
 
     # Downloading all the values is going slowly.
@@ -160,14 +178,8 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 "APFtexp", "APFpri", "APFcad", "APFnshots", "lastobs", \
                 "B-V", "APF Desired Precision", "Close Companion"
                 ]
-
-    try:
-        idx = [col_names.index(v) for v in req_cols]
-    except ValueError:
-        apflog("%s Not found in list" % (v) , level="warn",echo=True)
-    didx = dict()
-    for i,n in enumerate(req_cols):
-        didx[n] = idx[i]
+    didx = findColumns(col_names,req_cols)
+    
     names = []
     star_table = []
     do_flag = []
