@@ -685,7 +685,7 @@ def format_time(total, i2counts, hitthemall=False):
 
 def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex"):
     """ Determine the best target for UCSC team to observe for the given input.
-        Takes the time (Unix timestamp), seeing, slowdown, tele az, tele el
+        Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
     """
     # Convert the unix timestamp into a python datetime
