@@ -466,7 +466,7 @@ class Master(threading.Thread):
                 if not rising:
                     APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
                     opening()
-                elif rising and el < (sunel_lim - 5):
+                elif rising and el < (sunel_lim - 10):
                     APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
                     opening()
 
