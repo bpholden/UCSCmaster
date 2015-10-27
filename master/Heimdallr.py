@@ -463,8 +463,12 @@ class Master(threading.Thread):
                 
             # Open at night
             if not APF.isReadyForObserving()[0]  and el < sunel_lim and APF.openOK:
-                APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
-                opening()
+                if not rising:
+                    APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
+                    opening()
+                elif rising and el < (sunel_lim - 5):
+                    APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
+                    opening()
 
             # Check for servo errors
             if APF.isOpen()[0] and APF.slew_allowed == False:
