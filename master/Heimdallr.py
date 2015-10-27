@@ -250,7 +250,7 @@ class Master(threading.Thread):
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
 
 
-        def opening(sunset=False):
+        def opening(el,sunset=False):
             when = "night"
             if sunset:
                 when = "sunset"
@@ -264,10 +264,13 @@ class Master(threading.Thread):
 
             result = APF.openat(sunset=sunset)
             if not result:
-                apflog("After two tries openatsunset hasn't successfully opened. \
-                        Emailing for help and exiting.", level='error', echo=True)
-                APF.close()
-                os._exit(1)
+                apflog("openatsunset hasn't successfully opened. Current sunel = %4.2f" % (el), level='warn', echo=True)
+                if (el < SUNEL_ENDLIM):
+                    result = APF.openat(sunset=sunset)
+                    if not result:
+                        apflog("openatsunset has failed twice.", level='error', echo=True)
+                        APF.close()
+                        os._exit(1)
 
             APF.DMReset()
             while float(APF.sunel) > SUNEL_STARTLIM:
@@ -459,16 +462,16 @@ class Master(threading.Thread):
             sun_between_limits = el < SUNEL_HOR and el > sunel_lim 
             if not APF.isReadyForObserving()[0] and el < SUNEL_HOR and el > sunel_lim and APF.openOK and not rising:
                 APFTask.set(parent,suffix="VAR_1",value="Open at sunset",wait=False)                    
-                opening(sunset=True)
+                opening(el,sunset=True)
                 
             # Open at night
             if not APF.isReadyForObserving()[0]  and el < sunel_lim and APF.openOK:
                 if not rising:
                     APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
-                    opening()
+                    opening(el)
                 elif rising and el < (sunel_lim - 10):
                     APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
-                    opening()
+                    opening(el)
 
             # Check for servo errors
             if APF.isOpen()[0] and APF.slew_allowed == False:
