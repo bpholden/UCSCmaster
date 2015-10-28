@@ -63,5 +63,6 @@ def getEXPTime(cnts, v, bv, el, seeing, decker="W"):
 
     time = 0
     cnt_rate = getSpec_Rate(v, bv, el, seeing, decker="W")
-    time = cnts/cnt_rate
+    fin_cnt_rate = np.where(cnt_rate > 0,cnt_rate,1.0e-5)
+    time = cnts/fin_cnt_rate
     return time
