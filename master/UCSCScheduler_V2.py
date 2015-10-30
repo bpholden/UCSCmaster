@@ -31,6 +31,7 @@ MAX_EXPTIME = 1200.
 MIN_EXPTIME = 300.
 MIN_SHUTTERTIME = 60
 MAX_I2 = 40000
+MAX_EXPMETER = 1e9
 
 # A few constants to make accessing the star table more readable
 DS_RA     = 0
@@ -642,7 +643,14 @@ def smartList(starlist, time, seeing, slowdown):
     res['NAME']   = sn[idx]
     res['SCRIPTOBS'] = lines[idx]
     return res
+
+def format_expmeter(exp_counts, nexp):
     
+    exp_counts *= 1.1 
+    long_idx = np.where((exp_counts/nexp) > MAX_EXPMETER, True, False)
+    exp_counts[long_idx] = MAX_EXPMETER
+    return exp_counts, nexp
+
 def format_time(total, i2counts, hitthemall=False):
     total = np.array(total)
     times = np.zeros(len(total))
@@ -820,8 +828,9 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         totexptimes[f] += exp_times
         i2cnts[f] += i2counts
         star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times,i2counts)
-#        exp_counts /= star_table[f, DS_NSHOTS]
-        star_table[f, DS_COUNTS] = 1.1*exp_counts
+        #        exp_counts /= star_table[f, DS_NSHOTS]
+        star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,star_table[f, DS_NSHOTS])
+        #        star_table[f, DS_COUNTS] = 1.1*exp_counts / star_table[f, DS_NSHOTS]
 
         # Is the exposure time too long?
         time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
