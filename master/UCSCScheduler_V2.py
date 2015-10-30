@@ -396,7 +396,10 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y"):
     ret += 'uth=' + str(t.hour) + ' '
     ret += 'utm=' + str(t.minute) + ' '
     # Exp Count
-    ret += 'expcount=%.3g' % (row[DS_COUNTS]) + ' '
+    if row[DS_COUNTS] > 3e9:
+        ret += 'expcount=%.3g' % (3e9) + ' '
+    else:
+        ret += 'expcount=%.3g' % (row[DS_COUNTS]) + ' '
     # Decker
     ret += 'decker=%s ' % (decker)
     # do flag
