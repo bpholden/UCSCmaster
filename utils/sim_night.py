@@ -103,7 +103,8 @@ while observing:
         for i in range(0,int(result['NEXP'])):
             actslow, actfwhm = rand_obs_sample(slowdowns,fwhms)
             actel = compute_el(curtime,stars[idx],apf_obs)
-            
+            lastfwhm = actfwhm
+            lastslow = actslow
             meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
             meterrate *= 1 + 0.11*np.random.randn(1)
             meterrate *= actslow
