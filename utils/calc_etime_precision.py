@@ -40,6 +40,7 @@ if __name__ == "__main__":
     exp_times, exp_counts, i2cnts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV])
     exp_times *= options.slowdown
     etimes, nobs = ds.format_time(exp_times,i2cnts)
+    exp_counts, nobs = ds.format_expmeter(exp_counts,nobs)
     fin_pre = precision
 #    exp_counts /= nobs
     for i in range(len(stars)):
