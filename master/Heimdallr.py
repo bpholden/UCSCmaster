@@ -250,12 +250,12 @@ class Master(threading.Thread):
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
 
 
-        def opening(el,sunset=False):
+        def opening(sunel,sunset=False):
             when = "night"
             if sunset:
                 when = "sunset"
                 
-            apflog("Running open at %s as sunel = %4.2f" % (when,el))
+            apflog("Running open at %s as sunel = %4.2f" % (when, float(sunel)))
             (apfopen,what) =APF.isOpen()
             if apfopen:
                 APF.DMReset()
@@ -263,9 +263,10 @@ class Master(threading.Thread):
                 APF.DMZero()
 
             result = APF.openat(sunset=sunset)
+            apflog("openatsunset completed with result %s" % (result), echo=True)
             if not result:
-                apflog("openatsunset hasn't successfully opened. Current sunel = %4.2f" % (el), level='warn', echo=True)
-                if (el < SUNEL_ENDLIM):
+                apflog("openatsunset hasn't successfully opened. Current sunel = %4.2f" % ( float(sunel)), level='warn', echo=True)
+                if ( float(sunel) < SUNEL_ENDLIM):
                     result = APF.openat(sunset=sunset)
                     if not result:
                         apflog("openatsunset has failed twice.", level='error', echo=True)
@@ -277,7 +278,7 @@ class Master(threading.Thread):
             else:
                 setting = False
             APF.DMReset()
-            while el > SUNEL_STARTLIM and setting:
+            while float(sunel) > SUNEL_STARTLIM and setting:
                 chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM)
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
                 APF.DMReset()
@@ -467,16 +468,16 @@ class Master(threading.Thread):
             sun_between_limits = float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim 
             if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim and APF.openOK and not rising:
                 APFTask.set(parent,suffix="VAR_1",value="Open at sunset",wait=False)                    
-                opening( float(sunel), sunset=True)
+                opening( sunel, sunset=True)
                 
             # Open at night
             if not APF.isReadyForObserving()[0]  and float(sunel) < sunel_lim and APF.openOK:
                 if not rising:
                     APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
-                    opening( float(sunel))
+                    opening( sunel)
                 elif rising and float(sunel) < (sunel_lim - 5):
                     APFTask.set(parent,suffix="VAR_1",value="Open at night",wait=False)                    
-                    opening( float(sunel))
+                    opening( sunel)
 
             # Check for servo errors
             if APF.isOpen()[0] and APF.slew_allowed == False:
