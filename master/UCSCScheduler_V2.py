@@ -483,6 +483,7 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
 
         Notes: Uses the observer's current date and location
     """
+    start_min_el = min_el
     # Store the previous observer horizon and date since we change these
     prev_horizon = observer.horizon
     cdate = observer.date
@@ -508,7 +509,7 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
             ret.append(False)
             continue
 
-        if cur_el < min_el or cur_el > max_el:
+        if cur_el < start_min_el or cur_el > max_el:
             ret.append(False)
             continue
 
