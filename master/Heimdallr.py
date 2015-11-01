@@ -491,7 +491,7 @@ class Master(threading.Thread):
                 if not result and "DomeShutter" in APF.isOpen()[1]:
                     apflog("After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
 
-                APF.closeup(force=True)
+                APF.close(force=True)
                 if not APF.power_down_telescope():
                     apflog("Cannot reset telescope after servo failure",level="error", echo=True)
                     os._exit(1)
