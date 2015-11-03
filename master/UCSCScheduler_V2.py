@@ -22,7 +22,7 @@ import re
 # Some variables that will soon be moved to a separate file
 TARGET_ELEVATION_MIN = 20
 TARGET_ELEVATION_MAX = 85
-TARGET_EXPOSURE_TIME_MAX =  60 * 60 # 1 hour
+TARGET_EXPOSURE_TIME_MAX =  3* 60 * 60 # 3 hour
 TARGET_MOON_DIST_MIN = 15
 TARGET_MOON_DIST_MAX = 25
 
