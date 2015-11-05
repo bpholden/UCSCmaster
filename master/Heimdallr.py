@@ -280,7 +280,7 @@ class Master(threading.Thread):
             APF.DMReset()
             chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM)
             result = False
-            while not result and setting:
+            while float(sunel.read()) > SUNEL_STARTLIM and setting:
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
                 APF.DMReset()
             return
