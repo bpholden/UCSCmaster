@@ -266,7 +266,7 @@ def update_local_googledex(time,googledex_file="googledex.dat", observed_file="o
         g = open(googledex_file, 'r')
     except IOError:
         apflog("googledex file did not exist, so can't be updated",echo=True)
-        return
+        return names,times
 
     full_codex = pickle.load(g)
     g.close()
@@ -298,7 +298,7 @@ def update_local_googledex(time,googledex_file="googledex.dat", observed_file="o
     with open(googledex_file, 'w') as f:
         pickle.dump(full_codex, f)
             
-
+    return names, times
 
 
 def getLST(date, longitude):
@@ -713,11 +713,14 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         apfguide = ktl.Service('apfguide')
         ptime = apfguide['midptfin'].read(binary=True)
     except:
-        ptime = datetime.utcnow()
-    update_local_googledex(ptime,googledex_file=os.path.join(os.getcwd(),"googledex.dat"), observed_file=os.path.join(os.getcwd(),"observed_targets"))
+        if type(dt) == datetime:
+            ptime = dt
+        else:
+            ptime = datetime.utcnow()
+    observed, obstimes = update_local_googledex(ptime,googledex_file=os.path.join(os.getcwd(),"googledex.dat"), observed_file=os.path.join(os.getcwd(),"observed_targets"))
 
     # List of targets already observed
-    observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
+#    observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
     global last_objs_attempted
     try:
         lastline = ktl.read("apftask","SCRIPTOBS_LINE")
