@@ -127,6 +127,9 @@ while observing:
         ot.close()
     else:
         curtime += 2100./86400 # close for lack of target
+        lastslow = 5
+        lastfwhm = 10
+        
     curtime = ephem.Date(curtime)
         
 print "sun rose"
