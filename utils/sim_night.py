@@ -119,8 +119,6 @@ while observing:
             else:
                 curtime += (exp_time+40.)/86400
                 totcounts = exp_time * specrate
-            if curtime > endtime:
-                observing = False
             print "%s %s %.1f %.1f %.1f\n" %(result['NAME'] , ephem.Date(curtime), exp_time, metertime, totcounts)
         ot = open(otfn,"a+")
         ot.write("%s\n" % (result["SCRIPTOBS"]))
@@ -129,6 +127,8 @@ while observing:
         curtime += 2100./86400 # close for lack of target
         lastslow = 5
         lastfwhm = 10
+    if curtime > endtime:
+        observing = False
         
     curtime = ephem.Date(curtime)
         
