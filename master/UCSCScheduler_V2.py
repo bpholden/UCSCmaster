@@ -816,11 +816,6 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         done = [ True if n in observed else False for n in sn ]
         available = available & np.logical_not(done) # Available and not observed
 
-        mag_limit = 12
-        if slowdown > 1.0:
-            mag_limit = -2.5*np.log10(slowdown/SLOWDOWN_MIN) + 10
-        bright_enough = np.where(star_table[:,DS_VMAG] < mag_limit, True, False)
-        available = available & bright_enough
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
         f = available
