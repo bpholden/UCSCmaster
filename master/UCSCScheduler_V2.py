@@ -284,7 +284,6 @@ def update_local_googledex(time,googledex_file="googledex.dat", observed_file="o
             if isinstance(otime,float):
                 t = datetime.fromtimestamp(otime)
             else:
-                time = datetime.utcnow()
                 hr, min = otime
                 t = datetime(time.year, time.month, time.day, hr, min)
 
