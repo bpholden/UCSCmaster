@@ -769,6 +769,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     sn, star_table, do_flag, stars = parseGoogledex(sheetn=sheetn)
     sn = np.array(sn)
     targNum = len(sn)
+    if verbose:
+        apflog("getNext(): Parsed the Googledex...",echo=True)
 
     # Note which of these are B-Stars for later.
     bstars = np.array([ True if 'HR' in n else False for n in sn ], dtype=bool)
