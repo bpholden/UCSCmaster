@@ -816,9 +816,9 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     else:
         # Available and not a BStar
         available = np.logical_and(available, np.logical_not(bstars))
-        # has the star been observed 
-        done = [ True if n in observed else False for n in sn ]
-        available = available & np.logical_not(done) # Available and not observed
+        # has the star been observed - commented out as redundant with cadence
+#        done = [ True if n in observed else False for n in sn ]
+#        available = available & np.logical_not(done) # Available and not observed
 
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
