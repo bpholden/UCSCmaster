@@ -290,7 +290,7 @@ def update_local_googledex(time,googledex_file="googledex.dat", observed_file="o
 
             # This keeps the JD precision to one decimal point. There is no real reason for this other than
             # the googledex currently only stores the lastObs field to one decimal precision. Legacy styles FTW.
-            jd = round(float(ephem.julian_date(t)), 1) 
+            jd = round(float(ephem.julian_date(t)), 2) 
             apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
             row[lastObsIdx] = str(jd)
             full_codex[i] = row
@@ -853,7 +853,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         return None
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
-    good_cadence = np.where(cadence_check > 0, True, False)
+    good_cadence = np.where(cadence_check >  star_table[:, DS_CAD], True, False)
     good_cadence_available = available & good_cadence
 
     if len(good_cadence_available):
