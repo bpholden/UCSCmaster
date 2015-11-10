@@ -732,7 +732,7 @@ if __name__ == '__main__':
     # Start the main watcher thread
     master = Master(apf,user=opt.name)
     try:
-        if opt.fixed == None:
+        if opt.name == "ucsc":
                 names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
     except Exception as e:
         apflog("Cannot download googledex?!  %s" % (e),level="Error")
@@ -800,7 +800,7 @@ if __name__ == '__main__':
     # We have finished taking data, and presumably it is the morning.
     apf.setTeqMode('Morning')
 
-    if opt.fixed is None:
+    if opt.name is "ucsc":
         try:
             ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
         except:
