@@ -775,6 +775,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
     # Note which of these are B-Stars for later.
     bstars = np.array([ True if 'HR' in n else False for n in sn ], dtype=bool)
+    if verbose:
+        apflog("getNext(): Finding B stars",echo=True)
 
 
     # Distance to stay away from the moon
@@ -792,6 +794,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     # Is the target behind the moon?
     moon_check = np.where(moonDist > minMoonDist, True, False)
     available = available & moon_check
+    if verbose:
+        apflog("getNext(): Culling stars behind the moon",echo=True)
     
     
 
@@ -851,7 +855,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
     # Now just sort by priority, then cadence. Return top target
     if len(sn[available]) < 1:
-        apflog( "Couldn't find any suitable targets!",level="error",echo=True)
+        apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
@@ -869,33 +873,33 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         pri = max(star_table[available, DS_APFPRI])
         sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
     else:
-        apflog( "Couldn't find any suitable targets!",level="error",echo=True)
+        apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
         
 #    print sn[available][sort_i]
 #    print star_table[available, DS_APFPRI][sort_i]
-    starstr = "star table available: %s" % (sn[good_cadence_available][sort_i]) 
+    starstr = "getNext(): star table available: %s" % (sn[good_cadence_available][sort_i]) 
     apflog(starstr,echo=True)
 
-    starstr = "star table available priorities: %s" % (star_table[good_cadence_available, DS_APFPRI][sort_i]) 
+    starstr = "getNext(): star table available priorities: %s" % (star_table[good_cadence_available, DS_APFPRI][sort_i]) 
     apflog(starstr,echo=True)
      
     if bstar:
         sort_j = cur_elevations[good_cadence_available][sort_i].argsort()[::-1]
     else:
         sort_j = cadence_check[good_cadence_available][sort_i].argsort()[::-1]
-        cstr= "cadence check: %s" %( cadence_check[good_cadence_available][sort_i][sort_j][0])
+        cstr= "getNext(): cadence check: %s" %( cadence_check[good_cadence_available][sort_i][sort_j][0])
         apflog(cstr,echo=True)
     
     t_n = sn[good_cadence_available][sort_i][sort_j][0]
 
-    elstr= "star elevations %s" % (cur_elevations[good_cadence_available][sort_i][sort_j])
+    elstr= "getNext(): star elevations %s" % (cur_elevations[good_cadence_available][sort_i][sort_j])
     apflog(elstr,echo=True)
 
     t_n = sn[good_cadence_available][sort_i][sort_j][0]
 
-    apflog("selected target %s" %( t_n) )
+    apflog("getNext(): selected target %s" %( t_n) )
 
     idx, = np.where(sn == t_n)
     idx = idx[0]
