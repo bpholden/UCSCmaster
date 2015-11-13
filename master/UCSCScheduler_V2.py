@@ -252,8 +252,13 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certific
                 hr, min = otime
                 t = datetime(time.year, time.month, time.day, hr, min)
             jd = float(ephem.julian_date(t))
-            if jd > float(v[col]):
-                ws.update_cell(i+1, col+1, round(jd, 2) )
+            try:
+                pastdate = float(v[col])
+                if jd > pastdate:
+                    ws.update_cell(i+1, col+1, round(jd, 2) )
+            except:
+                print v[0], v[col]
+                
     apflog( "Updated Googledex",echo=True)
 
 def update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets"):
