@@ -278,7 +278,7 @@ class Master(threading.Thread):
             else:
                 setting = False
             APF.DMReset()
-            chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM)
+            chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
             result = False
             while float(sunel.read()) > SUNEL_STARTLIM and setting:
                 outstr = "Sun setting is %s and sun at elevation of %.3f" % (setting, float(sunel.read()))
