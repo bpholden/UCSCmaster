@@ -31,7 +31,8 @@ MAX_EXPTIME = 1200.
 MIN_EXPTIME = 300.
 MIN_SHUTTERTIME = 60
 MAX_I2 = 40000
-MAX_EXPMETER = 1e9
+MIN_I2 = 500
+MAX_EXPMETER = 2e9
 
 # A few constants to make accessing the star table more readable
 DS_RA     = 0
@@ -458,14 +459,19 @@ def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker
     mstars = np.where(bmv > 1.2)
     if len(mstars) > 0:
         i2counts[mstars] = getI2_M(precision[mstars])
+
+    # minimum I2 counts so exposures are not rejected by P. Butler's DRP
+    mini2_idx = np.where(i2counts < MIN_I2)
+    if len(mini2_idx) > 0:
+        i2counts[mini2_idx] = MIN_I2
 	
 	# Exposure Meter counts to reach desired I2 counts
-	exp_counts = getEXPMeter(i2counts, bmv)
-#	exp_counts = 1e9
+    exp_counts = getEXPMeter(i2counts, bmv)
+    #	exp_counts = 1e9
 	# Exposure time to reach desired I2 counts
-	exp_time = getEXPTime(i2counts, vmag, bmv, elevation, seeing, decker=decker)
+    exp_time = getEXPTime(i2counts, vmag, bmv, elevation, seeing, decker=decker)
 	
-	return exp_time, exp_counts, i2counts
+    return exp_time, exp_counts, i2counts
 
 def calc_elevations(stars, observer):
     els = []
