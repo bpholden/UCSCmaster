@@ -59,7 +59,16 @@ SLOWDOWN_MAX = 10.0
 last_objs_attempted = []
 
 def parseStarlist(starlist):
-    """ Parse a scriptobs-compatible starlist for the scheduler."""
+    """ Parse a scriptobs-compatible starlist for the scheduler.
+
+    names, star_table, lines, stars = parseStarlist(starlist)
+    starlist - a filename
+
+    names - a list of stars in the starlist
+    star_table - a numpy array
+    lines - a list of strings that can be used for scriptobs input
+    stars - a list of pyEphem objects 
+    """
     names = []
     lines = []
     stars = []
@@ -109,7 +118,15 @@ def parseStarlist(starlist):
     return names, np.array(star_table), lines, stars
 
 def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
+    """ Get the spreadsheet from google
 
+    worksheet = get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json')
+    worksheet - the worksheet object returned by the gspread module
+
+    sheetn - name of the google sheet, defaults to "The Googledex"
+    certificate - certificate used to control access to the google sheet
+    
+    """
     # this downloads the googledex from the Google Drive
     # the certificate must be available
     # these certificates are generated through the Google Developer Interface
@@ -135,7 +152,13 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
     return worksheet
 
 def findColumns(col_names,req_cols):
+    """ findColumns finds the indices for the column names in the list of required columns
+    indices = findColumns(col_names, req_cols)
     
+    indices - a list of indices, each index maps to where in col_names the column is found and in the order of req_cols
+    col_names - list of column names to be searched
+    req_cols - list of names that should be in the first list
+    """
     idx = []
     didx = dict()
 
@@ -153,7 +176,16 @@ def findColumns(col_names,req_cols):
     return didx
 
 def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat"):
+    """ parseGoogledex parses the google sheet and returns the output as a tuple
+    This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
+    
+    names, star_table, do_flag, stars = parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat")
+    names - a list of stars in the starlist
+    star_table - a numpy array
+    do_flag - a list of items on whether or not do="y" needs to be set for scriptobs 
+    stars - a list of pyEphem objects 
 
+    """
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
     try:
@@ -228,6 +260,9 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
 def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
+        update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json')
+
+        filename - where the observations are logged
     """
     names, times = getObserved(filename)
     if len(names) == 0:
@@ -264,7 +299,11 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certific
 
 def update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets"):
     """
-        Update the local copy of the googledex with the last observed star time. 
+        Update the local copy of the googledex with the last observed star time.
+        update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
+
+        opens googledex_file and inputs date of last observation from observed_file
+        in principle can use timestamps as well as scriptobs uth and utm values
     """
     names, times = getObserved(observed_file)
 
@@ -363,7 +402,15 @@ def getElAz(ra, dec, lat, lng, time):
     return (np.degrees(el), np.degrees(az))
 
 def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y"):
-
+    """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
+    line = makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y")
+    name - name of star, first column in line
+    row - star_table row for star that begins with name, cotains all of the data needed for the line except
+    do_flag - a string for whether or not scriptob needs to do a pointing check before slewing to the target
+    t - a datetime object, this is used to fill in the uth and utm fields,
+    decker - one character field for the decker, defaults to "W"
+    I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
+    """
     focval = 0
     if row[DS_APFPRI] > 9.9:
         focval = 2
@@ -421,6 +468,12 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y"):
     return ret
 
 def getObserved(filename):
+    """ getObserved parses a file to find the object names and times
+    names, times = getObserved(filename)
+    names - list of names, must be first column of file called filename
+    times - times either as a timestamp in second column or a (hour,minute) tuple from a scriptobs line
+
+    """
     obs = []
     times = []
     try:
