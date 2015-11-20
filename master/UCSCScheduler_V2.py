@@ -557,6 +557,9 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
     observer.horizon = min_el
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
+
+        apflog( "is_visible(): Finding limits for %s" % (s),echo=True)
+
         # Is the target visible at the end of the observations?
         observer.date = ephem.Date(cdate + dt/86400.)
         s.compute(observer)
@@ -740,11 +743,9 @@ def format_time(total, i2counts, hitthemall=False):
         exps[max_idx] = np.ceil(total[max_idx]/MAX_EXPTIME)
     times[max_idx] = MAX_EXPTIME
 
-
-
-    bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
-    exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
-    times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
+#    bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
+#    exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
+#    times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
 
     return times, exps
 
