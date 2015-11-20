@@ -856,10 +856,10 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     i2cnts = np.zeros(targNum, dtype=float)
 
     # Is the target behind the moon?
-    moon_check = np.where(moonDist > minMoonDist, True, False)
-    available = available & moon_check
     if verbose:
         apflog("getNext(): Culling stars behind the moon",echo=True)
+    moon_check = np.where(moonDist > minMoonDist, True, False)
+    available = available & moon_check
     
     
 
@@ -869,8 +869,13 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
     # We just need a B star, so restrict our math to those
     if bstar:
+        if verbose:
+            apflog("getNext(): Selecting B stars",echo=True)
         available = available & bstars
+        
         f = available
+        if verbose:
+            apflog("getNext(): Computing star elevations",echo=True)
         vis,star_elevations,fin_star_elevations = is_visible([s for s,_ in zip(stars,f) if _ ], apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         
         available[f] = available[f] & vis
@@ -884,7 +889,10 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     # Just need a normal star for observing
     else:
         # Available and not a BStar
+        if verbose:
+            apflog("getNext(): Culling B stars",echo=True)
         available = np.logical_and(available, np.logical_not(bstars))
+        
         # has the star been observed - commented out as redundant with cadence
 #        done = [ True if n in observed else False for n in sn ]
 #        available = available & np.logical_not(done) # Available and not observed
@@ -892,7 +900,12 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
         f = available
+        if verbose:
+            apflog("getNext(): Computing star elevations",echo=True)
         star_elevations=calc_elevations([s for s,_ in zip(stars,f) if _ ],apf_obs)
+        
+        if verbose:
+            apflog("getNext(): Computing exposure times",echo=True)
         exp_times, exp_counts, i2counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
                                             star_table[f,DS_ERR], star_elevations, seeing, \
                                             star_table[f,DS_BV])
@@ -900,18 +913,26 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         exp_times = exp_times * slowdown
         totexptimes[f] += exp_times
         i2cnts[f] += i2counts
+        if verbose:
+            apflog("getNext(): Formating exposure times",echo=True)
         star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times,i2counts)
         #        exp_counts /= star_table[f, DS_NSHOTS]
+        if verbose:
+            apflog("getNext(): Formating exposure meter",echo=True)
         star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,star_table[f, DS_NSHOTS])
         #        star_table[f, DS_COUNTS] = 1.1*exp_counts / star_table[f, DS_NSHOTS]
 
         # Is the exposure time too long?
+        if verbose:
+            apflog("getNext(): Removing really long exposures",echo=True)
         time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
         
         available[f] = available[f] & time_check
         f = available
 
         # Is the star currently visible?
+        if verbose:
+            apflog("getNext(): Computing stars visibility",echo=True)
         vis,star_elevations,fin_star_elevations = is_visible([s for s,_ in zip(stars,f) if _ ], apf_obs, exp_times, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         if vis != []:
             available[f] = available[f] & vis
