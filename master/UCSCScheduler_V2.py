@@ -877,7 +877,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         f = available
         if verbose:
             apflog("getNext(): Computing star elevations",echo=True)
-        vis,star_elevations,fin_star_elevations = is_visible([s for s,_ in zip(stars,f) if _ ], apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        fstars = [s for s,_ in zip(stars,f) if _ ]
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
@@ -903,12 +904,16 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         f = available
         if verbose:
             apflog("getNext(): Computing star elevations",echo=True)
-        star_elevations=calc_elevations([s for s,_ in zip(stars,f) if _ ],apf_obs)
-        
+        fstars = [s for s,_ in zip(stars,f) if _ ]
+#        star_elevations=calc_elevations(fstars,apf_obs)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [0]*len(fstars), TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)        
+        available[f] = available[f] & vis
+        f = available
+        fstars = [s for s,_ in zip(stars,f) if _ ]
         if verbose:
             apflog("getNext(): Computing exposure times",echo=True)
         exp_times, exp_counts, i2counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
-                                            star_table[f,DS_ERR], star_elevations, seeing, \
+                                            star_table[f,DS_ERR], star_elevations[np.array(vis)], seeing, \
                                             star_table[f,DS_BV])
         
         exp_times = exp_times * slowdown
@@ -934,7 +939,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         # Is the star currently visible?
         if verbose:
             apflog("getNext(): Computing stars visibility",echo=True)
-        vis,star_elevations,fin_star_elevations = is_visible([s for s,_ in zip(stars,f) if _ ], apf_obs, exp_times, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        fstars = [s for s,_ in zip(stars,f) if _ ]
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, exp_times, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         if vis != []:
             available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
