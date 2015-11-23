@@ -557,16 +557,18 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
     observer.horizon = min_el
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
-
-        apflog( "is_visible(): Finding limits for %s" % (s),echo=True)
+        s.compute()
+#        apflog( "is_visible(): Finding limits for %s %s" % (s.ra, s.dec),echo=True)
 
         # Is the target visible at the end of the observations?
+#        apflog( "is_visible(): Is the target visible at the end of the observations?", echo=True)
         observer.date = ephem.Date(cdate + dt/86400.)
         s.compute(observer)
         fin_el = np.degrees(s.alt)
         fin_elevations.append(fin_el)
 
         # Is the target visible now?
+#        apflog( "is_visible(): Is the target visible now?", echo=True)
         observer.date = ephem.Date(cdate)
         s.compute(observer)
         cur_el = np.degrees(s.alt)
@@ -594,7 +596,7 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
                 # The object will set before the observation finishes
                 ret.append(False)
                 continue
-
+ #       apflog( "is_visible(): Does the target remain visible through the observation?", echo=True)
         observer.horizon = max_el
         s.compute(observer)
 
@@ -608,10 +610,11 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
                 # The object rises above the max el before the observation finishes
                 ret.append(False)
                 continue
+#        apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
 		
         # Everything seems to be fine, so the target is visible!
         ret.append(True)
-	
+#	apflog( "is_visible(): done searching targets", echo=True)
     observer.horizon = prev_horizon
     return ret, np.array(start_elevations), np.array(fin_elevations)
 
