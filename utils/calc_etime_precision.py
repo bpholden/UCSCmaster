@@ -46,8 +46,6 @@ if __name__ == "__main__":
     for i in range(len(stars)):
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
-        if star_table[i, ds.DS_APFPRI] > 9.9:
-            etimes[i] = 1200.0
 
         print "%15s %4.1f %3.1f %7.0f %7.0f %.3g %.1f %d" % (allnames[i],star_table[i, ds.DS_APFPRI],precision[i],i2counts[i],exp_times[i],exp_counts[i],etimes[i],nobs[i])
 
