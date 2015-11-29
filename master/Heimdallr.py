@@ -51,20 +51,20 @@ def control_watch(keyword,parent):
         if value == "Abort":
             APFTask.set(parent,suffix='STATUS',value='Exited/Failure')
             APF.log("Aborted by APFTask")
-            os._exit(1)
+            os.kill(os.getpid(),signal.SIGINT)
         elif value == "Pause":
             try:
                 APFTask.set(parent,suffix='STATUS',value='PAUSED')
             except:
                 APF.log("Failure to set STATUS in APFTask",level=error)
-                sys.exit("Failure to communicate with APFTask")
+                os.kill(os.getpid(),signal.SIGINT)
 
         else:
             try:
                 APFTask.set(parent,suffix='STATUS',value='Running')
             except:
                 APF.log("Failure to set STATUS in APFTask",level=error)
-                sys.exit("Failure to communicate with APFTask")
+                os.kill(os.getpid(),signal.SIGINT)
 
     except:
         return
