@@ -696,6 +696,11 @@ if __name__ == '__main__':
         apflog("Focus has finished. Setting phase to Cal-Pre")
         apflog("Restart specified. Setting scriptobs_lines_done=0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
+        try:
+            APFLib.write("apfmot.DEWARFOCRAW", AVERAGE_INSTRFOC,timeout=60)
+            apflog("Moved instrument focus to %d" % (AVERAGE_INSTRFOC),echo=True)            
+        except:
+            apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
 
