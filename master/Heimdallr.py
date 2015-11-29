@@ -38,6 +38,8 @@ SUNEL_ENDLIM = -10.0
 SUNEL_STARTLIM = -9.0
 SUNEL_HOR = -3.2
 
+AVERAGE_INSTRFOC = 8481
+
 def sunel_startlim():
     return SUNEL_STARTLIM
 
