@@ -49,8 +49,9 @@ def control_watch(keyword,parent):
     try:
         value = keyword['ascii']
         if value == "Abort":
+            APFTask.set(parent,suffix='STATUS',value='Exited/Failure')
             APF.log("Aborted by APFTask")
-            sys.exit("Aborted by APFTask")
+            os._exit(1)
         elif value == "Pause":
             try:
                 APFTask.set(parent,suffix='STATUS',value='PAUSED')
@@ -558,7 +559,7 @@ if __name__ == '__main__':
 
     if not opt.sheet:
         opt.sheet = "The Googledex"
-        
+    apftask = ktl.Service("apftask")        
     # Establish this as the only running master script ( Or example task in test mode )
     try:
         apflog("Attempting to establish apftask as %s" % parent)
@@ -569,7 +570,6 @@ if __name__ == '__main__':
         sys.exit("Couldn't establish APFTask %s" % parent)
     else:
         # Set up monitoring of the current master phase
-        apftask = ktl.Service("apftask")
         phase = apftask("%s_PHASE" % parent)
         phase.monitor()
 
@@ -580,9 +580,8 @@ if __name__ == '__main__':
 
     control = apftask[parent + '_CONTROL']
     cw = functools.partial(control_watch,parent=parent)
-    control.callback(cw)
-    control.read()
     control.monitor()
+    control.callback(cw)
 
     apflog("Master initiallizing APF monitors.", echo=True)
 
