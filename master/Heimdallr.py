@@ -694,14 +694,6 @@ if __name__ == '__main__':
             sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
         apflog("Restart specified. Setting scriptobs_lines_done=0")
-        APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
-        try:
-            APFLib.write("apfmot.DEWARFOCRAW", AVERAGE_INSTRFOC,timeout=60)
-            apflog("Moved instrument focus to %d" % (AVERAGE_INSTRFOC),echo=True)            
-        except:
-            apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
-        APFTask.phase(parent, "Cal-Pre")
-        apflog("Phase now %s" % phase)
 
     # Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
@@ -715,6 +707,15 @@ if __name__ == '__main__':
                 names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
         except Exception as e:
             apflog("Cannot download googledex?! %s" % (e),level="Error")
+            
+        APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
+        try:
+            APFLib.write("apfmot.DEWARFOCRAW", AVERAGE_INSTRFOC,timeout=60)
+            apflog("Moved instrument focus to %d" % (AVERAGE_INSTRFOC),echo=True)            
+        except:
+            apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
+        APFTask.phase(parent, "Cal-Pre")
+        apflog("Phase now %s" % phase)
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
