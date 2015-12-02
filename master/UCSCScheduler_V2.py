@@ -500,6 +500,22 @@ def getObserved(filename):
     return obs, times
 	
 def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W"):
+    """ calculate_ucsc_exposure_time uses the recipe from Burt et al. (2015) to compute the exposure time for a target.
+
+    exp_time, exp_counts, i2counts = calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W")
+    vmag - numpy array of V magnitudes (Johnson filter, Vega mags)
+    precision - required precision for the velocity in m/s
+    elevation - elevation of the star above the horizon at the start of the exposure
+    seeing - FWHM of the seeing in pixels on the guider
+    bmv - (B - V) for the star (both Johnson filters, Vega zeropoint)
+    decker - apeture 
+    
+    exp_time - a numpy array of times in seconds, are integer values
+    exp_counts - values for the exposure meter, this can be a floating point value
+    i2counts - the required number of median Iodine cell counts, this is calculated from the precision and color of the star, this, in effect, sets the exposure time.
+
+
+    """
     vmag = np.array(vmag)
     precision = np.array(precision)
     bmv = np.array(bmv)
