@@ -693,7 +693,8 @@ if __name__ == '__main__':
             apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
             sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
-        apflog("Restart specified. Setting scriptobs_lines_done=0")
+        APFTask.phase(parent, "Cal-Pre")
+        apflog("Phase now %s" % phase)
 
     # Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
@@ -714,8 +715,6 @@ if __name__ == '__main__':
             apflog("Moved instrument focus to %d" % (AVERAGE_INSTRFOC),echo=True)            
         except:
             apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
-        APFTask.phase(parent, "Cal-Pre")
-        apflog("Phase now %s" % phase)
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
