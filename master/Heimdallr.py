@@ -712,6 +712,7 @@ if __name__ == '__main__':
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         try:
             APFLib.write("apfmot.DEWARFOCRAW", AVERAGE_INSTRFOC,timeout=60)
+            APFLib.write("apftask.FOCUSINSTR_LASTFOCUS", AVERAGE_INSTRFOC,timeout=60)
             apflog("Moved instrument focus to %d" % (AVERAGE_INSTRFOC),echo=True)            
         except:
             apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
