@@ -515,7 +515,7 @@ class Master(threading.Thread):
             if APF.isOpen()[0] and APF.dmtime <= 1140:
                 APFTask.set(parent,suffix="VAR_1",value="Reseting DM timer",wait=False)                    
                 APF.DMReset()
-                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
+#                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
 
             if not APF.isOpen()[0] and not rising:
                 APFTask.set(parent,suffix="VAR_1",value="Waiting for sunset",wait=False)
