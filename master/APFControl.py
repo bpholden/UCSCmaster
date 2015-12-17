@@ -106,6 +106,12 @@ def okmon(ok2open):
     except Exception, e:
         apflog("Exception in okmon: %s" % (e), level='warn')
         return
+    try:
+        if not check['USERKIND'].read(binary=True) == 3:
+            ok = False
+    except Exception, e:
+        apflog("Exception in okmon: %s" % (e), level='warn')
+        return
     APF.openOK = ok
     return
 
@@ -675,12 +681,23 @@ class APF:
         p = subprocess.Popen(args,stdin=infile, stdout=outfile,stderr = subprocess.PIPE, cwd=robotdir)
 
     def DMReset(self):
-        APFLib.write(self.checkapf['ROBOSTATE'], "master operating")
+        try:
+            APFLib.write(self.checkapf['ROBOSTATE'], "master operating")
+        except Exception, e:
+            try:
+                ukind = self.checkapf['USERKIND'].read()
+            except:
+                ukind = "Unknown"
+            ostr = "Error: Cannot write to ROBOSTATE, USERKIND = %s, reason: %s" % (ukind,e)
+            apflog(ostr,level='error',echo=True)
 
     def DMZero(self):
-        if self.checkapf['DMTIME'].read(binary=True) < 1:
-            APFLib.write(self.checkapf['DMTIME'], -1)
-        
+        try:
+            if self.checkapf['DMTIME'].read(binary=True) < 1:
+                APFLib.write(self.checkapf['DMTIME'], -1)
+        except Exception, e:
+            ostr = "Warning: cannot touch DM Timer: %s " %( e)
+            apflog(ostr,level='warn',echo=True)
 
     def findRobot(self):
         """Trys to find a running instance of robot.csh. Returns the PID along with a boolean representing if the robot was succesfully found."""
