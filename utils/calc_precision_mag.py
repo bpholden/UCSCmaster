@@ -1,4 +1,6 @@
-from ExposureCalc import *
+import sys
+sys.path.append("../master")
+from ExposureCalculations import *
 import UCSCScheduler as ds
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,8 +30,8 @@ if __name__ == "__main__":
     #        for bmv in [1.0, 1.4]:
 
     cols = ['violet','b','r']
-    mags = [4.7,6.53,9.15]
-    bmvs = [0.77, 0.68, 1.5]
+    mags = [4.7,6.53,10.65]
+    bmvs = [0.77, 0.68, 0.996]
     for i in range(0,len(mags)):
         uncs = np.linspace(1,10)
         mag = mags[i]
