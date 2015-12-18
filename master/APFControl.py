@@ -107,7 +107,7 @@ def okmon(ok2open):
         apflog("Exception in okmon: %s" % (e), level='warn')
         return
     try:
-        if not check['USERKIND'].read(binary=True) == 3:
+        if not checkapf['USERKIND'].read(binary=True) == 3:
             ok = False
     except Exception, e:
         apflog("Exception in okmon: %s" % (e), level='warn')
