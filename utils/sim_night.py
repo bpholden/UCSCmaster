@@ -59,6 +59,9 @@ parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
 parser.add_option("-f","--fixed",dest="fixed",default="")
 parser.add_option("-s","--smartlist",dest="smartlist",default=False,action="store_true")
+parser.add_option("-g","--googledex",dest="googledex",default="The Googledex")
+parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
+parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
 (options, args) = parser.parse_args()    
 
 if options.date == "today":
@@ -78,7 +81,7 @@ if not checkdate(datestr):
 if options.fixed != "":
     allnames, star_table, lines, stars = ds.parseStarlist(options.fixed)
 else:
-    allnames, star_table, do_flag, stars  = ds.parseGoogledex()
+    allnames, star_table, do_flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=options.infile)
 
 slowdowns, fwhms = make_obs_sample("slowdowns")
 lastslow = 5
@@ -88,7 +91,7 @@ ot = open(otfn,"w")
 ot.close()
 observing = True
 curtime, endtime, apf_obs = sun_times(datestr)
-bstar = True
+bstar = options.bstar
 while observing:
 
     if options.smartlist and options.fixed != "":
