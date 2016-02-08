@@ -289,9 +289,13 @@ class APF:
     def isReadyForObserving(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
         what = self.checkapf("WHATSOPN").read()
-        if "DomeShutter" in what and "MirrorCover" in what:
-            return True, what
-        else:
+        try:
+            if "DomeShutter" in what and "MirrorCover" in what:
+                return True, what
+            else:
+                return False, ''
+        except Exception, e:
+            apflog("Exception in isReadyForObserving: %s (what = %s)" % (e,what), level='error')
             return False, ''
 
     def setObserverInfo(self, num=100, name='Robot'):
