@@ -718,7 +718,7 @@ if __name__ == '__main__':
             apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
 
         if apf.ucam['OUTFILE'].read() == 'ucsc':
-            APFTask.set(parent,suffix=["LAST_OBS_UCSC"], value=apf.ucam["OBSNUM"].read())
+            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
             
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
@@ -739,7 +739,7 @@ if __name__ == '__main__':
         APFTask.phase(parent, "Watching")
         apflog("Phase is now %s" % phase)
         if apf.ucam['OUTFILE'].read() == 'ucsc':
-            APFTask.set(parent,suffix=["LAST_OBS_UCSC"], value=apf.ucam["OBSNUM"].read())
+            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
 
     # Start the main watcher thread
