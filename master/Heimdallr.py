@@ -228,7 +228,7 @@ class Master(threading.Thread):
             
             if self.fixedList is None:
                 # Pull from the dynamic scheduler
-                target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True,sheetn=self.sheetn)
+                target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
             else:
                 # Get the best target from the star list
                 target = ds.smartList(self.fixedList, time.time(), seeing, slowdown)
