@@ -104,6 +104,7 @@ def args():
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
     parser.add_argument('-s', '--smartObs', default=False, action='store_true', help="When specified with a fixed starlist, this option will pass the starlist to a selection algorithm to choose the optimal unobserved target, regardless of starlist ordering.")
     parser.add_argument('--sheet',default=None,help="Optional name for a Google spreadsheet")
+    parser.add_argument('--owner',default=None,help="Optionale name for file owners")    
     
     opt = parser.parse_args()
     return opt
