@@ -401,7 +401,7 @@ def getElAz(ra, dec, lat, lng, time):
                          (np.cos(el) * np.cos(lat)))
     return (np.degrees(el), np.degrees(az))
 
-def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y"):
+def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y")
     name - name of star, first column in line
@@ -769,7 +769,7 @@ def format_time(total, i2counts, hitthemall=False):
     return times, exps
 
 
-def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex"):
+def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='Vogt'):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -784,7 +784,11 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     else:
         dt = datetime.utcnow()
         # punt
-        
+
+    confg = dict()
+    confg['I2'] = 'Y'
+    confg['decker']='W'
+                
     if verbose:
         apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
@@ -1033,7 +1037,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     res['NAME']   = sn[idx]
     res['SCORE']  = star_table[idx,DS_NSHOTS]
     res['PRI']    = star_table[idx, DS_APFPRI]
-    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], do_flag[idx], dt)
+    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], do_flag[idx], dt, decker=confg['decker'], I2=confg['I2'], owner=owner)
     return res
 
 
