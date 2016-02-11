@@ -90,9 +90,11 @@ def shutdown():
 def args():
     p_c = ["ObsInfo", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
     w_c = ["on", "off", "auto"]
+    b_c = [1,2,4]
     parser = argparse.ArgumentParser(description="Set default options")
     parser.add_argument('-n', '--name', type=str, help='This values is used as the UCAM observer name, as well as the file prefix.')
     parser.add_argument('-o', '--obsnum', type=int, help='Sets the UCAM observation number to this integer value.')
+    parser.add_argument('-b', '--binning', choices=b_c, default=1, type=int, help='Sets the UCAM binning, bins in both pixels, allowed to be 1, 2 or 4.')
     parser.add_argument('-p', '--phase', choices=p_c, help='Specify the starting phase of the watcher. Allows for skipping standard procedures.')
     parser.add_argument('-f', '--fixed', help='Specify a fixed target list to observe. File will be searched for relative to the current working directory.')
     parser.add_argument('-t', '--test', action='store_true', help="Start the watcher in test mode. No modification to telescope, instrument, or observer settings will be made.")
