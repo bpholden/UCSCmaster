@@ -298,7 +298,7 @@ class APF:
             apflog("Exception in isReadyForObserving: %s (what = %s)" % (e,what), level='error')
             return False, ''
 
-    def setObserverInfo(self, num=100, name='Robot'):
+    def setObserverInfo(self, num=10000, name='Robot'):
         if self.test: return
         apflog("Setting science camera parameters.")
         self.ucam('OBSERVER').write(name)
