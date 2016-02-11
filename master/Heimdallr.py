@@ -675,6 +675,7 @@ if __name__ == '__main__':
         apflog("Setting Observer Information", echo=True)
         if opt.name is None:
             apf.setObserverInfo(num=obsNum, name='ucsc')
+            opt.owner = 'Vogt'
         else:
             apf.setObserverInfo(num=obsNum, name=opt.name)
         apflog("Setting ObsInfo finished. Setting phase to Focus.")
