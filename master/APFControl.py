@@ -737,9 +737,11 @@ class APF:
 
         robotdir = "/usr/local/lick/bin/robot/"
 
-        rv, retc = cmdexec(os.path.join(robotdir,"slew --hold"))
-        if not rv:
-            return rv
+        telstate = tel['TELSTATE'].read()
+        if telstate == 'Disabled':
+            rv, retc = cmdexec(os.path.join(robotdir,"slew --hold"))
+            if not rv:
+                return rv
         rv, retc = cmdexec(os.path.join(robotdir,"prep-obs"))
         if not rv:
             return rv
