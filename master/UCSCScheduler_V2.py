@@ -21,6 +21,7 @@ import re
 
 # Some variables that will soon be moved to a separate file
 TARGET_ELEVATION_MIN = 20
+TARGET_ELEVATION_START_MIN = 30
 TARGET_ELEVATION_MAX = 85
 TARGET_EXPOSURE_TIME_MAX =  3* 60 * 60 # 3 hour
 TARGET_MOON_DIST_MIN = 15
@@ -551,7 +552,7 @@ def calc_elevations(stars, observer):
         els.append(cur_el)
     return np.array(els)
 
-def is_visible(stars, observer, obs_len, min_el, max_el):
+def is_visible(stars, observer, obs_len, start_min_el, fin_min_el, max_el):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
             observer: A pyephem observer to use a the visibility reference
@@ -563,14 +564,13 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
 
         Notes: Uses the observer's current date and location
     """
-    start_min_el = min_el
     # Store the previous observer horizon and date since we change these
     prev_horizon = observer.horizon
     cdate = observer.date
     ret = []
     fin_elevations = []
     start_elevations = []    
-    observer.horizon = min_el
+    observer.horizon = start_min_el
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
         s.compute()
@@ -590,7 +590,7 @@ def is_visible(stars, observer, obs_len, min_el, max_el):
         cur_el = np.degrees(s.alt)
         start_elevations.append(cur_el)
         
-        if fin_el < min_el or fin_el > max_el:
+        if fin_el < fin_min_el or fin_el > max_el:
             ret.append(False)
             continue
 
@@ -696,7 +696,7 @@ def smartList(starlist, time, seeing, slowdown):
     available = available & brightenough
 
     obs_length = star_table[:,DS_EXPT] * star_table[:,DS_NSHOTS] + 45 * (star_table[:,DS_NSHOTS]-1)
-    vis, star_elevations, fin_els = is_visible(stars,apf_obs,obs_length,TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+    vis, star_elevations, fin_els = is_visible(stars,apf_obs,obs_length, TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
     available = available & vis
         
     done = [ True if n in observed else False for n in sn ]
@@ -901,7 +901,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         if verbose:
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
@@ -929,7 +929,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
 #        star_elevations=calc_elevations(fstars,apf_obs)
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [0]*len(fstars), TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)        
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [0]*len(fstars),  TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         available[f] = available[f] & vis
         f = available
         fstars = [s for s,_ in zip(stars,f) if _ ]
@@ -963,7 +963,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         if verbose:
             apflog("getNext(): Computing stars visibility",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, exp_times, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, exp_times,  TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         if vis != []:
             available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
