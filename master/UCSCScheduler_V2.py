@@ -823,7 +823,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
                 last_objs_attempted = []
                 return None
     if len (last_objs_attempted) > 0:
-        observed += last_objs_attempted
+        observed.append(last_objs_attempted)
 #    if observed == []:
 #        if verbose:
 #            apflog( "getNext(): getObserved is empty, setting bstar to true",echo=True)
@@ -884,8 +884,9 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         apflog("getNext(): Culling stars behind the moon",echo=True)
     moon_check = np.where(moonDist > minMoonDist, True, False)
     available = available & moon_check
-    
-    
+    if len(last_objs_attempted) > 0:
+        failed_to_observed_check = [ np.where(sn == l)  for l in last_objs_attempted]
+        available[np.transpose(failed_to_observed_check)] = False
 
 #    apflog( "Pre loop elevations", echo=True)
 #    elstr = "Stars els not behind moon: %s %d" % ( star_elevations[available],len(star_elevations[available]))
