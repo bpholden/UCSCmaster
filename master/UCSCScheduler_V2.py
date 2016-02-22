@@ -813,13 +813,19 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     try:
         lastline = ktl.read("apftask","SCRIPTOBS_LINE")
         lastobj = lastline.split()[0]
+        if verbose:
+            apflog( "getNext(): Last object attempted %s" % (lastobj),echo=True)
     except:
         lastobj = None
 
     if lastobj:
         if lastobj not in observed and lastobj not in last_objs_attempted:
             last_objs_attempted.append(lastobj)
+            if verbose:
+                apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
+            
             if len(last_objs_attempted) > 5:
+                apflog( "getNext(): 5 failed acquisition attempts",echo=True)
                 last_objs_attempted = []
                 return None
     if len (last_objs_attempted) > 0:
