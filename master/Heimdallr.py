@@ -142,11 +142,12 @@ def getTotalLines(filename):
                
 
 class Master(threading.Thread):
-    def __init__(self, apf, user='ucsc',sheetn="The Googledex"):
+    def __init__(self, apf, user='ucsc',sheetn="The Googledex",owner='Vogt'):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf
         self.user = user
+        self.owner = owner
         self.name = 'Heimdallr'
         self.signal = True
         self.windshield = 'auto'
@@ -678,6 +679,9 @@ if __name__ == '__main__':
             opt.owner = 'Vogt'
         else:
             apf.setObserverInfo(num=obsNum, name=opt.name)
+            if opt.owner == None:
+                opt.owner = opt.name
+                
         apflog("Setting ObsInfo finished. Setting phase to Focus.")
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
@@ -747,7 +751,7 @@ if __name__ == '__main__':
 
 
     # Start the main watcher thread
-    master = Master(apf,user=opt.name)
+    master = Master(apf,user=opt.name,sheetn=opt.sheet,owner=opt.owner)
     try:
         if opt.name == "ucsc":
                 names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
