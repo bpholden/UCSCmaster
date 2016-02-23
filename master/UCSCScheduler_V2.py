@@ -340,8 +340,9 @@ def update_local_googledex(time,googledex_file="googledex.dat", observed_file="o
                 t = datetime.fromtimestamp(otime)
             else:
                 hr, min = otime
-                tt = datetime.utcnow()
-                t = datetime(tt.year, tt.month, tt.day, hr, min)
+                if type(time) != datetime:
+                    time = datetime.utcnow()
+                t = datetime(time.year, time.month, time.day, hr, min)
 
             # This keeps the JD precision to one decimal point. There is no real reason for this other than
             # the googledex currently only stores the lastObs field to one decimal precision. Legacy styles FTW.
