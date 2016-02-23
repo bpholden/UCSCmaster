@@ -59,6 +59,15 @@ SLOWDOWN_MAX = 10.0
 
 last_objs_attempted = []
 
+def computeMaxTimes(sn,exp_times):
+    maxtimes = np.zeros_like(exp_times)
+    maxtimes += TARGET_EXPOSURE_TIME_MAX
+    for i,n in enumerate(sn):
+        if re.match("K2APF",n):
+            maxtimes[i] *= 3.
+    
+    return maxtimes
+
 def parseStarlist(starlist):
     """ Parse a scriptobs-compatible starlist for the scheduler.
 
@@ -947,6 +956,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
                                             star_table[f,DS_BV])
         
         exp_times = exp_times * slowdown
+        maxtimes = computeMaxTimes(sn[f],exp_times)
         totexptimes[f] += exp_times
         i2cnts[f] += i2counts
         if verbose:
@@ -961,7 +971,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         # Is the exposure time too long?
         if verbose:
             apflog("getNext(): Removing really long exposures",echo=True)
-        time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
+        time_check = np.where( exp_times < maxtimes, True, False)
         
         available[f] = available[f] & time_check
         f = available
