@@ -40,5 +40,5 @@ if __name__ == "__main__":
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
 #        print "%15s %4.1f %3.1f %7.0f %7.0f %.3g %.1f %d" % (allnames[i],star_table[i, ds.DS_APFPRI],precision[i],i2counts[i],exp_times[i],exp_counts[i],etimes[i],nobs[i])
-        ds.makeScriptobsLine(allnames[i],star_table[i,:], '', datetime.datetime.utcnow())
-
+        ret = ds.makeScriptobsLine(allnames[i],star_table[i,:], '', datetime.datetime.utcnow())
+        print ret
