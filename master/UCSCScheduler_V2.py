@@ -900,13 +900,6 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         apflog("getNext(): Culling stars behind the moon",echo=True)
     moon_check = np.where(moonDist > minMoonDist, True, False)
     available = available & moon_check
-    if len(last_objs_attempted) > 0:
-        failed_to_observed_check = [ np.where(sn == l)  for l in last_objs_attempted]
-        available[np.transpose(failed_to_observed_check)] = False
-
-#    apflog( "Pre loop elevations", echo=True)
-#    elstr = "Stars els not behind moon: %s %d" % ( star_elevations[available],len(star_elevations[available]))
-#    apflog(elstr, echo=True)
 
     # We just need a B star, so restrict our math to those
     if bstar:
