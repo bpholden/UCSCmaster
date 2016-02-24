@@ -386,6 +386,8 @@ def getDECDeg(deg, mn, sec, sign=None):
         neg = True
     elif float(mn) < 0:
         neg = True
+    elif float(sec) < 0:
+        neg = True
     x = abs(float(deg)) + float(mn)/60. + float(sec)/3600.
     if neg:
         return x*-1
