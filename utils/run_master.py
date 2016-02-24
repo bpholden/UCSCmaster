@@ -9,6 +9,12 @@ import ConfigParser
 import os.path
 import os
 import sys
+import re
+
+def primary_run(schedule):
+    match = re.search("\A\s*(\d+)\s*",schedule)
+    if match:
+        return match.group(1)
 
 def remap_config(configlist):
     config = dict()
@@ -16,8 +22,8 @@ def remap_config(configlist):
         config[it[0]] = it[1]
     return config
 
-def read_config(configfile,run):
-
+def read_config(configfile,runstr):
+    run = primary_run(runstr)
     config = ConfigParser.ConfigParser()
     if not os.path.exists(configfile):
         sys.exit("configuration file %s does not exist"  % configfile)
@@ -87,7 +93,7 @@ def config_kwds(config):
         raise
         sys.exit('Cannot communicate with checkapf service')
     try:
-        ktl.write('apfschedule','ACTIVE_RUN',schedule)
+        ktl.write('apfschedule','ACTIVE_RUN',primary_run(schedule))
     except:
         raise
         sys.exit('Cannot communicate with apfschedule service')
@@ -114,7 +120,7 @@ if __name__ == "__main__":
         schedule = ktl.read('apfschedule','SCHEDULED_RUNS')
     except:
         sys.exit("cannot read apfschedule.SCHEDULED_RUNS")
-
+        
     cpath = os.path.dirname(os.path.abspath(__file__))
     configfile = os.path.join(cpath,"master.config")
     masterstatus=ktl.read('apftask','MASTER_PID',binary=True)
