@@ -402,6 +402,28 @@ def getDECRad(deg, mn, sec, sign=None):
     else:
         return x
 
+def getCoordStr(floatval,isRA=False):
+
+    neg = False
+    nround = 2
+    if isRA:
+        floatval /= 15.
+        nround = 3
+    if floatval < 0:
+        neg = True
+    floatval = abs(floatval)
+    deghrval = int(floatval)
+    minval = (floatval % 1) * 60.0 
+    secval = round( (minval % 1) *60.0, nround)
+
+    if neg:
+        ret = "-" + str(deghrval) + ' '
+    else:
+        ret = str(deghrval) + ' '
+    ret += str(int(minval)) + ' ' + str(secval)
+    return ret
+
+        
 def getElAz(ra, dec, lat, lng, time):
     """Given RA, DEC, Latitude, and a time, returns the corresponding elevation and azimuth angles
        Works with single values, or numpy arrays
@@ -431,17 +453,11 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
     # Start with the target name
     ret = name + ' '
     # Add the RA as three elements, HR, MIN, SEC
-    ra = np.degrees(row[DS_RA]) / 15.
-    ret += str(int(ra)) + ' '
-    ra_min = (ra % 1) * 60
-    ret += str(int(ra_min)) + ' '
-    ret += str(round((ra_min % 1) * 60., 1)) + ' '
+    rastr = getCoordStr(np.degrees(row[DS_RA]),isRA=True)
+    ret += rastr + ' '
     # Add the DEC as three elements, DEG, MIN, SEC
-    dec = np.degrees(row[DS_DEC])
-    ret += str(int(dec)) + ' '
-    dec_min = abs((dec - int(dec)) * 60)
-    ret += str(int(dec_min)) + ' '
-    ret += str(round( (dec_min % 1) * 60, 1)) + ' '
+    decstr = getCoordStr(np.degrees(row[DS_DEC]))
+    ret += decstr + ' '
     # Epoch
     ret += '2000 '
     # Proper motion RA and DEC
@@ -811,7 +827,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
 
     try:
         apfguide = ktl.Service('apfguide')
-        ptime = apfguide['midptfin'].read(binary=True)
+        stamp = apfguide['midptfin'].read(binary=True)
+        ptime = datetime.fromtimestamp(stamp)
     except:
         if type(dt) == datetime:
             ptime = dt
