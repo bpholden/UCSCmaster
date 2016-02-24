@@ -396,10 +396,14 @@ def getDECDeg(deg, mn, sec, neg=False):
 
 def getDECRad(deg, mn, sec, neg=False):
     if float(deg) < 0:
-        sign = '-'
+        neg = True
+    elif  float(mn) < 0:
+        neg = True
+    elif float(sec) < 0:
+        neg = True
     x = abs(float(deg)) + float(mn)/60. + float(sec)/3600.
     x = x * np.pi/180.
-    if sign == '-':
+    if neg:
         return x*-1
     else:
         return x
