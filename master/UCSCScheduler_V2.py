@@ -824,7 +824,9 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     global last_objs_attempted
     try:
         lastline = ktl.read("apftask","SCRIPTOBS_LINE")
-        lastobj = lastline.split()[0]
+        if not bstar:             # otherwise from previous night
+            lastobj = lastline.split()[0]
+
         if verbose:
             apflog( "getNext(): Last object attempted %s" % (lastobj),echo=True)
     except:
