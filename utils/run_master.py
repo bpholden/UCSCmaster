@@ -106,6 +106,13 @@ def config_kwds(config):
             raise
             sys.exit('Cannot communicate with apfucam service')
 
+    if config['owner']:
+        try: 
+            ktl.write('apfschedule','ownrhint',config['owner'])
+        except:
+            raise
+            sys.exit('Cannot communicate with apfschedule service')
+
     return True
 
 def modify_env(config):
