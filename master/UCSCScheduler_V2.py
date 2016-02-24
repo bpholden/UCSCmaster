@@ -383,9 +383,11 @@ def getRARad(hr, mn, sec):
 
 def getDECDeg(deg, mn, sec, sign=None):
     if float(deg) < 0:
-        sign = '-'
+        neg = True
+    elif float(mn) < 0:
+        neg = True
     x = abs(float(deg)) + float(mn)/60. + float(sec)/3600.
-    if sign == '-':
+    if neg:
         return x*-1
     else:
         return x
