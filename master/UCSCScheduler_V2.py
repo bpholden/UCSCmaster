@@ -843,7 +843,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
                 last_objs_attempted = []
                 return None
     if len (last_objs_attempted) > 0:
-        observed.append(last_objs_attempted)
+        observed.extend(last_objs_attempted)
 #    if observed == []:
 #        if verbose:
 #            apflog( "getNext(): getObserved is empty, setting bstar to true",echo=True)
