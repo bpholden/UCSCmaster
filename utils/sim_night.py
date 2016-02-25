@@ -43,6 +43,8 @@ else:
     allnames, star_table, do_flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=options.infile)
 
 slowdowns, fwhms = make_obs_sample("slowdowns")
+fwhms = gen_seeing()
+
 lastslow = 5
 lastfwhm = 15
 otfn = "observed_targets"
@@ -63,8 +65,9 @@ while observing:
         curtime += 70./86400 # acquisition time
         idx = allnames.index(result['NAME'])
         for i in range(0,int(result['NEXP'])):
-            actslow, actfwhm = rand_obs_sample(slowdowns,fwhms)
             actel = compute_el(curtime,stars[idx],apf_obs)
+            actslow, actfwhm = rand_obs_sample(slowdowns,fwhms)
+            actfwhm = gen_seeing_el(actfwhm,actel)
             lastfwhm = actfwhm
             lastslow = actslow
             meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
