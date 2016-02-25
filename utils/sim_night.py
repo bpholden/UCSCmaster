@@ -85,7 +85,7 @@ else:
 
 slowdowns, fwhms = make_obs_sample("slowdowns")
 lastslow = 5
-lastfwhm = 10
+lastfwhm = 15
 otfn = "observed_targets"
 ot = open(otfn,"w")
 ot.close()
