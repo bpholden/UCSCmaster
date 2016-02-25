@@ -12,48 +12,7 @@ from datetime import datetime
 import re
 import os
 
-def sun_times(datestr):
-    apf_obs = ephem.Observer()
-    apf_obs.lat  = '37:20:33.1'
-    apf_obs.long = '-121:38:17.7'
-    apf_obs.elevation = 1274
-    # Minimum observation to observe things at
-    apf_obs.horizon = -9.0*np.pi / 180.0
-    apf_obs.date = datestr
-    sunset = apf_obs.next_setting(ephem.Sun())
-    sunrise = apf_obs.next_rising(ephem.Sun())    
-    return sunset,sunrise, apf_obs
-    
-def make_obs_sample(fn):
-    slow,fwhm = np.loadtxt(fn,unpack=True)
-    return slow, fwhm
-
-def rand_obs_sample(slow,fwhm):
-    ls = len(slow) -1
-    lf = len(fwhm) -1
-    sindx = np.random.randint(0,ls)
-    findx = np.random.randint(0,lf)
-    return slow[sindx], fwhm[findx]
-
-def compute_el(curtime,star,apf_obs):
-    apf_obs.date = curtime
-    star.compute(apf_obs)
-    actel = np.degrees(star.alt)
-    return actel
-
-
-def checkdate(datestr):
-    match = re.match("(\d{4})\/(\d{1,2})\/(\d{1,2})",datestr)
-    if not match:
-        return False
-    if int(match.group(2)) < 1 or int(match.group(2)) > 12:
-        return False
-    if int(match.group(3)) < 1 or int(match.group(3)) > 31:
-        return False
-    
-    return True
-
-#######
+from NightSim import * # yea I know, I know
 
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
