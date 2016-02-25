@@ -865,12 +865,6 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
                 apflog( "getNext(): 5 failed acquisition attempts",echo=True)
                 last_objs_attempted = []
                 return None
-    if len (last_objs_attempted) > 0:
-        observed.extend(last_objs_attempted)
-#    if observed == []:
-#        if verbose:
-#            apflog( "getNext(): getObserved is empty, setting bstar to true",echo=True)
-#        bstar = True
 
     ###
     # Need to update the googledex with the lastObserved date for observed targets
@@ -956,8 +950,10 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         available = np.logical_and(available, np.logical_not(bstars))
         
         # has the star been observed - commented out as redundant with cadence
-#        done = [ True if n in observed else False for n in sn ]
-#        available = available & np.logical_not(done) # Available and not observed
+        if len(last_objs_attempted)>0:
+            for n in last_objs_attempted:
+                attempted = (sn == n)
+                available = available & np.logical_not(attempted) # Available and not observed
 
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
