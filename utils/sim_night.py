@@ -84,7 +84,7 @@ while observing:
             else:
                 curtime += (exp_time+40.)/86400
                 totcounts = exp_time * specrate
-            print "%s %s %.1f %.1f %.1f\n" %(result['NAME'] , ephem.Date(curtime), exp_time, metertime, totcounts)
+            print "%s %s %.1f %.1f %.1f" %(result['NAME'] , ephem.Date(curtime), exp_time, metertime, totcounts)
         ot = open(otfn,"a+")
         ot.write("%s\n" % (result["SCRIPTOBS"]))
         ot.close()
