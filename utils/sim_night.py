@@ -12,7 +12,7 @@ from datetime import datetime
 import re
 import os
 
-from NightSim import * # yea I know, I know
+import NightSim as ns # yea I know, I know
 
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
@@ -33,7 +33,7 @@ if options.fixed != "":
     if not os.path.isfile(options.fixed):
         print "%s is not a file" % (options.fixed)
 
-if not checkdate(datestr):
+if not ns.checkdate(datestr):
     print "%s is not an acceptable date string" % (datestr)
     sys.exit()
     
@@ -42,8 +42,8 @@ if options.fixed != "":
 else:
     allnames, star_table, do_flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=options.infile)
 
-slowdowns, fwhms = make_obs_sample("slowdowns")
-fwhms = gen_seeing()
+slowdowns, fwhms = ns.make_obs_sample("slowdowns")
+fwhms = ns.gen_seeing()
 
 lastslow = 5
 lastfwhm = 15
@@ -51,7 +51,7 @@ otfn = "observed_targets"
 ot = open(otfn,"w")
 ot.close()
 observing = True
-curtime, endtime, apf_obs = sun_times(datestr)
+curtime, endtime, apf_obs = ns.sun_times(datestr)
 bstar = options.bstar
 while observing:
 
@@ -65,9 +65,9 @@ while observing:
         curtime += 70./86400 # acquisition time
         idx = allnames.index(result['NAME'])
         for i in range(0,int(result['NEXP'])):
-            actel = compute_el(curtime,stars[idx],apf_obs)
-            actslow, actfwhm = rand_obs_sample(slowdowns,fwhms)
-            actfwhm = gen_seeing_el(actfwhm,actel)
+            actel = ns.compute_el(curtime,stars[idx],apf_obs)
+            actslow, actfwhm = ns.rand_obs_sample(slowdowns,fwhms)
+            actfwhm = ns.gen_seeing_el(actfwhm,actel)
             lastfwhm = actfwhm
             lastslow = actslow
             meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
