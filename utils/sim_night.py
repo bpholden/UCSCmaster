@@ -12,7 +12,7 @@ from datetime import datetime
 import re
 import os
 
-import NightSim as ns # yea I know, I know
+import NightSim as ns
 
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
