@@ -91,7 +91,7 @@ while observing:
     else:
         curtime += 2100./86400 # close for lack of target
         lastslow = 5
-        lastfwhm = 10
+        lastfwhm = 15
     if curtime > endtime:
         observing = False
         
