@@ -20,6 +20,7 @@ parser.add_option("-f","--fixed",dest="fixed",default="")
 parser.add_option("-s","--smartlist",dest="smartlist",default=False,action="store_true")
 parser.add_option("-g","--googledex",dest="googledex",default="The Googledex")
 parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
+parser.add_option("-o","--outfile",dest="outfile",default=None)
 parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
 (options, args) = parser.parse_args()    
 
@@ -29,6 +30,7 @@ if options.date == "today":
 else:
     datestr = options.date
 
+    
 if options.fixed != "":
     if not os.path.isfile(options.fixed):
         print "%s is not a file" % (options.fixed)
@@ -36,7 +38,21 @@ if options.fixed != "":
 if not ns.checkdate(datestr):
     print "%s is not an acceptable date string" % (datestr)
     sys.exit()
-    
+
+if options.outfile == None:
+    fdatestr = re.sub("\/","-",datestr)
+    outfile = "%s.simout" % (fdatestr )
+else:
+    outfile = options.outfile
+try:
+    outfp = open(outfile,"w+")
+except Exception as e:
+    print "cannot open file %s for output, %s,  exiting" % (outfile,e)
+    sys.exit()
+
+hdrstr = "starname date time mjd exptime i2counts fwhm slowdown\n"
+outfp.write(hdrstr)
+        
 if options.fixed != "":
     allnames, star_table, lines, stars = ds.parseStarlist(options.fixed)
 else:
@@ -104,3 +120,4 @@ if os.path.isfile(fn):
         os.unlink(fn)
     except:
         print "cannot unlink %s" %(fn)
+outfp.close()
