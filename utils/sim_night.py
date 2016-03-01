@@ -14,6 +14,34 @@ import os
 
 import NightSim as ns
 
+def compute_simulation(curtime,star,apf_obs,slowdowns,fwhms,outfp):
+    actel = ns.compute_el(curtime,star,apf_obs)
+    actslow, actfwhm = ns.rand_obs_sample(slowdowns,fwhms)
+    actfwhm = ns.gen_seeing_el(actfwhm,actel)
+    lastfwhm = actfwhm
+    lastslow = actslow
+    meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+    meterrate *= 1 + 0.11*np.random.randn(1)
+    meterrate /= actslow
+    specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+    specrate *= 1 + 0.11*np.random.randn(1)
+    specrate /= actslow
+    metertime = result['COUNTS'] / meterrate
+    exp_time = result['EXP_TIME']
+    barycentertime = curtime
+    if metertime < exp_time:
+        fexptime = metertime
+    else:
+        fexptime = exp_time
+        
+    curtime += (fexptime+40.)/86400
+    barycentertime += fexptime/(2.*86400)
+    totcounts = fexptime * specrate
+    outstr = "%s %s %.5f %.1f %.1f %.1f %.1f" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, actfwhm, actslow)
+    print outstr
+    outfp.write(outstr + "\n")
+    return curtime, lastfwhm, lastslow
+
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
 parser.add_option("-f","--fixed",dest="fixed",default="")
@@ -81,26 +109,7 @@ while observing:
         curtime += 70./86400 # acquisition time
         idx = allnames.index(result['NAME'])
         for i in range(0,int(result['NEXP'])):
-            actel = ns.compute_el(curtime,stars[idx],apf_obs)
-            actslow, actfwhm = ns.rand_obs_sample(slowdowns,fwhms)
-            actfwhm = ns.gen_seeing_el(actfwhm,actel)
-            lastfwhm = actfwhm
-            lastslow = actslow
-            meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
-            meterrate *= 1 + 0.11*np.random.randn(1)
-            meterrate *= actslow
-            specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm)
-            specrate *= 1 + 0.11*np.random.randn(1)
-            specrate *= actslow
-            metertime = result['COUNTS'] / meterrate
-            exp_time = result['EXP_TIME']
-            if metertime < exp_time:
-                curtime += (metertime+40.)/86400
-                totcounts = metertime * specrate
-            else:
-                curtime += (exp_time+40.)/86400
-                totcounts = exp_time * specrate
-            print "%s %s %.1f %.1f %.1f" %(result['NAME'] , ephem.Date(curtime), exp_time, metertime, totcounts)
+            (curtime,lastfwhm,lastslow) = compute_simulation(curtime,stars[idx],apf_obs,slowdowns,fwhms,outfp)
         ot = open(otfn,"a+")
         ot.write("%s\n" % (result["SCRIPTOBS"]))
         ot.close()
