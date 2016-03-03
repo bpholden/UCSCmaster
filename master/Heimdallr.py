@@ -467,12 +467,16 @@ class Master(threading.Thread):
             # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
             if APF.openOK and not rising and not APF.isOpen()[0]:
                 APFTask.set(parent,suffix="MESSAGE",value="Powering up for APFTeq",wait=False)                    
-                APF.clearestop()
-                try:
-                    APFLib.write(APF.dome['AZENABLE'],'enable',timeout=10)
-                except:
-                    apflog("cannot enable AZ drive",level="error")
-                apf.setTeqMode('Evening')
+                if APF.clearestop():
+                    try:
+                        APFLib.write(APF.dome['AZENABLE'],'enable',timeout=10)
+                    except:
+                        apflog("Cannot enable AZ drive, exiting",level="error")
+                        sys.exit()
+                    apf.setTeqMode('Evening')
+                else:
+                    apflog("Cannot clear emergency stop, sleeping for 600 seconds",level="error")
+                    APFTask.waitFor(parent,True,timeout=600)
                 
             # Open at sunset
             sun_between_limits = float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim 
