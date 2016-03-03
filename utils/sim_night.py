@@ -3,6 +3,7 @@ sys.path.append("../master")
 #from ExposureCalc import *
 import UCSCScheduler_V2 as ds
 import ExposureCalculations as ec
+import Generate_Errors as ge
 
 import numpy as np
 import pickle
@@ -37,7 +38,10 @@ def compute_simulation(curtime,star,apf_obs,slowdowns,fwhms,outfp):
     curtime += (fexptime+40.)/86400
     barycentertime += fexptime/(2.*86400)
     totcounts = fexptime * specrate
-    outstr = "%s %s %.5f %.1f %.1f %.1f %.1f" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, actfwhm, actslow)
+
+    precision, true_error = ge.compute_real_uncertainty(totcounts,result['BV'])
+    
+    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow)
     print outstr
     outfp.write(outstr + "\n")
     return curtime, lastfwhm, lastslow
@@ -78,7 +82,7 @@ except Exception as e:
     print "cannot open file %s for output, %s,  exiting" % (outfile,e)
     sys.exit()
 
-hdrstr = "starname date time mjd exptime i2counts fwhm slowdown\n"
+hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown\n"
 outfp.write(hdrstr)
         
 if options.fixed != "":
