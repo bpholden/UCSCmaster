@@ -43,6 +43,23 @@ def gen_seeing_el(deviate,el):
     deviate += (-0.823637535775*el + 0.0104081289798*el*el +  -4.45020842236e-05*el*el*el)
     return deviate
 
+def gen_clouds(nsize=200):
+    val = np.random.uniform(size=1)
+    if val < 0.7:
+        mean = np.random.normal(loc=0.4,scale=0.1,size=1)
+        rms  = np.random.normal(loc=0.1,scale=0.05,size=1)
+    elif val > 0.9:
+        mean = np.random.normal(loc=1.0,scale=0.4,size=1)
+        rms  = np.random.normal(loc=0.5,scale=0.1,size=1)
+    else:
+        mean = np.random.normal(loc=0.4,scale=0.1,size=1)
+        rms  = np.random.normal(loc=0.3,scale=0.05,size=1)
+
+        
+    deviates = np.random.normal(loc=mean,scale=rms,size=nsize)
+    deviates[deviates < 0.3] = 0.3
+    return deviates
+
 def rand_obs_sample(slows,fwhms):
     ls = len(slows) -1
     lf = len(fwhms) -1
