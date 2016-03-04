@@ -90,8 +90,8 @@ if options.fixed != "":
 else:
     allnames, star_table, do_flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=options.infile)
 
-slowdowns, fwhms = ns.make_obs_sample("slowdowns")
 fwhms = ns.gen_seeing()
+slowdowns = ns.gen_clouds()
 
 lastslow = 5
 lastfwhm = 15
