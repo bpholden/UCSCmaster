@@ -697,7 +697,7 @@ def smartList(starlist, time, seeing, slowdown):
     apf_obs.horizon = str(TARGET_ELEVATION_MIN)
     apf_obs.date = dt
     # APF latitude in radians
-    apf_lat = (37 + 20/60. + 33.1/3600.) * np.pi/180.
+    apf_lat = apf_obs.lat
 
     # Calculate the moon's location
     moon = ephem.Moon()
