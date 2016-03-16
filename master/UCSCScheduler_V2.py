@@ -730,7 +730,7 @@ def smartList(starlist, time, seeing, slowdown):
     available = available & brightenough
 
     obs_length = star_table[:,DS_EXPT] * star_table[:,DS_NSHOTS] + 45 * (star_table[:,DS_NSHOTS]-1)
-    vis, star_elevations, fin_els = is_visible(stars,apf_obs,obs_length, TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+    vis, star_elevations, fin_els = is_visible(stars,apf_obs,obs_length, TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
     available = available & vis
         
     done = [ True if n in observed else False for n in sn ]
@@ -932,7 +932,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         if verbose:
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
@@ -962,7 +962,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
 #        star_elevations=calc_elevations(fstars,apf_obs)
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [0]*len(fstars),  TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [0]*len(fstars),  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         available[f] = available[f] & vis
         f = available
         fstars = [s for s,_ in zip(stars,f) if _ ]
@@ -997,7 +997,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         if verbose:
             apflog("getNext(): Computing stars visibility",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, exp_times,  TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, exp_times,  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         if vis != []:
             available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
