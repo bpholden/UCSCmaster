@@ -646,7 +646,7 @@ def is_visible(stars, observer, obs_len, start_min_el, fin_min_el, max_el):
                 # The object will set before the observation finishes
                 ret.append(False)
                 continue
- #       apflog( "is_visible(): Does the target remain visible through the observation?", echo=True)
+        #  apflog( "is_visible(): Does the target remain visible through the observation?", echo=True)
         observer.horizon = max_el
         s.compute(observer)
 
