@@ -586,11 +586,12 @@ def calc_elevations(stars, observer):
         els.append(cur_el)
     return np.array(els)
 
-def is_visible(stars, observer, obs_len, start_min_el, fin_min_el, max_el):
+def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
             observer: A pyephem observer to use a the visibility reference
             obs_len: A list of observation lengths ( Seconds ). This is the time frame for which visibility is checked
+            pref_min_el: Preferred minimum body elevation to be visible ( degrees )            
             min_el: The minimum body elevation to be visible ( degrees )
             max_el: The maximum body elevation to be visible ( degrees )
         Returns:
