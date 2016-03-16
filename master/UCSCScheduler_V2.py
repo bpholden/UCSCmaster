@@ -661,7 +661,18 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
                 # The object rises above the max el before the observation finishes
                 ret.append(False)
                 continue
-#        apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
+        #   apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
+        
+        if np.degrees(s.transit_alt) > pref_min_el:
+            # will transit above preferred elevation
+            observer.horizon=pref_min_el
+            s.compute(observer)
+            if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el:
+                # this star is currently low on the horizon but will be above the preferred elevation for the requested exposure time
+                # NEED TO HANDLE ONLY RISING STARS
+                ret.append(False)
+                continue
+                
 		
         # Everything seems to be fine, so the target is visible!
         ret.append(True)
