@@ -605,7 +605,7 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
     ret = []
     fin_elevations = []
     start_elevations = []    
-    observer.horizon = start_min_el
+    observer.horizon = min_el
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
         s.compute()
@@ -625,11 +625,11 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
         cur_el = np.degrees(s.alt)
         start_elevations.append(cur_el)
         
-        if fin_el < fin_min_el or fin_el > max_el:
+        if fin_el < min_el or fin_el > max_el:
             ret.append(False)
             continue
 
-        if cur_el < start_min_el or cur_el > max_el:
+        if cur_el < min_el or cur_el > max_el:
             ret.append(False)
             continue
 
