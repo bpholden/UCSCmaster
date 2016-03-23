@@ -663,8 +663,8 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
                 continue
         #   apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
         
-        if np.degrees(s.transit_alt) > pref_min_el:
-            # will transit above preferred elevation
+        if np.degrees(s.transit_alt) > pref_min_el and np.degrees(star.az) < 180:
+            # will transit above preferred elevation and still rising
             observer.horizon=pref_min_el
             s.compute(observer)
             if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el:
