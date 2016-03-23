@@ -40,6 +40,9 @@ SUNEL_HOR = -3.2
 
 AVERAGE_INSTRFOC = 8481
 
+# global
+paused = False
+
 def sunel_startlim():
     return SUNEL_STARTLIM
 
@@ -48,6 +51,7 @@ def control_watch(keyword,parent):
         return
     try:
         value = keyword['ascii']
+        global paused
         if value == "Abort":
             APFTask.set(parent,suffix='STATUS',value='Exited/Failure')
             APF.log("Aborted by APFTask")
@@ -55,6 +59,7 @@ def control_watch(keyword,parent):
         elif value == "Pause":
             try:
                 APFTask.set(parent,suffix='STATUS',value='PAUSED')
+                paused = True
             except:
                 APF.log("Failure to set STATUS in APFTask",level=error)
                 os.kill(os.getpid(),signal.SIGINT)
@@ -62,6 +67,7 @@ def control_watch(keyword,parent):
         else:
             try:
                 APFTask.set(parent,suffix='STATUS',value='Running')
+                paused = False
             except:
                 APF.log("Failure to set STATUS in APFTask",level=error)
                 os.kill(os.getpid(),signal.SIGINT)
@@ -371,6 +377,9 @@ class Master(threading.Thread):
             sunel.monitor()
 
 
+            # if paused:
+            #     apflog("Pausing because of apftask request",level='warn',echo=True)
+            #     APFTask.waitfor(self.task, True, timeout=60)
             
             # Check and close for weather
             if APF.isOpen()[0] and not APF.openOK:

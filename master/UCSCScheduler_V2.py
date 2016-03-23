@@ -20,8 +20,8 @@ except:
 import re
 
 # Some variables that will soon be moved to a separate file
-TARGET_ELEVATION_MIN = 20
-TARGET_ELEVATION_START_MIN = 30
+TARGET_ELEVATION_MIN = 20 # this elevation is the physical minimum, below this the ADC does not work
+TARGET_ELEVATION_HIGH_MIN = 45 # this elevation is the preferred one for stars that will be high in the sky
 TARGET_ELEVATION_MAX = 85
 TARGET_EXPOSURE_TIME_MAX =  1* 60 * 60 # 1 hour
 TARGET_MOON_DIST_MIN = 15
@@ -586,11 +586,12 @@ def calc_elevations(stars, observer):
         els.append(cur_el)
     return np.array(els)
 
-def is_visible(stars, observer, obs_len, start_min_el, fin_min_el, max_el):
+def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
             observer: A pyephem observer to use a the visibility reference
             obs_len: A list of observation lengths ( Seconds ). This is the time frame for which visibility is checked
+            pref_min_el: Preferred minimum body elevation to be visible ( degrees )            
             min_el: The minimum body elevation to be visible ( degrees )
             max_el: The maximum body elevation to be visible ( degrees )
         Returns:
@@ -604,7 +605,7 @@ def is_visible(stars, observer, obs_len, start_min_el, fin_min_el, max_el):
     ret = []
     fin_elevations = []
     start_elevations = []    
-    observer.horizon = start_min_el
+    observer.horizon = str(min_el)
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
         s.compute()
@@ -624,11 +625,11 @@ def is_visible(stars, observer, obs_len, start_min_el, fin_min_el, max_el):
         cur_el = np.degrees(s.alt)
         start_elevations.append(cur_el)
         
-        if fin_el < fin_min_el or fin_el > max_el:
+        if fin_el < min_el or fin_el > max_el:
             ret.append(False)
             continue
 
-        if cur_el < start_min_el or cur_el > max_el:
+        if cur_el < min_el or cur_el > max_el:
             ret.append(False)
             continue
 
@@ -646,7 +647,7 @@ def is_visible(stars, observer, obs_len, start_min_el, fin_min_el, max_el):
                 # The object will set before the observation finishes
                 ret.append(False)
                 continue
- #       apflog( "is_visible(): Does the target remain visible through the observation?", echo=True)
+        #  apflog( "is_visible(): Does the target remain visible through the observation?", echo=True)
         observer.horizon = max_el
         s.compute(observer)
 
@@ -660,8 +661,15 @@ def is_visible(stars, observer, obs_len, start_min_el, fin_min_el, max_el):
                 # The object rises above the max el before the observation finishes
                 ret.append(False)
                 continue
-#        apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
-		
+        #   apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
+        observer.horizon = str(pref_min_el)
+        if not s.neverup:
+            # will transit above preferred elevation and still rising
+            if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el and np.degrees(s.az) < 180:
+                # this star is currently low on the horizon but will be above the preferred elevation for the requested exposure time
+                ret.append(False)
+                continue
+                
         # Everything seems to be fine, so the target is visible!
         ret.append(True)
 #	apflog( "is_visible(): done searching targets", echo=True)
@@ -697,7 +705,7 @@ def smartList(starlist, time, seeing, slowdown):
     apf_obs.horizon = str(TARGET_ELEVATION_MIN)
     apf_obs.date = dt
     # APF latitude in radians
-    apf_lat = (37 + 20/60. + 33.1/3600.) * np.pi/180.
+    apf_lat = apf_obs.lat
 
     # Calculate the moon's location
     moon = ephem.Moon()
@@ -730,7 +738,7 @@ def smartList(starlist, time, seeing, slowdown):
     available = available & brightenough
 
     obs_length = star_table[:,DS_EXPT] * star_table[:,DS_NSHOTS] + 45 * (star_table[:,DS_NSHOTS]-1)
-    vis, star_elevations, fin_els = is_visible(stars,apf_obs,obs_length, TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+    vis, star_elevations, fin_els = is_visible(stars,apf_obs,obs_length, TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
     available = available & vis
         
     done = [ True if n in observed else False for n in sn ]
@@ -932,7 +940,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         if verbose:
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
@@ -962,7 +970,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
 #        star_elevations=calc_elevations(fstars,apf_obs)
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [0]*len(fstars),  TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [0]*len(fstars),  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         available[f] = available[f] & vis
         f = available
         fstars = [s for s,_ in zip(stars,f) if _ ]
@@ -997,7 +1005,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         if verbose:
             apflog("getNext(): Computing stars visibility",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, exp_times,  TARGET_ELEVATION_START_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, exp_times,  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         if vis != []:
             available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
