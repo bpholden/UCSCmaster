@@ -662,18 +662,13 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
                 ret.append(False)
                 continue
         #   apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
-        observer.horizon = str(min_el)
-        s.compute(observer)
+        observer.horizon = str(pref_min_el)
         if not s.neverup:
-            if np.degrees(s.transit_alt) > pref_min_el and np.degrees(s.az) < 180:
-                # will transit above preferred elevation and still rising
-                observer.horizon=str(pref_min_el)
-                s.compute(observer)
-                if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el:
-                    # this star is currently low on the horizon but will be above the preferred elevation for the requested exposure time
-                    # NEED TO HANDLE ONLY RISING STARS
-                    ret.append(False)
-                    continue
+            # will transit above preferred elevation and still rising
+            if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el and np.degrees(s.az) < 180:
+                # this star is currently low on the horizon but will be above the preferred elevation for the requested exposure time
+                ret.append(False)
+                continue
                 
         # Everything seems to be fine, so the target is visible!
         ret.append(True)
