@@ -665,11 +665,13 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
         observer.horizon = str(pref_min_el)
         if not s.neverup:
             # will transit above preferred elevation and still rising
-            if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el and np.degrees(s.az) < 180:
-                # this star is currently low on the horizon but will be above the preferred elevation for the requested exposure time
-                ret.append(False)
-                continue
-                
+            try:
+                if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el and np.degrees(s.az) < 180:
+                    # this star is currently low on the horizon but will be above the preferred elevation for the requested exposure time
+                    ret.append(False)
+                    continue
+            except:
+                pass
         # Everything seems to be fine, so the target is visible!
         ret.append(True)
 #	apflog( "is_visible(): done searching targets", echo=True)
