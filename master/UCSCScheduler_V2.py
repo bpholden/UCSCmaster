@@ -253,11 +253,11 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             except ValueError:
                 row.append(0.0)
 
-        match = re.search("\A(y|Y)",ls[didx["Close Companion"]])
+        match = re.search("\A(n|N)",ls[didx["Close Companion"]])
         if match:
-            do_flag.append("y")
-        else:
             do_flag.append("")
+        else:
+            do_flag.append("Y")
         
         star_table.append(row)
         star = ephem.FixedBody()
