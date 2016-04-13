@@ -776,6 +776,9 @@ if __name__ == '__main__':
     
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
+
+        bstr = "%d,%d" % (options.binning,options.binning)
+        apf.ucam['BINNING'].write(bstr) 
             
         if opt.fixed != None:
             lastList = apf.robot["MASTER_STARLIST"].read()
@@ -868,6 +871,9 @@ if __name__ == '__main__':
         if not result:
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
 
+    bstr = "%d,%d" % (1,1)
+    apf.ucam['BINNING'].write(bstr) 
+            
     # Focus the instrument once more
     APFTask.phase(parent, "Focus")
     apflog("Running Focus Post", echo=True)
