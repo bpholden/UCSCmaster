@@ -777,7 +777,7 @@ if __name__ == '__main__':
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
 
-        bstr = "%d,%d" % (options.binning,options.binning)
+        bstr = "%d,%d" % (opt.binning,opt.binning)
         apf.ucam['BINNING'].write(bstr) 
             
         if opt.fixed != None:
