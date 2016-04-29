@@ -30,13 +30,21 @@ def make_obs_sample(fn):
 
 def gen_seeing(nsize=200):
     val = np.random.uniform(size=1)
+    alpha = 0.52
+    
     if val < 0.9:
         mean = np.random.normal(loc=33.46,scale=1.0,size=1)
         rms  = np.random.normal(loc=1.9,scale=1.0,size=1)
     else:
         mean = np.random.normal(loc=41.0,scale=1.0,size=1)
         rms  = np.random.normal(loc=4.5,scale=1.0,size=1)
-    deviates = np.random.normal(loc=mean,scale=rms,size=nsize)
+    real_rms = np.sqrt((1-alpha**2) * rms**2)
+    deviates = np.random.normal(loc=0,scale=real_rms,size=nsize)
+    for i in np.arange(1,nsize):
+        deviates[i] += alpha*deviates[i-1]
+    deviates += mean
+
+#    deviates = np.random.normal(loc=mean,scale=rms,size=nsize)
     return deviates
         
 def gen_seeing_el(deviate,el):
@@ -45,6 +53,7 @@ def gen_seeing_el(deviate,el):
 
 def gen_clouds(nsize=200):
     val = np.random.uniform(size=1)
+    alpha = 0.353
     if val < 0.7:
         mean = np.random.normal(loc=0.4,scale=0.1,size=1)
         rms  = np.random.normal(loc=0.1,scale=0.05,size=1)
@@ -55,8 +64,11 @@ def gen_clouds(nsize=200):
         mean = np.random.normal(loc=0.4,scale=0.1,size=1)
         rms  = np.random.normal(loc=0.3,scale=0.05,size=1)
 
-        
-    deviates = np.random.normal(loc=mean,scale=rms,size=nsize)
+    real_rms = np.sqrt((1-alpha**2) * rms**2)
+    deviates = np.random.normal(loc=0,scale=real_rms,size=nsize)
+    for i in np.arange(1,nsize):
+        deviates[i] += alpha*deviates[i-1]
+    deviates += mean
     deviates[deviates < 0.3] = 0.3
     return deviates
 
