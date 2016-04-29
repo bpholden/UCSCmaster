@@ -1029,6 +1029,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
             pri = max(star_table[available, DS_APFPRI])
             sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
     elif len(available):
+        apflog( "getNext(): No new stars available, going back to the previously observed list.",level="warn",echo=True)
         pri = max(star_table[available, DS_APFPRI])
         sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
     else:
