@@ -103,6 +103,7 @@ curtime, endtime, apf_obs = ns.sun_times(datestr)
 bstar = options.bstar
 while observing:
 
+    print "Seeing: %.2f Slowdown %.3f" % (lastfwhm,lastslow)
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime, lastfwhm, lastslow)
     else:
