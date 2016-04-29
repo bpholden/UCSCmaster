@@ -1,28 +1,8 @@
 import numpy as np
-from astropy.table import Table
-from astropy.io import ascii
-import UCSCScheduler_V2 as ds
 
 # needs to take output from sim_night
 # generate the skeleton of a vels file for each target
 # a file will be MJD error I2 Counts exptime
-
-
-
-def readin_data(infile):
-
-    names = ["Star Names", "MJD","precision","total uncertainty","I2 Counts","Exp Time"]
-
-    try:
-      indata = ascii(infile)
-    except:
-        print "cannot open %s for input" % (infile)
-        sys.exit(-1)
-
-    cols = [ indata['starname'], indata['mjd'],np.zeros_like(indata['i2counts']),np.zeros_like(indata['i2counts']),indata['i2counts'],indata['exptime'] ]
-    outtab = Table(cols,names=names)
-     
-    return outtab
 
 def compute_precision(i2counts,cols):
 
