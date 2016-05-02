@@ -378,13 +378,19 @@ def getRARad(hr, mn, sec):
     return ra_hours * 15 * np.pi/180.0
 
 def getDECRad(deg, mn, sec, neg=False):
+    deg = float(deg)
+    mn = float(deg)
+    sec = float(sec)
     if float(deg) < 0:
         neg = True
-    elif  float(mn) < 0:
+        deg = abs(deg)       
+    if  float(mn) < 0:
         neg = True
-    elif float(sec) < 0:
+        mn = abs(mn)
+    if float(sec) < 0:
         neg = True
-    x = abs(float(deg) + float(mn)/60. + float(sec)/3600.)
+        sec = abs(sec)
+    x = deg + mn/60. + sec/3600.
     x = x * np.pi/180.
     if neg:
         return x*-1
