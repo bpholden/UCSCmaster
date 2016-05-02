@@ -373,26 +373,9 @@ def getLST(date, longitude):
     return lst % 360.
 
 
-def getRADeg(hr, mn, sec):
-    ra_hr = float(hr) + float(mn)/60. + float(sec)/3600.
-    return ra_hr * 15
-
 def getRARad(hr, mn, sec):
     ra_hours = float(hr) + float(mn)/60. + float(sec)/3600.
     return ra_hours * 15 * np.pi/180.0
-
-def getDECDeg(deg, mn, sec, neg=False):
-    if float(deg) < 0:
-        neg = True
-    elif float(mn) < 0:
-        neg = True
-    elif float(sec) < 0:
-        neg = True
-    x = abs(float(deg)) + float(mn)/60. + float(sec)/3600.
-    if neg:
-        return x*-1
-    else:
-        return x
 
 def getDECRad(deg, mn, sec, neg=False):
     if float(deg) < 0:
