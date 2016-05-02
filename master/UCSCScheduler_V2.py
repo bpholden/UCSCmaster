@@ -401,7 +401,7 @@ def getDECRad(deg, mn, sec, neg=False):
         neg = True
     elif float(sec) < 0:
         neg = True
-    x = abs(float(deg)) + float(mn)/60. + float(sec)/3600.
+    x = abs(float(deg) + float(mn)/60. + float(sec)/3600.)
     x = x * np.pi/180.
     if neg:
         return x*-1
