@@ -379,15 +379,15 @@ def getRARad(hr, mn, sec):
 
 def getDECRad(deg, mn, sec, neg=False):
     deg = float(deg)
-    mn = float(deg)
+    mn = float(mn)
     sec = float(sec)
-    if float(deg) < 0:
+    if deg < 0:
         neg = True
         deg = abs(deg)       
-    if  float(mn) < 0:
+    if  mn < 0:
         neg = True
         mn = abs(mn)
-    if float(sec) < 0:
+    if sec < 0:
         neg = True
         sec = abs(sec)
     x = deg + mn/60. + sec/3600.
