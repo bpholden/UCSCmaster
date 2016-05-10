@@ -15,12 +15,16 @@ if __name__ == "__main__":
     parser.add_option("-e","--el",dest="el",default=70,type="float")
     (options, args) = parser.parse_args()    
 
+    desiredstars = []
+    if args:
+        desiredstars = args
 #    ws = ds.get_speadsheet(sheetn="The Googledex")
 #    vals = ws.get_all_values()
 #    texpcol = vals[0].index("APFtexp") 
     
     allnames, star_table, do_flag, stars  = ds.parseGoogledex()
-
+    if len(desiredstars) == 0:
+        desiredstars = allnames
     el = np.zeros_like(star_table[:, ds.DS_BV])
     el += options.el
     fwhm = np.array(options.fwhm)
@@ -36,7 +40,8 @@ if __name__ == "__main__":
     etimes, nobs = ds.format_time(exp_times,i2cnts)
     exp_counts, nobs = ds.format_expmeter(exp_counts,nobs)
     fin_pre = precision
-    for i in range(len(stars)):
+    for star in desiredstars:
+        i = allnames.index(star)
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
 #        print "%15s %4.1f %3.1f %7.0f %7.0f %.3g %.1f %d" % (allnames[i],star_table[i, ds.DS_APFPRI],precision[i],i2counts[i],exp_times[i],exp_counts[i],etimes[i],nobs[i])
