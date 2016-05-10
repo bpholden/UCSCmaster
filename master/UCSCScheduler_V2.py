@@ -411,11 +411,18 @@ def getCoordStr(floatval,isRA=False):
     minval = (floatval % 1) * 60.0 
     secval = round( (minval % 1) *60.0, nround)
 
-    if neg:
+    if neg and deghrval != 0:
         ret = "-" + str(deghrval) + ' '
     else:
         ret = str(deghrval) + ' '
-    ret += str(int(minval)) + ' ' + str(secval)
+    if neg and deghrval == 0 and minval != 0:
+        ret += "-" + str(int(minval)) + ' '
+    else:
+        ret += str(int(minval)) + ' '
+    if neg and deghrval == 0 and minval == 0:
+        ret += "-" + str(secval)
+    else:
+        ret += str(secval)
     return ret
 
         
