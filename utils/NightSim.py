@@ -57,7 +57,7 @@ def gen_clouds(nsize=200):
     alpha = 0.353
     if val < 0.7:
         mean = np.random.normal(loc=0.4,scale=0.1,size=1)
-        rms  = np.random.normal(loc=0.1,scale=0.05,size=1)
+        rms  = np.random.normal(loc=0.05,scale=0.01,size=1)
     elif val > 0.9:
         mean = np.random.normal(loc=1.0,scale=0.4,size=1)
         rms  = np.random.normal(loc=0.5,scale=0.1,size=1)
