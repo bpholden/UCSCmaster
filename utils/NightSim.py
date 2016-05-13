@@ -28,8 +28,9 @@ def make_obs_sample(fn):
     slow,fwhm = np.loadtxt(fn,unpack=True)
     return slow, fwhm
 
-def gen_seeing(nsize=200):
-    val = np.random.uniform(size=1)
+def gen_seeing(nsize=200,val=-1):
+    if val < 0:
+        val = np.random.uniform(size=1)
     alpha = 0.52
     
     if val < 0.9:
@@ -52,8 +53,9 @@ def gen_seeing_el(deviate,el):
     deviate += (0.0903544076597*zd +  -0.00172591889888*zd*zd + 3.3157238117e-05*zd*zd*zd)
     return deviate
 
-def gen_clouds(nsize=200):
-    val = np.random.uniform(size=1)
+def gen_clouds(nsize=200,val=-1):
+    if val < 0:
+        val = np.random.uniform(size=1)
     alpha = 0.353
     if val < 0.7:
         mean = np.random.normal(loc=0.4,scale=0.1,size=1)
