@@ -90,8 +90,8 @@ if options.fixed != "":
 else:
     allnames, star_table, do_flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=options.infile)
 
-fwhms = ns.gen_seeing()
-slowdowns = ns.gen_clouds()
+fwhms = ns.gen_seeing(val=0.1) # good conditions
+slowdowns = ns.gen_clouds(val=0.1) # good conditions
 
 lastslow = 5
 lastfwhm = 15
@@ -103,7 +103,6 @@ curtime, endtime, apf_obs = ns.sun_times(datestr)
 bstar = options.bstar
 while observing:
 
-    print "Seeing: %.2f Slowdown %.3f" % (lastfwhm,lastslow)
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime, lastfwhm, lastslow)
     else:
