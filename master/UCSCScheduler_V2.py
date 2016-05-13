@@ -63,7 +63,7 @@ def computeMaxTimes(sn,exp_times):
     maxtimes = np.zeros_like(exp_times)
     maxtimes += TARGET_EXPOSURE_TIME_MAX
     for i,n in enumerate(sn):
-        if re.match("K2APF",n):
+        if re.match("K",n):
             maxtimes[i] *= 3.
     
     return maxtimes
