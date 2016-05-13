@@ -33,10 +33,10 @@ def gen_seeing(nsize=200):
     alpha = 0.52
     
     if val < 0.9:
-        mean = np.random.normal(loc=33.46,scale=1.0,size=1)
+        mean = np.random.normal(loc=8.,scale=1.0,size=1)
         rms  = np.random.normal(loc=1.9,scale=1.0,size=1)
     else:
-        mean = np.random.normal(loc=41.0,scale=1.0,size=1)
+        mean = np.random.normal(loc=19.0,scale=1.0,size=1)
         rms  = np.random.normal(loc=4.5,scale=1.0,size=1)
     real_rms = np.sqrt((1-alpha**2) * rms**2)
     deviates = np.random.normal(loc=0,scale=real_rms,size=nsize)
