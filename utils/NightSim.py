@@ -48,7 +48,8 @@ def gen_seeing(nsize=200):
     return deviates
         
 def gen_seeing_el(deviate,el):
-    deviate += (-0.823637535775*el + 0.0104081289798*el*el +  -4.45020842236e-05*el*el*el)
+    zd = 90 - el
+    deviate += (0.0903544076597*zd +  -0.00172591889888*zd*zd + 3.3157238117e-05*zd*zd*zd)
     return deviate
 
 def gen_clouds(nsize=200):
