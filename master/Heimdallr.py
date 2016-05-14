@@ -241,7 +241,11 @@ class Master(threading.Thread):
                 target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
             else:
                 # Get the best target from the star list
-                target = ds.smartList(self.fixedList, time.time(), seeing, slowdown)
+                if os.path.exists(self.fixedList):
+                    target = ds.smartList(self.fixedList, time.time(), seeing, slowdown)
+                else:
+                    apflog("starlist %s does not exist" % (self.fixedList), level="error",echo=True)
+                    self.fixedList=None
 
             if target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
@@ -316,6 +320,10 @@ class Master(threading.Thread):
 
             if self.fixedList is not None and self.smartObs == False:
                 # We wish to observe a fixed target list, in it's original order
+                if not os.path.exists(self.fixedList):
+                    apflog("starlist %s does not exist" % (self.fixedList), level="error")
+                    self.fixedList=None
+                    return
                 tot = getTotalLines(self.fixedList)
                 apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
                 if APF.ldone == tot and APF.user != "ucsc":
@@ -568,6 +576,7 @@ if __name__ == '__main__':
         if od[o] is not None:
             apflog(o + ': ' +str(od[o]))
 
+
     if opt.test:
         debug = True
         parent = 'example'
@@ -638,6 +647,10 @@ if __name__ == '__main__':
     if not opt.fixed:
         APFTask.set(parent,"STARLIST","")
     else:
+        if not os.path.exist(opt.fixed):
+            errmsg = "starlist %s does not exist" % (opt.fixed)
+            apflog(errmsg,level="error",echo=True)
+            sys.exit(errmsg)
         APFTask.set(parent,"STARLIST",opt.fixed)
 
     if str(phase).strip() != "ObsInfo":
