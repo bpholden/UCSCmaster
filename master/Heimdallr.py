@@ -647,7 +647,7 @@ if __name__ == '__main__':
     if not opt.fixed:
         APFTask.set(parent,"STARLIST","")
     else:
-        if not os.path.exist(opt.fixed):
+        if not os.path.exists(opt.fixed):
             errmsg = "starlist %s does not exist" % (opt.fixed)
             apflog(errmsg,level="error",echo=True)
             sys.exit(errmsg)
