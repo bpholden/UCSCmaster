@@ -216,7 +216,7 @@ class Master(threading.Thread):
                         apflog("Countrate non-sensical %g" % APF.countrate, echo=True, level='warn')
                         APF.counts.monitor(start=False)
                         APF.counts.monitor(start=True)
-                        APF.counts.callback(APF.countmon)
+                        APF.counts.callback(ad.countmon)
                         # yes this happened.
                     if slowdown < ds.SLOWDOWN_MIN:
                         slowdown = ds.SLOWDOWN_MIN
