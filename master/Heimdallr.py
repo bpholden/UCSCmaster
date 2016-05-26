@@ -879,6 +879,9 @@ if __name__ == '__main__':
     except OSError:
         apflog("Note: There was no googledex save file to delete today.", echo=True)
 
+    apfmon = ktl.Service('apfmon')
+    if apfmon['BINNINGDIS'].read(binary=True) > 0:
+        apfmon['BINNINGDIS'].write(0,binary=True)
               
     # Take morning calibrations
     APFTask.phase(parent, "Cal-Post")
