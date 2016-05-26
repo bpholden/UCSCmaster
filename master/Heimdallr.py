@@ -796,7 +796,7 @@ if __name__ == '__main__':
         if opt.binning > 1:
             apfmon = ktl.Service('apfmon')
             d = time.time() + 22.*3600
-            apfmon['BINNINGDIS'].write(d)
+            apfmon['BINNINGDIS'].write(d,binary=True)
             
         if opt.fixed != None:
             lastList = apf.robot["MASTER_STARLIST"].read()
