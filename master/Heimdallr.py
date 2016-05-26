@@ -791,7 +791,12 @@ if __name__ == '__main__':
         apflog("Starting the main watcher." ,echo=True)
 
         bstr = "%d,%d" % (opt.binning,opt.binning)
-        apf.ucam['BINNING'].write(bstr) 
+        apf.ucam['BINNING'].write(bstr)
+
+        if opt.binning > 1:
+            apfmon = ktl.Service('apfmon')
+            d = time.time() + 22.*3600
+            apfmon['BINNINGDIS'].write(d)
             
         if opt.fixed != None:
             lastList = apf.robot["MASTER_STARLIST"].read()
