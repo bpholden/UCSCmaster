@@ -232,7 +232,11 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     for ls in codex:
         if ls[0] == '':
             continue
-        if float(ls[didx["APFpri"]]) < 0.5: continue
+        try:
+            apfpri = float(ls[didx["APFpri"]])
+        except:
+            apfpri = 0.0
+        if apfpri < 0.5: continue
         row = []
         # Get the star name
         names.append(ls[didx["Star Name"]])
