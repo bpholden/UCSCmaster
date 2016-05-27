@@ -51,5 +51,5 @@ if __name__ == "__main__":
         row.append(0)
         row.append( nobs[i])
         line = ds.makeScriptobsLine(allnames[i],row,do_flag[i],dt)
-        print "%s %s %s" % (allnames[i],do_flag[i],line)
+        print "%s #  %s" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI]))
 
