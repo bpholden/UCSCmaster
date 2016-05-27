@@ -68,6 +68,17 @@ def computeMaxTimes(sn,exp_times):
     
     return maxtimes
 
+def float_keyval(instr):
+    try:
+        key,val = instr.split('=')
+    except:
+        return None
+    try:
+        retval = float(val)
+    except:
+        return None
+    return retval
+
 def parseStarlist(starlist):
     """ Parse a scriptobs-compatible starlist for the scheduler.
 
