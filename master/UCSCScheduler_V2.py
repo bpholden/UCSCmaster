@@ -241,9 +241,18 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         # Get the star name
         names.append(ls[didx["Star Name"]])
         # Get the RA
-        row.append(getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]))
+        raval = getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
+        if raval:
+            row.append(raval)
+        else:
+            continue
         # Get the DEC
-        row.append(getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]))
+        decval = getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
+        if raval:
+            row.append(decval)
+        else:
+            continue
+
         for i in ("pmRA", "pmDEC", "Vmag","APFtexp"):
             try:
                 row.append(float(ls[didx[i]]))
@@ -378,13 +387,19 @@ def getLST(date, longitude):
 
 
 def getRARad(hr, mn, sec):
-    ra_hours = float(hr) + float(mn)/60. + float(sec)/3600.
-    return ra_hours * 15 * np.pi/180.0
+    try:
+        ra_hours = float(hr) + float(mn)/60. + float(sec)/3600.
+        return ra_hours * 15 * np.pi/180.0
+    except:
+        return None
 
 def getDECRad(deg, mn, sec, neg=False):
-    deg = float(deg)
-    mn = float(mn)
-    sec = float(sec)
+    try:
+        deg = float(deg)
+        mn = float(mn)
+        sec = float(sec)
+    except:
+        return None
     if deg < 0:
         neg = True
         deg = abs(deg)       
