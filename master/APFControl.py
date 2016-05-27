@@ -686,7 +686,7 @@ class APF:
 
     def DMReset(self):
         try:
-            APFLib.write(self.checkapf['ROBOSTATE'], "master operating")
+            APFLib.write(self.checkapf['ROBOSTATE'], "master operating",timeout=10)
         except Exception, e:
             try:
                 ukind = self.checkapf['USERKIND'].read()
@@ -698,7 +698,7 @@ class APF:
     def DMZero(self):
         try:
             if self.checkapf['DMTIME'].read(binary=True) < 1:
-                APFLib.write(self.checkapf['DMTIME'], -1)
+                APFLib.write(self.checkapf['DMTIME'], -1,timeout=10)
         except Exception, e:
             ostr = "Warning: cannot touch DM Timer: %s " %( e)
             apflog(ostr,level='warn',echo=True)
