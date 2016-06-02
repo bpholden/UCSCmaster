@@ -619,10 +619,11 @@ class APF:
         APFLib.write(self.ucam["OUTFILE"], obs_file)
         APFLib.write(self.ucam["OBSNUM"], obs_num)
         APFLib.write(self.robot["SCRIPTOBS_LINES_DONE"], lines_done)
-	APFTask.waitFor(self.task, True, timeout=5)
+        APFTask.waitFor(self.task, True, timeout=5)
         apflog("checkClouds(): Keywords successfully written.", echo=True)
-	apflog("checkClouds(): New values")
-	apflog("checkClouds(): File=%s - Num=%d - LinesDone=%d" % (self.ucam["OUTFILE"].read(), int(self.ucam["OBSNUM"].read()), int(self.robot["SCRIPTOBS_LINES_DONE"].read()) ) )
+        apflog("checkClouds(): New values")
+        apflog("checkClouds(): File=%s - Num=%d - LinesDone=%d" % (self.ucam["OUTFILE"].read(), int(self.ucam["OBSNUM"].read()), int(self.robot["SCRIPTOBS_LINES_DONE"].read()) ) )
+        return
 
     def observe(self, observation, skip=0):
         """ Currently: Takes a string which is the filename of a properly formatted star list. """
