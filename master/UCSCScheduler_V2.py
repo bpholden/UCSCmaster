@@ -268,14 +268,20 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             try:
                 row.append(float(ls[didx[i]]))
             except ValueError:
-                row.append(0.0)
+                if i == "Vmag":
+                    row.append(15.0)
+                else:
+                    row.append(0.0)
         # For now use the old 1e9 count value
         row.append(1.e9)
         for i in ("APFpri", "APFcad", "APFnshots", "lastobs", "B-V", "APF Desired Precision" ):
             try:
-                row.append(float(ls[didx[i]]))
+         if i in ("APFpri","APFnshots", "lastobs", "B-V"):       row.append(float(ls[didx[i]]))
             except ValueError:
-                row.append(0.0)
+                if i in ("APFpri","APFnshots", "lastobs", "B-V"):
+                    row.append(0.0)
+                else:
+                    row.append(1000.0)
 
         match = re.search("\A(n|N)",ls[didx["Close Companion"]])
         if match:
