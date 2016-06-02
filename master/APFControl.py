@@ -360,6 +360,80 @@ class APF:
         else:
             print "Don't recognize user %s. Nothing was done." % style
 
+
+    def find_star(self):
+        ra = self.tel['RA'].read()
+        dec = self.tel['DEC'].read()
+        rah,ram,ras = ra.split(":") 
+        decd,decm,decs = dec.split(":")
+        cmdpath = '/usr/local/lick/bin/robot/'
+        cmd = os.path.join(cmdpath,"closest")
+        cmdargs =  [cmd, rah,ram, ras, decd,decm,decs, "5","1","8"]
+        sfncat = "/usr/local/lick/data/apf/StarCatalog.dat"
+        try:
+            starcat = open(sfncat)
+        except:
+            apflog("Cannot open file %s" % (sfncat), level="warn",echo=True)
+            return False
+        #$line[3] $line[4] $line[5] $line[6] $line[7] 5 1 "8"] < /usr/local/lick/data/apf/StarCatalog.dat"               
+        p = subprocess.Popen(cmdargs, stdin=starcat, stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=os.path.curdir)
+        out, err = p.communicate()
+        ret_code = p.returncode
+        if ret_code != 0:
+            apflog(err, level="warn",echo=debug)
+            return False
+        else:
+            return out.split()
+    
+    def slew(self,star):
+        cmdpath = '/usr/local/lick/bin/robot/'
+        cmd = os.path.join(cmdpath,'slewlock')
+        try:
+            ra = float(star[1])
+            ra *= 3.819718
+            dec = float(star[2])
+            dec *= 57.295779
+        except:
+            return False
+        cmd +=  ' "%s" %s %f %f %s %s %d ' % ("reference",star[0],ra, dec,star[4],star[5],210)
+        if self.test:
+            apflog("Would slew by executing %s" %(cmd), echo=True)
+        else:
+            apflog("Slewing by executing %s" %(cmd), echo=True)
+            result, code = cmdexec(cmd,cwd=os.path.curdir)
+            if not result:
+                apflog("Failed at slewing: %s" %(code), level="warn", echo=True)
+        return result
+
+
+    def run_focustel(self):
+        """Runs the telescope focus routine."""
+        if self.test: 
+            APFTask.waitFor(self.task, True, timeout=10)
+            apflog("Test Mode: Would be running focus_telescope.",echo=True)
+            return True
+        else:
+            apflog("Running focusinstr routine.",echo=True)
+            cmdpath = '/usr/local/lick/bin/robot/'
+            cmd = os.path.join(cmdpath,'focus_telescope')
+            result, code = cmdexec(cmd,cwd=os.path.curdir)
+            if not result:
+                apflog("focustel failed with code %d" % code, echo=True)
+                expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
+                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                    apflog("focus_telescope failed to exit" ,echo=True)
+                return result
+            
+    def focusTel(self):
+        star = self.find_star()
+        if not star:
+            return False
+        if self.slew(star):
+            return self.run_focustel()
+
+        return False
+    
+                
     def setTeqMode(self, mode):
         apflog("Setting TEQMode to %s" % mode)
         if self.test: 
