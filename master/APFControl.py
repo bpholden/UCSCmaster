@@ -339,7 +339,7 @@ class APF:
             print "Couldn't understand argument %s, nothing was done." % time
 
     def focus(self, user='ucsc'):
-        """Runs the focus routine appropriate for the style string."""
+        """Runs the focus routine appropriate for the user."""
         if user == 'ucsc':
             if self.test: 
                 APFTask.waitFor(self.task, True, timeout=10)
