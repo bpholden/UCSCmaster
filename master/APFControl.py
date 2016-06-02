@@ -510,29 +510,6 @@ class APF:
         else:
             apflog("After 30 minutes of trying, closeup could not successfully complete.")
 
-    def focusTel(self):
-        """Slew the telescope to a bright star, open the shutters, and call measure_focus."""
-        # Short plan
-        # Check if we are tracking a star. ( apftask slew_phase? )
-        # If not, getNext(Bstar) -> self.target()
-        # .call(["focus_telescope", "-o"])
-
-        if self.robot["SLEW_PHASE"].read() != "Tracking":
-            apflog("We don't seem to be tracking a star. This is required to focus the telescope.", echo=True)
-            apflog("focusTel() will return without doing anything.", echo=True)
-            return
-
-        apflog("Attempting to run a full focus sweep.", echo=True)
-        args = ["./focus_telescope", "-o"]
-
-        PIPE = subprocess.PIPE
-
-        ret = subprocess.call(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        if ret != 0:
-            apflog("Focus sweep has failed.", echo=True)
-        else:
-            apflog("Focus finished successfully")
-
 
 
     def updateLastObs(self):
