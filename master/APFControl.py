@@ -408,6 +408,14 @@ class APF:
 
     def run_focustel(self):
         """Runs the telescope focus routine."""
+        el = self.tel['EL'].read(binary=True)
+        cfspos = self.fspos.read(binary=True)
+        crspos = self.rspos.read(binary=True)
+
+        if abs(el - cfspos) < 2.5 or abs(el - crspos) < 2.5:
+            apflog("Cannot focus, telescope too close to shutter", level="warn", echo=True)
+            return False
+           
         if self.test: 
             APFTask.waitFor(self.task, True, timeout=10)
             apflog("Test Mode: Would be running focus_telescope.",echo=True)
