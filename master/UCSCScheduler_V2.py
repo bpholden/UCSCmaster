@@ -276,7 +276,8 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         row.append(1.e9)
         for i in ("APFpri", "APFcad", "APFnshots", "lastobs", "B-V", "APF Desired Precision" ):
             try:
-         if i in ("APFpri","APFnshots", "lastobs", "B-V"):       row.append(float(ls[didx[i]]))
+                if i in ("APFpri","APFnshots", "lastobs", "B-V"):
+                    row.append(float(ls[didx[i]]))
             except ValueError:
                 if i in ("APFpri","APFnshots", "lastobs", "B-V"):
                     row.append(0.0)
