@@ -37,7 +37,7 @@ parent = 'master'
 SUNEL_ENDLIM = -10.0
 SUNEL_STARTLIM = -9.0
 SUNEL_HOR = -3.2
-
+FOCUSTIME = 3600.
 AVERAGE_INSTRFOC = 8481
 
 # global
@@ -428,6 +428,7 @@ class Master(threading.Thread):
                     self.BV=None
                     APF.countrate = 0
 
+            
             # If scriptobs is running and waiting for input, give it a target
             if running == True and float(sunel) < sunel_lim and APF.sop.read().strip() == 'Input':
                 if self.fixedList is None:
