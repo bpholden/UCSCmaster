@@ -624,6 +624,10 @@ if __name__ == '__main__':
     apf = ad.APF(task=parent, test=debug)
     APFTask.waitFor(parent, True, timeout=5)
 
+    if apf.checkapf['USERKIND'].read(binary=True) != 3:
+        apflog("checkapf not in robotic mode, exiting",level="error",echo=True)
+        sys.exit()
+    
     # Check to see if the instrument has been released
     # if not debug:
     #     if apf.checkapf['INSTRELE'].read().strip().lower() != 'yes':
