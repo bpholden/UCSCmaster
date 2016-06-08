@@ -401,7 +401,7 @@ class APF:
             apflog("Would slew by executing %s" %(cmd), echo=True)
         else:
             apflog("Slewing by executing %s" %(cmd), echo=True)
-            result, code = cmdexec(cmd,cwd=os.path.curdir)
+            result, code = cmdexec(cmd,cwd=os.path.curdir,debug=True)
             if not result:
                 apflog("Failed at slewing: %s" %(code), level="warn", echo=True)
         return result
