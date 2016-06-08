@@ -380,7 +380,8 @@ class APF:
         out, err = p.communicate()
         ret_code = p.returncode
         if ret_code != 0:
-            apflog(err, level="warn",echo=debug)
+            apflog(out,echo=True)            
+            apflog(err, level="warn",echo=True)
             return False
         else:
             return out.split()
