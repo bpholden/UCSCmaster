@@ -256,30 +256,29 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         if raval:
             row.append(raval)
         else:
-            continue
+            row.append(-1.)
         # Get the DEC
         decval = getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
-        if raval:
+        if decval:
             row.append(decval)
         else:
-            continue
+            row.append(-3.14)
 
-        for i in ("pmRA", "pmDEC", "Vmag","APFtexp"):
+        for coln in ("pmRA", "pmDEC", "Vmag","APFtexp"):
             try:
-                row.append(float(ls[didx[i]]))
+                row.append(float(ls[didx[coln]]))
             except ValueError:
-                if i == "Vmag":
+                if coln == "Vmag":
                     row.append(15.0)
                 else:
                     row.append(0.0)
         # For now use the old 1e9 count value
         row.append(1.e9)
-        for i in ("APFpri", "APFcad", "APFnshots", "lastobs", "B-V", "APF Desired Precision" ):
+        for coln in ["APFpri", "APFcad", "APFnshots", "lastobs", "B-V", "APF Desired Precision" ]:
             try:
-                if i in ("APFpri","APFnshots", "lastobs", "B-V"):
-                    row.append(float(ls[didx[i]]))
+                row.append(float(ls[didx[coln]]))
             except ValueError:
-                if i in ("APFpri","APFnshots", "lastobs", "B-V"):
+                if coln in ("APFpri","APFnshots", "lastobs", "B-V"):
                     row.append(0.0)
                 else:
                     row.append(1000.0)
