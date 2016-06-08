@@ -396,7 +396,7 @@ class APF:
             dec *= 57.295779
         except:
             return False
-        cmd +=  ' "%s" %s %f %f %s %s %d ' % ("reference",star[0],ra, dec,star[4],star[5],210)
+        cmd +=  ' %s %s %f %f %s %s %d ' % ("reference",star[0],ra, dec,star[4],star[5],210)
         if self.test:
             apflog("Would slew by executing %s" %(cmd), echo=True)
         else:
@@ -404,6 +404,7 @@ class APF:
             result, code = cmdexec(cmd,cwd=os.path.curdir,debug=True)
             if not result:
                 apflog("Failed at slewing: %s" %(code), level="warn", echo=True)
+
         return result
 
 
