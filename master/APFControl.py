@@ -327,7 +327,7 @@ class APF:
                 apflog("Cannot read the last best fitting focus value or write the dewar focus value", level='error')
             apflog("Running calibrate %s %s" % (script, time), level = 'info')
             cmd = '%s %s %s' % (s_calibrate,script, time)
-            code = APFTask.do("master",True,tuple(cmd.split()))
+            code = APFTask.do("master",True,cmd)
             if code > 0:
                 apflog("%s %s failed with return code %d" % (s_calibrate, script, code),echo=True)
             expression="($apftask.CALIBRATE_STATUS != 0) and ($apftask.CALIBRATE_STATUS != 1) "
@@ -350,7 +350,7 @@ class APF:
 #                cmd = '/u/user/devel_scripts/ucscapf/auto_focuscube.sh pre t'
                 cmdpath = '/usr/local/lick/bin/robot/'
                 cmd = os.path.join(cmdpath,'focusinstr -b')
-                code = APFTask.do("master",True,tuple(cmd.split()))
+                code = APFTask.do("master",True,cmd)
                 if code > 0:
                     apflog("focusinstr failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
