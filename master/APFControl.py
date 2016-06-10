@@ -54,7 +54,7 @@ decker     = motor['DECKERNAM']
 
 
 def cmdexec(cmd, debug=False, cwd='./'):
-    args = ["apftask", "master","do"]
+    args = ["apftask","do"]
     args = args + cmd.split()
     apflog("Executing Command: %s" % repr(cmd), echo=True)
     
