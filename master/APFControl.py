@@ -327,8 +327,8 @@ class APF:
                 apflog("Cannot read the last best fitting focus value or write the dewar focus value", level='error')
             apflog("Running calibrate %s %s" % (script, time), level = 'info')
             cmd = '%s %s %s' % (s_calibrate,script, time)
-            result, code = cmdexec(cmd)
-            if not result:
+            code = APFTask.do("master",True,cmd.split())
+            if code > 0:
                 apflog("%s %s failed with return code %d" % (s_calibrate, script, code),echo=True)
             expression="($apftask.CALIBRATE_STATUS != 0) and ($apftask.CALIBRATE_STATUS != 1) "
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
@@ -350,8 +350,8 @@ class APF:
 #                cmd = '/u/user/devel_scripts/ucscapf/auto_focuscube.sh pre t'
                 cmdpath = '/usr/local/lick/bin/robot/'
                 cmd = os.path.join(cmdpath,'focusinstr -b')
-                result, code = cmdexec(cmd,cwd=os.path.curdir)
-                if not result:
+                code = APFTask.do("master",True,cmd.split())
+                if code > 0:
                     apflog("focusinstr failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
@@ -401,8 +401,9 @@ class APF:
             apflog("Would slew by executing %s" %(cmd), echo=True)
         else:
             apflog("Slewing by executing %s" %(cmd), echo=True)
-            result, code = cmdexec(cmd,cwd=os.path.curdir,debug=True)
-            if not result:
+            #            cmdexec(cmd,cwd=os.path.curdir,debug=True)
+            code = APFTask.do("master",True,cmd.split())
+            if code > 0:
                 apflog("Failed at slewing: %s" %(code), level="warn", echo=True)
 
         return result
@@ -426,8 +427,9 @@ class APF:
             apflog("Running focusinstr routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
             cmd = os.path.join(cmdpath,'focus_telescope')
-            result, code = cmdexec(cmd,cwd=os.path.curdir)
-            if not result:
+            #            result, code = cmdexec(cmd,cwd=os.path.curdir)
+            code = APFTask.do("master",True,cmd.split())
+            if code >0:
                 apflog("focustel failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
@@ -467,7 +469,7 @@ class APF:
                 return False
 
         cmd = '/usr/local/lick/bin/robot/clear_estop'
-        result, code = cmdexec(cmd)
+        code = APFTask.do("master",True,cmd.split())
         if result:
             return True
         else:
