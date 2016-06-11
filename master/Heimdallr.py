@@ -39,7 +39,7 @@ SUNEL_STARTLIM = -9.0
 SUNEL_HOR = -3.2
 FOCUSTIME = 3600.
 AVERAGE_INSTRFOC = 8481
-
+DMLIM = 1140
 # global
 paused = False
 
