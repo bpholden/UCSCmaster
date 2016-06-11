@@ -373,7 +373,7 @@ class Master(threading.Thread):
         # Actual Watching loop
         apflog("Beginning observing process....",echo=True)
         APF.DMZero()
-
+        haveobserved = False
         while self.signal:
             # Check on everything
             if datetime.now().strftime("%p") == 'AM':
@@ -438,7 +438,7 @@ class Master(threading.Thread):
                     apflog("Observing target")
                     APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
                     APFTask.waitfor(self.task, True, timeout=15)
-                    
+                    haveobserved = True                    
                     if self.obsBstar:
                         self.obsBstar = False
                     try:
@@ -457,12 +457,14 @@ class Master(threading.Thread):
                     APFTask.waitfor(self.task, True, timeout=15)
                     apflog("Observing target")
                     APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
-                    
+                    haveobserved = True
+                                                           
             # check last telescope focus
             lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
             if time.time() - lastfoc > FOCUSTIME and APF.isReadyForObserving()[0] and running and float(sunel) <= sunel_lim:
                 APFTask.set(parent,suffix="MESSAGE",value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.),wait=False)
 #                APF.focusTel()
+                haveobserved = False
                 
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation
