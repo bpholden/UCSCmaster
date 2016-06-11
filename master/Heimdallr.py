@@ -546,7 +546,7 @@ class Master(threading.Thread):
                     
                 
             # Keep an eye on the deadman timer if we are open 
-            if APF.isOpen()[0] and APF.dmtime <= 1140:
+            if APF.isOpen()[0] and APF.dmtime <= DMLIM:
                 APFTask.set(parent,suffix="MESSAGE",value="Reseting DM timer",wait=False)                    
                 APF.DMReset()
 #                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
