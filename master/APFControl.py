@@ -468,7 +468,7 @@ class APF:
                 return False
 
         cmd = '/usr/local/lick/bin/robot/clear_estop'
-        code = APFTask.do("master",True,(cmd))
+        results, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
         if result:
             return True
         else:
