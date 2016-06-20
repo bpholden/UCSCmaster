@@ -196,7 +196,7 @@ def findColumns(col_names,req_cols):
 
     return didx
 
-def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat"):
+def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None):
     """ parseGoogledex parses the google sheet and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
@@ -209,15 +209,17 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     """
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
+    if not outdir :
+        outdir = os.getcwd()
     try:
-        f = open(os.path.join(os.getcwd(),outfn),'r')
+        f = open(os.path.join(outdir,outfn),'r')
     except IOError:
         apflog( "Starting Googledex parse",echo=True)
         worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
         full_codex = worksheet.get_all_values()
         #time = (datetime.now() - start).total_seconds()
         #print "Loaded Values. Took {0:f} seconds.".format(time)
-        f = open(os.path.join(os.getcwd(),"googledex.dat"),'w')
+        f = open(os.path.join(outdir,"googledex.dat"),'w')
         pickle.dump(full_codex, f)
         f.close()
     else:
@@ -711,7 +713,7 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
     return ret, np.array(start_elevations), np.array(fin_elevations)
 
 
-def smartList(starlist, time, seeing, slowdown):
+def smartList(starlist, time, seeing, slowdown,outdir = None):
     """ Determine the best target to observe from the provided scriptobs-compatible starlist.
         Here the best target is defined as an unobserved target (ie not in observed targets )
         that is visible above 30 degrees elevation. Higher elevation targets are prefered,
@@ -727,8 +729,9 @@ def smartList(starlist, time, seeing, slowdown):
         dt = time
     elif type(time) == ephem.Date:
         dt = time.datetime()
-
-    observed, _ = getObserved(os.path.join(os.getcwd(),"observed_targets"))
+    if not outdir:
+        outdir = os.getcwd()
+    observed, _ = getObserved(os.path.join(outdir,"observed_targets"))
 
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
@@ -845,11 +848,15 @@ def format_time(total, i2counts, hitthemall=False):
     return times, exps
 
 
-def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='Vogt'):
+def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='Vogt',outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
     """
+
+    if not outdir:
+        outdir = os.getcwd()
+        
     # Convert the unix timestamp into a python datetime
     if type(time) == float:
         dt = datetime.utcfromtimestamp(int(time))
@@ -882,7 +889,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
             ptime = dt
         else:
             ptime = datetime.utcnow()
-    observed, obstimes = update_local_googledex(ptime,googledex_file=os.path.join(os.getcwd(),"googledex.dat"), observed_file=os.path.join(os.getcwd(),"observed_targets"))
+    observed, obstimes = update_local_googledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
 
     # List of targets already observed
 #    observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
