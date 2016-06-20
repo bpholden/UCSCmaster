@@ -604,9 +604,6 @@ class APF:
             apflog("Number of last observation is %s" % self.ucam('OBSNUM').read())
             return
         APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], self.ucam["OBSNUM"].read())
-        with open(os.path.join(self.cwd,'lastObs.txt'),'w') as f:
-                f.write("%s\n" % self.ucam('OBSNUM').read())
-                apflog("Recording last ObsNum as %d" % int(self.ucam["OBSNUM"].read()))
 
 
     def updateWindshield(self, state):
