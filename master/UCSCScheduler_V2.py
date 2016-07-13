@@ -1057,7 +1057,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         return None
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
-    good_cadence = np.where(cadence_check >  star_table[:, DS_CAD], True, False)
+    good_cadence = np.where(cadence_check >  1.0, True, False)
     good_cadence_available = available & good_cadence
 
     if len(good_cadence_available):
