@@ -762,12 +762,12 @@ if __name__ == '__main__':
             apflog("Cannot download googledex?! %s" % (e),level="Error")
             
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
-        try:
-            APFLib.write("apfmot.DEWARFOCRAW", AVERAGE_INSTRFOC,timeout=60)
-            APFLib.write("apftask.FOCUSINSTR_LASTFOCUS", AVERAGE_INSTRFOC,timeout=60)
-            apflog("Moved instrument focus to %d" % (AVERAGE_INSTRFOC),echo=True)            
-        except:
-            apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
+        # try:
+        #     APFLib.write("apfmot.DEWARFOCRAW", AVERAGE_INSTRFOC,timeout=60)
+        #     APFLib.write("apftask.FOCUSINSTR_LASTFOCUS", AVERAGE_INSTRFOC,timeout=60)
+        #     apflog("Moved instrument focus to %d" % (AVERAGE_INSTRFOC),echo=True)            
+        # except:
+        #     apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
 
         if apf.ucam['OUTFILE'].read() == 'ucsc':
             APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
