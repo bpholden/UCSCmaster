@@ -213,14 +213,14 @@ class Master(threading.Thread):
                     slowdown = exp_cnts_sec / APF.countrate
                     if slowdown < 0:
                         slowdown = 1
-                        apflog("Countrate non-sensical %g" % APF.countrate, echo=True, level='warn')
+                        apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
                         APF.counts.monitor(start=False)
                         APF.counts.monitor(start=True)
                         APF.counts.callback(ad.countmon)
                         # yes this happened.
                     if slowdown < ds.SLOWDOWN_MIN:
                         slowdown = ds.SLOWDOWN_MIN
-                        apflog("slowdown too low %g" % APF.countrate, echo=True, level='debug')
+                        apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
                         # yes this happened.
                 except ZeroDivisionError:
                     apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
