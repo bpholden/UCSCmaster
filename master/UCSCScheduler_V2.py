@@ -29,7 +29,7 @@ TARGET_MOON_DIST_MAX = 25
 
 # Maximum single exposure time in seconds
 MAX_EXPTIME = 1200.
-MIN_EXPTIME = 300.
+MIN_EXPTIME = 600.
 MIN_SHUTTERTIME = 60
 MAX_I2 = 40000
 MIN_I2 = 500
