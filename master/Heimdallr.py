@@ -222,6 +222,9 @@ class Master(threading.Thread):
                         slowdown = ds.SLOWDOWN_MIN
                         apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
                         # yes this happened.
+                    if slowdown > ds.SLOWDOWN_MAX:
+                        slowdown = ds.SLOWDOWN_MAX
+                        apflog("slowdown too high, countrate= %g" % (APF.countrate), echo=True, level='debug')
                 except ZeroDivisionError:
                     apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                     slowdown = 1
