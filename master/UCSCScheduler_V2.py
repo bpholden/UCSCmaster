@@ -232,7 +232,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
-                "APFtexp", "APFpri", "APFcad", "APFnshots", "lastobs", \
+                "APFpri", "APFcad", "lastobs", \
                 "B-V", "APF Desired Precision", "Close Companion"
                 ]
     didx = findColumns(col_names,req_cols)
@@ -266,7 +266,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         else:
             row.append(-3.14)
 
-        for coln in ("pmRA", "pmDEC", "Vmag","APFtexp"):
+        for coln in ("pmRA", "pmDEC", "Vmag"):
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
@@ -275,8 +275,9 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 else:
                     row.append(0.0)
         # For now use the old 1e9 count value
+        row.append(1200.0)
         row.append(1.e9)
-        for coln in ["APFpri", "APFcad", "APFnshots", "lastobs", "B-V", "APF Desired Precision" ]:
+        for coln in ["APFpri", "APFcad"] :
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
@@ -284,7 +285,18 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                     row.append(0.0)
                 else:
                     row.append(1000.0)
-
+                    
+        row.append(1)
+        
+        for coln in ["lastobs", "B-V", "APF Desired Precision" ]:
+            try:
+                row.append(float(ls[didx[coln]]))
+            except ValueError:
+                if coln in ("APFpri","APFnshots", "lastobs", "B-V"):
+                    row.append(0.0)
+                else:
+                    row.append(1000.0)
+                
         match = re.search("\A(n|N)",ls[didx["Close Companion"]])
         if match:
             do_flag.append("")
