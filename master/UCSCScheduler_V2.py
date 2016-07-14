@@ -817,7 +817,8 @@ def format_expmeter(exp_counts, nexp):
     
     exp_counts *= 1.1 
     long_idx = np.where(exp_counts > MAX_EXPMETER, True, False)
-    nexp[long_idx] = np.ceil((exp_counts[long_idx]/MAX_EXPMETER) + 1)
+    toofew_idx = np.where(exp_counts/nexp > MAX_EXPMETER, True, False)
+    nexp[toofew_idx] = np.ceil((exp_counts[toofew_idx]/MAX_EXPMETER) + 1)
     exp_counts[long_idx] = MAX_EXPMETER
     return exp_counts, nexp
 
