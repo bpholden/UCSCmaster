@@ -22,7 +22,7 @@ if __name__ == "__main__":
 #    vals = ws.get_all_values()
 #    texpcol = vals[0].index("APFtexp") 
     
-    allnames, star_table, do_flag, stars  = ds.parseGoogledex()
+    allnames, star_table, flags, stars  = ds.parseGoogledex()
     if len(desiredstars) == 0:
         desiredstars = allnames
     el = np.zeros_like(star_table[:, ds.DS_BV])
@@ -45,5 +45,5 @@ if __name__ == "__main__":
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
 #        print "%15s %4.1f %3.1f %7.0f %7.0f %.3g %.1f %d" % (allnames[i],star_table[i, ds.DS_APFPRI],precision[i],i2counts[i],exp_times[i],exp_counts[i],etimes[i],nobs[i])
-        ret = ds.makeScriptobsLine(allnames[i],star_table[i,:], '', datetime.datetime.utcnow())
+        ret = ds.makeScriptobsLine(allnames[i],star_table[i,:], flags['do'][i], datetime.datetime.utcnow(),decker=flags['decker'][i])
         print ret

@@ -23,7 +23,7 @@ if __name__ == "__main__":
 #    vals = ws.get_all_values()
 #    texpcol = vals[0].index("APFtexp") 
     
-    allnames, star_table, do_flag, stars  = ds.parseGoogledex()
+    allnames, star_table, flags, stars  = ds.parseGoogledex()
 
     el = np.zeros_like(star_table[:, ds.DS_BV])
     el += options.el

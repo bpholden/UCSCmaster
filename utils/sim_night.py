@@ -88,7 +88,7 @@ outfp.write(hdrstr)
 if options.fixed != "":
     allnames, star_table, lines, stars = ds.parseStarlist(options.fixed)
 else:
-    allnames, star_table, do_flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=options.infile)
+    allnames, star_table, flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=options.infile)
 
 fwhms = ns.gen_seeing(val=0.1) # good conditions
 slowdowns = ns.gen_clouds(val=0.1) # good conditions
