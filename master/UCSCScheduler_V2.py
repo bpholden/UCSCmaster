@@ -196,14 +196,14 @@ def findColumns(col_names,req_cols):
 
     return didx
 
-def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None):
+def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W'}):
     """ parseGoogledex parses the google sheet and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
     names, star_table, do_flag, stars = parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat")
     names - a list of stars in the starlist
     star_table - a numpy array
-    do_flag - a list of items on whether or not do="y" needs to be set for scriptobs 
+    flags - a dictionary of items on whether or not do="y" needs to be set for scriptobs 
     stars - a list of pyEphem objects 
 
     """
@@ -232,14 +232,14 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
-                "APFtexp", "APFpri", "APFcad", "APFnshots", "lastobs", \
-                "B-V", "APF Desired Precision", "Close Companion"
+                "APFpri", "APFcad", "APFnshots", "lastobs", \
+                "B-V", "APF Desired Precision", "Close Companion", "APF decker"
                 ]
     didx = findColumns(col_names,req_cols)
     
     names = []
     star_table = []
-    do_flag = []
+    flags = { "do" : [], "decker" : []}
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -266,7 +266,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         else:
             row.append(-3.14)
 
-        for coln in ("pmRA", "pmDEC", "Vmag","APFtexp"):
+        for coln in ("pmRA", "pmDEC", "Vmag"):
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
@@ -275,8 +275,19 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 else:
                     row.append(0.0)
         # For now use the old 1e9 count value
+        row.append(1200.0)
         row.append(1.e9)
-        for coln in ["APFpri", "APFcad", "APFnshots", "lastobs", "B-V", "APF Desired Precision" ]:
+        for coln in ["APFpri", "APFcad","APFnshots"] :
+            try:
+                row.append(float(ls[didx[coln]]))
+            except ValueError:
+                if coln in ("APFpri","APFnshots", "lastobs", "B-V"):
+                    row.append(0.0)
+                else:
+                    row.append(1000.0)
+                    
+        
+        for coln in ["lastobs", "B-V", "APF Desired Precision" ]:
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
@@ -287,17 +298,26 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
 
         match = re.search("\A(n|N)",ls[didx["Close Companion"]])
         if match:
-            do_flag.append("")
+            flags['do'].append("")
         else:
-            do_flag.append("Y")
-        
+            flags['do'].append("Y")
+
+        if "APF decker" in didx.keys():
+            match = re.search("\A(W|N|T|S|O|K|L|M|B)",ls[didx["APF decker"]])
+            if match:
+                flags['decker'].append(match.group(1))
+            else:
+                flags['decker'].append(config['decker'])
+        else:
+            flags['decker'].append(config['decker'])
+            
         star_table.append(row)
         star = ephem.FixedBody()
         star._ra = ephem.hours(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]]))
         star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
         stars.append(star)
 
-    return (names, np.array(star_table), do_flag, stars)
+    return (names, np.array(star_table), flags, stars)
     
 def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     """
@@ -942,7 +962,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     # Note -- RA and Dec are returned in Radians
     if verbose:
         apflog("getNext(): Parsing the Googledex...",echo=True)
-    sn, star_table, do_flag, stars = parseGoogledex(sheetn=sheetn)
+    sn, star_table, flags, stars = parseGoogledex(sheetn=sheetn)
     sn = np.array(sn)
     targNum = len(sn)
     if verbose:
@@ -1122,7 +1142,7 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     res['NAME']   = sn[idx]
     res['SCORE']  = star_table[idx,DS_NSHOTS]
     res['PRI']    = star_table[idx, DS_APFPRI]
-    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], do_flag[idx], dt, decker=confg['decker'], I2=confg['I2'], owner=owner)
+    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=confg['I2'], owner=owner)
     return res
 
 
