@@ -128,9 +128,4 @@ while observing:
         
 print "sun rose"
 fn = "observed_targets"
-if os.path.isfile(fn):
-    try:
-        os.unlink(fn)
-    except:
-        print "cannot unlink %s" %(fn)
 outfp.close()
