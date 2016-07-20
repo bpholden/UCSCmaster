@@ -836,15 +836,17 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
     return res
 
 def format_expmeter(exp_counts, nexp):
-    
+
+    exps = np.zeros_like(exp_counts)
     exp_counts *= 1.1 
     long_idx = np.where(exp_counts > MAX_EXPMETER, True, False)
     toofew_idx = np.where(exp_counts/nexp > MAX_EXPMETER, True, False)
     nexp[toofew_idx] = np.ceil((exp_counts[toofew_idx]/MAX_EXPMETER) + 1)
     exp_counts[long_idx] = MAX_EXPMETER
-    return exp_counts, nexp
+    exps[exps < nexp] = nexp[exps < nexp]
+    return exp_counts, exps
 
-def format_time(total, i2counts, hitthemall=False):
+def format_time(total, i2counts, nexp, hitthemall=False):
     total = np.array(total)
     times = np.zeros(len(total))
     exps  = np.zeros(len(total))
@@ -864,9 +866,11 @@ def format_time(total, i2counts, hitthemall=False):
         exps[max_idx] = np.ceil(total[max_idx]/MAX_EXPTIME)
     times[max_idx] = MAX_EXPTIME
 
-#    bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
-#    exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
-#    times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
+    #    bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
+    #    exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
+    #    times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
+
+    exps[exps < nexp] = nexp[exps < nexp]
 
     return times, exps
 
@@ -1050,11 +1054,11 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         i2cnts[f] += i2counts
         if verbose:
             apflog("getNext(): Formating exposure times",echo=True)
-        star_table[f, DS_EXPT], star_table[f, DS_NSHOTS] = format_time(exp_times,i2counts)
+        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS])
         #        exp_counts /= star_table[f, DS_NSHOTS]
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
-        star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,star_table[f, DS_NSHOTS])
+        star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,exps)
         #        star_table[f, DS_COUNTS] = 1.1*exp_counts / star_table[f, DS_NSHOTS]
 
         # Is the exposure time too long?
