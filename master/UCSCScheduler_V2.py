@@ -295,11 +295,13 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                     row.append(0.0)
                 else:
                     row.append(1000.0)
-
-        match = re.search("\A(n|N)",ls[didx["Close Companion"]])
-        if match:
-            flags['do'].append("")
-        else:
+        try:
+            match = re.search("\A(n|N)",ls[didx["Close Companion"]])
+            if match:
+                flags['do'].append("")
+            else:
+                flags['do'].append("Y")
+        except:
             flags['do'].append("Y")
 
         if "APF decker" in didx.keys():
