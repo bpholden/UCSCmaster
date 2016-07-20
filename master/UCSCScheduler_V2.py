@@ -281,8 +281,8 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
-                if coln in ("APFpri","APFnshots", "lastobs", "B-V"):
-                    row.append(0.0)
+                if coln in ("APFpri","APFnshots"):
+                    row.append(0)
                 else:
                     row.append(1000.0)
                     
