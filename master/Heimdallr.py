@@ -504,7 +504,7 @@ class Master(threading.Thread):
                         APFLib.write(APF.dome['AZENABLE'],'enable',timeout=10)
                     except:
                         apflog("Cannot enable AZ drive, exiting",level="error")
-                        sys.exit()
+                        os._exit(1)
                     apf.setTeqMode('Evening')
                 else:
                     apflog("Cannot clear emergency stop, sleeping for 600 seconds",level="error")
