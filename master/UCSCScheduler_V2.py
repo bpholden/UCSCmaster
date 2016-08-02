@@ -172,7 +172,7 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
 
     return worksheet
 
-def findColumns(col_names,req_cols):
+def findColumns(col_names,req_cols,opt_cols==[]):
     """ findColumns finds the indices for the column names in the list of required columns
     indices = findColumns(col_names, req_cols)
     
@@ -189,6 +189,10 @@ def findColumns(col_names,req_cols):
         else:
             apflog("%s Not found in column names from google spreadsheet" % (r) , level="Alert",echo=True)
 
+    for r in opt_cols:
+        if r in col_names:
+            didx[r] = col_names.index(r)
+            
     # hack to handle an error
     if req_cols[0] == "Star Name" and req_cols[0] not in didx.keys():
         didx[req_cols[0]] = 0
