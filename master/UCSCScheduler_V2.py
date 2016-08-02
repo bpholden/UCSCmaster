@@ -172,7 +172,7 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
 
     return worksheet
 
-def findColumns(col_names,req_cols,opt_cols==[]):
+def findColumns(col_names,req_cols,opt_cols=[]):
     """ findColumns finds the indices for the column names in the list of required columns
     indices = findColumns(col_names, req_cols)
     
