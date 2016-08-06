@@ -281,8 +281,11 @@ class APF:
     def isOpen(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
         what = self.checkapf("WHATSOPN").read()
-        if "DomeShutter" in what or "MirrorCover" in what or "Vents" in what:
-            return True, what
+        if hasattr(what,'__iter__'):
+            if "DomeShutter" in what or "MirrorCover" in what or "Vents" in what:
+                return True, what
+            else:
+                return False, ''
         else:
             return False, ''
 
