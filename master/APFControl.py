@@ -280,7 +280,7 @@ class APF:
     # Fucntion for checking what is currently open on the telescope
     def isOpen(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
-        what = self.checkapf("WHATSOPN").read()
+        what = self.checkapf("WHATSOPN").read().split()
         if hasattr(what,'__iter__'):
             if "DomeShutter" in what or "MirrorCover" in what or "Vents" in what:
                 return True, what
