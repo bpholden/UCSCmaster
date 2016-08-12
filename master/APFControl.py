@@ -284,7 +284,7 @@ class APF:
         try:
             what = whatstr.split()
         except:
-            apflog("checkapf.WHATSOPN returned a value that split cannot split",level='warn',echo=True)
+            apflog("checkapf.WHATSOPN returned a value that str.split cannot split",level='warn',echo=True)
             return False, ''
         if hasattr(what,'__iter__'):
             if "DomeShutter" in what or "MirrorCover" in what or "Vents" in what:
