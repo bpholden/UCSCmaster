@@ -184,6 +184,8 @@ class APF:
     autofoc    = robot["SCRIPTOBS_AUTOFOC"]
     slew_allowed = robot['slew_allowed']
     ucam       = ktl.Service('apfucam')
+    apfschedule= ktl.Service('apfschedule')
+    
     user       = ucam['OUTFILE']
     elapsed    = ucam['elapsed']
     apfteq     = ktl.Service('apfteq')
@@ -311,12 +313,14 @@ class APF:
         if self.test: return
         apflog("Setting science camera parameters.")
         self.ucam('OBSERVER').write(name)
+        self.apfschedule('OWNRHINT').write(name)        
         self.ucam('OBSNUM').write(str(num))
         self.ucam('OUTDIR').write('/data/apf/')
         self.ucam('OUTFILE').write(name)
 
         apflog("Upadted science camera parameters:")
         apflog("Observer = %s" % self.ucam('OBSERVER').read(),echo=True)
+        apflog("Ownrhint = %s" % self.apfschedule('OWNRHINT').read(),echo=True)        
         apflog("Output directory = %s" % self.ucam('OUTDIR').read(),echo=True)
         apflog("Observation number = %s" % self.ucam('OBSNUM').read(), echo=True)
         apflog("File prefix = %s" % self.ucam('OUTFILE').read(), echo=True)
