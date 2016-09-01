@@ -318,7 +318,7 @@ class APF:
         self.ucam('OUTDIR').write('/data/apf/')
         self.ucam('OUTFILE').write(name)
 
-        apflog("Upadted science camera parameters:")
+        apflog("Updated science camera parameters:")
         apflog("Observer = %s" % self.ucam('OBSERVER').read(),echo=True)
         apflog("Ownrhint = %s" % self.apfschedule('OWNRHINT').read(),echo=True)        
         apflog("Output directory = %s" % self.ucam('OUTDIR').read(),echo=True)
