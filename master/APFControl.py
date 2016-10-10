@@ -369,6 +369,10 @@ class APF:
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                     apflog("focusinstr failed to exit" ,echo=True)
+                expression="($apftask.FOCUSINSTR_STATUS == 3)"
+                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                    apflog("focusinstr failed" ,echo=True)
+                    result = False
                 return result
         else:
             print "Don't recognize user %s. Nothing was done." % style
