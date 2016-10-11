@@ -411,7 +411,8 @@ def update_local_googledex(time,googledex_file="googledex.dat", observed_file="o
 
     with open(googledex_file, 'w') as f:
         pickle.dump(full_codex, f)
-            
+    f.close()
+    
     return names, times
 
 
