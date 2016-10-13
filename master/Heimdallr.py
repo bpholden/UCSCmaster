@@ -873,8 +873,9 @@ if __name__ == '__main__':
     # We have finished taking data, and presumably it is the morning.
     apf.setTeqMode('Morning')
 
-    if opt.name is "ucsc":
+    if opt.name == "ucsc":
         try:
+            apflog("Updating the online googledex with the observed times", level='Info', echo=True)
             ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
         except:
             apflog("Updating the online googledex has failed.", level="Error")
