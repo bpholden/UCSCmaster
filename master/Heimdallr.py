@@ -119,14 +119,14 @@ def args():
 def findObsNum(apf):
 
     obsNum = int(apf.robot["MASTER_LAST_OBS_UCSC"].read().strip())
-    try:
-        backup_obsNum = int(apf.robot["MASTER_VAR_2"].read(binary=True))
-    except:
-        backup_obsNum = -1
-    if  backup_obsNum > obsNum:
-        obsNum = backup_obsNum
+
+    last_times = int(apf.robot["MASTER_VAR_2"].read(binary=True))
+    deltat = time.time() - last_times
+    deltat /= (24*3600)
+    ndays = int(deltat+0.5)
 
     obsNum += 100 - (obsNum % 100)
+    obsNum += ndays*200
 
     if obsNum % 10000 > 9700:
         obsNum += 10000 - (obsNum % 10000)
@@ -729,6 +729,7 @@ if __name__ == '__main__':
         apflog("Setting ObsInfo finished. Setting phase to Focus.")
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
+        APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
         APFTask.phase(parent, "Focus")
         apflog("Phase is now %s" % phase)
 
