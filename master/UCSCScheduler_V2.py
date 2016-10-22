@@ -1136,6 +1136,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
     idx = idx[0]
 
     stars[idx].compute(apf_obs)
+    cstr= "getNext(): cadence check: %f (%f %f %f)" %( ((ephem.julian_date(dt) - star_table[idx, DS_LAST]) / star_table[idx, DS_CAD]), ephem.julian_date(dt), star_table[idx, DS_LAST], star_table[idx, DS_CAD])
+    apflog(cstr,echo=True)
     
     res = dict()
         
