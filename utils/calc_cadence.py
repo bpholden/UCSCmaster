@@ -2,6 +2,7 @@ import UCSCScheduler as ds
 import numpy as np
 import pickle
 from datetime import datetime
+import time
 
 def compute_jd(dt):
 
@@ -21,7 +22,7 @@ if __name__ == "__main__":
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
 
-        now = datetime.utcnow()
+        now = datetime.utcfromtimestamp(int(time.time()))
         jd = compute_jd(now)
 
         delta = jd - star_table[i, ds.DS_LAST]

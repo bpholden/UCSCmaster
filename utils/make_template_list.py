@@ -7,6 +7,7 @@ from  fake_apflog import *
 import numpy as np
 from optparse import OptionParser
 from datetime import datetime
+import time
 import os
 import pickle
 import re
@@ -107,7 +108,7 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
 
 if __name__ == "__main__":
 
-    dt = datetime.utcnow()
+    dt = datetime.utcfromtimestamp(int(time.time()))
 
     parser = OptionParser()
     (options, args) = parser.parse_args()    

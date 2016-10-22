@@ -6,6 +6,7 @@ import UCSCScheduler_V2 as ds
 import numpy as np
 from optparse import OptionParser
 from datetime import datetime
+import time
 
 if __name__ == "__main__":
 
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     exp_counts, nobs = ds.format_expmeter(exp_counts,nobs)
     fin_pre = precision
    
-    dt = datetime.utcnow()
+    dt = datetime.utcfromtimestamp(int(time.time()))
     for i in range(len(stars)):
         if star_table[i, ds.DS_APFPRI] < 5:
             continue

@@ -336,7 +336,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certific
     if len(names) == 0:
         return
     if time is None:
-        time = datetime.utcnow()
+        time = datetime.utcfromtimestamp(int(time.time()))
     
 
     ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
@@ -399,7 +399,9 @@ def update_local_googledex(time,googledex_file="googledex.dat", observed_file="o
             else:
                 hr, min = otime
                 if type(time) != datetime:
-                    time = datetime.utcnow()
+                    ctime = datetime.now()
+                    td = timedelta(0,3600.*7)
+                    time = ctime + td
                 t = datetime(time.year, time.month, time.day, hr, min)
 
             # This keeps the JD precision to one decimal point. There is no real reason for this other than
@@ -747,8 +749,6 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
         but those that rise above 85 degrees will be regected to avoid slewing through the zenith. """
     # Convert the unix timestamp into a python datetime
 
-    # punt
-    dt = datetime.utcnow()
 
     if type(time) == float:
         dt = datetime.utcfromtimestamp(int(time))
@@ -756,6 +756,10 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
         dt = time
     elif type(time) == ephem.Date:
         dt = time.datetime()
+    else:
+        #punt
+        dt = datetime.utcfromtimestamp(int(time.time()))
+        
     if not outdir:
         outdir = os.getcwd()
     observed, _ = getObserved(os.path.join(outdir,"observed_targets"))
@@ -880,7 +884,7 @@ def format_time(total, i2counts, nexp, hitthemall=False):
     return times, exps
 
 
-def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='Vogt',outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='Vogt',outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -890,14 +894,14 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         outdir = os.getcwd()
         
     # Convert the unix timestamp into a python datetime
-    if type(time) == float:
-        dt = datetime.utcfromtimestamp(int(time))
-    elif type(time) == datetime:
-        dt = time
-    elif type(time) == ephem.Date:
-        dt = time.datetime()
+    if type(ctime) == float:
+        dt = datetime.utcfromtimestamp(int(ctime))
+    elif type(ctime) == datetime:
+        dt = ctime
+    elif type(ctime) == ephem.Date:
+        dt = ctime.datetime()
     else:
-        dt = datetime.utcnow()
+        dt = datetime.utcfromtimestamp(int(time.time()))
         # punt
 
     confg = dict()
@@ -920,7 +924,8 @@ def getNext(time, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googl
         if type(dt) == datetime:
             ptime = dt
         else:
-            ptime = datetime.utcnow()
+            ptime = datetime.utcfromtimestamp(int(time.time()))
+            
     observed, obstimes = update_local_googledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
 
     # List of targets already observed

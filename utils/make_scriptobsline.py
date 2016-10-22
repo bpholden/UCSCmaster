@@ -6,6 +6,7 @@ import UCSCScheduler_V2 as ds
 import numpy as np
 from optparse import OptionParser
 import datetime
+import time
 
 if __name__ == "__main__":
 
@@ -45,5 +46,5 @@ if __name__ == "__main__":
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
 #        print "%15s %4.1f %3.1f %7.0f %7.0f %.3g %.1f %d" % (allnames[i],star_table[i, ds.DS_APFPRI],precision[i],i2counts[i],exp_times[i],exp_counts[i],etimes[i],nobs[i])
-        ret = ds.makeScriptobsLine(allnames[i],star_table[i,:], flags['do'][i], datetime.datetime.utcnow(),decker=flags['decker'][i])
+        ret = ds.makeScriptobsLine(allnames[i],star_table[i,:], flags['do'][i], datetime.datetime.utcfromtimestamp(int(time.time())),decker=flags['decker'][i])
         print ret

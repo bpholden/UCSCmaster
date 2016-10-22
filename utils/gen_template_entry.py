@@ -6,6 +6,7 @@ import UCSCScheduler_V2 as ds
 import numpy as np
 from optparse import OptionParser
 from datetime import datetime
+import time
 
 if __name__ == "__main__":
 
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     allnames, star_table, do_flag, stars  = ds.parseGoogledex()
 
    
-    dt = datetime.utcnow()
+    dt = datetime.utcfromtimestamp(int(time.time()))
     for arg in args:
         if arg in allnames:
             i = allnames.index(arg)
