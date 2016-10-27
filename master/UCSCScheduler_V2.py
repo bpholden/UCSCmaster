@@ -919,7 +919,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     try:
         apfguide = ktl.Service('apfguide')
         stamp = apfguide['midptfin'].read(binary=True)
-        ptime = datetime.fromtimestamp(stamp)
+        ptime = datetime.utcfromtimestamp(stamp)
     except:
         if type(dt) == datetime:
             ptime = dt
