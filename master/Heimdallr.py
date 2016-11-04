@@ -120,7 +120,7 @@ def findObsNum(apf):
 
     obsNum = int(apf.robot["MASTER_LAST_OBS_UCSC"].read().strip())
 
-    last_times = int(apf.robot["MASTER_VAR_2"].read(binary=True))
+    last_times = int(float(apf.robot["MASTER_VAR_2"].read()))
     deltat = time.time() - last_times
     deltat /= (24*3600)
     ndays = int(deltat+0.5)
