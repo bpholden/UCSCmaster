@@ -377,6 +377,7 @@ class Master(threading.Thread):
         apflog("Beginning observing process....",echo=True)
         APF.DMZero()
         haveobserved = False
+        failstart = 0
         while self.signal:
             # Check on everything
             if datetime.now().strftime("%p") == 'AM':
@@ -544,11 +545,16 @@ class Master(threading.Thread):
                 
             # If we are open and scriptobs isn't running, start it up
             if APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
-                APFTask.set(parent,suffix="MESSAGE",value="Starting scriptobs",wait=False)                    
+                APFTask.set(parent,suffix="MESSAGE",value="Starting scriptobs",wait=False)
                 startScriptobs()
                 if not APFTask.waitFor(self.task,True,expression="$apftask.SCRIPTOBS_STATUS == 'Running'",timeout=10):
-                    apflog("scriptobs is not running just after being started!", level="warn", echo=True)
-                    
+                    if failstart % 11 == 0 and failstart > 0:
+                        lvl = "error"
+                    else:
+                        lvl = "warn"
+                    apflog("scriptobs is not running just after being started!", level=lvl, echo=True)
+                    APFTask.set(parent,suffix="MESSAGE",value="scriptobs is not running just after being started!",wait=False)                    
+
                 
             # Keep an eye on the deadman timer if we are open 
             if APF.isOpen()[0] and APF.dmtime <= DMLIM:
