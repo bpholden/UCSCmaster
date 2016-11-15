@@ -17,7 +17,7 @@ def find_bstar(ras,decs,ra,dec):
     
     return min_ind
 
-def make_row(star_table,ind):
+def make_row(star_table,ind,bstar=False):
 
     row = []
 
@@ -30,10 +30,13 @@ def make_row(star_table,ind):
     row.append(1e9)
     row.append( star_table[ind, ds.DS_APFPRI])
     row.append(0)
-    if star_table[ind, ds.DS_VMAG] > 10:
-        row.append(9)
+    if bstar:
+        row.append(2)
     else:
-        row.append(5)                
+        if star_table[ind, ds.DS_VMAG] > 10:
+            row.append(9)
+        else:
+            row.append(5)                
     return row
 
 
@@ -59,7 +62,7 @@ if __name__ == "__main__":
             bstarrow = make_row(star_table[bstars],bstari)
             
             line = ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt,decker="N",I2="N")
-            bline = ds.makeScriptobsLine(npallnames[bstars][bstari],bstarrow,'Y',dt,decker="N",I2="Y")            
+            bline = ds.makeScriptobsLine(npallnames[bstars][bstari],bstarrow,'Y',dt,decker="N",I2="Y",bstar=True)            
             print "%s" % (bline)
             print "%s #  %s" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI]))
             print "%s" % (bline)            
