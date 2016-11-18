@@ -335,8 +335,8 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certific
     names, times = getObserved(filename)
     if len(names) == 0:
         return
-    if time is None:
-        time = datetime.utcfromtimestamp(int(time.time()))
+    if times is None:
+        times = datetime.utcfromtimestamp(int(time.time()))
     
 
     ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
