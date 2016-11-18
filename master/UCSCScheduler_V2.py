@@ -325,7 +325,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
 
     return (names, np.array(star_table), flags, stars)
     
-def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
+def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
         update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json')
@@ -335,8 +335,8 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certific
     names, times = getObserved(filename)
     if len(names) == 0:
         return
-    if times is None:
-        times = datetime.utcfromtimestamp(int(time.time()))
+    if ctime is None:
+        ctime = datetime.utcfromtimestamp(int(time.time()))
     
 
     ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
@@ -354,7 +354,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certific
                 t = datetime.fromtimestamp(otime)
             else:
                 hr, min = otime
-                t = datetime(time.year, time.month, time.day, hr, min)
+                t = datetime(ctime.year, ctime.month, ctime.day, hr, min)
             jd = float(ephem.julian_date(t))
             try:
                 pastdate = float(v[col])
