@@ -128,4 +128,7 @@ while observing:
         
 print "sun rose"
 fn = "observed_targets"
+outdir = "."
+observed, obstimes = ds.update_local_googledex(curtime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,fn))
+
 outfp.close()
