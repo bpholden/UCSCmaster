@@ -360,7 +360,6 @@ class APF:
                 return True
             else:
                 apflog("Running focusinstr routine.",echo=True)
-#                cmd = '/u/user/devel_scripts/ucscapf/auto_focuscube.sh pre t'
                 cmdpath = '/usr/local/lick/bin/robot/'
                 cmd = os.path.join(cmdpath,'focusinstr -b')
                 result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
@@ -368,10 +367,14 @@ class APF:
                     apflog("focusinstr failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                    apflog("focusinstr failed to exit" ,echo=True)
+                    apflog("focusinstr failed to exit" ,echo=True, level="error")
                 expression="($apftask.FOCUSINSTR_STATUS == 3)"
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                    apflog("focusinstr failed" ,echo=True)
+                    apflog("focusinstr failed" ,echo=True, level="error")
+                    result = False
+                expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
+                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                    apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
                     result = False
                 return result
         else:
