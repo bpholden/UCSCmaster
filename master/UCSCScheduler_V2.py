@@ -671,7 +671,7 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
     observer.horizon = str(min_el)
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
-        s.compute()
+#        s.compute()
 #        apflog( "is_visible(): Finding limits for %s %s" % (s.ra, s.dec),echo=True)
 
         # Is the target visible at the end of the observations?
