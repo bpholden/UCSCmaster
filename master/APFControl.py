@@ -726,7 +726,7 @@ class APF:
         apflog("checkClouds(): File=%s - Num=%d - LinesDone=%d" % (self.ucam["OUTFILE"].read(), int(self.ucam["OBSNUM"].read()), int(self.robot["SCRIPTOBS_LINES_DONE"].read()) ) )
         return
 
-    def observe(self, observation, skip=0):
+    def observe(self, observation):
         """ Currently: Takes a string which is the filename of a properly formatted star list. """
 
         if self.test:
@@ -757,7 +757,7 @@ class APF:
         outfile = open("robot.log", 'a')
         
         if skip != 0:
-            args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip', str(skip)]
+            args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip']
         else:
             args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
 
