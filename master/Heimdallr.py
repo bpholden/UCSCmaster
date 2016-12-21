@@ -726,6 +726,7 @@ if __name__ == '__main__':
         apflog("Setting Observer Information", echo=True)
         if opt.name is None:
             opt.owner = 'Vogt'
+            opt.name = 'ucsc'
             apf.setObserverInfo(num=obsNum, name='ucsc',owner=opt.owner)
         else:
             if opt.owner == None:
