@@ -351,7 +351,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
             # update_cell(row, col, val) - col and row are 1 indexed
             otime = times[names.index(v[0])]
             if isinstance(otime,float):
-                t = datetime.fromtimestamp(otime)
+                t = datetime.utcfromtimestamp(otime)
             else:
                 hr, min = otime
                 t = datetime(ctime.year, ctime.month, ctime.day, hr, min)
@@ -365,7 +365,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
                 
     apflog( "Updated Googledex",echo=True)
 
-def update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets"):
+def update_local_googledex(intime,googledex_file="googledex.dat", observed_file="observed_targets"):
     """
         Update the local copy of the googledex with the last observed star time.
         update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
@@ -393,16 +393,16 @@ def update_local_googledex(time,googledex_file="googledex.dat", observed_file="o
         row = full_codex[i]
         if row[starNameIdx] in names:
             # We have observed this star, so lets update the last obs field
-            otime = times[names.index(row[starNameIdx])]
-            if isinstance(otime,float):
-                t = datetime.fromtimestamp(otime)
+            obstime = times[names.index(row[starNameIdx])]
+            if isinstance(obstime,float):
+                t = datetime.utcfromtimestamp(obstime)
             else:
-                hr, min = otime
-                if type(time) != datetime:
+                hr, min = obstime
+                if type(intime) != datetime:
                     ctime = datetime.now()
                     td = timedelta(0,3600.*7)
-                    time = ctime + td
-                t = datetime(time.year, time.month, time.day, hr, min)
+                    intime = ctime + td
+                t = datetime(intime.year, intime.month, intime.day, hr, min)
 
             # This keeps the JD precision to one decimal point. There is no real reason for this other than
             # the googledex currently only stores the lastObs field to one decimal precision. Legacy styles FTW.
@@ -667,19 +667,22 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
     cdate = observer.date
     ret = []
     fin_elevations = []
-    start_elevations = []    
+    start_elevations = []
+    scaled_elevations = []
     observer.horizon = str(min_el)
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
-#        s.compute()
+
 #        apflog( "is_visible(): Finding limits for %s %s" % (s.ra, s.dec),echo=True)
 
         # Is the target visible at the end of the observations?
 #        apflog( "is_visible(): Is the target visible at the end of the observations?", echo=True)
+
         observer.date = ephem.Date(cdate + dt/86400.)
         s.compute(observer)
         fin_el = np.degrees(s.alt)
         fin_elevations.append(fin_el)
+            
 
         # Is the target visible now?
 #        apflog( "is_visible(): Is the target visible now?", echo=True)
@@ -688,10 +691,16 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
         cur_el = np.degrees(s.alt)
         start_elevations.append(cur_el)
         
+        if s.transit_alt is not None:
+            se = 90.0 * (s.alt / s.transit_alt)
+            scaled_elevations.append(np.abs(se))
+        else:
+            scaled_elevations.append(-1.0)
+
         if fin_el < min_el or fin_el > max_el:
             ret.append(False)
             continue
-
+            
         if cur_el < min_el or cur_el > max_el:
             ret.append(False)
             continue
@@ -730,7 +739,7 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
             # will transit above preferred elevation and still rising
             try:
                 if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el and np.degrees(s.az) < 180:
-                    # this star is currently low on the horizon but will be above the preferred elevation for the requested exposure time
+                    # this star is currently low on the horizon but will not be above the preferred elevation for the requested exposure time
                     ret.append(False)
                     continue
             except:
@@ -739,7 +748,7 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
         ret.append(True)
 #	apflog( "is_visible(): done searching targets", echo=True)
     observer.horizon = prev_horizon
-    return ret, np.array(start_elevations), np.array(fin_elevations)
+    return ret, np.array(start_elevations), np.array(fin_elevations), np.array(scaled_elevations)
 
 
 def smartList(starlist, time, seeing, slowdown,outdir = None):
@@ -806,7 +815,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
     available = available & brightenough
 
     obs_length = star_table[:,DS_EXPT] * star_table[:,DS_NSHOTS] + 45 * (star_table[:,DS_NSHOTS]-1)
-    vis, star_elevations, fin_els = is_visible(stars,apf_obs,obs_length, TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+    vis, star_elevations, fin_els, scaled_els = is_visible(stars,apf_obs,obs_length, TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
     available = available & vis
         
     done = [ True if n in observed else False for n in sn ]
@@ -1000,6 +1009,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     available = np.ones(targNum, dtype=bool)
     totexptimes = np.zeros(targNum, dtype=float)
     cur_elevations = np.zeros(targNum, dtype=float)
+    scaled_elevations = np.zeros(targNum, dtype=float)    
     i2cnts = np.zeros(targNum, dtype=float)
 
     # Is the target behind the moon?
@@ -1018,7 +1028,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         if verbose:
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations, scaled_els = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
@@ -1048,7 +1058,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
 #        star_elevations=calc_elevations(fstars,apf_obs)
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, [0]*len(fstars),  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations, scaled_els = is_visible(fstars, apf_obs, [0]*len(fstars),  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         available[f] = available[f] & vis
         f = available
         fstars = [s for s,_ in zip(stars,f) if _ ]
@@ -1083,10 +1093,11 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         if verbose:
             apflog("getNext(): Computing stars visibility",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = is_visible(fstars, apf_obs, exp_times,  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations, scaled_els = is_visible(fstars, apf_obs, exp_times,  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
         if vis != []:
             available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
+        scaled_elevations[np.where(f)] += scaled_els[np.where(vis)]        
 
     # Now just sort by priority, then cadence. Return top target
     if len(sn[available]) < 1:
@@ -1124,8 +1135,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     if bstar:
         sort_j = cur_elevations[good_cadence_available][sort_i].argsort()[::-1]
     else:
-        sort_j = cadence_check[good_cadence_available][sort_i].argsort()[::-1]
-        cstr= "getNext(): cadence check: %s" %( cadence_check[good_cadence_available][sort_i][sort_j][0])
+        sort_j = scaled_elevations[good_cadence_available][sort_i].argsort()[::-1]
+        cstr= "getNext(): cadence check: %s" %( scaled_elevations[good_cadence_available][sort_i][sort_j][0])
         apflog(cstr,echo=True)
     
     t_n = sn[good_cadence_available][sort_i][sort_j][0]
