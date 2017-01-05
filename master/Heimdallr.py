@@ -294,7 +294,7 @@ class Master(threading.Thread):
                     if not result:
                         apflog("openatsunset has failed twice.", level='error', echo=True)
                         APF.close()
-                        os._exit(1)
+
 
             if datetime.now().strftime("%p") == 'PM':
                 setting = True
@@ -505,7 +505,7 @@ class Master(threading.Thread):
                         APFLib.write(APF.dome['AZENABLE'],'enable',timeout=10)
                     except:
                         apflog("Cannot enable AZ drive, exiting",level="error")
-                        os._exit(1)
+                        return
                     apf.setTeqMode('Evening')
                 else:
                     apflog("Cannot clear emergency stop, sleeping for 600 seconds",level="error")
