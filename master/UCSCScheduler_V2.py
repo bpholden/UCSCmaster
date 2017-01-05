@@ -1109,14 +1109,14 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     if len(good_cadence_available):
         try:
             pri = max(star_table[good_cadence_available, DS_APFPRI])
-            sort_i = np.where(star_table[good_cadence_available, DS_APFPRI] == pri, True, False)
+            sort_i = (star_table[:, DS_APFPRI] == pri) & good_cadence_available
         except:
             pri = max(star_table[available, DS_APFPRI])
-            sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
+            sort_i = (star_table[:, DS_APFPRI] == pri) & available
     elif len(available):
         apflog( "getNext(): No new stars available, going back to the previously observed list.",level="warn",echo=True)
         pri = max(star_table[available, DS_APFPRI])
-        sort_i = np.where(star_table[available, DS_APFPRI] == pri, True, False)
+        sort_i = (star_table[:, DS_APFPRI] == pri) & available
     else:
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
@@ -1124,25 +1124,26 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         
 #    print sn[available][sort_i]
 #    print star_table[available, DS_APFPRI][sort_i]
-    starstr = "getNext(): star table available: %s" % (sn[good_cadence_available][sort_i]) 
+    starstr = "getNext(): star table available: %s" % (sn[sort_i]) 
     apflog(starstr,echo=True)
 
-    starstr = "getNext(): star table available priorities: %s" % (star_table[good_cadence_available, DS_APFPRI][sort_i]) 
+    starstr = "getNext(): star table available priorities: %s" % (star_table[:, DS_APFPRI][sort_i]) 
     apflog(starstr,echo=True)
      
     if bstar:
-        sort_j = cur_elevations[good_cadence_available][sort_i].argsort()[::-1]
+        sort_j = cur_elevations[sort_i].argsort()[::-1]
     else:
-        sort_j = scaled_elevations[good_cadence_available][sort_i].argsort()[::-1]
-        cstr= "getNext(): cadence check: %s" %( scaled_elevations[good_cadence_available][sort_i][sort_j][0])
+#        sort_j = scaled_elevations[sort_i].argsort()[::-1]
+        sort_j = cadence_check[sort_i].argsort()[::-1]
+        cstr= "getNext(): cadence check: %s" %( cadence_check[sort_i][sort_j][0])
         apflog(cstr,echo=True)
     
-    t_n = sn[good_cadence_available][sort_i][sort_j][0]
+    t_n = sn[sort_i][sort_j][0]
 
-    elstr= "getNext(): star elevations %s" % (cur_elevations[good_cadence_available][sort_i][sort_j])
+    elstr= "getNext(): star elevations %s" % (cur_elevations[sort_i][sort_j])
     apflog(elstr,echo=True)
 
-    t_n = sn[good_cadence_available][sort_i][sort_j][0]
+    t_n = sn[sort_i][sort_j][0]
 
     apflog("getNext(): selected target %s" %( t_n) )
 
