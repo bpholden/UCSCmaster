@@ -732,6 +732,7 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
                 continue
         #   apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
         observer.horizon = str(pref_min_el)
+        s.compute(observer)
         if not s.neverup:
             # will transit above preferred elevation and still rising
             try:
