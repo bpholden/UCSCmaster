@@ -652,7 +652,7 @@ def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
             observer: A pyephem observer to use a the visibility reference
             obs_len: A list of observation lengths ( Seconds ). This is the time frame for which visibility is checked
             pref_min_el: Preferred minimum body elevation to be visible ( degrees )            
-            min_el: The minimum body elevation to be visible ( degrees )
+            min_el: The minimum body elevation to be visible ( degrees ) - only use this if star never goes above preferred limit
             max_el: The maximum body elevation to be visible ( degrees )
         Returns:
             Boolean list representing if body[i] is visible
