@@ -709,24 +709,6 @@ if __name__ == '__main__':
         else:
             obsNum = int(opt.obsnum)
 
-        print "Welcome! I think the starting observation number should be:"
-        print repr(obsNum)
-        print ''
-        print "If you believe this number is an error, please enter the correct number within the next 15 seconds..."
-        rlist, _, _ = select([sys.stdin], [], [], 15)
-        if rlist:
-            s = sys.stdin.readline()
-            while True:
-                try:
-                    v = int(s.strip())
-                except ValueError:
-                    print "Couldn't turn %s into an integer." % s
-                else:
-                    break
-                s = raw_input("Enter Obs Number:")
-            
-            obsNum = v
-
         apflog("Using %s for obs number." % repr(obsNum),echo=True)
         apflog("Setting Observer Information", echo=True)
         if opt.name is None:
