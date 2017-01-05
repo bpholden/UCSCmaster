@@ -523,12 +523,13 @@ class Master(threading.Thread):
                 
             # Open at night
             if not APF.isReadyForObserving()[0]  and float(sunel) < sunel_lim and APF.openOK:
-                if not rising:
+                if not rising or (rising and float(sunel) < (sunel_lim - 5)):
                     APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
-                    opening( sunel)
-                elif rising and float(sunel) < (sunel_lim - 5):
-                    APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
-                    opening( sunel)
+                    success = opening( sunel)
+                    if not success:
+                        apflog("Cannot open the dome",echo=True,level='error')
+                        APF.close()
+                        os._exit()
 
             # Check for servo errors
             if APF.isOpen()[0] and APF.slew_allowed == False:
