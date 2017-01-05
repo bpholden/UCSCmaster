@@ -515,7 +515,11 @@ class Master(threading.Thread):
             sun_between_limits = float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim 
             if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim and APF.openOK and not rising:
                 APFTask.set(parent,suffix="MESSAGE",value="Open at sunset",wait=False)                    
-                opening( sunel, sunset=True)
+                success = opening( sunel, sunset=True)
+                if not success:
+                    apflog("Cannot open the dome",echo=True,level='error')
+                    APF.close()
+                    os._exit()
                 
             # Open at night
             if not APF.isReadyForObserving()[0]  and float(sunel) < sunel_lim and APF.openOK:
