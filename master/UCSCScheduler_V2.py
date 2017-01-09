@@ -30,7 +30,7 @@ TARGET_MOON_DIST_MAX = 25
 # Maximum single exposure time in seconds
 MAX_EXPTIME = 1200.
 MIN_EXPTIME = 600.
-MIN_SHUTTERTIME = 60
+MIN_TOTOBS = 300.
 MAX_I2 = 40000
 MIN_I2 = 500
 MAX_EXPMETER = 2e9
@@ -868,9 +868,9 @@ def format_time(total, i2counts, nexp, hitthemall=False):
     times = np.zeros(len(total))
     exps  = np.zeros(len(total))
 
-    short_idx = np.where(total < MIN_EXPTIME, True, False)
+    short_idx = np.where(total < MIN_TOTOBS, True, False)
     times[short_idx] = MIN_EXPTIME  # pad out to make it more likely exposure meter threshold sets actual limit
-    exps[short_idx] = [ (np.ceil(MIN_EXPTIME/(t+40)) + 1) for t in total[short_idx] ] 
+    exps[short_idx] = [ (np.ceil(MIN_TOTOBS/(t+40)) + 1) for t in total[short_idx] ] 
 
     middle_idx = np.where((total > MIN_EXPTIME ) &(total < MAX_EXPTIME))
     times[middle_idx] = MAX_EXPTIME # pad out to make it more likely exposure meter threshold sets actual limit
