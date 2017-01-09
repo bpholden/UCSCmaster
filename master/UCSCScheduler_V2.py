@@ -129,6 +129,7 @@ def parseStarlist(starlist):
 
                 # Generate a pyEphem object for this target
                 star = ephem.FixedBody()
+                star.name = ls[0]
                 star._ra = ephem.hours(":".join([ls[1], ls[2], ls[3]]))
                 star._dec = ephem.degrees(":".join([ls[4], ls[5], ls[6]]))
                 stars.append(star)
