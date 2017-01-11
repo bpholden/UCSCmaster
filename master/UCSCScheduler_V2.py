@@ -1034,8 +1034,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     if bstar:
         sort_j = cur_elevations[sort_i].argsort()[::-1]
     else:
-#        sort_j = scaled_elevations[sort_i].argsort()[::-1]
-        sort_j = cadence_check[sort_i].argsort()[::-1]
+        sort_j = scaled_elevations[sort_i].argsort()[::-1]
+#        sort_j = cadence_check[sort_i].argsort()[::-1]
         cstr= "getNext(): cadence check: %s" %( cadence_check[sort_i][sort_j][0])
         apflog(cstr,echo=True)
     
