@@ -974,7 +974,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         if verbose:
             apflog("getNext(): Formating exposure times",echo=True)
         star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS])
-        #        exp_counts /= star_table[f, DS_NSHOTS]
+
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
         star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,exps)
