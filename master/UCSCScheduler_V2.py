@@ -18,6 +18,7 @@ try:
 except:
     from fake_apflog import *
 import re
+import Visible
 
 # Some variables that will soon be moved to a separate file
 TARGET_ELEVATION_MIN = 20 # this elevation is the physical minimum, below this the ADC does not work
@@ -647,108 +648,6 @@ def calc_elevations(stars, observer):
         els.append(cur_el)
     return np.array(els)
 
-def is_visible(stars, observer, obs_len, pref_min_el, min_el, max_el):
-    """ Args:
-            stars: A list of pyephem bodies to evaluate visibility of
-            observer: A pyephem observer to use a the visibility reference
-            obs_len: A list of observation lengths ( Seconds ). This is the time frame for which visibility is checked
-            pref_min_el: Preferred minimum body elevation to be visible ( degrees )            
-            min_el: The minimum body elevation to be visible ( degrees ) - only use this if star never goes above preferred limit
-            max_el: The maximum body elevation to be visible ( degrees )
-        Returns:
-            Boolean list representing if body[i] is visible
-
-        Notes: Uses the observer's current date and location
-    """
-    # Store the previous observer horizon and date since we change these
-    prev_horizon = observer.horizon
-    cdate = observer.date
-    ret = []
-    fin_elevations = []
-    start_elevations = []
-    scaled_elevations = []
-    observer.horizon = str(min_el)
-    # Now loop over each body to check visibility
-    for s, dt in zip(stars, obs_len):
-
-#        apflog( "is_visible(): Finding limits for %s %s" % (s.ra, s.dec),echo=True)
-
-        # Is the target visible at the end of the observations?
-#        apflog( "is_visible(): Is the target visible at the end of the observations?", echo=True)
-
-        observer.date = ephem.Date(cdate + dt/86400.)
-        s.compute(observer)
-        fin_el = np.degrees(s.alt)
-        fin_elevations.append(fin_el)
-            
-
-        # Is the target visible now?
-#        apflog( "is_visible(): Is the target visible now?", echo=True)
-        observer.date = ephem.Date(cdate)
-        s.compute(observer)
-        cur_el = np.degrees(s.alt)
-        start_elevations.append(cur_el)
-        
-        if s.transit_alt is not None:
-            se = 90.0 * (s.alt / s.transit_alt)
-            scaled_elevations.append(np.abs(se))
-        else:
-            scaled_elevations.append(-1.0)
-
-        if fin_el < min_el or fin_el > max_el:
-            ret.append(False)
-            continue
-            
-        if cur_el < min_el or cur_el > max_el:
-            ret.append(False)
-            continue
-
-        # Does the target remain visible through the observation?
-        # The next setting/rising functions throw an exception if the body never sets or rises
-        # ex. circumpolar 
-        try:
-            next_set = observer.next_setting(s)
-        except:
-            # If it never sets, no need to worry.
-            pass
-        else:
-            # Making the assumption that next_set is a datetime object. Might not be the case
-            if next_set < dt:
-                # The object will set before the observation finishes
-                ret.append(False)
-                continue
-        #  apflog( "is_visible(): Does the target remain visible through the observation?", echo=True)
-        observer.horizon = max_el
-        s.compute(observer)
-
-        try:
-            next_rise = observer.next_rising(s)
-        except:
-            # If the body never rises above the max limit no problem
-            pass
-        else:
-            if next_rise < dt:
-                # The object rises above the max el before the observation finishes
-                ret.append(False)
-                continue
-        #   apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
-        observer.horizon = str(pref_min_el)
-        s.compute(observer)
-        if not s.neverup:
-            # will transit above preferred elevation and still rising
-            try:
-                if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el and np.degrees(s.az) < 180:
-                    # this star is currently low on the horizon but will not be above the preferred elevation for the requested exposure time
-                    ret.append(False)
-                    continue
-            except:
-                pass
-        # Everything seems to be fine, so the target is visible!
-        ret.append(True)
-#	apflog( "is_visible(): done searching targets", echo=True)
-    observer.horizon = prev_horizon
-    return ret, np.array(start_elevations), np.array(fin_elevations), np.array(scaled_elevations)
-
 
 def smartList(starlist, time, seeing, slowdown,outdir = None):
     """ Determine the best target to observe from the provided scriptobs-compatible starlist.
@@ -814,7 +713,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
     available = available & brightenough
 
     obs_length = star_table[:,DS_EXPT] * star_table[:,DS_NSHOTS] + 45 * (star_table[:,DS_NSHOTS]-1)
-    vis, star_elevations, fin_els, scaled_els = is_visible(stars,apf_obs,obs_length, TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+    vis, star_elevations, fin_els = Visible.is_visible(apf_obs,stars,obs_length)
     available = available & vis
         
     done = [ True if n in observed else False for n in sn ]
@@ -1027,7 +926,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         if verbose:
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations, scaled_els = is_visible(fstars, apf_obs, [400]*len(bstars[f]), TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations = Visible.is_visible(apf_obs, fstars, [400]*len(bstars[f]))
         
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
@@ -1056,8 +955,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         if verbose:
             apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-#        star_elevations=calc_elevations(fstars,apf_obs)
-        vis,star_elevations,fin_star_elevations, scaled_els = is_visible(fstars, apf_obs, [0]*len(fstars),  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, [0]*len(fstars))
+#        vis,star_elevations,fin_star_elevations = Visible.is_visible( apf_obs,fstars,[0]*len(fstars))
         available[f] = available[f] & vis
         f = available
         fstars = [s for s,_ in zip(stars,f) if _ ]
@@ -1092,7 +991,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         if verbose:
             apflog("getNext(): Computing stars visibility",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations, scaled_els = is_visible(fstars, apf_obs, exp_times,  TARGET_ELEVATION_HIGH_MIN, TARGET_ELEVATION_MIN, TARGET_ELEVATION_MAX)
+        vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, exp_times)
         if vis != []:
             available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
