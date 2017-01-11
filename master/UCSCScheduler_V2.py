@@ -792,7 +792,7 @@ def format_time(total, i2counts, nexp, hitthemall=False):
     return times, exps
 
 
-def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='Vogt',outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='Vogt',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -886,7 +886,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     # Note -- RA and Dec are returned in Radians
     if verbose:
         apflog("getNext(): Parsing the Googledex...",echo=True)
-    sn, star_table, flags, stars = parseGoogledex(sheetn=sheetn)
+    sn, star_table, flags, stars = parseGoogledex(sheetn=sheetn,outfn=outfn,outdir=outdir)
     sn = np.array(sn)
     targNum = len(sn)
     if verbose:
