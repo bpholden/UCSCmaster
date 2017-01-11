@@ -198,8 +198,8 @@ class Master(threading.Thread):
             if self.BV is None:
                 apflog("Warning!: Ended up in getTarget() with no B Magnitude value, slowdown can't be computed.", echo=True)
                 self.BV = 0.6 # use a default average
-                slowdown = 5
-            elif self.VMAG is None:
+
+            if self.VMAG is None:
                 apflog("Warning!: Ended up in getTarget() with no V Magnitude value, slowdown can't be computed.", echo=True)
                 slowdown = 5
             elif APF.avg_fwhm < 1.0:
@@ -229,6 +229,7 @@ class Master(threading.Thread):
                     apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                     slowdown = 1
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
+            APFLib.write(apf.robot["MASTER_VAR_1"], slowdown)
             apflog("getTarget(): countrate = %.2f" % APF.countrate)
 
             # Check for a valid seeing measurment. If there isn't one, use a default
