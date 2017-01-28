@@ -288,7 +288,7 @@ class Master(threading.Thread):
 
             result = APF.openat(sunset=sunset)
             apflog("openatsunset completed with result %s" % (result), echo=True)
-            if not result:
+            if result == False:
                 apflog("openatsunset hasn't successfully opened. Current sunel = %4.2f" % ( float(sunel)), level='warn', echo=True)
                 if ( float(sunel) < SUNEL_ENDLIM):
                     result = APF.openat(sunset=sunset)
