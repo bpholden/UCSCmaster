@@ -783,10 +783,6 @@ def format_time(total, i2counts, nexp, hitthemall=False):
         exps[max_idx] = np.ceil(total[max_idx]/MAX_EXPTIME)
     times[max_idx] = MAX_EXPTIME
 
-    #    bright_idx = np.where((i2counts > MAX_I2) & (exps == 1), True, False)
-    #    exps[bright_idx] = [ np.ceil(i/MAX_I2) for i in i2counts[bright_idx] ]
-    #    times[bright_idx] = np.ceil(total[bright_idx]/exps[bright_idx])
-
     exps[exps < nexp] = nexp[exps < nexp]
 
     return times, exps
