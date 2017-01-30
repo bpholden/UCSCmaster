@@ -537,6 +537,8 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
     # T Exp
     if row[DS_EXPT] > MAX_EXPTIME:
         ret += 'texp=%d ' % (int(MAX_EXPTIME))
+    elif row[DS_EXPT] <= MIN_EXPTIME:
+        ret += 'texp=%d ' % (int(MIN_EXPTIME))
     else:
         ret += 'texp=' + str(int(row[DS_EXPT])) + ' '
     # I2
