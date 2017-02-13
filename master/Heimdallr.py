@@ -777,7 +777,7 @@ if __name__ == '__main__':
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
 
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
-        if not result:
+        if result == False:
             apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
             result = apf.calibrate(script = opt.calibrate, time = 'pre')
             if not result:
