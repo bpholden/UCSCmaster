@@ -619,7 +619,7 @@ def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker
     vmag = np.array(vmag)
     precision = np.array(precision)
     bmv = np.array(bmv)
-    precision = np.array(precision)
+
 		
 	# Now lets calculate the exposure times
 	
