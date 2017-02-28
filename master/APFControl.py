@@ -17,7 +17,7 @@ import numpy as np
 
 from apflog import *
 
-m1 = 22.8
+
 windlim = 40.0
 slowlim = 100
 WINDSHIELD_LIMIT = 15.
