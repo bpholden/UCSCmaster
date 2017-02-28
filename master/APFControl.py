@@ -20,7 +20,8 @@ from apflog import *
 
 windlim = 40.0
 slowlim = 100
-WINDSHIELD_LIMIT = 15.
+WINDSHIELD_LIMIT = 15. # mph at the APF
+TEMP_LIMIT = 5. # deg C at the APF
 wxtimeout = timedelta(seconds=1800)
 SUNEL_HOR = -3.2
 
@@ -175,6 +176,7 @@ class APF:
     ok2open    = checkapf('OPEN_OK')
     dmtimer    = checkapf('DMTIME')
     wx         = apfmet('M5WIND')
+    temp       = apfmet('M5OUTEMP')
     mv_perm    = checkapf('MOVE_PERM')
     chk_close  = checkapf('CHK_CLOSE')
     robot      = ktl.Service('apftask')
@@ -210,7 +212,8 @@ class APF:
         # Set the callbacks and monitors
         self.wx.monitor()
         self.wx.callback(windmon)
-
+        self.temp.monitor()
+        
         self.ok2open.monitor()
         self.ok2open.callback(okmon)
 
@@ -242,6 +245,7 @@ class APF:
         # Grab some initial values for the state of the telescope
         
         self.wx.poll()
+        self.temp.poll()
         self.counts.poll()
         self.ok2open.poll()
 
@@ -641,10 +645,10 @@ class APF:
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
         else:
             # State must be auto, so check wind
-            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT:
+            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and self.temp > TEMP_LIMIT:
                 apflog("Setting scriptobs_windshield to Disable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
-            if currState == 'disable' and self.wvel > WINDSHIELD_LIMIT:
+            if currState == 'disable' and (self.wvel > WINDSHIELD_LIMIT or self.temp < TEMP_LIMIT):
                 apflog("Setting scriptobs_windshield to Enable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
