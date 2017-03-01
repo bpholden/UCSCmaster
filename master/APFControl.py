@@ -21,7 +21,7 @@ from apflog import *
 windlim = 40.0
 slowlim = 100
 WINDSHIELD_LIMIT = 15. # mph at the APF
-TEMP_LIMIT = 5. # deg C at the APF
+TEMP_LIMIT = 35. # deg F at the APF
 wxtimeout = timedelta(seconds=1800)
 SUNEL_HOR = -3.2
 
@@ -645,10 +645,10 @@ class APF:
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
         else:
             # State must be auto, so check wind
-            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and self.temp > TEMP_LIMIT:
+            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and float(self.temp) > TEMP_LIMIT:
                 apflog("Setting scriptobs_windshield to Disable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
-            if currState == 'disable' and (self.wvel > WINDSHIELD_LIMIT or self.temp < TEMP_LIMIT):
+            if currState == 'disable' and (self.wvel > WINDSHIELD_LIMIT or float(self.temp) < TEMP_LIMIT):
                 apflog("Setting scriptobs_windshield to Enable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
