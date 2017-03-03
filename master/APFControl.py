@@ -20,7 +20,7 @@ from apflog import *
 
 windlim = 40.0
 slowlim = 100
-WINDSHIELD_LIMIT = 15. # mph at the APF
+WINDSHIELD_LIMIT = 10. # mph at the APF
 TEMP_LIMIT = 35. # deg F at the APF
 wxtimeout = timedelta(seconds=1800)
 SUNEL_HOR = -3.2
