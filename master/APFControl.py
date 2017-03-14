@@ -616,10 +616,10 @@ class APF:
                     areopen, whatsopen = self.isOpen()
                     if areopen == True:
                         # truly dire, the telescope is open
-                        apflog(lstr, level='error', echo=True)
+                        apflog(lstr, level='Alert', echo=True)
                     else:
                         # telescope powered on, and possibly in the wrong place, but not open
-                        apflog(lstr, level='warn', echo=True)
+                        apflog(lstr, level='error', echo=True)
                 APFTask.waitFor(self.task, True, timeout=30)
             else:
                 break
