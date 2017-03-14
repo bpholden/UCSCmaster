@@ -50,7 +50,10 @@ def apflog(msg, level='Notice', echo=True):
 
     APF.log(str(msg), level=level, echo=echo)
     
-    if level in ['error', 'Crit', 'Alert', 'Emerg']:
+    if level in ['warn','error']:
+        subject = "[APF] An Error has occured in Heimdallr.py"
+        sendmail(subject, msg, to=['holden@ucolick.org'])
+    if level in ['Crit', 'Alert', 'Emerg']:
         subject = "[APF] An Error has occured in Heimdallr.py"
         sendmail(subject, msg, to=['holden@ucolick.org','8314211210@txt.att.net'])
 
