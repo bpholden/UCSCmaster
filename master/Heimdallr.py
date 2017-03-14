@@ -248,7 +248,7 @@ class Master(threading.Thread):
                 if os.path.exists(self.fixedList):
                     target = ds.smartList(self.fixedList, time.time(), seeing, slowdown)
                 else:
-                    apflog("starlist %s does not exist" % (self.fixedList), level="error",echo=True)
+                    apflog("Error: starlist %s does not exist" % (self.fixedList), level="error",echo=True)
                     self.fixedList=None
 
             if target is None:
@@ -293,7 +293,7 @@ class Master(threading.Thread):
                 if ( float(sunel) < SUNEL_ENDLIM):
                     result = APF.openat(sunset=sunset)
                     if not result:
-                        apflog("openatsunset has failed twice.", level='error', echo=True)
+                        apflog("Error: openatsunset has failed twice.", level='error', echo=True)
                         APF.close()
 
 
@@ -325,7 +325,7 @@ class Master(threading.Thread):
             if self.fixedList is not None and self.smartObs == False:
                 # We wish to observe a fixed target list, in it's original order
                 if not os.path.exists(self.fixedList):
-                    apflog("starlist %s does not exist" % (self.fixedList), level="error")
+                    apflog("Error: starlist %s does not exist" % (self.fixedList), level="error")
                     self.fixedList=None
                     return
                 tot = getTotalLines(self.fixedList)
@@ -452,7 +452,7 @@ class Master(threading.Thread):
                             s="True"
                         APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
                     except:
-                        apflog("Cannot communicate with apftask",level="error")
+                        apflog("Error: Cannot communicate with apftask",level="error")
 
 
                 elif self.smartObs == True:
@@ -493,7 +493,7 @@ class Master(threading.Thread):
                     msg = "Telescope was already closed when sun got to %4.2f" % float(sunel)
                 
                 if APF.isOpen()[0]:
-                    apflog("Closeup did not succeed", level='Error', echo=True)
+                    apflog("Error: Closeup did not succeed", level='error', echo=True)
                 APF.updateLastObs()
                 self.exitMessage = msg
                 self.stop()
@@ -505,11 +505,11 @@ class Master(threading.Thread):
                     try:
                         APFLib.write(APF.dome['AZENABLE'],'enable',timeout=10)
                     except:
-                        apflog("Cannot enable AZ drive, exiting",level="error")
+                        apflog("Error: Cannot enable AZ drive, exiting",level="error")
                         return
                     apf.setTeqMode('Evening')
                 else:
-                    apflog("Cannot clear emergency stop, sleeping for 600 seconds",level="error")
+                    apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds",level="error")
                     APFTask.waitFor(parent,True,timeout=600)
                 
             # Open at sunset
@@ -518,7 +518,7 @@ class Master(threading.Thread):
                 APFTask.set(parent,suffix="MESSAGE",value="Open at sunset",wait=False)                    
                 success = opening( sunel, sunset=True)
                 if success == False:
-                    apflog("Cannot open the dome",echo=True,level='error')
+                    apflog("Error: Cannot open the dome",echo=True,level='error')
                     APF.close()
                     os._exit()
                 
@@ -528,7 +528,7 @@ class Master(threading.Thread):
                     APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
                     success = opening( sunel)
                     if success == False:
-                        apflog("Cannot open the dome",echo=True,level='error')
+                        apflog("Error: Cannot open the dome",echo=True,level='error')
                         APF.close()
                         os._exit()
 
@@ -536,17 +536,17 @@ class Master(threading.Thread):
             if APF.isOpen()[0] and APF.slew_allowed == False:
                 APFTask.set(parent,suffix="MESSAGE",value="Servo failure.",wait=False)                    
                 
-                apflog("APF is open, and slew_allowed is false. Likely an amplifier fault.", level="error", echo=True)
+                apflog("Error: APF is open, and slew_allowed is false. Likely an amplifier fault.", level="error", echo=True)
 #                apflog("Forcing checkapf to close the dome. Heimdallr will then exit.", echo=True)
                 chk_done = "$checkapf.MOVE_PERM == true"
 #                APFLib.write(APF.dmtimer, 0)
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
                 if not result and "DomeShutter" in APF.isOpen()[1]:
-                    apflog("After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+                    apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
 
                 APF.close(force=True)
                 if not APF.power_down_telescope():
-                    apflog("Cannot reset telescope after servo failure",level="error", echo=True)
+                    apflog("Error: Cannot reset telescope after servo failure",level="error", echo=True)
                     os._exit(1)
                 
             # If we are open and scriptobs isn't running, start it up
@@ -749,13 +749,13 @@ if __name__ == '__main__':
         try:
             APFTask.set(parent,suffix="VAR_3",value="True")
         except:
-            apflog("Cannot communicate with apftask",level="Error")
+            apflog("Error: Cannot communicate with apftask",level="error")
 
         try:
             if opt.fixed == None:
                 names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
         except Exception as e:
-            apflog("Cannot download googledex?! %s" % (e),level="Error")
+            apflog("Error: Cannot download googledex?! %s" % (e),level="error")
             
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         # try:
@@ -781,7 +781,7 @@ if __name__ == '__main__':
             apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
             result = apf.calibrate(script = opt.calibrate, time = 'pre')
             if not result:
-                apflog("Calibrate Pre has failed twice. Observer is exiting.",level='error',echo=True)
+                apflog("Error: Calibrate Pre has failed twice. Observer is exiting.",level='error',echo=True)
                 sys.exit(2)
         apflog("Calibrate Pre has finished. Setting phase to Watching.")
         APFTask.phase(parent, "Watching")
@@ -796,7 +796,7 @@ if __name__ == '__main__':
         if opt.name == "ucsc":
                 names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
     except Exception as e:
-        apflog("Cannot download googledex?!  %s" % (e),level="Error")
+        apflog("Error: Cannot download googledex?!  %s" % (e),level="error")
     
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
@@ -841,7 +841,7 @@ if __name__ == '__main__':
             if currTime.hour == 9:
                 # Its 9 AM. Lets closeup
                 master.stop()
-                apflog("Master was still running at 9AM. It was stopped and post calibrations will be attempted.", level='Warn')
+                apflog("Master was still running at 9AM. It was stopped and post calibrations will be attempted.", level='warn')
                 break
 
             if debug:
@@ -874,7 +874,7 @@ if __name__ == '__main__':
             apflog("Updating the online googledex with the observed times", level='Info', echo=True)
             ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
         except:
-            apflog("Updating the online googledex has failed.", level="Error")
+            apflog("Error: Updating the online googledex has failed.", level="error")
 
     # Keep a copy of observed_targets around for a bit just in case
     logpush(os.path.join(os.getcwd(),"observed_targets"))
