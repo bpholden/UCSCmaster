@@ -100,19 +100,19 @@ def okmon(ok2open):
     try:
         ok = ok2open # historical
     except Exception, e:
-        apflog("Exception in okmon: %s" % (e), level='warn')
+        apflog("Exception in okmon: %s" % (e), level='error')
         return
     try:
         if not checkapf['MOVE_PERM'].read(binary=False):
             ok = False
     except Exception, e:
-        apflog("Exception in okmon: %s" % (e), level='warn')
+        apflog("Exception in okmon: %s" % (e), level='error')
         return
     try:
         if not checkapf['USERKIND'].read(binary=True) == 3:
             ok = False
     except Exception, e:
-        apflog("Exception in okmon: %s" % (e), level='warn')
+        apflog("Exception in okmon: %s" % (e), level='error')
         return
     APF.openOK = ok
     return
@@ -125,7 +125,7 @@ def windmon(wx):
     try:
         wvel = float(wx)
     except Exception, e:
-        apflog("Exception in windmon: %s" % (e), level='warn')
+        apflog("Exception in windmon: %s" % (e), level='error')
         return
         
     if APF.wslist == []:
@@ -145,7 +145,7 @@ def dmtimemon(dmtime):
     try:
         APF.dmtime = dmtime
     except Exception, e:
-        apflog("Exception in dmtimemon: %s" % (e), level='warn')
+        apflog("Exception in dmtimemon: %s" % (e), level='error')
 
 
 class APF:
@@ -290,7 +290,7 @@ class APF:
         try:
             what = whatstr.split()
         except:
-            apflog("checkapf.WHATSOPN returned a value that str.split cannot split",level='warn',echo=True)
+            apflog("checkapf.WHATSOPN returned a value that str.split cannot split",level='error',echo=True)
             return False, ''
         if hasattr(what,'__iter__'):
             if "DomeShutter" in what or "MirrorCover" in what or "Vents" in what:
@@ -430,7 +430,7 @@ class APF:
             apflog("Slewing by executing %s" %(cmd), echo=True)
             result, code = cmdexec(cmd,cwd=os.path.curdir,debug=True)
             if not result:
-                apflog("Failed at slewing: %s" %(code), level="warn", echo=True)
+                apflog("Failed at slewing: %s" %(code), level="error", echo=True)
 
         return result
 
@@ -761,7 +761,7 @@ class APF:
         # Check the instrument focus for a reasonable value
         if self.dewarfoc > 8600 or self.dewarfoc < 8400:
             lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
-            apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
+            apflog("Error: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
             APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
             
         # Check Telescope M2 Focus
@@ -793,8 +793,8 @@ class APF:
             if self.checkapf['DMTIME'].read(binary=True) < 1:
                 APFLib.write(self.checkapf['DMTIME'], -1,timeout=10)
         except Exception, e:
-            ostr = "Warning: cannot touch DM Timer: %s " %( e)
-            apflog(ostr,level='warn',echo=True)
+            ostr = "Error: cannot touch DM Timer: %s " %( e)
+            apflog(ostr,level='error',echo=True)
 
     def findRobot(self):
         """Trys to find a running instance of robot.csh. Returns the PID along with a boolean representing if the robot was succesfully found."""
