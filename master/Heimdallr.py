@@ -169,7 +169,6 @@ class Master(threading.Thread):
 
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
-#            apflog("cannot open %s: %s" % (self.nighttargetlogname,e),level="error")
 
     def run(self):
         APF = self.APF
