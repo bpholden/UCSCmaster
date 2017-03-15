@@ -170,6 +170,15 @@ class Master(threading.Thread):
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
 
+    def set_autofocval(self):
+        # check last telescope focus
+        lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
+        if time.time() - lastfoc > FOCUSTIME and running and float(sunel) <= sunel_lim:
+            APF.robot['SCRIPTOBS_AUTOFOC'] = "robot_autofocus_enable"
+        else:
+            APF.robot['SCRIPTOBS_AUTOFOC'] = "robot_autofocus_disable"
+
+
     def run(self):
         APF = self.APF
 
@@ -255,7 +264,7 @@ class Master(threading.Thread):
                 return
             else:
                 apflog("Observing target: %s" % target['NAME'], echo=True)
-                APFLib.write(self.APF.robot["SCRIPTOBS_AUTOFOC"], "robot_autofocus_enable")
+                self.set_autofocval()
                 self.scriptobs.stdin.write(target["SCRIPTOBS"] + '\n')
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = target["VMAG"]
