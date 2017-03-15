@@ -160,6 +160,7 @@ class Master(threading.Thread):
         self.scriptobs = None
         self.BV = None
         self.VMAG = None
+        self.decker = "W"
         self.obsBstar = False
         self.fixedList = None
         self.sheetn = sheetn
@@ -208,7 +209,7 @@ class Master(threading.Thread):
             else:
                 apflog("Calculating expected counts")
                 apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
-                exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm)
+                exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm, decker=self.decker)
                 try:
                     slowdown = exp_cnts_sec / APF.countrate
                     if slowdown < 0:
@@ -267,6 +268,7 @@ class Master(threading.Thread):
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = target["VMAG"]
             self.BV   = target["BV"]
+            self.decker = target["DECKER"]
             apflog("getTarget(): V=%.2f  B-V=%.2f Pri=%.2f " % (self.VMAG, self.BV, target["PRI"]))
             apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (APF.avg_fwhm, slowdown, APF.countrate))
 
