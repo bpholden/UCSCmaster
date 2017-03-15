@@ -1069,6 +1069,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     res['NAME']   = sn[idx]
     res['SCORE']  = star_table[idx,DS_NSHOTS]
     res['PRI']    = star_table[idx, DS_APFPRI]
+    res['DECKER'] = flags['decker'][idx]
+    res['I2'] = confg['I2']    
     res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=confg['I2'], owner=owner)
     return res
 
