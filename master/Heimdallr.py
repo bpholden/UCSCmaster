@@ -165,16 +165,9 @@ class Master(threading.Thread):
         self.fixedList = None
         self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
-#        try:
-#            self.targetlog = open(self.targetlogname,"w+")
-#        except Exception, e:
         self.targetlog = None
-#            apflog("cannot open %s: %s" % (self.targetlogname,e),level="error")
 
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
-#        try:
-#            self.nighttargetlog = open(self.nighttargetlogname,"w+")
-#        except Exception, e:
         self.nighttargetlog = None
 #            apflog("cannot open %s: %s" % (self.nighttargetlogname,e),level="error")
 
