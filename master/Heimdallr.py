@@ -253,6 +253,7 @@ class Master(threading.Thread):
                     apflog("Error: starlist %s does not exist" % (self.fixedList), level="error",echo=True)
                     self.fixedList=None
 
+            self.set_autofocval()
             if target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
@@ -264,7 +265,6 @@ class Master(threading.Thread):
                 return
             else:
                 apflog("Observing target: %s" % target['NAME'], echo=True)
-                self.set_autofocval()
                 self.scriptobs.stdin.write(target["SCRIPTOBS"] + '\n')
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = target["VMAG"]
