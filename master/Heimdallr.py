@@ -173,10 +173,10 @@ class Master(threading.Thread):
     def set_autofocval(self):
         # check last telescope focus
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
-        if time.time() - lastfoc > FOCUSTIME and running and float(sunel) <= sunel_lim:
-            APF.robot['SCRIPTOBS_AUTOFOC'] = "robot_autofocus_enable"
+        if time.time() - lastfoc > FOCUSTIME :
+            APF.autofoc.write("robot_autofocus_enable")
         else:
-            APF.robot['SCRIPTOBS_AUTOFOC'] = "robot_autofocus_disable"
+            APF.autofoc.write("robot_autofocus_disable")
 
 
     def run(self):
