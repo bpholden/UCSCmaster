@@ -872,16 +872,20 @@ if __name__ == '__main__':
     # We have finished taking data, and presumably it is the morning.
     apf.setTeqMode('Morning')
 
-    if opt.name == "ucsc":
-        try:
-            apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-            ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
-        except:
-            apflog("Error: Updating the online googledex has failed.", level="error")
 
     # Keep a copy of observed_targets around for a bit just in case
-    logpush(os.path.join(os.getcwd(),"observed_targets"))
-    logpush(os.path.join(os.getcwd(),"robot.log"))
+    if os.path.exists(os.path.join(os.getcwd(),"observed_targets")):
+        if opt.name == "ucsc":
+            try:
+                apflog("Updating the online googledex with the observed times", level='Info', echo=True)
+                ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
+            except:
+                apflog("Error: Updating the online googledex has failed.", level="error")
+       logpush(os.path.join(os.getcwd(),"observed_targets"))
+        
+    if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
+        logpush(os.path.join(os.getcwd(),"robot.log"))
+        
     if master.nighttargetlog:
         try:
             logpush(master.nighttargetlogname)
