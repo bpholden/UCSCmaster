@@ -100,19 +100,19 @@ def okmon(ok2open):
     try:
         ok = ok2open # historical
     except Exception, e:
-        apflog("Exception in okmon: %s" % (e), level='error')
+        apflog("Exception in okmon for checkapf.OPEN_OK: %s" % (e), level='error')
         return
     try:
-        if not checkapf['MOVE_PERM'].read(binary=False):
+        if checkapf['MOVE_PERM'].read(binary=False) == False:
             ok = False
     except Exception, e:
-        apflog("Exception in okmon: %s" % (e), level='error')
+        apflog("Exception in okmon for checkapf.MOVE_PERM: %s" % (e), level='error')
         return
     try:
         if not checkapf['USERKIND'].read(binary=True) == 3:
             ok = False
     except Exception, e:
-        apflog("Exception in okmon: %s" % (e), level='error')
+        apflog("Exception in okmon checkapf.USERKIND: %s" % (e), level='error')
         return
     APF.openOK = ok
     return
