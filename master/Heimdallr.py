@@ -881,7 +881,7 @@ if __name__ == '__main__':
                 ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
             except:
                 apflog("Error: Updating the online googledex has failed.", level="error")
-       logpush(os.path.join(os.getcwd(),"observed_targets"))
+        logpush(os.path.join(os.getcwd(),"observed_targets"))
         
     if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
         logpush(os.path.join(os.getcwd(),"robot.log"))
