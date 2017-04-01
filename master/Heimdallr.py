@@ -171,6 +171,7 @@ class Master(threading.Thread):
         self.nighttargetlog = None
 
     def set_autofocval(self):
+        APF = self.APF
         # check last telescope focus
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
         if time.time() - lastfoc > FOCUSTIME :
