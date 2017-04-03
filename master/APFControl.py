@@ -343,7 +343,7 @@ class APF:
             except:
                 apflog("Cannot read the last best fitting focus value or write the dewar focus value", level='error')
             if self.dewarfoc > 8600 or self.dewarfoc < 8400:
-                apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
+                apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % (self.dewarfoc), level = "error", echo=True)
                 return False
             apflog("Running calibrate %s %s" % (script, time), level = 'info')
             cmd = '%s %s %s' % (s_calibrate,script, time)
