@@ -911,6 +911,7 @@ if __name__ == '__main__':
         result = apf.calibrate(script=opt.calibrate, time='post')
         if not result:
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
+            APFTask.set(parent,suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
 
     bstr = "%d,%d" % (1,1)
     apf.ucam['BINNING'].write(bstr) 
@@ -930,6 +931,7 @@ if __name__ == '__main__':
 
     # Update the last observation number to account for the morning calibration shots.
     apf.updateLastObs()
+    APFTask.set(parent,suffix="MESSAGE",value="Updating last observation number",wait=False)
 
     # All Done!
     APFTask.phase(parent, "Finished")
