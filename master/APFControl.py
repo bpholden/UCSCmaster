@@ -372,9 +372,6 @@ class APF:
                 result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
                 if not result:
                     apflog("focusinstr failed with code %d" % code, echo=True)
-                expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
-                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                    apflog("focusinstr failed to exit" ,echo=True, level="error")
                 expression="($apftask.FOCUSINSTR_STATUS == 3)"
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                     apflog("focusinstr failed" ,echo=True, level="error")
