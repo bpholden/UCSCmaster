@@ -322,15 +322,21 @@ class APF:
     # Fucntion for checking what is currently open on the telescope
     def isReadyForObserving(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
-        what = self.checkapf("WHATSOPN").read()
+        whatstr = self.whatsopn.read()
         try:
+            what = whatstr.split()
+        except:
+            apflog("checkapf.WHATSOPN returned a value that str.split cannot split",level='warn',echo=True)
+            return self.isReadyForObservingDirect()
+
+        
+        if hasattr(what,'__iter__'):
             if "DomeShutter" in what and "MirrorCover" in what:
                 return True, what
             else:
                 return False, ''
-        except Exception, e:
-            apflog("Exception in isReadyForObserving: %s (what = %s)" % (e,what), level='warn')
-            return False, ''
+        else:
+            return self.isReadyForObservingDirect()
 
     def setObserverInfo(self, num=10000, name='Robot', owner=None):
         if self.test: return
