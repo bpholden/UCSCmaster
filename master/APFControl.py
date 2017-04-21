@@ -320,6 +320,33 @@ class APF:
             return False, ''
 
     # Fucntion for checking what is currently open on the telescope
+
+    def isReadyForObservingDirect(self):
+        what = ''
+        rv = False
+        try:
+            ismcopen = self.mcopen.read(binary=True)
+        except:
+            return False, ''
+        try:
+            isshutterclosed = self.shclosed.read(binary=True)
+        except:
+            return False, ''
+            
+        if ismcopen:
+            what = what + "MirrorCover"
+            rv = True
+        if isshutterclosed == False:
+            if len(what) > 0 :
+                what = what + " DomeShutter"
+            else:
+                what = "DomeShutter"
+            if rv:
+                rv = True
+        else:
+            rv = False
+        return rv, what
+        
     def isReadyForObserving(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
         whatstr = self.whatsopn.read()
