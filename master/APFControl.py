@@ -281,7 +281,6 @@ class APF:
         s += "Telescope -- AZ=%4.2f  EL=%4.2f \n" % (self.aaz, self.ael)
         s += "Front/Rear Shutter=%4.2f / %4.2f\n"%(self.fspos, self.rspos)
         s += "Wind = %3.1f mph \n" % (self.wvel)
-        s += "Seeing %4.2f arcsec\n" % self.seeing
         s += "Slowdown = %5.2f x\n" % self.slowdown
         #s += "Conditions are - %s\n" % self.conditions
         s += "Teq Mode - %s\n" % self.teqmode
