@@ -34,13 +34,14 @@ deckscale = {'M': 1.0, 'W':1.0, 'N': 3.0, 'B': 0.5, 'S':2.0, 'P':1.0}
 # Aquire the ktl services and associated keywords
 tel        = ktl.Service('eostele')
 sunelServ  = tel('SUNEL')
-checkapf   = ktl.Service('checkapf')
 apfmet     = ktl.Service('apfmet')
+checkapf   = ktl.Service('checkapf')
 ok2open    = ktl.cache('checkapf','OPEN_OK')
 dmtimer    = ktl.cache('checkapf','DMTIME')
 wx         = ktl.cache('apfmet','M5WIND')
 robot      = ktl.Service('apftask')
 vmag       = robot['scriptobs_vmag']
+
 ucam       = ktl.Service('apfucam')
 apfteq     = ktl.Service('apfteq')
 teqmode    = apfteq['MODE']
@@ -117,6 +118,8 @@ def okmon(ok2open):
     APF.openOK = ok
     return
 
+
+
 # Callback for the windspeed
 def windmon(wx):
     if wx['populated'] == False:
@@ -168,9 +171,15 @@ class APF:
     ael        = tel('AEL')
     aaz        = tel('AAZ')
     aafocus    = tel('AAFOCUS')
+
     dome       = ktl.Service('eosdome')
     rspos      = dome('RSCURPOS')
     fspos      = dome('FSCURPOS')
+    shclosed   = dome('SHCLOSED')
+
+    eostdio    = ktl.Service('eostdio')
+    mcopen     = eostdio('MCOPEN')
+    
     checkapf   = ktl.Service('checkapf')
     apfmet     = ktl.Service('apfmet')
     ok2open    = checkapf('OPEN_OK')
@@ -185,18 +194,22 @@ class APF:
     sop        = robot['scriptobs_phase']
     autofoc    = robot["SCRIPTOBS_AUTOFOC"]
     slew_allowed = robot['slew_allowed']
+
     ucam       = ktl.Service('apfucam')
-    apfschedule= ktl.Service('apfschedule')
-    
     user       = ucam['OUTFILE']
     elapsed    = ucam['elapsed']
+
+    apfschedule= ktl.Service('apfschedule')
+    
     apfteq     = ktl.Service('apfteq')
     teqmode    = apfteq['MODE']
+
     guide      = ktl.Service('apfguide')
     counts     = guide['COUNTS']
     countrate  = guide['countrate']
     thresh     = guide['xpose_thresh']
     avg_fwhm   = guide['AVG_FWHM']
+
     motor      = ktl.Service('apfmot')
     decker     = motor['DECKERNAM']
     dewarfoc   = motor["DEWARFOCRAW"]
@@ -219,6 +232,8 @@ class APF:
 
         self.dmtimer.monitor()
         self.dmtimer.callback(dmtimemon)
+
+        self.whatsopn.monitor()
 
         self.counts.monitor()
         self.counts.callback(countmon)
