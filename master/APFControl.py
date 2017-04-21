@@ -39,6 +39,7 @@ checkapf   = ktl.Service('checkapf')
 ok2open    = ktl.cache('checkapf','OPEN_OK')
 dmtimer    = ktl.cache('checkapf','DMTIME')
 wx         = ktl.cache('apfmet','M5WIND')
+
 robot      = ktl.Service('apftask')
 vmag       = robot['scriptobs_vmag']
 
@@ -181,13 +182,16 @@ class APF:
     mcopen     = eostdio('MCOPEN')
     
     checkapf   = ktl.Service('checkapf')
-    apfmet     = ktl.Service('apfmet')
     ok2open    = checkapf('OPEN_OK')
     dmtimer    = checkapf('DMTIME')
-    wx         = apfmet('M5WIND')
-    temp       = apfmet('M5OUTEMP')
+    whatsopn   = checkapf('WHATSOPN')  
     mv_perm    = checkapf('MOVE_PERM')
     chk_close  = checkapf('CHK_CLOSE')
+
+    apfmet     = ktl.Service('apfmet')
+    wx         = apfmet('M5WIND')
+    temp       = apfmet('M5OUTEMP')
+
     robot      = ktl.Service('apftask')
     vmag       = robot['scriptobs_vmag']
     ldone      = robot['scriptobs_lines_done']
@@ -301,7 +305,7 @@ class APF:
     # Fucntion for checking what is currently open on the telescope
     def isOpen(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
-        whatstr = self.checkapf("WHATSOPN").read()
+        whatstr = self.whatsopn.read()
         try:
             what = whatstr.split()
         except:
