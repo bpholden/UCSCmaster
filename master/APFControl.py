@@ -290,7 +290,7 @@ class APF:
         try:
             what = whatstr.split()
         except:
-            apflog("checkapf.WHATSOPN returned a value that str.split cannot split",level='error',echo=True)
+            apflog("checkapf.WHATSOPN returned a value that str.split cannot split",level='warn',echo=True)
             return False, ''
         if hasattr(what,'__iter__'):
             if "DomeShutter" in what or "MirrorCover" in what or "Vents" in what:
@@ -310,7 +310,7 @@ class APF:
             else:
                 return False, ''
         except Exception, e:
-            apflog("Exception in isReadyForObserving: %s (what = %s)" % (e,what), level='error')
+            apflog("Exception in isReadyForObserving: %s (what = %s)" % (e,what), level='warn')
             return False, ''
 
     def setObserverInfo(self, num=10000, name='Robot', owner=None):
