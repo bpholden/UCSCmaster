@@ -304,8 +304,8 @@ class APF:
     # Fucntion for checking what is currently open on the telescope
     def isOpen(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
-        whatstr = self.whatsopn.read()
         try:
+            whatstr = str(self.whatsopn)
             what = whatstr.split()
         except:
             apflog("checkapf.WHATSOPN returned a value that str.split cannot split",level='warn',echo=True)
@@ -348,8 +348,8 @@ class APF:
         
     def isReadyForObserving(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
-        whatstr = self.whatsopn.read()
         try:
+            whatstr = str(self.whatsopn)
             what = whatstr.split()
         except:
             apflog("checkapf.WHATSOPN returned a value that str.split cannot split",level='warn',echo=True)
