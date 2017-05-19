@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser.add_option("-e","--el",dest="el",default=70,type="float")
     (options, args) = parser.parse_args()    
 
-    allnames, star_table, do_flag, stars  = ds.parseGoogledex()
+    allnames, star_table, flags, stars  = ds.parseGoogledex()
 
     el = np.zeros_like(star_table[:, ds.DS_BV])
     el += options.el
@@ -51,6 +51,6 @@ if __name__ == "__main__":
         row.append( star_table[i, ds.DS_APFPRI])
         row.append(0)
         row.append( nobs[i])
-        line = ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt)
+        line = ds.makeScriptobsLine(allnames[i],row,flags['do'][i],dt,decker=flags['decker'][i],I2=flags['I2'][i])
         print "%s #  %s" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI]))
 
