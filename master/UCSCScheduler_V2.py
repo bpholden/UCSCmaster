@@ -199,7 +199,18 @@ def findColumns(col_names,req_cols,opt_cols=[]):
 
     return didx
 
-def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W'}):
+def checkflag(key,didx,line,regexp,default):
+    try:
+        match = re.search(regexp,line[didx[key]])
+        if match:
+            return match.group(1)
+        else:
+            return default
+    except:
+        return default
+    
+
+def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W' }):
     """ parseGoogledex parses the google sheet and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
