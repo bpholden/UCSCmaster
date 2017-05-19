@@ -521,8 +521,6 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
     I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
     """
     focval = 0
-    if row[DS_APFPRI] > 9.9:
-        focval = 2
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
     ret = name + ' '
