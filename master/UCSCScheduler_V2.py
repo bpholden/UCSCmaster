@@ -254,7 +254,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     
     names = []
     star_table = []
-    flags = { "do" : [], "decker" : []}
+    flags = { "do" : [], "decker" : [], "I2" : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -310,23 +310,16 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                     row.append(0.0)
                 else:
                     row.append(1000.0)
-        try:
-            match = re.search("\A(n|N)",ls[didx["Close Companion"]])
-            if match:
-                flags['do'].append("")
-            else:
-                flags['do'].append("Y")
-        except:
-            flags['do'].append("Y")
 
-        if "APF decker" in didx.keys():
-            match = re.search("\A(W|N|T|S|O|K|L|M|B)",ls[didx["APF decker"]])
-            if match:
-                flags['decker'].append(match.group(1))
-            else:
-                flags['decker'].append(config['decker'])
+        check = checkflag("Close Companion",didx,ls,"\A(n|N)","Y")
+        if check == "N" or check == "n":
+            flags['do'].append("")
         else:
-            flags['decker'].append(config['decker'])
+            flags['do'].append(check)
+            
+        flags['decker'].append(checkflag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
+        flags['I2'].append(checkflag("I2",didx,ls,"\A(n|N)",config["I2"]))
+                                         
             
         star_table.append(row)
         star = ephem.FixedBody()
