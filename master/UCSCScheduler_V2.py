@@ -761,8 +761,8 @@ def format_expmeter(exp_counts, nexp):
 
     exps = np.zeros_like(exp_counts)
     exp_counts *= 1.1 
-    long_idx = np.where(exp_counts > MAX_EXPMETER, True, False)
-    toofew_idx = np.where(exp_counts/nexp > MAX_EXPMETER, True, False)
+    long_idx = exp_counts > MAX_EXPMETER
+    toofew_idx = exp_counts/nexp > MAX_EXPMETER
     nexp[toofew_idx] = np.ceil((exp_counts[toofew_idx]/MAX_EXPMETER) + 1)
     exp_counts[long_idx] = MAX_EXPMETER
     exps[exps < nexp] = nexp[exps < nexp]
@@ -773,18 +773,18 @@ def format_time(total, i2counts, nexp, hitthemall=False):
     times = np.zeros(len(total))
     exps  = np.zeros(len(total))
 
-    middle_idx = np.where((total > MIN_EXPTIME ) &(total < MAX_EXPTIME))
+    middle_idx = (total > MIN_TOTOBS ) &(total < MAX_EXPTIME)
     times[middle_idx] = MAX_EXPTIME # pad out to make it more likely exposure meter threshold sets actual limit
     exps[middle_idx] = 1
 
-    max_idx = np.where(total > MAX_EXPTIME, True, False)
+    max_idx = total > MAX_EXPTIME
     if hitthemall:
         exps[max_idx] = 1
     else:
         exps[max_idx] = np.ceil(total[max_idx]/MAX_EXPTIME)
     times[max_idx] = MAX_EXPTIME
 
-    short_idx = np.where(total < MIN_TOTOBS, True, False)
+    short_idx = total < MIN_TOTOBS
     times[short_idx] = MIN_EXPTIME  # pad out to make it more likely exposure meter threshold sets actual limit
     exps[short_idx] = [ (np.ceil(MIN_TOTOBS/(t+40)) + 1) for t in total[short_idx] ] 
 
