@@ -59,10 +59,10 @@ if __name__ == "__main__":
             row = make_row(star_table,i)
 
             bstari = find_bstar(star_table[:,ds.DS_RA][bstars],star_table[:,ds.DS_DEC][bstars],star_table[i,ds.DS_RA],star_table[i,ds.DS_DEC])
-            bstarrow = make_row(star_table[bstars],bstari)
+            bstarrow = make_row(star_table[bstars],bstari,bstar=True)
             
             line = ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt,decker="N",I2="N")
-            bline = ds.makeScriptobsLine(npallnames[bstars][bstari],bstarrow,'Y',dt,decker="N",I2="Y",bstar=True)            
+            bline = ds.makeScriptobsLine(npallnames[bstars][bstari],bstarrow,'Y',dt,decker="N",I2="Y")            
             print "%s" % (bline)
             print "%s #  %s" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI]))
             print "%s" % (bline)            
