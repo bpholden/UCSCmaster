@@ -210,7 +210,7 @@ def checkflag(key,didx,line,regexp,default):
         return default
     
 
-def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W' }):
+def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' }):
     """ parseGoogledex parses the google sheet and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
@@ -248,13 +248,13 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                 "APFpri", "APFcad", "APFnshots", "lastobs", \
                 "B-V", "APF Desired Precision", "Close Companion", \
-                "APF decker","I2"
+                "APF decker","I2", "owner"
                 ]
     didx = findColumns(col_names,req_cols)
     
     names = []
     star_table = []
-    flags = { "do" : [], "decker" : [], "I2" : [] }
+    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -319,7 +319,9 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             
         flags['decker'].append(checkflag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
         flags['I2'].append(checkflag("I2",didx,ls,"\A(n|N)",config["I2"]))
-                                         
+
+        flags['owner'].append(checkflag("owner",didx,ls,"\A(w+)",config["owner"]))
+
             
         star_table.append(row)
         star = ephem.FixedBody()
@@ -567,6 +569,9 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
     ret += 'count=' + str(int(row[DS_NSHOTS])) 
 
     ret += ' foc=' + str(int(focval))
+
+    if owner != '':
+        ret += ' owner=' + str(owner)
         
     return ret
 
@@ -793,7 +798,7 @@ def format_time(total, i2counts, nexp, hitthemall=False):
     return times, exps
 
 
-def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='Vogt',outfn="googledex.dat",outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='S.Vogt',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -887,7 +892,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     # Note -- RA and Dec are returned in Radians
     if verbose:
         apflog("getNext(): Parsing the Googledex...",echo=True)
-    sn, star_table, flags, stars = parseGoogledex(sheetn=sheetn,outfn=outfn,outdir=outdir)
+    config={'I2': 'Y', 'decker': 'W', 'owner' : owner}
+    sn, star_table, flags, stars = parseGoogledex(sheetn=sheetn,outfn=outfn,outdir=outdir,config=config)
     sn = np.array(sn)
     targNum = len(sn)
     if verbose:
@@ -1073,8 +1079,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     res['SCORE']  = star_table[idx,DS_NSHOTS]
     res['PRI']    = star_table[idx, DS_APFPRI]
     res['DECKER'] = flags['decker'][idx]
-    res['I2'] = confg['I2']    
-    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=owner)
+    res['I2'] =    flags['I2'][idx] 
+    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx])
     return res
 
 
