@@ -209,7 +209,14 @@ def checkflag(key,didx,line,regexp,default):
     except:
         return default
     
-
+def make_local_copy(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
+    worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
+    full_codex = worksheet.get_all_values()
+    f = open(outfn,'w')
+    pickle.dump(full_codex, f)
+    f.close()
+    return full_codex
+    
 def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' }):
     """ parseGoogledex parses the google sheet and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
@@ -223,6 +230,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     """
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
+    apflog( "Starting Googledex parse",echo=True)    
     if not outdir :
         outdir = os.getcwd()
     try:
@@ -230,15 +238,9 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         full_codex = pickle.load(f)
         f.close()
     except IOError:
-        apflog( "Starting Googledex parse",echo=True)
-        worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
-        full_codex = worksheet.get_all_values()
-        #time = (datetime.now() - start).total_seconds()
-        #print "Loaded Values. Took {0:f} seconds.".format(time)
-        f = open(os.path.join(outdir,"googledex.dat"),'w')
-        pickle.dump(full_codex, f)
-        f.close()
-
+        full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
+    except EOFError:
+        full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
         
     col_names = full_codex[0]
     codex = full_codex[1:]
@@ -384,12 +386,15 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
 
     try:
         g = open(googledex_file, 'r')
+        full_codex = pickle.load(g)
+        g.close()
     except IOError:
         apflog("googledex file did not exist, so can't be updated",echo=True)
         return names,times
+    except EOFError:
+        apflog("googledex file corrupt, so can't be updated",echo=True)
+        return names,times
 
-    full_codex = pickle.load(g)
-    g.close()
 
     codex_cols = full_codex[0]
 
