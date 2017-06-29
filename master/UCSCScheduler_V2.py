@@ -186,7 +186,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
         if r in col_names:
             didx[r] = col_names.index(r)
         else:
-            apflog("%s Not found in column names from google spreadsheet" % (r) , level="Alert",echo=True)
+            apflog("%s Not found in column names from google spreadsheet" % (r) , level="Warn",echo=True)
 
     for r in opt_cols:
         if r in col_names:
@@ -195,7 +195,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     # hack to handle an error
     if req_cols[0] == "Star Name" and req_cols[0] not in didx.keys():
         didx[req_cols[0]] = 0
-        apflog("Pasting 'Star Name' into column 0 of google spreadsheet" , level="Error",echo=True)
+        apflog("Pasting 'Star Name' into column 0 of google spreadsheet" , level="Warn",echo=True)
 
     return didx
 
