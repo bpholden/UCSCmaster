@@ -227,6 +227,8 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         outdir = os.getcwd()
     try:
         f = open(os.path.join(outdir,outfn),'r')
+        full_codex = pickle.load(f)
+        f.close()
     except IOError:
         apflog( "Starting Googledex parse",echo=True)
         worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
@@ -236,9 +238,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         f = open(os.path.join(outdir,"googledex.dat"),'w')
         pickle.dump(full_codex, f)
         f.close()
-    else:
-        full_codex = pickle.load(f)
-        f.close()
+
         
     col_names = full_codex[0]
     codex = full_codex[1:]
