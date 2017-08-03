@@ -548,6 +548,13 @@ class APF:
         else:
             return False
 
+    def states_set(self):
+        # there are three states - but we do not care about ESTOPST, that is will be cleared in openatsunset/openatnight
+        if self.dome['ECLOSEST']:
+            return True
+        if self.dome['ESECURST']:
+            return True
+        return False
 
     def openat(self, sunset=False):
         """Function to ready the APF for observing. Calls either openatsunset or openatnight.
@@ -579,6 +586,10 @@ class APF:
                 apflog("Can't open. No move permission.",echo=True)
                 return False
 
+        if self.states_set():
+            apflog("An unusal emergency state is set.", level="error",echo=True)
+            return False
+            
         # Everything seems acceptable, so lets try opening
         if sunset:
             cmd = '/usr/local/lick/bin/robot/openatsunset'
@@ -708,7 +719,7 @@ class APF:
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
     def target(self, name, ra, dec, pmra, pmdec):
-        """Aim the APF at the desired target. This calles prep-obs, slewlock, and focus-telescope. A workaround to relying on scriptobs."""
+        """Aim the APF at the desired target. This calls prep-obs, slewlock, and focus-telescope. A workaround to relying on scriptobs."""
         if self.isOpen()[0] == False:
             apflog("APF is not open. Can't target a star while closed.",echo=True)
             return
