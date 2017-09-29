@@ -276,7 +276,7 @@ class Master(threading.Thread):
 
             apflog("getTarget(): Target= %s" % target["NAME"])
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
-
+            APF.updateLastObs()
 
         def opening(sunel,sunset=False):
             when = "night"
