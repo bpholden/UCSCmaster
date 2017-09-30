@@ -745,6 +745,8 @@ if __name__ == '__main__':
             apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
             sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
+        apf.updateLastObs()
+
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
 
@@ -781,6 +783,7 @@ if __name__ == '__main__':
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
 
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
+        apf.updateLastObs()
         if result == False:
             apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
             result = apf.calibrate(script = opt.calibrate, time = 'pre')
@@ -912,6 +915,7 @@ if __name__ == '__main__':
         if not result:
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
             APFTask.set(parent,suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
+    apf.updateLastObs()
 
     bstr = "%d,%d" % (1,1)
     apf.ucam['BINNING'].write(bstr) 
