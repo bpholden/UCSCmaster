@@ -905,7 +905,11 @@ if __name__ == '__main__':
     apfmon = ktl.Service('apfmon')
     if apfmon['BINNINGDIS'].read(binary=True) > 0:
         apfmon['BINNINGDIS'].write(0,binary=True)
-              
+
+    try:
+        apf.ok2open.monitor(start=False)
+    except Exception, e:
+        apflog("Note: Cannot stop monitoring ok2open. %s" % (e), level="warn", echo=True
     # Take morning calibrations
     APFTask.phase(parent, "Cal-Post")
     result = apf.calibrate(script=opt.calibrate, time='post')
