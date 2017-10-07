@@ -909,7 +909,7 @@ if __name__ == '__main__':
     try:
         apf.ok2open.monitor(start=False)
     except Exception, e:
-        apflog("Note: Cannot stop monitoring ok2open. %s" % (e), level="warn", echo=True
+        apflog("Note: Cannot stop monitoring ok2open. %s" % (e), level="warn", echo=True)
     # Take morning calibrations
     APFTask.phase(parent, "Cal-Post")
     result = apf.calibrate(script=opt.calibrate, time='post')
