@@ -409,20 +409,20 @@ class APF:
         else:
             print "Couldn't understand argument %s, nothing was done." % time
 
-    def focus(self, user='ucsc'):
+    def focus(self):
         """Runs the focus routine appropriate for the user."""
-        if user == 'ucsc':
-            if self.test: 
-                APFTask.waitFor(self.task, True, timeout=10)
-                print "Test Mode: Would be running focusinstr."
-                return True
-            else:
-                apflog("Running focusinstr routine.",echo=True)
-                cmdpath = '/usr/local/lick/bin/robot/'
-                cmd = os.path.join(cmdpath,'focusinstr -b')
-                result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
-                if not result:
-                    apflog("focusinstr failed with code %d" % code, echo=True)
+
+        if self.test: 
+            APFTask.waitFor(self.task, True, timeout=10)
+            print "Test Mode: Would be running focusinstr."
+            return True
+        else:
+            apflog("Running focusinstr routine.",echo=True)
+            cmdpath = '/usr/local/lick/bin/robot/'
+            cmd = os.path.join(cmdpath,'focusinstr -b')
+            result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
+            if not result:
+                apflog("focusinstr failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS == 3)"
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                     apflog("focusinstr failed" ,echo=True, level="error")
@@ -431,9 +431,7 @@ class APF:
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                     apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
                     result = False
-                return result
-        else:
-            print "Don't recognize user %s. Nothing was done." % style
+            return result
 
 
     def find_star(self):
