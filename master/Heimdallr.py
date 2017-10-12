@@ -740,7 +740,7 @@ if __name__ == '__main__':
             apflog("Waiting for instrument permission to be true")
             APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-        result = apf.focus(user='ucsc')
+        result = apf.focus()
         if not result:
             apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
             sys.exit(1)
@@ -927,7 +927,7 @@ if __name__ == '__main__':
     # Focus the instrument once more
     APFTask.phase(parent, "Focus")
     apflog("Running Focus Post", echo=True)
-    result = apf.focus(user='ucsc')
+    result = apf.focus()
     if not result:
         apflog("Focus cube post has failed", level='error', echo=True)
     else:
