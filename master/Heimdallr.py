@@ -758,7 +758,7 @@ if __name__ == '__main__':
             apflog("Error: Cannot communicate with apftask",level="error")
 
         try:
-            if opt.fixed == None:
+            if opt.name == "ucsc":
                 names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
