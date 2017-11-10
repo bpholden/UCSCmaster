@@ -50,12 +50,17 @@ DS_NSHOTS = 9
 DS_LAST   = 10
 DS_BV     = 11
 DS_ERR    = 12
+DS_UTH    = 13
+DS_UTM    = 14
+DS_DUR    = 15
 
 SLOWDOWN_MIN = 0.4
 SLOWDOWN_MAX = 10.0
 
+PRI_DELTA = 5
+
 ###
-# arGGGGGG!!
+# arGGGGGG!! a global
 ###
 
 last_objs_attempted = []
@@ -65,6 +70,22 @@ def computeMaxTimes(sn,exp_times):
     maxtimes += TARGET_EXPOSURE_TIME_MAX
     
     return maxtimes
+
+
+def compute_priorities(star_table,available,cur_dt):
+    # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
+    if any(star_table[available, DS_DUR] > 0):
+        new_pri = np.zeros_like(star_table[:, DS_APFPRI])
+        new_pri += star_table[available,DS_APFPRI]
+        timedependent, = np.where(star_table[available, DS_DUR] > 0)
+        for tdinx in timedependent:
+            sdt = datetime(dt.year,dt.month,dt.day,star_table[:, DS_UTH][available][tdinx],star_table[:, DS_UTm][available][tdinx],0.)
+            durdelt = timedelta(0,star_table[:, DS_DUR][available][tdinx],0)
+            if (dt - sdt < durdelt) and (st - sdt > timedelta(0,0,0) ):
+                new_pri[available][tdinx] += PRI_DELTA
+    else:
+        new_pri = star_table[:, DS_APFPRI]
+    return new_pri
 
 def float_keyval(instr):
     try:
@@ -250,7 +271,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                 "APFpri", "APFcad", "APFnshots", "lastobs", \
                 "B-V", "APF Desired Precision", "Close Companion", \
-                "APF decker","I2", "owner"
+                "APF decker","I2", "owner", "uth","utm","duration"
                 ]
     didx = findColumns(col_names,req_cols)
     
@@ -313,6 +334,15 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 else:
                     row.append(1000.0)
 
+        for coln in ["uth", "utm", "duration" ]:
+            try:
+                row.append(float(ls[didx[coln]]))
+            except ValueError:
+                row.append(0)
+            except KeyError:
+                row.append(0)
+                
+                    
         check = checkflag("Close Companion",didx,ls,"\A(n|N)","Y")
         if check == "N" or check == "n":
             flags['do'].append("")
@@ -1008,28 +1038,33 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         if vis != []:
             available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
-        scaled_elevations[np.where(f)] += scaled_els[np.where(vis)]        
+        scaled_elevations[np.where(f)] += scaled_els[np.where(vis)]
+        
 
     # Now just sort by priority, then cadence. Return top target
     if len(sn[available]) < 1:
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
+
+    final_priorities = compute_priorities(star_table,available,dt)
+    
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
     good_cadence = np.where(cadence_check >  1.0, True, False)
     good_cadence_available = available & good_cadence
 
-    if len(good_cadence_available):
+
+    if any(good_cadence_available):
         try:
-            pri = max(star_table[good_cadence_available, DS_APFPRI])
-            sort_i = (star_table[:, DS_APFPRI] == pri) & good_cadence_available
+            pri = max(final_priorities[good_cadence_available])
+            sort_i = (final_priorities == pri) & good_cadence_available
         except:
-            pri = max(star_table[available, DS_APFPRI])
-            sort_i = (star_table[:, DS_APFPRI] == pri) & available
-    elif len(available):
+            pri = max(final_priorities[available])
+            sort_i = (final_priorities == pri) & available
+    elif any(available):
         apflog( "getNext(): No new stars available, going back to the previously observed list.",level="warn",echo=True)
-        pri = max(star_table[available, DS_APFPRI])
-        sort_i = (star_table[:, DS_APFPRI] == pri) & available
+        pri = max(final_priorities[available])
+        sort_i = (final_priorities == pri) & available
     else:
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
