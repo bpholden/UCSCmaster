@@ -76,13 +76,15 @@ def compute_priorities(star_table,available,cur_dt):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     if any(star_table[available, DS_DUR] > 0):
         new_pri = np.zeros_like(star_table[:, DS_APFPRI])
-        new_pri += star_table[available,DS_APFPRI]
+        new_pri[available] += star_table[available,DS_APFPRI]
+        delta_pri = np.zeros_like(new_pri[available])
         timedependent, = np.where(star_table[available, DS_DUR] > 0)
         for tdinx in timedependent:
-            sdt = datetime(dt.year,dt.month,dt.day,star_table[:, DS_UTH][available][tdinx],star_table[:, DS_UTm][available][tdinx],0.)
+            sdt = datetime(cur_dt.year,cur_dt.month,cur_dt.day,int(star_table[:, DS_UTH][available][tdinx]),int(star_table[:, DS_UTM][available][tdinx]),0)
             durdelt = timedelta(0,star_table[:, DS_DUR][available][tdinx],0)
-            if (dt - sdt < durdelt) and (st - sdt > timedelta(0,0,0) ):
-                new_pri[available][tdinx] += PRI_DELTA
+            if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
+                delta_pri[tdinx] += PRI_DELTA
+        new_pri[available] += delta_pri
     else:
         new_pri = star_table[:, DS_APFPRI]
     return new_pri
@@ -334,7 +336,15 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 else:
                     row.append(1000.0)
 
-        for coln in ["uth", "utm", "duration" ]:
+        for coln in ["uth", "utm"]:
+            try:
+                row.append(int(ls[didx[coln]]))
+            except ValueError:
+                row.append(0)
+            except KeyError:
+                row.append(0)
+                
+        for coln in ["duration"]:
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
@@ -1075,7 +1085,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
     starstr = "getNext(): star table available: %s" % (sn[sort_i]) 
     apflog(starstr,echo=True)
 
-    starstr = "getNext(): star table available priorities: %s" % (star_table[:, DS_APFPRI][sort_i]) 
+    starstr = "getNext(): star table available priorities: %s" % (final_priorities[sort_i]) 
     apflog(starstr,echo=True)
      
     if bstar:
