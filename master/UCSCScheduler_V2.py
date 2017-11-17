@@ -1137,17 +1137,20 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
 
 
 if __name__ == '__main__':
+
+    sheetn="The Googledex"
+    
     # For some test input what would the best target be?
     otfn = "observed_targets"
     ot = open(otfn,"w")
     starttime = time.time()
-    result = getNext(starttime, 13.99, 1.8, bstar=True, verbose=True)
+    result = getNext(starttime, 13.99, 1.8, bstar=True, verbose=True,sheetn=sheetn)
     ot.write("%s\n" % (result["SCRIPTOBS"]))
     ot.close()
     starttime += 400
     for i in range(5):
         
-        result = getNext(starttime, 13.99, 1.8, bstar=False, verbose=True)
+        result = getNext(starttime, 13.99, 1.8, bstar=False, verbose=True,sheetn=sheetn)
         #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:
