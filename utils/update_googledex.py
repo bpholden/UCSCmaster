@@ -9,4 +9,8 @@ if __name__ == "__main__":
         print "needs a filename"
         sys.exit()
     fn = sys.argv[1]
-    ds.update_googledex_lastobs(fn)
+    if len(sys.argv) >= 3:
+        sheetn = sys.argv[2]
+    else:
+        sheetn = "The Googledex"
+    ds.update_googledex_lastobs(fn,sheetn=sheetn)
