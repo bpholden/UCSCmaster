@@ -1,5 +1,6 @@
 #!/usr/bin/env  /opt/kroot/bin/kpython
 
+import sys
 import json
 import gspread
 import pickle
@@ -11,7 +12,12 @@ scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/
 credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)
 gc = gspread.authorize(credentials)
 
-spreadsheet = gc.open("The Googledex")
+sheetn ="The Googledex"
+
+if len(sys.argv) > 1:
+    sheetn = sys.argv[1]
+
+spreadsheet = gc.open(sheetn)
 #spreadsheet = gc.open_by_key("1VoNDlmtVSnqJqzWbbCzYGc7XAvR9ADNjNIDSIBZE-jE")
 # 1VoNDlmtVSnqJqzWbbCzYGc7XAvR9ADNjNIDSIBZE-jE
 #spreadsheet = gc.open_by_url("https://docs.google.com/spreadsheets/d/1VoNDlmtVSnqJqzWbbCzYGc7XAvR9ADNjNIDSIBZE-jE/")
