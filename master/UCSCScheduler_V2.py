@@ -411,6 +411,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
                     ws.update_cell(i+1, col+1, round(jd, 2) )
             except:
                 print v[0], v[col]
+                ws.update_cell(i+1, col+1, round(jd,2) )
                 
     apflog( "Updated Googledex",echo=True)
 
