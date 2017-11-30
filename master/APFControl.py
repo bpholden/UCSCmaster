@@ -218,6 +218,10 @@ class APF:
     decker     = motor['DECKERNAM']
     dewarfoc   = motor["DEWARFOCRAW"]
 
+    eosgcam    = ktl.Service('eosgcam')
+    fits3pre   = eosgcam('fits3pre')
+    save3d     = eosgcam('save3d')
+
     def __init__(self, task="example", test=False):
         """ Initilize the current state of APF. Setup the callbacks and monitors necessary for automated telescope operation."""
         # Set up the calling task that set up the monitor and if this is a test instance
@@ -301,6 +305,11 @@ class APF:
         return s
 
 
+    def initGuidecam(self):
+        self.save3d.write(False,binary=True)
+        self.fits3pre.write('')
+        return
+    
     # Fucntion for checking what is currently open on the telescope
     def isOpen(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""

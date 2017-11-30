@@ -644,7 +644,8 @@ if __name__ == '__main__':
     # Aquire an instance of the APF class, which holds wrapper functions for controlling the telescope
     apf = ad.APF(task=parent, test=debug)
     APFTask.waitFor(parent, True, timeout=5)
-
+    apf.initGuidecam()
+    
     if apf.checkapf['USERKIND'].read(binary=True) != 3:
         apflog("checkapf not in robotic mode, exiting",level="error",echo=True)
         sys.exit()
