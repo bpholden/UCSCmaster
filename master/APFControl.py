@@ -24,6 +24,8 @@ WINDSHIELD_LIMIT = 10. # mph at the APF
 TEMP_LIMIT = 35. # deg F at the APF
 wxtimeout = timedelta(seconds=1800)
 SUNEL_HOR = -3.2
+DEWARMAX = 8600
+DEWARMIN = 8400
 
 #ScriptDir = '@LROOT@/bin/robot/'
 ScriptDir = '/usr/local/lick/bin/robot/'
@@ -889,7 +891,7 @@ class APF:
         if self.teqmode.read() != 'Night':
             self.setTeqMode('Night')
         # Check the instrument focus for a reasonable value
-        if self.dewarfoc > 8600 or self.dewarfoc < 8400:
+        if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
             lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
             apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
             APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
