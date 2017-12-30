@@ -743,8 +743,10 @@ if __name__ == '__main__':
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
         result = apf.focus()
         if not result:
-            apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
-            sys.exit(1)
+#            apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
+            apflog("Focusinstr has failed. Seeting to 8500.",level='error',echo=True)
+            APFLib.write("apfmot.DEWARFOCRAW","8500",binary=True))
+#            sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
         apf.updateLastObs()
 
