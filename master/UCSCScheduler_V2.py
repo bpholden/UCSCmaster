@@ -68,7 +68,14 @@ last_objs_attempted = []
 def computeMaxTimes(sn,exp_times):
     maxtimes = np.zeros_like(exp_times)
     maxtimes += TARGET_EXPOSURE_TIME_MAX
-    
+
+    reg = re.compile("(K2|KOI)")
+    it = np.nditer(sn)
+    while not it.finished:
+        if reg.match(str(it[0])):
+            maxtimes[it.iterindex] *= 3.
+        it.iternext()
+
     return maxtimes
 
 
