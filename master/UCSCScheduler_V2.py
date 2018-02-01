@@ -57,6 +57,8 @@ DS_ERR    = 12
 DS_UTH    = 13
 DS_UTM    = 14
 DS_DUR    = 15
+DS_MIN    = 16
+DS_MAX    = 17
 
 SLOWDOWN_MIN = 0.4
 SLOWDOWN_MAX = 10.0
@@ -282,7 +284,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
-                "APFpri", "APFcad", "APFnshots", "lastobs", \
+                "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
                 "B-V", "APF Desired Precision", "Close Companion", \
                 "APF decker","I2", "owner", "uth","utm","duration"
                 ]
@@ -362,6 +364,22 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 row.append(0)
             except KeyError:
                 row.append(0)
+                
+        for coln in ["APFmin"]:
+            try:
+                row.append(float(ls[didx[coln]]))
+            except ValueError:
+                row.append(MIN_TOTOBS)
+            except KeyError:
+                row.append(MIN_TOTOBS)
+                
+        for coln in ["APFmax"]:
+            try:
+                row.append(float(ls[didx[coln]]))
+            except ValueError:
+                row.append(TARGET_EXPOSURE_TIME_MAX)
+            except KeyError:
+                row.append(TARGET_EXPOSURE_TIME_MAX)
                 
                     
         check = checkflag("Close Companion",didx,ls,"\A(n|N)","Y")
@@ -830,25 +848,25 @@ def format_expmeter(exp_counts, nexp):
     exps[exps < nexp] = nexp[exps < nexp]
     return exp_counts, exps
 
-def format_time(total, i2counts, nexp, hitthemall=False):
+def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     total = np.array(total)
     times = np.zeros(len(total))
     exps  = np.zeros(len(total))
 
-    middle_idx = (total > MIN_TOTOBS ) &(total < MAX_EXPTIME)
-    times[middle_idx] = MAX_EXPTIME # pad out to make it more likely exposure meter threshold sets actual limit
+    middle_idx = (total > mintime ) &(total < maxtime)
+    times[middle_idx] = maxtime[middle_idx] # pad out to make it more likely exposure meter threshold sets actual limit
     exps[middle_idx] = 1
 
-    max_idx = total > MAX_EXPTIME
+    max_idx = total > maxtime
     if hitthemall:
         exps[max_idx] = 1
     else:
-        exps[max_idx] = np.ceil(total[max_idx]/MAX_EXPTIME)
-    times[max_idx] = MAX_EXPTIME
+        exps[max_idx] = np.ceil(total[max_idx]/maxtime[max_idx])
+    times[max_idx] = maxtime[max_idx]
 
-    short_idx = total < MIN_TOTOBS
-    times[short_idx] = MIN_EXPTIME  # pad out to make it more likely exposure meter threshold sets actual limit
-    exps[short_idx] = [ (np.ceil(MIN_TOTOBS/(t+40)) + 1) for t in total[short_idx] ] 
+    short_idx = total < mintime
+    times[short_idx] = mintime[short_idx]  # pad out to make it more likely exposure meter threshold sets actual limit
+    exps[short_idx] = [ (np.ceil(mintime[short_idx]/(t+READOUT)) + 1) for t in total[short_idx] ] 
 
     exps[exps < nexp] = nexp[exps < nexp]
 
@@ -1032,12 +1050,11 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
                                             star_table[f,DS_BV])
         
         exp_times = exp_times * slowdown
-        maxtimes = computeMaxTimes(sn[f],exp_times)
         totexptimes[f] += exp_times
         i2cnts[f] += i2counts
         if verbose:
             apflog("getNext(): Formating exposure times",echo=True)
-        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS])
+        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],star_table[f, DS_MAX])
 
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
