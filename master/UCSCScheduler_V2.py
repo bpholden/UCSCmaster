@@ -33,8 +33,11 @@ TARGET_MOON_DIST_MAX = 25
 MAX_EXPTIME = 1200.
 MIN_EXPTIME = 600.
 MIN_TOTOBS = 300.
+READOUT = 40
+
 MAX_I2 = 40000
 MIN_I2 = 500
+
 MAX_EXPMETER = 2e9 # above this saturates the CCD
 
 # A few constants to make accessing the star table more readable
