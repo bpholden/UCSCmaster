@@ -1064,7 +1064,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Goog
         # Is the exposure time too long?
         if verbose:
             apflog("getNext(): Removing really long exposures",echo=True)
-        time_check = np.where( exp_times < maxtimes, True, False)
+        time_check = np.where( exp_times < star_table[f, DS_MAX], True, False)
         
         available[f] = available[f] & time_check
         f = available
