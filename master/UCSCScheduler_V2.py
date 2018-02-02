@@ -866,7 +866,7 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
 
     short_idx = total < mintime
     times[short_idx] = mintime[short_idx]  # pad out to make it more likely exposure meter threshold sets actual limit
-    exps[short_idx] = [ (np.ceil(mintime[short_idx]/(t+READOUT)) + 1) for t in total[short_idx] ] 
+    exps[short_idx] = np.ceil(mintime[short_idx]/(total[short_idx]+READOUT)) + 1
 
     exps[exps < nexp] = nexp[exps < nexp]
 
