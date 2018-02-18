@@ -743,9 +743,23 @@ if __name__ == '__main__':
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
         result = apf.focus()
         if not result:
+            focusdict = APFTask.get("focusinstr",["phase","nominal"])
 #            apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
-            apflog("Focusinstr has failed. Seeting to 8500.",level='error',echo=True)
-            APFLib.write("apfmot.DEWARFOCRAW","8500",binary=True)
+            instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+            if not instr_perm:
+                while not instr_perm:
+                    apflog("Waiting for instrument permission to be true")
+                    APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
+                    instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+                if len(focusdict['phase']) > 0:
+                    flags = " ".join(["-p",focusdict['phase']])
+                else:
+                    flags = "-b"
+                result = apf.focus(flags=flags)
+            else:
+                apflog("Focusinstr has failed. Seeting to %s." % (focusdict["nominal"]),level='error',echo=True)
+                APFLib.write("apfmot.DEWARFOCRAW",focusdict["nominal"],binary=True)
+
 #            sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
         apf.updateLastObs()
