@@ -774,11 +774,6 @@ if __name__ == '__main__':
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
 
-        try:
-            if opt.name == "ucsc":
-                names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
-        except Exception as e:
-            apflog("Error: Cannot download googledex?! %s" % (e),level="error")
             
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         # try:
@@ -824,6 +819,11 @@ if __name__ == '__main__':
     
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
+        try:
+            if opt.name == "ucsc":
+                names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
+        except Exception as e:
+            apflog("Error: Cannot download googledex?! %s" % (e),level="error")
 
         bstr = "%d,%d" % (opt.binning,opt.binning)
         apf.ucam['BINNING'].write(bstr)
