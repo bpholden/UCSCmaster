@@ -420,7 +420,7 @@ class APF:
         else:
             print "Couldn't understand argument %s, nothing was done." % time
 
-    def focus(self):
+    def focus(self,flags="-b"):
         """Runs the focus routine appropriate for the user."""
 
         if self.test: 
@@ -430,7 +430,8 @@ class APF:
         else:
             apflog("Running focusinstr routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
-            cmd = os.path.join(cmdpath,'focusinstr -b')
+            execstr = " ".join['focusinstr',flags]
+            cmd = os.path.join(cmdpath,execstr)
             result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
             if not result:
                 apflog("focusinstr failed with code %d" % code, echo=True)
