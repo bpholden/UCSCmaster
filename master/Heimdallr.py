@@ -552,6 +552,12 @@ class Master(threading.Thread):
                                     APF.close()
                                     os._exit()
                 
+                            if not APF.isOpen()[0] and not rising:
+                                APFTask.set(parent,suffix="MESSAGE",value="Waiting for sunset",wait=False)
+                                APFTask.waitFor(self.task, True, timeout=5)
+                            if  APF.isOpen()[0] and float(sunel) > sunel_lim:
+                                APFTask.set(parent,suffix="MESSAGE",value="Waiting for the end of twilight",wait=False)
+                                APFTask.waitFor(self.task, True, timeout=5)
 
 
                 
@@ -561,12 +567,6 @@ class Master(threading.Thread):
                 APF.DMReset()
 #                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
 
-            if not APF.isOpen()[0] and not rising:
-                APFTask.set(parent,suffix="MESSAGE",value="Waiting for sunset",wait=False)
-                APFTask.waitFor(self.task, True, timeout=5)
-            if  APF.isOpen()[0] and float(sunel) > sunel_lim:
-                APFTask.set(parent,suffix="MESSAGE",value="Waiting for the end of twilight",wait=False)
-                APFTask.waitFor(self.task, True, timeout=5)
             
 
     def stop(self):
