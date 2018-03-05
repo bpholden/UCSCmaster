@@ -384,7 +384,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         flags['decker'].append(checkflag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
         flags['I2'].append(checkflag("I2",didx,ls,"\A(n|N)",config["I2"]))
 
-        flags['owner'].append(checkflag("owner",didx,ls,"\A(w+)",config["owner"]))
+        flags['owner'].append(checkflag("owner",didx,ls,"\A((w+)|(\A\w\.\w+))",config["owner"]))
 
             
         star_table.append(row)
