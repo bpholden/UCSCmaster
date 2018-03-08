@@ -643,22 +643,18 @@ class APF:
             apflog("First openup attempt has failed. Exit code = %d. After a pause, will make one more attempt." % code,echo=True)
             APFTask.waitFor(self.task, True, timeout=10)
             result, code = cmdexec(cmd)
-            if result:
-                try:
-                    APFLib.write("eostele.FOCUS",ktl.read("apftask","FOCUSTEL_LASTFOCUS",binary=True))
-                except:
-                    apflog("Cannot move secondary focus.",level="error")
-                return True
-            else:
+            if not result:
                 apflog("Second openup attempt also failed. Exit code %d. Giving up." % code,echo=True)
                 return False
-        else:
-            try:
-                APFLib.write("eostele.FOCUS",ktl.read("apftask","FOCUSTEL_LASTFOCUS",binary=True))
-            except:
-                apflog("Cannot move secondary focus.",level="error")
-
-            return True
+        rv = self.checkhome()
+        if rv == False:
+            return False
+        try:
+            APFLib.write("eostele.FOCUS",ktl.read("apftask","FOCUSTEL_LASTFOCUS",binary=True))
+        except:
+            apflog("Cannot move secondary focus.",level="error")
+            return False
+        return True
 
     def power_down_telescope(self):
         """Checks that we have the proper permission and dome is closed, then resets telescope power."""
