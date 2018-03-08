@@ -568,6 +568,34 @@ class APF:
             return True
         return False
 
+
+    def checkhome(self,home=True):
+        try:
+            homed = apfmon('ELHOMERIGHTSTA').read(binary=True)
+        except Exception, e:
+            apflog("apfmon.ELHOMERIGHTSTA cannot be read: %s" % (e),level='Alert',echo=True)
+            return False
+        if homed == 2:
+            return True
+        else:
+            if homed == 5 or homed == 6:
+                if home:
+                    rc = subprocess.call(["/usr/local/lick/bin/robot/slew", "--home"])
+                    homed = apfmon('ELHOMERIGHTSTA').read(binary=True)
+                    if rc == 0 and homed == 2:
+                        return True
+                    else:
+                        apflog("cannot home telescope" % (e),level='Alert',echo=True)
+                        return False
+                else:
+                    apflog("Telescope needs to be homed",level='Alert',echo=True)
+                    return False
+            else:
+                apflog("apfmon.ELHOMERIGHTSTA value is %d" % (homed),level='Alert',echo=True)
+                return False
+                
+        return False
+    
     def openat(self, sunset=False):
         """Function to ready the APF for observing. Calls either openatsunset or openatnight.
            This function will attempt to open successfully twice. If both attempts
