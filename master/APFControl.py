@@ -224,6 +224,8 @@ class APF:
     fits3pre   = eosgcam('fits3pre')
     save3d     = eosgcam('save3d')
 
+    apfmon     = ktl.Service('apfmon')
+
     def __init__(self, task="example", test=False):
         """ Initilize the current state of APF. Setup the callbacks and monitors necessary for automated telescope operation."""
         # Set up the calling task that set up the monitor and if this is a test instance
