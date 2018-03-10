@@ -16,7 +16,7 @@ import os
 import NightSim as ns
 
 def compute_simulation(curtime,star,apf_obs,slowdowns,fwhms,outfp):
-    actel = ns.compute_el(curtime,star,apf_obs)
+    actel,actaz = ns.compute_el(curtime,star,apf_obs)
     actslow, actfwhm = ns.rand_obs_sample(slowdowns,fwhms)
     actfwhm = ns.gen_seeing_el(actfwhm,actel)
     lastfwhm = actfwhm
@@ -40,11 +40,14 @@ def compute_simulation(curtime,star,apf_obs,slowdowns,fwhms,outfp):
     totcounts = fexptime * specrate
 
     precision, true_error = ge.compute_real_uncertainty(totcounts,result['BV'])
-    
-    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow)
+    if actaz < 180:
+        actel *= -1.
+    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %.2f" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow, actel)
     print outstr
     outfp.write(outstr + "\n")
     return curtime, lastfwhm, lastslow
+
+
 
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
@@ -55,6 +58,7 @@ parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
 parser.add_option("-o","--outfile",dest="outfile",default=None)
 parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
 (options, args) = parser.parse_args()    
+outdir = "."
 
 if options.date == "today":
     today = datetime.now()
@@ -82,13 +86,13 @@ except Exception as e:
     print "cannot open file %s for output, %s,  exiting" % (outfile,e)
     sys.exit()
 
-hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown\n"
+hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
 outfp.write(hdrstr)
         
 if options.fixed != "":
     allnames, star_table, lines, stars = ds.parseStarlist(options.fixed)
 else:
-    allnames, star_table, flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=options.infile)
+    allnames, star_table, flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=os.path.join(outdir,options.infile))
 
 fwhms = ns.gen_seeing(val=0.1) # good conditions
 slowdowns = ns.gen_clouds(val=0.1) # good conditions
@@ -106,7 +110,7 @@ while observing:
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime, lastfwhm, lastslow)
     else:
-        result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, verbose=True)
+        result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile), verbose=True)
     if result:
         if bstar:
             bstar = False
@@ -128,7 +132,6 @@ while observing:
         
 print "sun rose"
 fn = "observed_targets"
-outdir = "."
-observed, obstimes = ds.update_local_googledex(curtime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,fn))
+observed, obstimes = ds.update_local_googledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
 
 outfp.close()
