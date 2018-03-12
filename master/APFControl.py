@@ -224,6 +224,8 @@ class APF:
     fits3pre   = eosgcam('fits3pre')
     save3d     = eosgcam('save3d')
 
+    apfmon     = ktl.Service('apfmon')
+
     def __init__(self, task="example", test=False):
         """ Initilize the current state of APF. Setup the callbacks and monitors necessary for automated telescope operation."""
         # Set up the calling task that set up the monitor and if this is a test instance
@@ -566,6 +568,34 @@ class APF:
             return True
         return False
 
+
+    def checkhome(self,home=True):
+        try:
+            homed = apfmon('ELHOMERIGHTSTA').read(binary=True)
+        except Exception, e:
+            apflog("apfmon.ELHOMERIGHTSTA cannot be read: %s" % (e),level='Alert',echo=True)
+            return False
+        if homed == 2:
+            return True
+        else:
+            if homed == 5 or homed == 6:
+                if home:
+                    rc = subprocess.call(["/usr/local/lick/bin/robot/slew", "--home"])
+                    homed = apfmon('ELHOMERIGHTSTA').read(binary=True)
+                    if rc == 0 and homed == 2:
+                        return True
+                    else:
+                        apflog("cannot home telescope" % (e),level='Alert',echo=True)
+                        return False
+                else:
+                    apflog("Telescope needs to be homed",level='Alert',echo=True)
+                    return False
+            else:
+                apflog("apfmon.ELHOMERIGHTSTA value is %d" % (homed),level='Alert',echo=True)
+                return False
+                
+        return False
+    
     def openat(self, sunset=False):
         """Function to ready the APF for observing. Calls either openatsunset or openatnight.
            This function will attempt to open successfully twice. If both attempts
@@ -613,22 +643,18 @@ class APF:
             apflog("First openup attempt has failed. Exit code = %d. After a pause, will make one more attempt." % code,echo=True)
             APFTask.waitFor(self.task, True, timeout=10)
             result, code = cmdexec(cmd)
-            if result:
-                try:
-                    APFLib.write("eostele.FOCUS",ktl.read("apftask","FOCUSTEL_LASTFOCUS",binary=True))
-                except:
-                    apflog("Cannot move secondary focus.",level="error")
-                return True
-            else:
+            if not result:
                 apflog("Second openup attempt also failed. Exit code %d. Giving up." % code,echo=True)
                 return False
-        else:
-            try:
-                APFLib.write("eostele.FOCUS",ktl.read("apftask","FOCUSTEL_LASTFOCUS",binary=True))
-            except:
-                apflog("Cannot move secondary focus.",level="error")
-
-            return True
+        rv = self.checkhome()
+        if rv == False:
+            return False
+        try:
+            APFLib.write("eostele.FOCUS",ktl.read("apftask","FOCUSTEL_LASTFOCUS",binary=True))
+        except:
+            apflog("Cannot move secondary focus.",level="error")
+            return False
+        return True
 
     def power_down_telescope(self):
         """Checks that we have the proper permission and dome is closed, then resets telescope power."""
