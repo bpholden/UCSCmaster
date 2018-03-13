@@ -127,11 +127,35 @@ def okmon(ok2open):
 def windmon(wx):
     if wx['populated'] == False:
         return
-    windshield = robot["scriptobs_windshield"].read()
     try:
         wvel = float(wx)
     except Exception, e:
         apflog("Exception in windmon: %s" % (e), level='error')
+        return
+        
+    if APF.wslist == []:
+        APF.wslist = [wvel]*20
+
+    else:
+        APF.wslist.append(wvel)
+        APF.wslist = APF.wslist[-20:]
+
+    APF.wvel = np.median(APF.wslist)
+
+def altwindmon(wx):
+    if wx['populated'] == False:
+        return
+    try:
+        downval = APF.down.read(binary=True)
+    except Exception, e:
+        apflog("Exception in altwindmon: %s" % (e), level='error')
+        return
+    if downval == 0:
+        return 
+    try:
+        wvel = float(wx)
+    except Exception, e:
+        apflog("Exception in altwindmon: %s" % (e), level='error')
         return
         
     if APF.wslist == []:
@@ -192,6 +216,8 @@ class APF:
 
     apfmet     = ktl.Service('apfmet')
     wx         = apfmet('M5WIND')
+    down       = apfmet('M5DOWN')
+    altwx      = apfmet('M3WIND')
     temp       = apfmet('M5OUTEMP')
 
     robot      = ktl.Service('apftask')
@@ -237,6 +263,9 @@ class APF:
         # Set the callbacks and monitors
         self.wx.monitor()
         self.wx.callback(windmon)
+        self.altwx.monitor()
+        self.altwx.callback(altwindmon)
+        self.down.monitor()
         self.temp.monitor()
         
         self.ok2open.monitor()
