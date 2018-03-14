@@ -1,5 +1,5 @@
 import sys
-#from ExposureCalc import *
+sys.path.append("../master")
 
 import numpy as np
 import pickle
@@ -12,11 +12,11 @@ import os
 import shutil
 
 import NightSim as ns
-import UCSCScheduler_V3 as ds
+import UCSCScheduler_V2 as ds
 import ExposureCalculations as ec
 import Generate_Errors as ge
 
-def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab):
+def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab,owner):
     actel,actaz = ns.compute_el(curtime,star,apf_obs)
     actslow, actfwhm = ns.rand_obs_sample(slowdowns,fwhms)
     if actslow < 0.3:
@@ -50,9 +50,9 @@ def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab):
     totcounts = fexptime * specrate
 
 #    precision, deviation, true_error = ge.compute_real_uncertainty(totcounts,result['BV'],jitter)
-    precision, deviation, true_error = ge.compute_real_uncertainty_sinnoise(totcounts,ephem.julian_date(curtime),star_tab)
+#    precision, deviation, true_error = ge.compute_real_uncertainty_sinnoise(totcounts,ephem.julian_date(curtime),star_tab)
     
-    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %.2f" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, deviation, true_error, actfwhm, actslow)
+    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts,  actel,actaz, actfwhm, actslow, owner)
 #    print outstr
 #    for outfp in outfps:
 #        outfp.write(outstr + "\n")
@@ -112,14 +112,14 @@ def write_sim_file_results(star_strs,outdir="../SimFiles"):
         else:
             ofp = open(ofn,"w")
         for outstr in star_strs[starname]:
-            (name,date,time,mjd,expt,i2cnts,prec,dev,tru_err,fwhm,slow) = outstr.split()
-            outstr = "%s %s %s %s\n" % (mjd,i2cnts,prec,dev)
+            (name,date,time,mjd,expt,i2cnts,actel,actaz,fwhm,slow,owner) = outstr.split()
+            outstr = "%s %s %s\n" % (mjd,i2cnts,actel)
             ofp.write(outstr)
         ofp.close()
     
 
 def sim_results(outstr,star_strs,star_dates):
-    (name,date,time,mjd,expt,i2cnts,prec,dev,tru_err,fwhm,slow) = outstr.split()
+    (name,date,time,mjd,expt,i2cnts,actel,actaz,fwhm,slow,owner) = outstr.split()
     try:
         mjd = float(mjd)
         if name in star_strs.keys():
@@ -163,13 +163,13 @@ def prep_master(outdir,mastername):
 def parse_args():
     parser = optparse.OptionParser()
     parser.add_option("-g","--googledex",dest="googledex",default="The Googledex")
-    parser.add_option("-i","--infile",dest="infile",default="newgoogledex.csv")
+    parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
     parser.add_option("-f","--file",dest="datefile",default="")
     parser.add_option("-s","--seed",dest="seed",default=None)
+    parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
     parser.add_option("-o","--outdir",dest="outdir",default=".")        
     parser.add_option("-d","--double",dest="double",default=False,action="store_true")
     parser.add_option("-m","--masterfile",dest="master",default="sim_master.simout")
-    parser.add_option("-p","--priority",dest="method",default="inquad",choices=["inquad","outquad","uniform","random"])
     (options, args) = parser.parse_args()    
 
     if len(args) < 2 and options.datefile == "":
@@ -209,7 +209,7 @@ if __name__ == "__main__":
 
 
     options,datelist = parse_args()
-    
+    bstar = options.bstar
     masterfp,star_strs, star_dates = prep_master(options.outdir,options.master)
     
     for datestr in datelist:
@@ -226,29 +226,24 @@ if __name__ == "__main__":
         ot.close()
         observing = True
         curtime, endtime, apf_obs = ns.sun_times(datestr)
-        bstar = True
-        standardstar=False
         while observing:
 
-            result = ds.getNext(curtime, lastfwhm, lastslow, star_dates, bstar=bstar, standardstar=standardstar, verbose=True,googledex_file=options.infile,method=options.method)
+            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(options.outdir,options.infile),verbose=True)
             if result:
-                if standardstar:
-                    standardstar = False
                 if bstar:
                     bstar = False
-                    standardstar = True
                 
                 curtime += 70./86400 # acquisition time
-                idx, = np.where(star_table['starname'] == result['NAME'])
+                idx = allnames.index(result['NAME'])                
                 for i in range(0,int(result['NEXP'])):
-                    (curtime,lastfwhm,lastslow,outstr) = compute_simulation(curtime,result,stars[idx],apf_obs,slowdowns,fwhms,star_table[idx])
+                    (curtime,lastfwhm,lastslow,outstr) = compute_simulation(curtime,result,stars[idx],apf_obs,slowdowns,fwhms,star_table[idx],result['owner'])
                     sim_results(outstr,star_strs,star_dates)
+                    print outstr
+                    masterfp.write("%s\n" % (outstr))
                     
                 ot = open(otfn,"a+")
                 ot.write("%s\n" % (result["SCRIPTOBS"]))
                 ot.close()
-                print outstr
-                masterfp.write("%s\n" % (outstr))
             else:
                 curtime += 2100./86400 # close for lack of target
                 lastslow = 5
@@ -267,13 +262,6 @@ if __name__ == "__main__":
                 print "cannot unlink %s" %(otfn)
     if masterfp:
         masterfp.close()
-    simoutdir = os.path.join("..","SimFiles",options.outdir)
-    if not os.path.isdir(simoutdir):
-        try:
-            os.mkdir(simoutdir)
-        except Exception as e:
-            print "cannot make output directory: %s - %s" % (simoutdir,e)
-            sys.exit()
         
-    write_sim_file_results(star_strs,outdir=simoutdir)
+
 # done
