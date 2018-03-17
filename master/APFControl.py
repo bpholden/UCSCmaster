@@ -461,7 +461,7 @@ class APF:
         else:
             apflog("Running focusinstr routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
-            execstr = " ".join['focusinstr',flags]
+            execstr = " ".join(['focusinstr',flags])
             cmd = os.path.join(cmdpath,execstr)
             result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
             if not result:
