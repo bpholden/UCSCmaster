@@ -600,7 +600,7 @@ class APF:
 
     def checkhome(self,home=True):
         try:
-            homed = apfmon('ELHOMERIGHTSTA').read(binary=True)
+            homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
         except Exception, e:
             apflog("apfmon.ELHOMERIGHTSTA cannot be read: %s" % (e),level='Alert',echo=True)
             return False
@@ -610,7 +610,7 @@ class APF:
             if homed == 5 or homed == 6:
                 if home:
                     rc = subprocess.call(["/usr/local/lick/bin/robot/slew", "--home"])
-                    homed = apfmon('ELHOMERIGHTSTA').read(binary=True)
+                    homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
                     if rc == 0 and homed == 2:
                         return True
                     else:
