@@ -1,5 +1,5 @@
 # UCSCScheduler_V2.py
-
+from __future__ import print_function
 from datetime import datetime, timedelta
 import os
 import pickle
@@ -432,7 +432,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
                 if jd > pastdate:
                     ws.update_cell(i+1, col+1, round(jd, 2) )
             except:
-                print v[0], v[col]
+                print (v[0], v[col])
                 ws.update_cell(i+1, col+1, round(jd,2) )
                 
     apflog( "Updated Googledex",echo=True)
@@ -1176,10 +1176,10 @@ if __name__ == '__main__':
         #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:
-            print "Get None target"
+            print ("Get None target")
         else:
             for k in result:
-                print k, result[k]
+                print (k, result[k])
         ot = open(otfn,"a")
         ot.write("%s\n" % (result["SCRIPTOBS"]))
         ot.close()
