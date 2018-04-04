@@ -1188,4 +1188,4 @@ if __name__ == '__main__':
 #    print "testing googledex updater"
 #    update_googledex_lastobs('observed_targets')
 
-    print "Done"
+    print ("Done")
