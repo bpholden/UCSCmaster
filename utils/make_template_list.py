@@ -1,4 +1,4 @@
-#!/usr/bin/env  /opt/kroot/bin/kpython
+from __future__ import print_function
 import sys
 sys.path.append("../master")
 #from ExposureCalc import *
@@ -20,14 +20,7 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
     try:
         f = open(os.path.join(os.getcwd(),outfn),'r')
     except IOError:
-        apflog( "Starting Googledex parse",echo=True)
-        worksheet = ds.get_spreadsheet(sheetn=sheetn,certificate=certificate)
-        full_codex = worksheet.get_all_values()
-        #time = (datetime.now() - start).total_seconds()
-        #print "Loaded Values. Took {0:f} seconds.".format(time)
-        f = open(os.path.join(os.getcwd(),"googledex.dat"),'w')
-        pickle.dump(full_codex, f)
-        f.close()
+        print ("need to download googledex first")
     else:
         full_codex = pickle.load(f)
         f.close()
@@ -45,7 +38,7 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
     try:
         idx = [col_names.index(v) for v in req_cols]
     except ValueError:
-        apflog("%s Not found in list" % (v) , level="warn",echo=True)
+        print("%s Not found in list" % (v) )
     didx = dict()
     for i,n in enumerate(req_cols):
         didx[n] = idx[i]
@@ -112,10 +105,10 @@ if __name__ == "__main__":
 
     parser = OptionParser()
     (options, args) = parser.parse_args()    
-#    allnames, star_table, do_flag, stars, template  = parsetemplateGoogledex()
-    allnames, star_table, do_flag, stars = ds.parseGoogledex()
+    allnames, star_table, do_flag, stars, template  = parsetemplateGoogledex()
+#    allnames, star_table, do_flag, stars = ds.parseGoogledex()
     for i in range(len(stars)):
         if star_table[i, ds.DS_APFPRI] > 5:
             row = star_table[i,:]
-            print ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt,decker="N",I2="N"),
-            print "# pri=%.1f" % (star_table[i, ds.DS_APFPRI])
+            print (ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt,decker="N",I2="N"),)
+            print ("# pri=%.1f" % (star_table[i, ds.DS_APFPRI]))
