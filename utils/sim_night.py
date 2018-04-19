@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 sys.path.append("../master")
 #from ExposureCalc import *
@@ -43,7 +44,7 @@ def compute_simulation(curtime,star,apf_obs,slowdowns,fwhms,outfp):
     if actaz < 180:
         actel *= -1.
     outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %.2f" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow, actel)
-    print outstr
+    print (outstr)
     outfp.write(outstr + "\n")
     return curtime, lastfwhm, lastslow
 
@@ -69,10 +70,10 @@ else:
     
 if options.fixed != "":
     if not os.path.isfile(options.fixed):
-        print "%s is not a file" % (options.fixed)
+        print ("%s is not a file" % (options.fixed))
 
 if not ns.checkdate(datestr):
-    print "%s is not an acceptable date string" % (datestr)
+    print ("%s is not an acceptable date string" % (datestr))
     sys.exit()
 
 if options.outfile == None:
@@ -83,7 +84,7 @@ else:
 try:
     outfp = open(outfile,"w+")
 except Exception as e:
-    print "cannot open file %s for output, %s,  exiting" % (outfile,e)
+    print ("cannot open file %s for output, %s,  exiting" % (outfile,e))
     sys.exit()
 
 hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
@@ -130,7 +131,7 @@ while observing:
         
     curtime = ephem.Date(curtime)
         
-print "sun rose"
+print ("sun rose")
 fn = "observed_targets"
 observed, obstimes = ds.update_local_googledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
 
