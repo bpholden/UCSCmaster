@@ -275,6 +275,8 @@ class APF:
         self.task = task
         
         self.cloudObsNum = 1
+        self.ncountrate = 0
+        self.countrate = 0.0
   
         # Set the callbacks and monitors
         self.wx.monitor()
