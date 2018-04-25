@@ -83,16 +83,18 @@ def cmdexec(cmd, debug=False, cwd='./'):
 def countmon(counts):
     APF.countrate = -1.0
     if counts['populated'] == False:
+        apflog("Cannot read apfguide.counts",level='warn',echo=True)
         return
 
     try:
         cnts = float(counts)
         time = float(elapsed.read(binary=True))
         APF.countrate = cnts/time
+        APF.ncountrate += 1
     except ZeroDivisionError:
         return
     except:
-        apflog("Cannot read apfguide.counts or apfucam.elapsed")
+        apflog("Cannot read apfguide.counts or apfucam.elapsed",level='warn',echo=True)
         return
 
 def countratemon(countrate):
