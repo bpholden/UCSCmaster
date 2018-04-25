@@ -727,7 +727,15 @@ class APF:
         else:
             return False
 
-            
+
+    def servo_failure(self):
+        servo_failed = False
+        
+        if servo_failed:
+            return self.power_down_telescope()
+        else:
+            return False
+        
     def close(self, force=False):
         """Checks that we have the proper permission, then runs the closeup script."""
         if self.test: return True
