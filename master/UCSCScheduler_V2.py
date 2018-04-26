@@ -279,13 +279,13 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                 "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
                 "B-V", "APF Desired Precision", "Close Companion", \
-                "APF decker","I2", "owner", "uth","utm","duration"
+                "APF decker","I2", "owner", "uth","utm","duration", "Template"
                 ]
     didx = findColumns(col_names,req_cols)
     
     names = []
     star_table = []
-    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [] }
+    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -383,6 +383,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             
         flags['decker'].append(checkflag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
         flags['I2'].append(checkflag("I2",didx,ls,"\A(n|N)",config["I2"]))
+        flags['template'].append(checkflag("Template",didx,ls,"\A(n|N)",'Y'))
 
         flags['owner'].append(checkflag("owner",didx,ls,"\A(w+)",config["owner"]))
 
@@ -866,7 +867,7 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     return times, exps
 
 
-def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,sheetn="The Googledex",owner='S.Vogt',outfn="googledex.dat",outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetn="The Googledex",owner='S.Vogt',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
