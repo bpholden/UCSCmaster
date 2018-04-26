@@ -730,7 +730,13 @@ class APF:
 
     def servo_failure(self):
         servo_failed = False
-        
+        prefixs = ["AZ","EL","FA","FB","FC","TR" ]
+        for pr in prefixs:
+            nm = pr + "AMPFLT"
+            val = tel[nm].read(binary=True)
+            if val:
+                servo_failed = True
+                
         if servo_failed:
             return self.power_down_telescope()
         else:
@@ -761,6 +767,9 @@ class APF:
             result, code = cmdexec(cmd)
             if not result:
                 apflog("Closeup failed with exit code %d" % code, echo=True)
+                if attempts == 2:
+                    if self.servo_failure():
+                        apflog("Servo amplifier failure, power cycled telescope",echo=True)
                 if attempts == 3:
                     lstr = "Closeup has failed 3 times consecutively. Human intervention likely required."
                     areopen, whatsopen = self.isOpen()
