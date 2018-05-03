@@ -86,7 +86,8 @@ def compute_el(curtime,star,apf_obs):
     apf_obs.date = curtime
     star.compute(apf_obs)
     actel = np.degrees(star.alt)
-    return actel
+    actaz = np.degrees(star.az)
+    return actel,actaz
 
 
 def checkdate(datestr):
