@@ -811,12 +811,6 @@ if __name__ == '__main__':
 
     # Start the main watcher thread
     master = Master(apf,user=opt.name,sheetn=opt.sheet,owner=opt.owner)
-    try:
-        if opt.name == "ucsc":
-                names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
-    except Exception as e:
-        apflog("Error: Cannot download googledex?!  %s" % (e),level="error")
-    
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
         try:
