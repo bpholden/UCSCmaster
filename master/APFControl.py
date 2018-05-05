@@ -94,19 +94,19 @@ def countmon(counts):
         return
 
 
-def countratemon(countrate):
-    if countrate['populated'] == False:
-        return
+# def countratemon(countrate):
+#     if countrate['populated'] == False:
+#         return
 
-    try:
-        ctr = float(countrate)
-    except:
-        apflog("Cannot read apfguide.countrate",level='warn',echo=True)
-        return
-    APF.countrate += countrate
-    APF.countrate *= (1.0*APF.ncountrate)/(APF.ncountrate+1)
-    APF.ncountrate += 1
-    return
+#     try:
+#         ctr = float(countrate)
+#     except:
+#         apflog("Cannot read apfguide.countrate",level='warn',echo=True)
+#         return
+#     APF.countrate += countrate
+#     APF.countrate *= (1.0*APF.ncountrate)/(APF.ncountrate+1)
+#     APF.ncountrate += 1
+#     return
 
 # Callback for ok2open permission
 # -- Check that if we fall down a logic hole we don't error out
