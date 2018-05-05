@@ -87,11 +87,12 @@ def countmon(counts):
     try:
         cnts = float(counts.read(binary=True))
         time = float(elapsed.read(binary=True))
+        APF.countrate = cnts/time
     except ZeroDivisionError:
         return
     except:
         return
-    APF.countrate = cnts/time
+
 
 def countratemon(countrate):
     if countrate['populated'] == False:
