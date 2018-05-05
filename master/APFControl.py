@@ -81,12 +81,11 @@ def cmdexec(cmd, debug=False, cwd='./'):
 
 
 def countmon(counts):
-    APF.countrate = -1.0
     if counts['populated'] == False:
+        apflog("Counts not populated, what the actual fuck? %s" % (counts),level='warn')
         return
-
     try:
-        cnts = float(counts)
+        cnts = float(counts.read(binary=True))
         time = float(elapsed.read(binary=True))
     except ZeroDivisionError:
         return
