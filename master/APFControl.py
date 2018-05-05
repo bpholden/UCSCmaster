@@ -50,10 +50,8 @@ apfteq     = ktl.Service('apfteq')
 teqmode    = apfteq['MODE']
 guide      = ktl.Service('apfguide')
 counts     = ktl.cache('apfguide','COUNTS')
-countrate  = guide['countrate']
 thresh     = guide['xpose_thresh']
-
-elapsed    = ucam['elapsed']
+elapsed    = ktl.cache('apfucam','ELAPSED')
 motor      = ktl.Service('apfmot')
 decker     = motor['DECKERNAM']
 
@@ -82,7 +80,6 @@ def cmdexec(cmd, debug=False, cwd='./'):
 
 def countmon(counts):
     if counts['populated'] == False:
-        apflog("Counts not populated, what the actual fuck? %s" % (counts),level='warn')
         return
     try:
         cnts = float(counts.read(binary=True))
@@ -272,7 +269,7 @@ class APF:
         
         self.cloudObsNum = 1
         self.ncountrate = 0
-        self.countrate = 0.0
+        self.countrate = countrate.read()
   
         # Set the callbacks and monitors
         self.wx.monitor()
