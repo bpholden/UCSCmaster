@@ -269,7 +269,6 @@ class APF:
         
         self.cloudObsNum = 1
         self.ncountrate = 0
-        self.countrate = countrate.read()
   
         # Set the callbacks and monitors
         self.wx.monitor()
@@ -290,6 +289,13 @@ class APF:
         self.counts.monitor()
         self.counts.callback(countmon)
 
+        self.elapsed.monitor()
+        try:
+            self.countrate = self.counts/self.elapsed
+        except:
+            self.countrate = 0.0
+
+        
         self.teqmode.monitor()
         self.vmag.monitor()
         self.autofoc.monitor()
