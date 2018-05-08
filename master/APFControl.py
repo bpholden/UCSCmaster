@@ -48,6 +48,7 @@ apfteq     = ktl.Service('apfteq')
 teqmode    = apfteq['MODE']
 guide      = ktl.Service('apfguide')
 counts     = ktl.cache('apfguide','COUNTS')
+countrate     = ktl.cache('apfguide','COUNTRATE')
 thresh     = guide['xpose_thresh']
 elapsed    = ktl.cache('apfucam','ELAPSED')
 motor      = ktl.Service('apfmot')
@@ -77,15 +78,27 @@ def cmdexec(cmd, debug=False, cwd='./'):
 
 
 def countmon(counts):
+    try:
+        aux = float(countrate.read(binary=True))
+    except:
+        aux = 0.0
     if counts['populated'] == False:
         return
     try:
         cnts = float(counts.read(binary=True))
-        time = float(elapsed.read(binary=True))
-        APF.countrate = cnts/time
-    except ZeroDivisionError:
-        return
     except:
+        APF.countrate = aux
+        return
+    try:
+        time = float(elapsed.read(binary=True))
+    except:
+        APF.countrate = aux
+        return
+
+    try:
+        APF.countrate = cnts/time
+    except:
+        APF.countrate = aux
         return
 
 
@@ -245,7 +258,6 @@ class APF:
 
     guide      = ktl.Service('apfguide')
     counts     = guide['COUNTS']
-    countrate  = guide['countrate']
     thresh     = guide['xpose_thresh']
     avg_fwhm   = guide['AVG_FWHM']
 
