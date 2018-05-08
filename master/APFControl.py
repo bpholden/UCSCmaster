@@ -78,27 +78,20 @@ def cmdexec(cmd, debug=False, cwd='./'):
 
 
 def countmon(counts):
-    try:
-        aux = float(countrate.read(binary=True))
-    except:
-        aux = 0.0
     if counts['populated'] == False:
         return
     try:
         cnts = float(counts.read(binary=True))
     except:
-        APF.countrate = aux
         return
     try:
         time = float(elapsed.read(binary=True))
     except:
-        APF.countrate = aux
         return
 
     try:
         APF.countrate = cnts/time
     except:
-        APF.countrate = aux
         return
 
 
