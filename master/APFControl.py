@@ -1,5 +1,3 @@
-#!/usr/bin/env  /opt/kroot/bin/kpython
-
 # Class definition for an APF object which tracks the state of the telescope.
 
 import ktl
