@@ -213,6 +213,11 @@ class Master(threading.Thread):
                 apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
                 exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm, decker=self.decker)
                 try:
+                    if APF.countrate <= 0:
+                        try:
+                            APF.countrate = APF.counts / APF.elapsed
+                        except:
+                            APF.countrate = 0.0
                     slowdown = exp_cnts_sec / APF.countrate
                     if slowdown < 0:
                         slowdown = 1
