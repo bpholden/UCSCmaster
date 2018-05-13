@@ -48,7 +48,7 @@ if __name__ == "__main__":
         print ("needs a name")
         sys.exit()
 
-     
+    fp = open("tonight","a+")
     allnames, star_table, do_flag, stars  = ds.parseGoogledex()
     bstars = np.array([ True if 'HR' in n else False for n in allnames ], dtype=bool)
     npallnames = np.asarray(allnames)
@@ -63,7 +63,8 @@ if __name__ == "__main__":
             
             line = ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt,decker="N",I2="N")
             bline = ds.makeScriptobsLine(npallnames[bstars][bstari],bstarrow,'Y',dt,decker="N",I2="Y")            
-            print ("%s" % (bline))
-            print ("%s #  %s" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI])))
-            print ("%s" % (bline)            )
+            fp.write(bline)
+            oline ="%s #  %s" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI])) 
+            fp.write(oline)
+            fp.write(bline)
 
