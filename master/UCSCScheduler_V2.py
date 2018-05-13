@@ -262,17 +262,14 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
     apflog( "Starting Googledex parse",echo=True)    
     if not outdir :
         outdir = os.getcwd()
-    try:
-        f = open(os.path.join(outdir,outfn),'r')
-        full_codex = pickle.load(f)
-        f.close()
-    except IOError:
-        full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
-    except EOFError:
-        full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
-    except ValueError:
-        full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
-    except:
+    if os.path.exists(os.path.join(outdir,outfn)):
+        try:
+            f = open(os.path.join(outdir,outfn),'r')
+            full_codex = pickle.load(f)
+            f.close()
+        except:
+            full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
+    else:
         full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
         
     col_names = full_codex[0]
