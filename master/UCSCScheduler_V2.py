@@ -271,7 +271,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
     else:
         full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
-        
+
     col_names = full_codex[0]
     codex = full_codex[1:]
 
@@ -281,6 +281,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
                 "B-V", "APF Desired Precision", "Close Companion", \
                 "APF decker","I2", "owner", "uth","utm","duration", "Template"
+#                "Nobs", "Total NObs"
                 ]
     didx = findColumns(col_names,req_cols)
     
