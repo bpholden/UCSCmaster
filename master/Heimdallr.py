@@ -619,7 +619,7 @@ if __name__ == '__main__':
 
 
     if not opt.sheet:
-        opt.sheet = "The Googledex"
+        opt.sheet = "2017B"
     apftask = ktl.Service("apftask")        
     # Establish this as the only running master script ( Or example task in test mode )
     try:
