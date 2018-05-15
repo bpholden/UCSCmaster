@@ -243,6 +243,7 @@ class APF:
     ucam       = ktl.Service('apfucam')
     user       = ucam['OUTFILE']
     elapsed    = ucam['elapsed']
+    obsnum     = ucam['obsnum']
 
     apfschedule= ktl.Service('apfschedule')
     
@@ -298,6 +299,8 @@ class APF:
         except:
             self.countrate = 0.0
 
+        self.obsnum.callback(self.updateLastObs)
+        self.obsnum.monitor()
         
         self.teqmode.monitor()
         self.vmag.monitor()
@@ -791,13 +794,14 @@ class APF:
 
 
 
-    def updateLastObs(self):
+    def updateLastObs(self,obsnum):
         """ If the last observation was a success, this function updates the file storing the last observation number and the hit_list which is required by the dynamic scheduler."""
-        if self.ucam('OUTFILE').read() != 'ucsc':
-            apflog("UCAM Observer name is not ucsc, so the lastObs file will not be updated.")
-            apflog("Number of last observation is %s" % self.ucam('OBSNUM').read())
-            return
-        APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], self.ucam["OBSNUM"].read())
+        if obsnum['populated']:
+            if self.ucam('OUTFILE').read() == 'ucsc':
+                APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
+#                apflog("UCAM Observer name is not ucsc, so the lastObs file will not be updated.")
+#                apflog("Number of last observation is %s" % self.obsnum.read())
+        return
 
 
     def updateWindshield(self, state):
