@@ -655,13 +655,6 @@ if __name__ == '__main__':
         apflog("checkapf not in robotic mode, exiting",level="error",echo=True)
         sys.exit()
     
-    # Check to see if the instrument has been released
-    # if not debug:
-    #     if apf.checkapf['INSTRELE'].read().strip().lower() != 'yes':
-    #         apflog("The instrument has not been released. Check that Observer Location has been submitted.", echo=True, level='error')
-    #         sys.exit(1)
-        
-
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
     possible_phases = ["ObsInfo", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
 
@@ -738,7 +731,7 @@ if __name__ == '__main__':
         APFTask.phase(parent, "Focus")
         apflog("Phase is now %s" % phase)
 
-    # Run autofocus cube
+    # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
@@ -772,7 +765,7 @@ if __name__ == '__main__':
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
 
-    # Run pre calibrations
+    # 3) Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
         try:
             APFTask.set(parent,suffix="VAR_3",value="True")
@@ -814,7 +807,7 @@ if __name__ == '__main__':
             APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
 
-    # Start the main watcher thread
+    # 4) Start the main watcher thread
     master = Master(apf,user=opt.name,sheetn=opt.sheet,owner=opt.owner)
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
@@ -926,7 +919,7 @@ if __name__ == '__main__':
         apf.ok2open.monitor(start=False)
     except Exception, e:
         apflog("Note: Cannot stop monitoring ok2open. %s" % (e), level="warn", echo=True)
-    # Take morning calibrations
+    # 5) Take morning calibrations
     APFTask.phase(parent, "Cal-Post")
     result = apf.calibrate(script=opt.calibrate, time='post')
     if not result:
