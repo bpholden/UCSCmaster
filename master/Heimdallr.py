@@ -113,6 +113,17 @@ def args():
     parser.add_argument('--owner',default='Vogt',help="Optional name for file owners")    
     
     opt = parser.parse_args()
+
+    if opt.start != None:
+
+        mtch = re.search("(\d+)\:(\d+)",opt.start)
+        if mtch:
+            hr = int(mtch.group(1))
+            mn = int(mtch.group(2))
+            opt.start = get_startime(hr,mn)
+        else:
+            print ("Start time %s does not match required format hours:minutes where both the hours and the minutes are integers")
+            sys.exit()
     return opt
 
 
