@@ -312,6 +312,12 @@ class Master(threading.Thread):
                 APF.DMReset()
             return
 
+
+        def shouldstartlist():
+            if self.starttime == None:
+                return True
+            
+        
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
