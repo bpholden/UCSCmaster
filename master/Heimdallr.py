@@ -249,16 +249,7 @@ class Master(threading.Thread):
                 seeing = float(APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            if self.fixedList is None:
-                # Pull from the dynamic scheduler
-                target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
-            else:
-                # Get the best target from the star list
-                if os.path.exists(self.fixedList):
-                    target = ds.smartList(self.fixedList, time.time(), seeing, slowdown)
-                else:
-                    apflog("Error: starlist %s does not exist" % (self.fixedList), level="error",echo=True)
-                    self.fixedList=None
+            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
 
             self.set_autofocval()
             if target is None:
