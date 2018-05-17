@@ -108,7 +108,7 @@ def args():
     parser.add_argument('-w', '--windshield', choices=w_c, default='auto', help="Turn windshielding on, off, or let the software decide based on the current average wind speed (Default is auto). Velocity > %.1f mph turns windshielding on." % (ad.WINDSHIELD_LIMIT))
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
-    parser.add_argument('-s', '--smartObs', default=False, action='store_true', help="When specified with a fixed starlist, this option will pass the starlist to a selection algorithm to choose the optimal unobserved target, regardless of starlist ordering.")
+    parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
     parser.add_argument('--sheet',default=None,help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='Vogt',help="Optional name for file owners")    
     
@@ -166,6 +166,7 @@ class Master(threading.Thread):
         self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
+        self.starttime = None
 
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
@@ -846,7 +847,7 @@ if __name__ == '__main__':
         else:
             apflog("Starting dynamic scheduler", echo=True)
         master.fixedList = opt.fixed
-        master.smartObs = opt.smartObs
+        master.starttime = opt.start
         master.task = parent
         master.windsheild = opt.windshield
         master.start()
