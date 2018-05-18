@@ -340,7 +340,7 @@ class Master(threading.Thread):
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
 
-            shouldstart = shouldstartlist()
+            shouldstart = self.shouldstartlist()
 
             if self.fixedList is not None and shouldstart:
                 # We wish to observe a fixed target list, in it's original order
