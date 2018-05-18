@@ -474,16 +474,6 @@ class Master(threading.Thread):
                     except:
                         apflog("Error: Cannot communicate with apftask",level="error")
 
-
-                elif self.smartObs == True:
-                    apflog("Scriptobs phase is input ( smartlist ), calling getTarget.")
-                    APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget for a smartlist",wait=False)
-                    getTarget()
-                    APFTask.waitfor(self.task, True, timeout=15)
-                    apflog("Observing target")
-                    APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
-                    haveobserved = True
-                                                           
             # check last telescope focus
             lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
             if time.time() - lastfoc > FOCUSTIME and running and float(sunel) <= sunel_lim and haveobserved and APF.sop.read().strip() == 'Input':
