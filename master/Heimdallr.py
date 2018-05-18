@@ -474,6 +474,8 @@ class Master(threading.Thread):
                         APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
                     except:
                         apflog("Error: Cannot communicate with apftask",level="error")
+                elif self.shouldstartlist() :
+                    APF.killRobot()
 
             # check last telescope focus
             lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
