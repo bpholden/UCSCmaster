@@ -456,7 +456,7 @@ class Master(threading.Thread):
             
             # If scriptobs is running and waiting for input, give it a target
             if running == True and float(sunel) < sunel_lim and APF.sop.read().strip() == 'Input':
-                if self.fixedList is None:
+                if self.fixedList is None or self.shouldstartlist() == False:
                     APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget",wait=False)
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
