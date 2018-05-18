@@ -358,7 +358,7 @@ class Master(threading.Thread):
                     # The fixed list has been completely observed so nothing left to do
                 elif APF.ldone == tot and APF.user == "ucsc":
                     self.fixedList = None
-                    self.smartObs = False
+                    self.starttime = None
                     APFTask.set(self.task,suffix="STARLIST",value="")
                     ripd, running = APF.findRobot()
                     if running:
