@@ -328,6 +328,7 @@ class Master(threading.Thread):
             if self.starttime == None:
                 return True
             
+            return True
         
         def startScriptobs():
             # Update the last obs file and hitlist if needed
