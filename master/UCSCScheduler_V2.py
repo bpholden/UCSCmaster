@@ -362,7 +362,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 
         for coln in ["APFmin"]:
             try:
-                row.append(float(ls[didx[coln]]))
+                row.append(float(ls[didx[coln]])*60.)
             except ValueError:
                 row.append(MIN_TOTOBS)
             except KeyError:
@@ -370,7 +370,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 
         for coln in ["APFmax"]:
             try:
-                row.append(float(ls[didx[coln]]))
+                row.append(float(ls[didx[coln]])*60.)
             except ValueError:
                 row.append(TARGET_EXPOSURE_TIME_MAX)
             except KeyError:
