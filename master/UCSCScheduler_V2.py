@@ -71,10 +71,11 @@ PRI_DELTA = 5
 
 last_objs_attempted = []
 
-def computeMaxTimes(sn,exp_times):
+def computeMaxTimes(exp_times,maxtimes):
     maxtimes = np.zeros_like(exp_times)
-    maxtimes += TARGET_EXPOSURE_TIME_MAX
-
+    maxtimes[exp_times > maxtimes] = maxtimes[exp_times > maxtimes]
+    maxtimes[exp_times < maxtimes] = exp_times[exp_times < maxtimes]
+    
     return maxtimes
 
 
@@ -1046,11 +1047,11 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
                                             star_table[f,DS_BV])
         
         exp_times = exp_times * slowdown
-        totexptimes[f] += exp_times
+        totexptimes[f] += computeMaxTimes(exp_times,star_table[f, DS_MAX])
         i2cnts[f] += i2counts
         if verbose:
             apflog("getNext(): Formating exposure times",echo=True)
-        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],star_table[f, DS_MAX])
+        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],MAX_EXPTIME)
 
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
