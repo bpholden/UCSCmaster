@@ -1051,7 +1051,9 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         i2cnts[f] += i2counts
         if verbose:
             apflog("getNext(): Formating exposure times",echo=True)
-        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],MAX_EXPTIME)
+        mxtime = np.zeros_like(star_table[f,DS_MAX])
+        mxtime += MAX_EXPTIME
+        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],mxtime)
 
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
