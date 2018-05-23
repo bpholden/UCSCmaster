@@ -374,9 +374,9 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             try:
                 row.append(float(ls[didx[coln]])*60.)
             except ValueError:
-                row.append(TARGET_EXPOSURE_TIME_MAX)
+                row.append(0)
             except KeyError:
-                row.append(TARGET_EXPOSURE_TIME_MAX)
+                row.append(0)
                 
                     
         check = checkflag("Close Companion",didx,ls,"\A(n|N)","Y")
