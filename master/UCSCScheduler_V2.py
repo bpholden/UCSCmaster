@@ -72,11 +72,12 @@ PRI_DELTA = 5
 last_objs_attempted = []
 
 def computeMaxTimes(exp_times,maxtimes):
-    maxtimes = np.zeros_like(exp_times)
-    maxtimes[exp_times > maxtimes] = maxtimes[exp_times > maxtimes]
-    maxtimes[exp_times < maxtimes] = exp_times[exp_times < maxtimes]
+    fintimes = np.zeros_like(exp_times)
+    fintimes[(exp_times > maxtimes)&(maxtimes>0)] = maxtimes[(exp_times > maxtimes)&(maxtimes>0)]
+    fintimes[exp_times < maxtimes] = exp_times[exp_times < maxtimes]
+    fintimes[maxtimes<=0] = exp_times[maxtimes<=0]
     
-    return maxtimes
+    return fintimes
 
 
 def compute_priorities(star_table,available,cur_dt):
@@ -1053,7 +1054,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
             apflog("getNext(): Formating exposure times",echo=True)
         mxtime = np.zeros_like(star_table[f,DS_MAX])
         mxtime += MAX_EXPTIME
-        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],mxtime)
+        star_table[f, DS_EXPT], exps = format_time(totexptimes[f],i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],mxtime)
 
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
@@ -1063,7 +1064,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         # Is the exposure time too long?
         if verbose:
             apflog("getNext(): Removing really long exposures",echo=True)
-        time_check = np.where( exp_times < star_table[f, DS_MAX], True, False)
+        time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
         
         available[f] = available[f] & time_check
         f = available
