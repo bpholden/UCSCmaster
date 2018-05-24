@@ -284,8 +284,8 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                 "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
                 "B-V", "APF Desired Precision", "Close Companion", \
-                "APF decker","I2", "owner", "uth","utm","duration", "Template"
-#                "Nobs", "Total Obs"
+                "APF decker","I2", "owner", "uth","utm","duration", "Template",
+                "Nobs", "Total Obs"
                 ]
     didx = findColumns(col_names,req_cols)
     
