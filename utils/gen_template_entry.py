@@ -63,8 +63,8 @@ if __name__ == "__main__":
             
             line = ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt,decker="N",I2="N")
             bline = ds.makeScriptobsLine(npallnames[bstars][bstari],bstarrow,'Y',dt,decker="N",I2="Y")            
-            fp.write(bline)
-            oline ="%s #  %s" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI])) 
+            fp.write(bline + "\n")
+            oline ="%s #  %s\n" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI])) 
             fp.write(oline)
-            fp.write(bline)
+            fp.write(bline + "\n")
 
