@@ -760,7 +760,8 @@ if __name__ == '__main__':
 
 #            sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
-        apf.updateLastObs()
+        if apf.ucam['OUTFILE'].read() == 'ucsc':
+            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
@@ -793,7 +794,9 @@ if __name__ == '__main__':
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
 
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
-        apf.updateLastObs()
+        if apf.ucam['OUTFILE'].read() == 'ucsc':
+            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
         if result == False:
             apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
             result = apf.calibrate(script = opt.calibrate, time = 'pre')
@@ -928,7 +931,9 @@ if __name__ == '__main__':
         if not result:
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
             APFTask.set(parent,suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
-    apf.updateLastObs()
+
+    if apf.ucam['OUTFILE'].read() == 'ucsc':
+        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
     bstr = "%d,%d" % (1,1)
     apf.ucam['BINNING'].write(bstr) 
@@ -947,7 +952,9 @@ if __name__ == '__main__':
     apf.setTeqMode('Day')
 
     # Update the last observation number to account for the morning calibration shots.
-    apf.updateLastObs()
+    if apf.ucam['OUTFILE'].read() == 'ucsc':
+        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+    
     APFTask.set(parent,suffix="MESSAGE",value="Updating last observation number",wait=False)
 
     # All Done!
