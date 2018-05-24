@@ -281,7 +281,7 @@ class Master(threading.Thread):
 
             apflog("getTarget(): Target= %s" % target["NAME"])
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
-            APF.updateLastObs()
+
 
         def opening(sunel,sunset=False):
             when = "night"
@@ -323,7 +323,9 @@ class Master(threading.Thread):
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
-            APF.updateLastObs()
+            if apf.ucam['OUTFILE'].read() == 'ucsc':
+                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
             APF.updateWindshield(self.windshield)
             apflog("Starting an instance of scriptobs",echo=True)
             ripd, running = APF.findRobot()
@@ -341,7 +343,9 @@ class Master(threading.Thread):
                 apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
                 if APF.ldone == tot and APF.user != "ucsc":
                     APF.close()
-                    APF.updateLastObs()
+                    if apf.ucam['OUTFILE'].read() == 'ucsc':
+                        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+                    
                     self.exitMessage = "Fixed list is finished. Exiting the watcher."
                     self.stop()
                     # The fixed list has been completely observed so nothing left to do
@@ -417,7 +421,9 @@ class Master(threading.Thread):
                     APF.killRobot(now=True)
 
                 APF.close()
-                APF.updateLastObs()
+                if apf.ucam['OUTFILE'].read() == 'ucsc':
+                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
@@ -503,7 +509,9 @@ class Master(threading.Thread):
                 
                 if APF.isOpen()[0]:
                     apflog("Error: Closeup did not succeed", level='error', echo=True)
-                APF.updateLastObs()
+                if apf.ucam['OUTFILE'].read() == 'ucsc':
+                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
                 self.exitMessage = msg
                 self.stop()
 
