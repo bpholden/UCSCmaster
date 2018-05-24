@@ -1072,6 +1072,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
             apflog("getNext(): Formating exposure times",echo=True)
         mxtime = np.zeros_like(star_table[f,DS_MAX])
         mxtime += MAX_EXPTIME
+        shorter = (star_table[f,DS_MAX] < MAX_EXPTIME)&(star_table[f,DS_MAX] >0)
+        mxtime[shorter] = star_table[f,DS_MAX][shorter]
         star_table[f, DS_EXPT], exps = format_time(totexptimes[f],i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],mxtime)
 
         if verbose:
