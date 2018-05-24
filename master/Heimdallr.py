@@ -284,7 +284,7 @@ class Master(threading.Thread):
 
             apflog("getTarget(): Target= %s" % target["NAME"])
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
-            APF.updateLastObs()
+
 
         def opening(sunel,sunset=False):
             when = "night"
@@ -333,7 +333,9 @@ class Master(threading.Thread):
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
-            APF.updateLastObs()
+            if apf.ucam['OUTFILE'].read() == 'ucsc':
+                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
             APF.updateWindshield(self.windshield)
             apflog("Starting an instance of scriptobs",echo=True)
             ripd, running = APF.findRobot()
@@ -353,7 +355,9 @@ class Master(threading.Thread):
                 apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
                 if APF.ldone == tot and APF.user != "ucsc":
                     APF.close()
-                    APF.updateLastObs()
+                    if apf.ucam['OUTFILE'].read() == 'ucsc':
+                        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+                    
                     self.exitMessage = "Fixed list is finished. Exiting the watcher."
                     self.stop()
                     # The fixed list has been completely observed so nothing left to do
@@ -429,7 +433,9 @@ class Master(threading.Thread):
                     APF.killRobot(now=True)
 
                 APF.close()
-                APF.updateLastObs()
+                if apf.ucam['OUTFILE'].read() == 'ucsc':
+                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
@@ -507,7 +513,9 @@ class Master(threading.Thread):
                 
                 if APF.isOpen()[0]:
                     apflog("Error: Closeup did not succeed", level='error', echo=True)
-                APF.updateLastObs()
+                if apf.ucam['OUTFILE'].read() == 'ucsc':
+                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
                 self.exitMessage = msg
                 self.stop()
 
@@ -623,7 +631,7 @@ if __name__ == '__main__':
 
 
     if not opt.sheet:
-        opt.sheet = "The Googledex"
+        opt.sheet = "2017B"
     apftask = ktl.Service("apftask")        
     # Establish this as the only running master script ( Or example task in test mode )
     try:
@@ -659,13 +667,6 @@ if __name__ == '__main__':
         apflog("checkapf not in robotic mode, exiting",level="error",echo=True)
         sys.exit()
     
-    # Check to see if the instrument has been released
-    # if not debug:
-    #     if apf.checkapf['INSTRELE'].read().strip().lower() != 'yes':
-    #         apflog("The instrument has not been released. Check that Observer Location has been submitted.", echo=True, level='error')
-    #         sys.exit(1)
-        
-
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
     possible_phases = ["ObsInfo", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
 
@@ -742,7 +743,7 @@ if __name__ == '__main__':
         APFTask.phase(parent, "Focus")
         apflog("Phase is now %s" % phase)
 
-    # Run autofocus cube
+    # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
@@ -771,12 +772,13 @@ if __name__ == '__main__':
 
 #            sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
-        apf.updateLastObs()
+        if apf.ucam['OUTFILE'].read() == 'ucsc':
+            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
 
-    # Run pre calibrations
+    # 3) Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
         try:
             APFTask.set(parent,suffix="VAR_3",value="True")
@@ -804,7 +806,9 @@ if __name__ == '__main__':
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
 
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
-        apf.updateLastObs()
+        if apf.ucam['OUTFILE'].read() == 'ucsc':
+            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
         if result == False:
             apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
             result = apf.calibrate(script = opt.calibrate, time = 'pre')
@@ -818,7 +822,7 @@ if __name__ == '__main__':
             APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
 
-    # Start the main watcher thread
+    # 4) Start the main watcher thread
     master = Master(apf,user=opt.name,sheetn=opt.sheet,owner=opt.owner)
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
@@ -930,7 +934,7 @@ if __name__ == '__main__':
         apf.ok2open.monitor(start=False)
     except Exception, e:
         apflog("Note: Cannot stop monitoring ok2open. %s" % (e), level="warn", echo=True)
-    # Take morning calibrations
+    # 5) Take morning calibrations
     APFTask.phase(parent, "Cal-Post")
     result = apf.calibrate(script=opt.calibrate, time='post')
     if not result:
@@ -939,7 +943,9 @@ if __name__ == '__main__':
         if not result:
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
             APFTask.set(parent,suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
-    apf.updateLastObs()
+
+    if apf.ucam['OUTFILE'].read() == 'ucsc':
+        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
     bstr = "%d,%d" % (1,1)
     apf.ucam['BINNING'].write(bstr) 
@@ -958,7 +964,9 @@ if __name__ == '__main__':
     apf.setTeqMode('Day')
 
     # Update the last observation number to account for the morning calibration shots.
-    apf.updateLastObs()
+    if apf.ucam['OUTFILE'].read() == 'ucsc':
+        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+    
     APFTask.set(parent,suffix="MESSAGE",value="Updating last observation number",wait=False)
 
     # All Done!

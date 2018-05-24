@@ -59,6 +59,8 @@ DS_UTM    = 14
 DS_DUR    = 15
 DS_MIN    = 16
 DS_MAX    = 17
+DS_NOB    = 18
+DS_TOT    = 19
 
 SLOWDOWN_MIN = 0.4
 SLOWDOWN_MAX = 5.0
@@ -71,11 +73,13 @@ PRI_DELTA = 5
 
 last_objs_attempted = []
 
-def computeMaxTimes(sn,exp_times):
-    maxtimes = np.zeros_like(exp_times)
-    maxtimes += TARGET_EXPOSURE_TIME_MAX
-
-    return maxtimes
+def computeMaxTimes(exp_times,maxtimes):
+    fintimes = np.zeros_like(exp_times)
+    fintimes[(exp_times > maxtimes)&(maxtimes>0)] = maxtimes[(exp_times > maxtimes)&(maxtimes>0)]
+    fintimes[exp_times < maxtimes] = exp_times[exp_times < maxtimes]
+    fintimes[maxtimes<=0] = exp_times[maxtimes<=0]
+    
+    return fintimes
 
 
 def compute_priorities(star_table,available,cur_dt):
@@ -280,8 +284,8 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                 "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
                 "B-V", "APF Desired Precision", "Close Companion", \
-                "APF decker","I2", "owner", "uth","utm","duration", "Template"
-#                "Nobs", "Total NObs"
+                "APF decker","I2", "owner", "uth","utm","duration", "Template",
+                "Nobs", "Total Obs"
                 ]
     didx = findColumns(col_names,req_cols)
     
@@ -372,9 +376,25 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
-                row.append(TARGET_EXPOSURE_TIME_MAX)
+                row.append(0)
             except KeyError:
-                row.append(TARGET_EXPOSURE_TIME_MAX)
+                row.append(0)
+
+        for coln in ["Nobs"]:
+            try:
+                row.append(int(ls[didx[coln]]))
+            except ValueError:
+                row.append(0)
+            except KeyError:
+                row.append(0)
+                
+        for coln in ["Tota Obs"]:
+            try:
+                row.append(int(ls[didx[coln]]))
+            except ValueError:
+                row.append(0)
+            except KeyError:
+                row.append(0)
                 
                     
         check = checkflag("Close Companion",didx,ls,"\A(n|N)","Y")
@@ -1046,11 +1066,15 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
                                             star_table[f,DS_BV])
         
         exp_times = exp_times * slowdown
-        totexptimes[f] += exp_times
+        totexptimes[f] += computeMaxTimes(exp_times,star_table[f, DS_MAX])
         i2cnts[f] += i2counts
         if verbose:
             apflog("getNext(): Formating exposure times",echo=True)
-        star_table[f, DS_EXPT], exps = format_time(exp_times,i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],star_table[f, DS_MAX])
+        mxtime = np.zeros_like(star_table[f,DS_MAX])
+        mxtime += MAX_EXPTIME
+        shorter = (star_table[f,DS_MAX] < MAX_EXPTIME)&(star_table[f,DS_MAX] >0)
+        mxtime[shorter] = star_table[f,DS_MAX][shorter]
+        star_table[f, DS_EXPT], exps = format_time(totexptimes[f],i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],mxtime)
 
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
@@ -1060,7 +1084,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         # Is the exposure time too long?
         if verbose:
             apflog("getNext(): Removing really long exposures",echo=True)
-        time_check = np.where( exp_times < star_table[f, DS_MAX], True, False)
+        time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
         
         available[f] = available[f] & time_check
         f = available

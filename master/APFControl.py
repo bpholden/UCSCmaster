@@ -1031,6 +1031,63 @@ class APF:
                 apflog(errstr,level="Warn",echo=True)
 
 
+    def ucam_powercycle(self, fake=False):
+
+        if fake:
+            apflog("would have executed @LROOT/bin/robot/robot_power_cycle_ucam")
+            return True
+        else:
+            val = subprocess.call("/usr/local/lick/bin/robot/robot_power_cycle_ucam")
+            if val > 0:
+                apflog("power cycle of UCAM failed",level='alert')
+                return False
+
+            return True
+
+        return True
+
+
+
+    def ucam_restart(parent,comb,fake=False):
+
+        # modify -s apftask UCAMLAUNCHER_UCAM_COMMAND=Stop
+        if fake:
+            # would have restarted software
+            apflog("Would have restarted UCAM software ")
+            return True
+        else:
+            try:
+                ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
+                v= comb.waitFor(" == MissingProcesses",timeout=10)
+                if v:
+                    ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
+                    nv = comb.waitFor(" == Ok",timeout=10)
+                    return nv
+                else:
+                    return False
+            except:	      
+                apflog("UCAM status bad, cannot restart",level='alert')
+                return False
+
+        return False
+
+
+
+    def ucam_status(self,fake=False):
+
+        comb = ucam['combo_ps']
+        ctalk = ucam['ctalkto']
+        if ctalk.read(binary=True) > 0:
+            rv = self.ucam_powercycle(fake=fake)
+            return rv
+
+        if comb.read(binary=True) > 0:
+            # brains!
+            rv = self.ucam_restart(comb,fake=fake)
+            return rv
+
+        return True
+    
 if __name__ == '__main__':
     print "Testing telescope monitors, grabbing and printing out current state."
 
