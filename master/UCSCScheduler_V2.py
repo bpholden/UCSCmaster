@@ -59,6 +59,8 @@ DS_UTM    = 14
 DS_DUR    = 15
 DS_MIN    = 16
 DS_MAX    = 17
+DS_NOB    = 18
+DS_TOT    = 19
 
 SLOWDOWN_MIN = 0.4
 SLOWDOWN_MAX = 5.0
@@ -283,7 +285,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                 "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
                 "B-V", "APF Desired Precision", "Close Companion", \
                 "APF decker","I2", "owner", "uth","utm","duration", "Template"
-#                "Nobs", "Total NObs"
+#                "Nobs", "Total Obs"
                 ]
     didx = findColumns(col_names,req_cols)
     
@@ -373,6 +375,22 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         for coln in ["APFmax"]:
             try:
                 row.append(float(ls[didx[coln]]))
+            except ValueError:
+                row.append(0)
+            except KeyError:
+                row.append(0)
+
+        for coln in ["Nobs"]:
+            try:
+                row.append(int(ls[didx[coln]]))
+            except ValueError:
+                row.append(0)
+            except KeyError:
+                row.append(0)
+                
+        for coln in ["Tota Obs"]:
+            try:
+                row.append(int(ls[didx[coln]]))
             except ValueError:
                 row.append(0)
             except KeyError:
