@@ -331,8 +331,10 @@ class Master(threading.Thread):
         def shouldstartlist():
             if self.starttime == None:
                 return True
-            
-            return True
+            ct = time.time()
+            if ct - self.starttime < 3600 or self.starttime - ct < 1800:
+                return True
+            return False
         
         def startScriptobs():
             # Update the last obs file and hitlist if needed
