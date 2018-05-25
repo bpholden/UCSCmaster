@@ -447,8 +447,8 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
             if isinstance(otime,float):
                 t = datetime.utcfromtimestamp(otime)
             else:
-                hr, min = otime
-                t = datetime(ctime.year, ctime.month, ctime.day, hr, min)
+                hr, mn = otime
+                t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
             jd = float(ephem.julian_date(t))
             try:
                 pastdate = float(v[col])
