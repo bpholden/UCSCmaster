@@ -347,9 +347,7 @@ class Master(threading.Thread):
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
 
-            shouldstart = self.shouldstartlist()
-
-            if self.fixedList is not None and shouldstart:
+            if self.fixedList is not None and self.shouldstartlist():
                 # We wish to observe a fixed target list, in it's original order
                 if not os.path.exists(self.fixedList):
                     apflog("Error: starlist %s does not exist" % (self.fixedList), level="error")
