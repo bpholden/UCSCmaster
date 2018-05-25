@@ -92,6 +92,10 @@ def shutdown():
         print status
         os._exit(0)
 
+def get_start_time(hr,mn):
+    ct = datetime.now()
+    st = datetime(ct.year,ct.month,ct.day+1,hr,mn)
+    return float(st.strftime("%s"))
 
 def args():
     p_c = ["ObsInfo", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
