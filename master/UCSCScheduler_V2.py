@@ -1018,7 +1018,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     # Is the target behind the moon?
     if verbose:
         apflog("getNext(): Culling stars behind the moon",echo=True)
-    moon_check = np.where(moonDist > minMoonDist, True, False)
+    moon_check = moonDist > minMoonDist
     available = available & moon_check
 
     # We just need a B star, so restrict our math to those
