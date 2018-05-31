@@ -486,6 +486,10 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
 
     starNameIdx = codex_cols.index("Star Name")
     lastObsIdx = codex_cols.index("lastobs")
+    try:
+        nObsIdx = codex_cols.index("nObsIdx")
+    except:
+        nObsIdx = -1
     
     for i in range(1, len(full_codex)):
         row = full_codex[i]
@@ -507,6 +511,8 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
             jd = round(float(ephem.julian_date(t)), 2) 
             apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
             row[lastObsIdx] = str(jd)
+            if nObsIdx > 0:
+                row[nObsIdx] = row[nObsIdx] + 1
             full_codex[i] = row
 
     with open(googledex_file, 'w') as f:
