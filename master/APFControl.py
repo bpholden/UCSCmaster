@@ -299,8 +299,8 @@ class APF:
         except:
             self.countrate = 0.0
 
-        self.obsnum.callback(self.updateLastObs)
         self.obsnum.monitor()
+        self.obsnum.callback(self.updateLastObs)
         
         self.teqmode.monitor()
         self.vmag.monitor()

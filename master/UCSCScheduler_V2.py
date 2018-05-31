@@ -388,7 +388,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             except KeyError:
                 row.append(0)
                 
-        for coln in ["Tota Obs"]:
+        for coln in ["Total Obs"]:
             try:
                 row.append(int(ls[didx[coln]]))
             except ValueError:
@@ -486,6 +486,10 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
 
     starNameIdx = codex_cols.index("Star Name")
     lastObsIdx = codex_cols.index("lastobs")
+    try:
+        nObsIdx = codex_cols.index("nObsIdx")
+    except:
+        nObsIdx = -1
     
     for i in range(1, len(full_codex)):
         row = full_codex[i]
@@ -507,6 +511,8 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
             jd = round(float(ephem.julian_date(t)), 2) 
             apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
             row[lastObsIdx] = str(jd)
+            if nObsIdx > 0:
+                row[nObsIdx] = row[nObsIdx] + 1
             full_codex[i] = row
 
     with open(googledex_file, 'w') as f:
@@ -1012,9 +1018,12 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     # Is the target behind the moon?
     if verbose:
         apflog("getNext(): Culling stars behind the moon",echo=True)
-    moon_check = np.where(moonDist > minMoonDist, True, False)
+    moon_check = moonDist > minMoonDist
     available = available & moon_check
 
+    totobs_check = (star_table[:,DS_NOB] >= star_table[:,DS_TOT]) | (star_table[:,DS_TOT] == 0)
+    available = available & totobs_check
+    
     # We just need a B star, so restrict our math to those
     if bstar:
         if verbose:
