@@ -388,7 +388,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             except KeyError:
                 row.append(0)
                 
-        for coln in ["Tota Obs"]:
+        for coln in ["Total Obs"]:
             try:
                 row.append(int(ls[didx[coln]]))
             except ValueError:
