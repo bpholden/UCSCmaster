@@ -684,6 +684,7 @@ def getObserved(filename):
     """
     obs = []
     times = []
+    nobs = dict()
     try:
         f = open(filename, 'r')
     except IOError:
