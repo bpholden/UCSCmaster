@@ -440,15 +440,29 @@ def readin_lastobs(filename,ctime):
             return
         if ctime is None:
             ctime = datetime.utcfromtimestamp(int(time.time()))
+        
 
     lastjds = []
-    for name in names:
-        if codex:
-            col = 
-            for cline in codex:
-                codex[0]
-    
-    return names, lastjds
+    fnames = []
+    nobs = []
+    if codex:
+            
+        for cline in codex:
+            lastjds.append(cline[didx['lastobs']])
+            fnames.append(cline[didx['Star Name']])
+            nobs.append(cline[didx['Nobs']])            
+    else:
+        for i in range(0,len(names)):
+            fnames.append(names[i])
+            otime = times[i]
+            if isinstance(otime,float):
+                t = datetime.utcfromtimestamp(otime)
+            else:
+                hr, mn = otime
+                t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
+            lastjds.append(float(ephem.julian_date(t)))
+            
+    return fnames, lastjds
 
 def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     """
