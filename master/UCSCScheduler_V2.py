@@ -431,7 +431,7 @@ def readin_lastobs(filename,ctime):
         codex = full_codex[1:]
         # These are the columns we need for scheduling
         req_cols = ["Star Name", "lastobs", "Template", "Nobs"]
-        didx = findColumns(col_names,req_cols)
+        didx = findColumns(colhead,req_cols)
         
     except :
         codex = False
