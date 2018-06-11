@@ -1267,7 +1267,4 @@ if __name__ == '__main__':
         ot.close()
         starttime += result["EXP_TIME"]
                 
-#    print "testing googledex updater"
-#    update_googledex_lastobs('observed_targets')
-
     print ("Done")
