@@ -1,5 +1,4 @@
-#!/usr/bin/env  /opt/kroot/bin/kpython
-
+from __future__ import print_function
 import sys
 import json
 import gspread
@@ -18,11 +17,11 @@ if len(sys.argv) > 1:
     sheetn = sys.argv[1]
 
 spreadsheet = gc.open(sheetn)
-print "got spreadsheet"
+print ("got spreadsheet")
 worksheet = spreadsheet.sheet1
 full_codex = worksheet.get_all_values()
-print "got all values from worksheet"
+print ("got all values from worksheet")
 f = open("./googledex.dat",'wb')
 pickle.dump(full_codex, f)
-print "dumped a pickled file"
+print ("dumped a pickled file")
 f.close()
