@@ -28,7 +28,7 @@ print "got spreadsheet"
 worksheet = spreadsheet.sheet1
 full_codex = worksheet.get_all_values()
 print "got all values from worksheet"
-f = open("./googledex.dat",'w')
+f = open("./googledex.dat",'wb')
 pickle.dump(full_codex, f)
 print "dumped a pickled file"
 f.close()
