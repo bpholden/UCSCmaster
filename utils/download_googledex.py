@@ -18,12 +18,6 @@ if len(sys.argv) > 1:
     sheetn = sys.argv[1]
 
 spreadsheet = gc.open(sheetn)
-#spreadsheet = gc.open_by_key("1VoNDlmtVSnqJqzWbbCzYGc7XAvR9ADNjNIDSIBZE-jE")
-# 1VoNDlmtVSnqJqzWbbCzYGc7XAvR9ADNjNIDSIBZE-jE
-#spreadsheet = gc.open_by_url("https://docs.google.com/spreadsheets/d/1VoNDlmtVSnqJqzWbbCzYGc7XAvR9ADNjNIDSIBZE-jE/")
-#https://docs.google.com/spreadsheets/d/1VoNDlmtVSnqJqzWbbCzYGc7XAvR9ADNjNIDSIBZE-jE/edit?usp=sharing
-#allspreads = gc.openall()
-#print allspreads
 print "got spreadsheet"
 worksheet = spreadsheet.sheet1
 full_codex = worksheet.get_all_values()
