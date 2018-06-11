@@ -418,7 +418,52 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         stars.append(star)
 
     return (names, np.array(star_table), flags, stars)
-    
+
+
+def readin_lastobs(filename,ctime):
+    codex = False
+    try:
+        fp = open(filename)
+        full_codex = pickle.load(fp)
+        fp.close()
+        codex = True
+        colhead = full_codex[0]
+        codex = full_codex[1:]
+        # These are the columns we need for scheduling
+        req_cols = ["Star Name", "lastobs", "Template", "Nobs"]
+        didx = findColumns(col_names,req_cols)
+        
+    except :
+        codex = False
+        names, times = getObserved(filename)
+        if len(names) == 0:
+            return
+        if ctime is None:
+            ctime = datetime.utcfromtimestamp(int(time.time()))
+        
+
+    lastjds = []
+    fnames = []
+    nobs = []
+    if codex:
+            
+        for cline in codex:
+            lastjds.append(cline[didx['lastobs']])
+            fnames.append(cline[didx['Star Name']])
+            nobs.append(cline[didx['Nobs']])            
+    else:
+        for i in range(0,len(names)):
+            fnames.append(names[i])
+            otime = times[i]
+            if isinstance(otime,float):
+                t = datetime.utcfromtimestamp(otime)
+            else:
+                hr, mn = otime
+                t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
+            lastjds.append(float(ephem.julian_date(t)))
+            
+    return fnames, lastjds
+
 def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
