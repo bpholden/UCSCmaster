@@ -448,9 +448,9 @@ def readin_lastobs(filename,ctime):
     if codex:
             
         for cline in codex:
-            lastjds.append(cline[didx['lastobs']])
+            lastjds.append(float(cline[didx['lastobs']]))
             fnames.append(cline[didx['Star Name']])
-            nobs.append(cline[didx['Nobs']])            
+            nobs.append(int(cline[didx['Nobs']]))
     else:
         for i in range(0,len(names)):
             fnames.append(names[i])
