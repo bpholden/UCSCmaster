@@ -245,7 +245,7 @@ def checkflag(key,didx,line,regexp,default):
 def make_local_copy(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
     worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
     full_codex = worksheet.get_all_values()
-    f = open(outfn,'w')
+    f = open(outfn,'wb')
     pickle.dump(full_codex, f)
     f.close()
     return full_codex
@@ -268,7 +268,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         outdir = os.getcwd()
     if os.path.exists(os.path.join(outdir,outfn)):
         try:
-            f = open(os.path.join(outdir,outfn),'r')
+            f = open(os.path.join(outdir,outfn),'rb')
             full_codex = pickle.load(f)
             f.close()
         except:
@@ -423,7 +423,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
 def readin_lastobs(filename,ctime):
     codex = False
     try:
-        fp = open(filename)
+        fp = open(filename,'rb')
         full_codex = pickle.load(fp)
         fp.close()
         codex = True
@@ -519,7 +519,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     names, times = getObserved(observed_file)
 
     try:
-        g = open(googledex_file, 'r')
+        g = open(googledex_file, 'rb')
         full_codex = pickle.load(g)
         g.close()
     except IOError:
@@ -563,7 +563,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
                 row[nObsIdx] = row[nObsIdx] + 1
             full_codex[i] = row
 
-    with open(googledex_file, 'w') as f:
+    with open(googledex_file, 'wb') as f:
         pickle.dump(full_codex, f)
     f.close()
     
@@ -1267,7 +1267,4 @@ if __name__ == '__main__':
         ot.close()
         starttime += result["EXP_TIME"]
                 
-#    print "testing googledex updater"
-#    update_googledex_lastobs('observed_targets')
-
     print ("Done")
