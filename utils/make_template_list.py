@@ -30,7 +30,7 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
-                "APFpri", "APFcad", "lastobs", \
+                "APFpri", "APFcad", "lastobs", "owner", \
                 "B-V", "APF Desired Precision", "Close Companion", "Template",
                 ]
 
@@ -46,6 +46,7 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
     do_flag = []
     stars = []
     template = []
+    owner = []
     # Build the star table to return to 
     for ls in codex:
         if ls[0] == '':
@@ -87,14 +88,16 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
             template.append(True)
         else:
             template.append(False)
-        
+
+        owner.append(ls[didx['owner']])
+            
         star_table.append(row)
         star = ephem.FixedBody()
         star._ra = ephem.hours(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]]))
         star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
         stars.append(star)
 
-    return (names, np.array(star_table), do_flag, stars, template)
+    return (names, np.array(star_table), do_flag, stars, template, owner)
 
 
 
