@@ -107,10 +107,10 @@ if __name__ == "__main__":
 
     parser = OptionParser()
     (options, args) = parser.parse_args()    
-    allnames, star_table, do_flag, stars, template  = parsetemplateGoogledex()
-#    allnames, star_table, do_flag, stars = ds.parseGoogledex()
+    allnames, star_table, do_flag, stars, template, owner  = parsetemplateGoogledex()
     for i in range(len(stars)):
-        if star_table[i, ds.DS_APFPRI] > 5:
+        if star_table[i, ds.DS_APFPRI] > 5 and not template[i]:
             row = star_table[i,:]
-            print (ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt,decker="N",I2="N"),)
-            print ("# pri=%.1f" % (star_table[i, ds.DS_APFPRI]))
+            print ( allnames[i], owner[i], star_table[i, ds.DS_APFPRI])
+#            print (ds.makeScriptobsLine(allnames[i],row,do_flag[i],dt,decker="N",I2="N",owner=owner[i]),"# pri=%.1f" % (star_table[i, ds.DS_APFPRI]))
+#            print ("# pri=%.1f" % (star_table[i, ds.DS_APFPRI]))
