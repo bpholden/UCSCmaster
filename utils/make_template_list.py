@@ -1,7 +1,6 @@
 from __future__ import print_function
 import sys
 sys.path.append("../master")
-#from ExposureCalc import *
 import UCSCScheduler_V2 as ds
 from  fake_apflog import *
 import numpy as np
