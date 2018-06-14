@@ -939,6 +939,17 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
 
     return times, exps
 
+def template_conditions(moon, seeing, slowdown):
+
+    if seeing < 13 and slowdown < 0.5:
+        if moon.phase < 0.5 and moon.alt < 0:
+            return True
+        elif moon.phase < 0.25 and moon.alt < 0.7:
+            return True
+        else:
+            return False
+    else:
+        return False
 
 def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetn="The Googledex",owner='S.Vogt',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
