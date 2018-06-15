@@ -951,6 +951,44 @@ def template_conditions(moon, seeing, slowdown):
     else:
         return False
 
+def findClosest(ras,decs,ra,dec):
+
+
+    distances = np.sqrt((ra - ras)**2 + (dec - decs)**2)
+
+    min_ind = distances.argmin()
+    
+    return min_ind
+
+def makeRow(star_table,ind,bstar=False):
+
+    row = []
+
+    row.append(star_table[ind, ds.DS_RA])
+    row.append( star_table[ind, ds.DS_DEC])
+    row.append(star_table[ind, ds.DS_PMRA])
+    row.append(star_table[ind, ds.DS_PMDEC])
+    row.append(star_table[ind, ds.DS_VMAG])
+    row.append(1200)
+    row.append(1e9)
+    row.append( star_table[ind, ds.DS_APFPRI])
+    row.append(0)
+    if bstar:
+        row.append(2)
+    else:
+        if star_table[ind, ds.DS_VMAG] > 10:
+            row.append(9)
+        else:
+            row.append(5)                
+    return row
+
+
+def findBstar(star_table,idx, bstars):
+    
+    near_idx = findClosest(star_table[:,ds.DS_RA][bstars],star_table[:,ds.DS_DEC][bstars],star_table[idx,ds.DS_RA],star_table[idx,ds.DS_DEC])
+    row = makeRow(star_table,near_idx,bstar=True)
+    return row
+    
 def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetn="The Googledex",owner='S.Vogt',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
