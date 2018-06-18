@@ -988,7 +988,32 @@ def findBstar(star_table,idx, bstars):
     near_idx = findClosest(star_table[:,ds.DS_RA][bstars],star_table[:,ds.DS_DEC][bstars],star_table[idx,ds.DS_RA],star_table[idx,ds.DS_DEC])
     row = makeRow(star_table,near_idx,bstar=True)
     return row
-    
+
+
+def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx):
+    res = dict()
+        
+    res['RA']     = stars[idx].a_ra
+    res['DEC']    = stars[idx].a_dec
+    res['PM_RA']  = star_table[idx, DS_PMRA]
+    res['PM_DEC'] = star_table[idx, DS_PMDEC]
+    res['VMAG']   = star_table[idx, DS_VMAG]
+    res['BV']     = star_table[idx, DS_BV]
+    res['COUNTS'] = star_table[idx, DS_COUNTS]
+    res['EXP_TIME'] = star_table[idx, DS_EXPT]
+    res['NEXP'] = star_table[idx, DS_NSHOTS]
+    res['TOTEXP_TIME'] = totexptimes[idx]
+    res['I2CNTS'] = i2cnts[idx]
+    res['NAME']   = sn[idx]
+    res['SCORE']  = star_table[idx,DS_NSHOTS]
+    res['PRI']    = star_table[idx, DS_APFPRI]
+    res['DECKER'] = flags['decker'][idx]
+    res['I2'] =    flags['I2'][idx] 
+    res['owner'] =    flags['owner'][idx] 
+    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx])
+    return res
+
+
 def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetn="The Googledex",owner='S.Vogt',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
@@ -1201,20 +1226,18 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
             available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
         scaled_elevations[np.where(f)] += scaled_els[np.where(vis)]
-        
+       
 
     # Now just sort by priority, then cadence. Return top target
     if len(sn[available]) < 1:
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
-
     final_priorities = compute_priorities(star_table,available,dt)
     
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
     good_cadence = np.where(cadence_check >  1.0, True, False)
     good_cadence_available = available & good_cadence
-
 
     if any(good_cadence_available):
         try:
@@ -1230,10 +1253,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     else:
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
-
         
-#    print sn[available][sort_i]
-#    print star_table[available, DS_APFPRI][sort_i]
     starstr = "getNext(): star table available: %s" % (sn[sort_i]) 
     apflog(starstr,echo=True)
 
@@ -1264,28 +1284,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     cstr= "getNext(): cadence check: %f (%f %f %f)" %( ((ephem.julian_date(dt) - star_table[idx, DS_LAST]) / star_table[idx, DS_CAD]), ephem.julian_date(dt), star_table[idx, DS_LAST], star_table[idx, DS_CAD])
     apflog(cstr,echo=True)
     
-    res = dict()
-        
-    res['RA']     = stars[idx].a_ra
-    res['DEC']    = stars[idx].a_dec
-    res['PM_RA']  = star_table[idx, DS_PMRA]
-    res['PM_DEC'] = star_table[idx, DS_PMDEC]
-    res['VMAG']   = star_table[idx, DS_VMAG]
-    res['BV']     = star_table[idx, DS_BV]
-    res['COUNTS'] = star_table[idx, DS_COUNTS]
-    res['EXP_TIME'] = star_table[idx, DS_EXPT]
-    res['NEXP'] = star_table[idx, DS_NSHOTS]
-    res['TOTEXP_TIME'] = totexptimes[idx]
-    res['I2CNTS'] = i2cnts[idx]
-    res['NAME']   = sn[idx]
-    res['SCORE']  = star_table[idx,DS_NSHOTS]
-    res['PRI']    = star_table[idx, DS_APFPRI]
-    res['DECKER'] = flags['decker'][idx]
-    res['I2'] =    flags['I2'][idx] 
-    res['owner'] =    flags['owner'][idx] 
-    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx])
-    return res
-
+    return makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx)
 
 
 
