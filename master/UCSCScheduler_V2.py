@@ -1061,7 +1061,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
             ptime = datetime.utcfromtimestamp(int(time.time()))
             
     observed, obstimes = update_local_googledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
-
+    
     # List of targets already observed
 #    observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
     global last_objs_attempted
