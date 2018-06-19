@@ -978,8 +978,10 @@ def makeTempRow(star_table,ind,bstar=False):
     else:
         if star_table[ind, ds.DS_VMAG] > 10:
             row.append(9)
-        else:
+        elif star_table[ind, ds.DS_VMAG] < 8:
             row.append(5)                
+        else:
+            row.append(7)                
     return row
 
 
