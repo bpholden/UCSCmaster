@@ -301,6 +301,15 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             apfpri = float(ls[didx["APFpri"]])
         except:
             apfpri = 0.0
+        try:
+            nobs = int(ls[didx["Nobs"]])
+        except:
+            nobs = 0
+        try:
+            totobs = int(ls[didx["Total Obs"]])
+        except :
+            totobs = -1
+        if totobs > 0 and nobs >= totobs: continue
         if apfpri < 0.5: continue
         row = []
         # Get the star name
