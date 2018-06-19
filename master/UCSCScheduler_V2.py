@@ -482,6 +482,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
     vals = ws.get_all_values()
 
     col = vals[0].index("lastobs") 
+    nobscol = vals[0].index("Nobs")
     
     for i, v in enumerate(vals):
         # Did we observe this target tonight?
@@ -497,8 +498,13 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
             jd = float(ephem.julian_date(t))
             try:
                 pastdate = float(v[col])
+                try:
+                    n = int(v[nobscol])
+                except:
+                    n = 0
                 if jd > pastdate:
                     ws.update_cell(i+1, col+1, round(jd, 2) )
+                    ws.update_cell(i+1, nobscol+1, n + 1 )
             except:
                 print (v[0], v[col])
                 ws.update_cell(i+1, col+1, round(jd,2) )
