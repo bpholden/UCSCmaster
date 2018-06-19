@@ -988,8 +988,8 @@ def makeTempRow(star_table,ind,bstar=False):
 def findBstar(snames,star_table,idx, bstars):
     
     near_idx = findClosest(star_table[:,ds.DS_RA][bstars],star_table[:,ds.DS_DEC][bstars],star_table[idx,ds.DS_RA],star_table[idx,ds.DS_DEC])
-    row = makeRow(star_table,near_idx,bstar=True)
-    return row
+    row = makeTempRow(star_table[bstars],near_idx,bstar=True)
+    return snames[near_idx],row
 
 
 def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx):
