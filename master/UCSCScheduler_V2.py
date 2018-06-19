@@ -1289,10 +1289,16 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     stars[idx].compute(apf_obs)
     cstr= "getNext(): cadence check: %f (%f %f %f)" %( ((ephem.julian_date(dt) - star_table[idx, DS_LAST]) / star_table[idx, DS_CAD]), ephem.julian_date(dt), star_table[idx, DS_LAST], star_table[idx, DS_CAD])
     apflog(cstr,echo=True)
-    
-    return makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx)
 
-
+    res =  makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx)
+    if do_templates and flags['template'][idx] == 'N':
+        bname,brow = findBstar(sn,star_table,idx,bstars)
+        row = makeTempRow(star_table,idx)
+        bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner=flags['owner'][idx])            
+        line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])            
+        res['SCRIPTOBS'] = bline + line + bline
+        
+    return res
 
 if __name__ == '__main__':
 
