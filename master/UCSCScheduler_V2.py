@@ -1011,8 +1011,10 @@ def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx):
     res['PRI']    = star_table[idx, DS_APFPRI]
     res['DECKER'] = flags['decker'][idx]
     res['I2'] =    flags['I2'][idx] 
-    res['owner'] =    flags['owner'][idx] 
+    res['owner'] =    flags['owner'][idx]
+
     res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx])
+    
     return res
 
 
