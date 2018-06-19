@@ -960,7 +960,7 @@ def findClosest(ras,decs,ra,dec):
     
     return min_ind
 
-def makeRow(star_table,ind,bstar=False):
+def makeTempRow(star_table,ind,bstar=False):
 
     row = []
 
