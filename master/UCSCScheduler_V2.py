@@ -1108,6 +1108,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     moon = ephem.Moon()
     moon.compute(apf_obs)
 
+    do_templates = template and template_conditions(moon, seeing, slowdown)
+
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
     if verbose:
