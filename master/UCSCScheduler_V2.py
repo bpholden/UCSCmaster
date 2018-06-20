@@ -82,7 +82,7 @@ def computeMaxTimes(exp_times,maxtimes):
     return fintimes
 
 
-def compute_priorities(star_table,available,cur_dt):
+def compute_priorities(star_table,available,cur_dt,flags):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     if any(star_table[available, DS_DUR] > 0):
         new_pri = np.zeros_like(star_table[:, DS_APFPRI])
@@ -335,7 +335,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                     row.append(15.0)
                 else:
                     row.append(0.0)
-        # For now use the old 1e9 count value
+        # For now use the old 1e9 count value - these get recalculated 
         row.append(1200.0)
         row.append(1.e9)
         for coln in ["APFpri", "APFcad","APFnshots"] :
@@ -1175,7 +1175,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         return None
 
 
-    final_priorities = compute_priorities(star_table,available,dt)
+    final_priorities = compute_priorities(star_table,available,dt,flags)
     
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
     good_cadence = np.where(cadence_check >  1.0, True, False)
