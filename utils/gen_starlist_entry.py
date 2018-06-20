@@ -23,6 +23,7 @@ if __name__ == "__main__":
     el += options.el
     fwhm = np.array(options.fwhm)
     i2counts = np.zeros_like(star_table[:, ds.DS_BV])
+    totexptimes = np.zeros_like(star_table[:, ds.DS_BV])
 
     precision = star_table[:, ds.DS_ERR]
     i2counts = ds.getI2_K(precision)
@@ -31,8 +32,16 @@ if __name__ == "__main__":
 
     exp_times, exp_counts, i2cnts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV])
     exp_times *= options.slowdown
-    etimes, nobs = ds.format_time(exp_times,i2cnts,star_table[:,ds.DS_NSHOTS])
-    exp_counts, nobs = ds.format_expmeter(exp_counts,nobs)
+    totexptimes += ds.computeMaxTimes(exp_times,star_table[:, ds.DS_MAX])
+
+    mxtime = np.zeros_like(star_table[:,ds.DS_MAX])
+    mxtime += ds.MAX_EXPTIME
+    shorter = (star_table[:,ds.DS_MAX] < ds.MAX_EXPTIME) & (star_table[:,ds.DS_MAX] >0)
+    mxtime[shorter] = star_table[:,ds.DS_MAX][shorter]
+
+    star_table[:, ds.DS_EXPT], exps = ds.format_time(totexptimes,i2counts,star_table[:, ds.DS_NSHOTS],star_table[:, ds.DS_MIN],mxtime)
+    star_table[:, ds.DS_COUNTS], star_table[:, ds.DS_NSHOTS] = ds.format_expmeter(exp_counts,exps)
+
     fin_pre = precision
    
     dt = datetime.utcfromtimestamp(int(time.time()))
@@ -41,16 +50,16 @@ if __name__ == "__main__":
             continue
         row = []
 
-        row.append(star_table[i, ds.DS_RA])
+        row.append( star_table[i, ds.DS_RA])
         row.append( star_table[i, ds.DS_DEC])
-        row.append(star_table[i, ds.DS_PMRA])
-        row.append(star_table[i, ds.DS_PMDEC])
-        row.append(star_table[i, ds.DS_VMAG])
-        row.append( etimes[i])
-        row.append(exp_counts[i])
+        row.append( star_table[i, ds.DS_PMRA])
+        row.append( star_table[i, ds.DS_PMDEC])
+        row.append( star_table[i, ds.DS_VMAG])
+        row.append( star_table[i, ds.DS_EXPT])
+        row.append( star_table[i, ds.DS_COUNTS])
         row.append( star_table[i, ds.DS_APFPRI])
         row.append(0)
-        row.append( nobs[i])
+        row.append( star_table[i, ds.DS_NSHOTS])
         line = ds.makeScriptobsLine(allnames[i],row,flags['do'][i],dt,decker=flags['decker'][i],I2=flags['I2'][i])
         print "%s #  %s" % (line,"pri = %s" % (star_table[i, ds.DS_APFPRI]))
 
