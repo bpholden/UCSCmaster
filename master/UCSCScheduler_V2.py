@@ -335,7 +335,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                     row.append(15.0)
                 else:
                     row.append(0.0)
-        # For now use the old 1e9 count value
+        # For now use the old 1e9 count value - these get recalculated 
         row.append(1200.0)
         row.append(1.e9)
         for coln in ["APFpri", "APFcad","APFnshots"] :
