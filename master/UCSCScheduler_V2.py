@@ -82,7 +82,7 @@ def computeMaxTimes(exp_times,maxtimes):
     return fintimes
 
 
-def compute_priorities(star_table,available,cur_dt):
+def compute_priorities(star_table,available,cur_dt,flags):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     if any(star_table[available, DS_DUR] > 0):
         new_pri = np.zeros_like(star_table[:, DS_APFPRI])
@@ -301,6 +301,15 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             apfpri = float(ls[didx["APFpri"]])
         except:
             apfpri = 0.0
+        try:
+            nobs = int(ls[didx["Nobs"]])
+        except:
+            nobs = 0
+        try:
+            totobs = int(ls[didx["Total Obs"]])
+        except :
+            totobs = -1
+        if totobs > 0 and nobs >= totobs: continue
         if apfpri < 0.5: continue
         row = []
         # Get the star name
@@ -326,7 +335,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
                     row.append(15.0)
                 else:
                     row.append(0.0)
-        # For now use the old 1e9 count value
+        # For now use the old 1e9 count value - these get recalculated 
         row.append(1200.0)
         row.append(1.e9)
         for coln in ["APFpri", "APFcad","APFnshots"] :
@@ -407,7 +416,7 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
         flags['I2'].append(checkflag("I2",didx,ls,"\A(n|N)",config["I2"]))
         flags['template'].append(checkflag("Template",didx,ls,"\A(n|N)",'Y'))
 
-        flags['owner'].append(checkflag("owner",didx,ls,"\A(w+)",config["owner"]))
+        flags['owner'].append(checkflag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
 
             
         star_table.append(row)
@@ -431,7 +440,7 @@ def readin_lastobs(filename,ctime):
         codex = full_codex[1:]
         # These are the columns we need for scheduling
         req_cols = ["Star Name", "lastobs", "Template", "Nobs"]
-        didx = findColumns(col_names,req_cols)
+        didx = findColumns(colhead,req_cols)
         
     except :
         codex = False
@@ -448,9 +457,9 @@ def readin_lastobs(filename,ctime):
     if codex:
             
         for cline in codex:
-            lastjds.append(cline[didx['lastobs']])
+            lastjds.append(float(cline[didx['lastobs']]))
             fnames.append(cline[didx['Star Name']])
-            nobs.append(cline[didx['Nobs']])            
+            nobs.append(int(cline[didx['Nobs']]))
     else:
         for i in range(0,len(names)):
             fnames.append(names[i])
@@ -498,10 +507,14 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
             jd = float(ephem.julian_date(t))
             try:
                 pastdate = float(v[col])
-                nobs = int(v[nobscol]) + 1
+                try:
+                    n = int(v[nobscol])
+                except:
+                    n = 0
                 if jd > pastdate:
                     ws.update_cell(i+1, col+1, round(jd, 2) )
-                    ws.update_cell(i+1, nobscol + 1, nobs)
+                    ws.update_cell(i+1, nobscol+1, n + 1 )
+
             except:
                 print (v[0], v[col])
                 ws.update_cell(i+1, col+1, round(jd,2) )
@@ -1163,7 +1176,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         return None
 
 
-    final_priorities = compute_priorities(star_table,available,dt)
+    final_priorities = compute_priorities(star_table,available,dt,flags)
     
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
     good_cadence = np.where(cadence_check >  1.0, True, False)

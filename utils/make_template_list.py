@@ -1,7 +1,6 @@
 from __future__ import print_function
 import sys
 sys.path.append("../master")
-#from ExposureCalc import *
 import UCSCScheduler_V2 as ds
 from  fake_apflog import *
 import numpy as np
@@ -31,7 +30,7 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
-                "APFpri", "APFcad", "lastobs", \
+                "APFpri", "APFcad", "lastobs", "owner", \
                 "B-V", "APF Desired Precision", "Close Companion", "Template",
                 ]
 
@@ -47,6 +46,7 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
     do_flag = []
     stars = []
     template = []
+    owner = []
     # Build the star table to return to 
     for ls in codex:
         if ls[0] == '':
@@ -88,14 +88,16 @@ def parsetemplateGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Sche
             template.append(True)
         else:
             template.append(False)
-        
+
+        owner.append(ls[didx['owner']])
+            
         star_table.append(row)
         star = ephem.FixedBody()
         star._ra = ephem.hours(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]]))
         star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
         stars.append(star)
 
-    return (names, np.array(star_table), do_flag, stars, template)
+    return (names, np.array(star_table), do_flag, stars, template, owner)
 
 
 
@@ -105,10 +107,10 @@ if __name__ == "__main__":
 
     parser = OptionParser()
     (options, args) = parser.parse_args()    
-    allnames, star_table, do_flag, stars, template  = parsetemplateGoogledex()
-#    allnames, star_table, do_flag, stars = ds.parseGoogledex()
+    allnames, star_table, do_flag, stars, template, owner  = parsetemplateGoogledex()
     for i in range(len(stars)):
-        if star_table[i, ds.DS_APFPRI] > 5:
+        if star_table[i, ds.DS_APFPRI] > 5 and not template[i]:
             row = star_table[i,:]
-            print (ds.makeScriptobsLine(allnames[i],row,do_flag['do'][i],dt,decker="N",I2="N"),)
-            print ("# pri=%.1f" % (star_table[i, ds.DS_APFPRI]))
+            print ( allnames[i], owner[i], star_table[i, ds.DS_APFPRI])
+#            print (ds.makeScriptobsLine(allnames[i],row,do_flag[i],dt,decker="N",I2="N",owner=owner[i]),"# pri=%.1f" % (star_table[i, ds.DS_APFPRI]))
+#            print ("# pri=%.1f" % (star_table[i, ds.DS_APFPRI]))
