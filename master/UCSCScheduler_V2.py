@@ -514,6 +514,7 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
                 if jd > pastdate:
                     ws.update_cell(i+1, col+1, round(jd, 2) )
                     ws.update_cell(i+1, nobscol+1, n + 1 )
+
             except:
                 print (v[0], v[col])
                 ws.update_cell(i+1, col+1, round(jd,2) )
@@ -741,6 +742,7 @@ def getObserved(filename):
     """
     obs = []
     times = []
+    nobs = dict()
     try:
         f = open(filename, 'r')
     except IOError:
@@ -1148,7 +1150,6 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
         star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,exps)
-        #        star_table[f, DS_COUNTS] = 1.1*exp_counts / star_table[f, DS_NSHOTS]
 
         # Is the exposure time too long?
         if verbose:
@@ -1198,8 +1199,6 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         return None
 
         
-#    print sn[available][sort_i]
-#    print star_table[available, DS_APFPRI][sort_i]
     starstr = "getNext(): star table available: %s" % (sn[sort_i]) 
     apflog(starstr,echo=True)
 
@@ -1210,7 +1209,6 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         sort_j = cur_elevations[sort_i].argsort()[::-1]
     else:
         sort_j = scaled_elevations[sort_i].argsort()[::-1]
-#        sort_j = cadence_check[sort_i].argsort()[::-1]
         cstr= "getNext(): cadence check: %s" %( cadence_check[sort_i][sort_j][0])
         apflog(cstr,echo=True)
     

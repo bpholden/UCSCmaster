@@ -92,6 +92,10 @@ def shutdown():
         print status
         os._exit(0)
 
+def get_start_time(hr,mn):
+    ct = datetime.now()
+    st = datetime(ct.year,ct.month,ct.day+1,hr,mn)
+    return float(st.strftime("%s"))
 
 def args():
     p_c = ["ObsInfo", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
@@ -108,11 +112,22 @@ def args():
     parser.add_argument('-w', '--windshield', choices=w_c, default='auto', help="Turn windshielding on, off, or let the software decide based on the current average wind speed (Default is auto). Velocity > %.1f mph turns windshielding on." % (ad.WINDSHIELD_LIMIT))
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
-    parser.add_argument('-s', '--smartObs', default=False, action='store_true', help="When specified with a fixed starlist, this option will pass the starlist to a selection algorithm to choose the optimal unobserved target, regardless of starlist ordering.")
+    parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
     parser.add_argument('--sheet',default=None,help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='Vogt',help="Optional name for file owners")    
     
     opt = parser.parse_args()
+
+    if opt.start != None:
+
+        mtch = re.search("(\d+)\:(\d+)",opt.start)
+        if mtch:
+            hr = int(mtch.group(1))
+            mn = int(mtch.group(2))
+            opt.start = get_start_time(hr,mn)
+        else:
+            print ("Start time %s does not match required format hours:minutes where both the hours and the minutes are integers")
+            sys.exit()
     return opt
 
 
@@ -166,6 +181,7 @@ class Master(threading.Thread):
         self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
+        self.starttime = None
 
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
@@ -248,16 +264,7 @@ class Master(threading.Thread):
                 seeing = float(APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            if self.fixedList is None:
-                # Pull from the dynamic scheduler
-                target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
-            else:
-                # Get the best target from the star list
-                if os.path.exists(self.fixedList):
-                    target = ds.smartList(self.fixedList, time.time(), seeing, slowdown)
-                else:
-                    apflog("Error: starlist %s does not exist" % (self.fixedList), level="error",echo=True)
-                    self.fixedList=None
+            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
 
             self.set_autofocval()
             if target is None:
@@ -320,6 +327,15 @@ class Master(threading.Thread):
                 APF.DMReset()
             return
 
+
+        def shouldstartlist():
+            if self.starttime == None:
+                return True
+            ct = time.time()
+            if ct - self.starttime < 3600 or self.starttime - ct < 1800:
+                return True
+            return False
+        
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
@@ -333,7 +349,7 @@ class Master(threading.Thread):
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
 
-            if self.fixedList is not None and self.smartObs == False:
+            if self.fixedList is not None and self.shouldstartlist():
                 # We wish to observe a fixed target list, in it's original order
                 if not os.path.exists(self.fixedList):
                     apflog("Error: starlist %s does not exist" % (self.fixedList), level="error")
@@ -351,7 +367,7 @@ class Master(threading.Thread):
                     # The fixed list has been completely observed so nothing left to do
                 elif APF.ldone == tot and APF.user == "ucsc":
                     self.fixedList = None
-                    self.smartObs = False
+                    self.starttime = None
                     APFTask.set(self.task,suffix="STARLIST",value="")
                     ripd, running = APF.findRobot()
                     if running:
@@ -451,7 +467,7 @@ class Master(threading.Thread):
             
             # If scriptobs is running and waiting for input, give it a target
             if running == True and float(sunel) < sunel_lim and APF.sop.read().strip() == 'Input':
-                if self.fixedList is None:
+                if self.fixedList is None or self.shouldstartlist() == False:
                     APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget",wait=False)
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
@@ -468,17 +484,9 @@ class Master(threading.Thread):
                         APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
                     except:
                         apflog("Error: Cannot communicate with apftask",level="error")
+                elif self.shouldstartlist() :
+                    APF.killRobot()
 
-
-                elif self.smartObs == True:
-                    apflog("Scriptobs phase is input ( smartlist ), calling getTarget.")
-                    APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget for a smartlist",wait=False)
-                    getTarget()
-                    APFTask.waitfor(self.task, True, timeout=15)
-                    apflog("Observing target")
-                    APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
-                    haveobserved = True
-                                                           
             # check last telescope focus
             lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
             if time.time() - lastfoc > FOCUSTIME and running and float(sunel) <= sunel_lim and haveobserved and APF.sop.read().strip() == 'Input':
@@ -850,7 +858,7 @@ if __name__ == '__main__':
         else:
             apflog("Starting dynamic scheduler", echo=True)
         master.fixedList = opt.fixed
-        master.smartObs = opt.smartObs
+        master.starttime = opt.start
         master.task = parent
         master.windsheild = opt.windshield
         master.start()
