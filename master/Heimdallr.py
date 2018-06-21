@@ -424,184 +424,182 @@ class Master(threading.Thread):
             sunel = APF.sunel
             sunel.monitor()
 
-
-            # if paused:
-            #     apflog("Pausing because of apftask request",level='warn',echo=True)
-            #     APFTask.waitfor(self.task, True, timeout=60)
-            
-            # Check and close for weather
-            if APF.isOpen()[0] and not APF.openOK:
-                closetime = datetime.now()
-                APFTask.set(parent,suffix="MESSAGE",value="Closing for weather",wait=False)
-                apflog("No longer ok to open.", echo=True)
-                apflog("OPREASON: " + APF.checkapf["OPREASON"].read(), echo=True)
-                apflog("WEATHER: " + APF.checkapf['WEATHER'].read(), echo=True)
-                if running:
-                    APF.killRobot(now=True)
-
-                APF.close()
-                if apf.ucam['OUTFILE'].read() == 'ucsc':
-                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-
-
-            # Check the slowdown factor to close for clouds
-            if self.VMAG is not None and self.BV is not None and False:
-                exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm)
-                try:
-                    slow = exp_cntrate / APF.countrate
-                    if slow < 0:
-                        slow = 5
-                        apflog("Countrate non-sensical %g" % APF.countrate, echo=True)
-                except ZeroDivisionError:
-                    apflog("No current countrate", echo=True)
-                    slow = 5
-                APFTask.set(parent,suffix="MESSAGE",value="FWHM = %.2f and slowdown %.2f" % (APF.avg_fwhm,slow),wait=False)
-                if slow > 16:
-                    # The slowdown is too high, we should close up and wait.
-                    APFTask.set(parent,suffix="MESSAGE",value="Closing for clouds",wait=False)
-                    apflog("Slowdown factor of %.2f is too high. Waiting 30 min to check again." % slow, echo=True)
-                    APF.killRobot(now=True)
-                    APF.close()
-                    APFTask.waitfor(self.task, True, timeout=60*30)
-                    self.VMAG=None
-                    self.BV=None
-                    APF.countrate = 0
-
-            
-            # If scriptobs is running and waiting for input, give it a target
-            if running == True and float(sunel) < sunel_lim and APF.sop.read().strip() == 'Input':
-                if self.fixedList is None or self.shouldstartlist() == False:
-                    APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget",wait=False)
-                    apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
-                    getTarget()
-                    apflog("Observing target")
-                    APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
-                    APFTask.waitfor(self.task, True, timeout=15)
-                    haveobserved = True                    
-                    if self.obsBstar:
-                        self.obsBstar = False
-                    try:
-                        s=""
-                        if self.obsBstar:
-                            s="True"
-                        APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
-                    except:
-                        apflog("Error: Cannot communicate with apftask",level="error")
-                elif self.shouldstartlist() :
-                    APF.killRobot()
-
             # check last telescope focus
             lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
             if time.time() - lastfoc > FOCUSTIME and running and float(sunel) <= sunel_lim and haveobserved and APF.sop.read().strip() == 'Input':
                 APFTask.set(parent,suffix="MESSAGE",value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.),wait=False)
-#                APF.focusTel()
                 haveobserved = False
-                
-            # If the sun is rising and we are finishing an observation
-            # Send scriptobs EOF. This will shut it down after the observation
-            if float(sunel) >= sunel_lim and running == True:
-                APFTask.set(parent,suffix="MESSAGE",value="Last call",wait=False)
-                if self.scriptobs is None:
-                    apflog("Robot claims to be running, but no self.scriptobs instance can be found. Instead calling killRobot().", echo=True)
-                    APF.killRobot()
-                else:
-                    self.scriptobs.stdin.close()
-                    APF.killRobot()
-            
-            # If the sun is rising and scriptobs has stopped, run closeup
-            if float(sunel) > sunel_lim and running == False and rising == True:
-                apflog("Closing due to sun elevation. Sunel = % 4.2f" % float(sunel), echo=True)
-                APFTask.set(parent,suffix="MESSAGE",value="Closing, sun is rising",wait=False)
-                if APF.isOpen()[0]:
-                    msg = "APF is open, closing due to sun elevation = %4.2f" % float(sunel)
+                            
+            if APF.isOpen()[0]:
+
+                # Check and close for weather
+                if not APF.openOK:
+                    closetime = datetime.now()
+                    APFTask.set(parent,suffix="MESSAGE",value="Closing for weather",wait=False)
+                    apflog("No longer ok to open.", echo=True)
+                    apflog("OPREASON: " + APF.checkapf["OPREASON"].read(), echo=True)
+                    apflog("WEATHER: " + APF.checkapf['WEATHER'].read(), echo=True)
+                    if running:
+                        APF.killRobot(now=True)
+
                     APF.close()
+                    if apf.ucam['OUTFILE'].read() == 'ucsc':
+                        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
                 else:
-                    msg = "Telescope was already closed when sun got to %4.2f" % float(sunel)
-                
-                if APF.isOpen()[0]:
-                    apflog("Error: Closeup did not succeed", level='error', echo=True)
-                if apf.ucam['OUTFILE'].read() == 'ucsc':
-                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+                    # Check for servo errors
+                    if APF.slew_allowed == False:
+                        APFTask.set(parent,suffix="MESSAGE",value="Servo failure.",wait=False)                    
+                        apflog("Error: APF is open, and slew_allowed is false. Likely an amplifier fault.", level="error", echo=True)
+                        chk_done = "$checkapf.MOVE_PERM == true"
+                        result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+                        if not result and "DomeShutter" in APF.isOpen()[1]:
+                            apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
 
-                self.exitMessage = msg
-                self.stop()
+                        APF.close(force=True)
+                        if not APF.power_down_telescope():
+                            apflog("Error: Cannot reset telescope after servo failure",level="error", echo=True)
+                            os._exit(1)
+                            
+                    # Keep an eye on the deadman timer if we are open 
+                    if APF.dmtime <= DMLIM:
+                        APFTask.set(parent,suffix="MESSAGE",value="Reseting DM timer",wait=False)                    
+                        APF.DMReset()
 
-            # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
-            if APF.openOK and not rising and not APF.isOpen()[0]:
-                APFTask.set(parent,suffix="MESSAGE",value="Powering up for APFTeq",wait=False)                    
-                if APF.clearestop():
-                    try:
-                        APFLib.write(APF.dome['AZENABLE'],'enable',timeout=10)
-                    except:
-                        apflog("Error: Cannot enable AZ drive, exiting",level="error")
-                        return
-                    apf.setTeqMode('Evening')
-                else:
-                    apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds",level="error")
-                    APFTask.waitFor(parent,True,timeout=600)
-                
-            # Open at sunset
-            sun_between_limits = float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim 
-            if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim and APF.openOK and not rising:
-                APFTask.set(parent,suffix="MESSAGE",value="Open at sunset",wait=False)                    
-                success = opening( sunel, sunset=True)
-                if success == False:
-                    apflog("Error: Cannot open the dome",echo=True,level='error')
-                    APF.close()
-                    os._exit()
-                
-            # Open at night
-            if not APF.isReadyForObserving()[0]  and float(sunel) < sunel_lim and APF.openOK:
-                if not rising or (rising and float(sunel) < (sunel_lim - 5)):
-                    APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
-                    success = opening( sunel)
-                    if success == False:
-                        apflog("Error: Cannot open the dome",echo=True,level='error')
-                        APF.close()
-                        os._exit()
+                    # Check the slowdown factor to close for clouds
+                    if self.VMAG is not None and self.BV is not None and False:
+                        exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm)
+                        try:
+                            slow = exp_cntrate / APF.countrate
+                            if slow < 0:
+                                slow = 5
+                                apflog("Countrate non-sensical %g" % APF.countrate, echo=True)
+                        except ZeroDivisionError:
+                            apflog("No current countrate", echo=True)
+                            slow = 5
+                        APFTask.set(parent,suffix="MESSAGE",value="FWHM = %.2f and slowdown %.2f" % (APF.avg_fwhm,slow),wait=False)
+                        if slow > 16:
+                            # The slowdown is too high, we should close up and wait.
+                            APFTask.set(parent,suffix="MESSAGE",value="Closing for clouds",wait=False)
+                            apflog("Slowdown factor of %.2f is too high. Waiting 30 min to check again." % slow, echo=True)
+                            APF.killRobot(now=True)
+                            APF.close()
+                            APFTask.waitfor(self.task, True, timeout=60*30)
+                            self.VMAG=None
+                            self.BV=None
+                            APF.countrate = 0
 
-            # Check for servo errors
-            if APF.isOpen()[0] and APF.slew_allowed == False:
-                APFTask.set(parent,suffix="MESSAGE",value="Servo failure.",wait=False)                    
-                
-                apflog("Error: APF is open, and slew_allowed is false. Likely an amplifier fault.", level="error", echo=True)
-#                apflog("Forcing checkapf to close the dome. Heimdallr will then exit.", echo=True)
-                chk_done = "$checkapf.MOVE_PERM == true"
-#                APFLib.write(APF.dmtimer, 0)
-                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
-                if not result and "DomeShutter" in APF.isOpen()[1]:
-                    apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+                    if running == True:
+                        # If scriptobs is running and waiting for input, give it a target
+                        if  float(sunel) < sunel_lim:
+                            
+                            if APF.sop.read().strip() == 'Input':
+                                if self.fixedList is None or self.shouldstartlist() == False:
+                                    APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget",wait=False)
+                                    apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
+                                    getTarget()
+                                    apflog("Observing target")
+                                    APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
+                                    APFTask.waitfor(self.task, True, timeout=15)
+                                    haveobserved = True                    
+                                    if self.obsBstar:
+                                        self.obsBstar = False
+                                        try:
+                                            s=""
+                                            if self.obsBstar:
+                                                s="True"
+                                            APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
+                                        except:
+                                            apflog("Error: Cannot communicate with apftask",level="error")
+                                elif self.shouldstartlist() :
+                                    APF.killRobot()
 
-                APF.close(force=True)
-                if not APF.power_down_telescope():
-                    apflog("Error: Cannot reset telescope after servo failure",level="error", echo=True)
-                    os._exit(1)
+                            # If the sun is rising and we are finishing an observation
+                            # Send scriptobs EOF. This will shut it down after the observation
+                        elif float(sunel) >= sunel_lim:
+                            APFTask.set(parent,suffix="MESSAGE",value="Last call",wait=False)
+                            if self.scriptobs is None:
+                                apflog("Robot claims to be running, but no self.scriptobs instance can be found. Instead calling killRobot().", echo=True)
+                                APF.killRobot()
+                            else:
+                                self.scriptobs.stdin.close()
+                                APF.killRobot()
+                            
+                    # running is False                            
+                    else: 
+                        # If the sun is rising and scriptobs has stopped, run closeup
+                        if float(sunel) > sunel_lim and rising == True:
+                            apflog("Closing due to sun elevation. Sunel = % 4.2f" % float(sunel), echo=True)
+                            APFTask.set(parent,suffix="MESSAGE",value="Closing, sun is rising",wait=False)
+                            if APF.isOpen()[0]:
+                                msg = "APF is open, closing due to sun elevation = %4.2f" % float(sunel)
+                                APF.close()
+                            else:
+                                msg = "Telescope was already closed when sun got to %4.2f" % float(sunel)
                 
-            # If we are open and scriptobs isn't running, start it up
-            if APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
-                APFTask.set(parent,suffix="MESSAGE",value="Starting scriptobs",wait=False)
-                startScriptobs()
-                if not APFTask.waitFor(self.task,True,expression="$apftask.SCRIPTOBS_STATUS == 'Running'",timeout=10):
-                    if failstart % 11 == 0 and failstart > 0:
-                        lvl = "error"
+                            if APF.isOpen()[0]:
+                                apflog("Error: Closeup did not succeed", level='error', echo=True)
+                                if apf.ucam['OUTFILE'].read() == 'ucsc':
+                                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
+                            self.exitMessage = msg
+                            self.stop()
+
+                        # If we are open and scriptobs isn't running, start it up
+                        if APF.isReadyForObserving()[0] and float(sunel) <= sunel_lim:
+                            APFTask.set(parent,suffix="MESSAGE",value="Starting scriptobs",wait=False)
+                            startScriptobs()
+                            if not APFTask.waitFor(self.task,True,expression="$apftask.SCRIPTOBS_STATUS == 'Running'",timeout=10):
+                                if failstart % 11 == 0 and failstart > 0:
+                                    lvl = "error"
+                                else:
+                                    lvl = "warn"
+                                apflog("scriptobs is not running just after being started!", level=lvl, echo=True)
+                                APFTask.set(parent,suffix="MESSAGE",value="scriptobs is not running just after being started!",wait=False)                    
+
+                        if  float(sunel) > sunel_lim:
+                            APFTask.set(parent,suffix="MESSAGE",value="Waiting for the end of twilight",wait=False)
+                            APFTask.waitFor(self.task, True, timeout=5)
+
+
+            else: # not open
+                if APF.openOK and not rising :
+                    # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
+                    APFTask.set(parent,suffix="MESSAGE",value="Powering up for APFTeq",wait=False)                    
+                    if APF.clearestop():
+                        try:
+                            APFLib.write(APF.dome['AZENABLE'],'enable',timeout=10)
+                        except:
+                            apflog("Error: Cannot enable AZ drive, exiting",level="error")
+                            return
+                        apf.setTeqMode('Evening')
                     else:
-                        lvl = "warn"
-                    apflog("scriptobs is not running just after being started!", level=lvl, echo=True)
-                    APFTask.set(parent,suffix="MESSAGE",value="scriptobs is not running just after being started!",wait=False)                    
-
+                        apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds",level="error")
+                        APFTask.waitFor(parent,True,timeout=600)
                 
-            # Keep an eye on the deadman timer if we are open 
-            if APF.isOpen()[0] and APF.dmtime <= DMLIM:
-                APFTask.set(parent,suffix="MESSAGE",value="Reseting DM timer",wait=False)                    
-                APF.DMReset()
-#                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
+                    sun_between_limits = float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim
+                    if not APF.isReadyForObserving()[0]:
+                        # Open at sunset
+                        if float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim and not rising:
+                            APFTask.set(parent,suffix="MESSAGE",value="Open at sunset",wait=False)                    
+                            success = opening( sunel, sunset=True)
+                            if success == False:
+                                apflog("Error: Cannot open the dome",echo=True,level='error')
+                                APF.close()
+                                os._exit()
 
-            if not APF.isOpen()[0] and not rising:
-                APFTask.set(parent,suffix="MESSAGE",value="Waiting for sunset",wait=False)
-                APFTask.waitFor(self.task, True, timeout=5)
-            if  APF.isOpen()[0] and float(sunel) > sunel_lim:
-                APFTask.set(parent,suffix="MESSAGE",value="Waiting for the end of twilight",wait=False)
-                APFTask.waitFor(self.task, True, timeout=5)
+                        # Open at night
+                        if not rising or (rising and float(sunel) < (sunel_lim - 5)):
+                            APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
+                            success = opening( sunel)
+                            if success == False:
+                                apflog("Error: Cannot open the dome",echo=True,level='error')
+                                APF.close()
+                                os._exit()
+                                
+                    if not rising and float(sunel) > 0:
+                        APFTask.set(parent,suffix="MESSAGE",value="Waiting for sunset",wait=False)
+                        APFTask.waitFor(self.task, True, timeout=5)
+
             
 
     def stop(self):
