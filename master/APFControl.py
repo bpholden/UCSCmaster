@@ -1,9 +1,5 @@
 # Class definition for an APF object which tracks the state of the telescope.
 
-import ktl
-import APF as APFLib
-import APFTask
-
 import subprocess
 import time
 import os
@@ -13,7 +9,13 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from apflog import *
+try:
+    from apflog import *
+    import ktl
+    import APF as APFLib
+    import APFTask
+except:
+    from fake_apflog import *
 
 
 windlim = 40.0

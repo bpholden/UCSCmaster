@@ -18,9 +18,12 @@ import pickle
 import functools
 import glob
 
-import ktl
-import APF as APFLib
-import APFTask
+try:
+    import ktl
+    import APF as APFLib
+    import APFTask
+except:
+    pass
 
 import APFControl as ad
 from apflog import *
