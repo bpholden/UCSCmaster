@@ -1,11 +1,11 @@
-#!/usr/bin/env kpython
-
-import ktl
-import APF
+from __future__ import print_function
 
 import getpass
 import os
 import smtplib
+
+import ktl
+import APF
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
