@@ -111,6 +111,19 @@ def countratemon(kcountrate):
      APF.ncountrate += 1
      return
 
+def eventmon(event):
+    if event['populated'] == False:
+        return
+
+    try:
+        eventval = event.read(binary=True)
+        if eventval == 0 or eventval == 7 :
+            APF.ncountrate = 0
+    except:
+        return
+
+    return
+ 
 # Callback for ok2open permission
 # -- Check that if we fall down a logic hole we don't error out
 def okmon(ok2open):
@@ -248,6 +261,7 @@ class APF:
     user       = ucam['OUTFILE']
     elapsed    = ucam['elapsed']
     obsnum     = ucam['obsnum']
+    event     = ucam['event']    
 
     apfschedule= ktl.Service('apfschedule')
     
@@ -345,8 +359,9 @@ class APF:
         s += "Front/Rear Shutter=%4.2f / %4.2f\n"%(self.fspos, self.rspos)
         s += "Wind = %3.1f mph \n" % (self.wvel)
         s += "Slowdown = %5.2f x\n" % self.slowdown
-        s += "countrate = %5.2g x\n" % self.countrate
-        s += "kcountrate = %5.2g x\n" % self.kcountrate
+        s += "countrate = %5.2g cts/s\n" % self.countrate
+        s += "ccountrate = %5.2g cts/s\n" % self.ccountrate
+        s += "ncountrate = %d frames \n" % self.ncountrate
         #s += "Conditions are - %s\n" % self.conditions
         s += "Teq Mode - %s\n" % self.teqmode
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
