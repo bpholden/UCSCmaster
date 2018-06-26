@@ -97,7 +97,7 @@ def countmon(counts):
         return
 
 
- def countratemon(kcountrate):
+def countratemon(kcountrate):
      if kcountrate['populated'] == False:
          return
 
