@@ -92,7 +92,7 @@ def countmon(counts):
         return
 
     try:
-        APF.countrate = cnts/time
+        APF.ccountrate = cnts/time
     except:
         return
 
@@ -106,8 +106,8 @@ def countratemon(kcountrate):
      except:
          apflog("Cannot read apfguide.countrate",level='warn',echo=True)
          return
-     APF.ccountrate += ctr
-     APF.ccountrate *= (1.0*APF.ncountrate)/(APF.ncountrate+1)
+     APF.countrate += ctr
+     APF.countrate *= (1.0*APF.ncountrate)/(APF.ncountrate+1)
      APF.ncountrate += 1
      return
 
