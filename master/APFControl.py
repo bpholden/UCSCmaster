@@ -344,6 +344,8 @@ class APF:
         s += "Front/Rear Shutter=%4.2f / %4.2f\n"%(self.fspos, self.rspos)
         s += "Wind = %3.1f mph \n" % (self.wvel)
         s += "Slowdown = %5.2f x\n" % self.slowdown
+        s += "countrate = %5.2g x\n" % self.countrate
+        s += "kcountrate = %5.2g x\n" % self.kcountrate
         #s += "Conditions are - %s\n" % self.conditions
         s += "Teq Mode - %s\n" % self.teqmode
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
