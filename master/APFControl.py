@@ -365,6 +365,7 @@ class APF:
         s += "countrate = %5.2g cts/s\n" % self.countrate
         s += "ccountrate = %5.2g cts/s\n" % self.ccountrate
         s += "ncountrate = %d frames \n" % self.ncountrate
+        s += "elapsed = %5.2f sec \n" % self.elapsed
         #s += "Conditions are - %s\n" % self.conditions
         s += "Teq Mode - %s\n" % self.teqmode
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
