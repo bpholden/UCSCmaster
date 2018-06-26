@@ -1126,13 +1126,8 @@ if __name__ == '__main__':
     print str(apf)
 
     while True:
-        try:
-            if raw_input("Print Telescope State? (y/n): ") != 'y':
-                break
-        except KeyboardInterrupt:
-            break
-        else:
-            print str(apf)
+        print str(apf)
+        time.sleep(10)
 
 
         
