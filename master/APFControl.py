@@ -216,7 +216,7 @@ class APF:
     cwd        = os.getcwd()
     slowdown   = 0.0 
     ncountrate = 0
-    ccountrate = 0.0        
+    countrate = 0.0        
 
     # Initial Wind conditions
     wslist = []
