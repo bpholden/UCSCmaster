@@ -318,7 +318,10 @@ class APF:
 
         self.obsnum.monitor()
         self.obsnum.callback(self.updateLastObs)
-        
+
+        self.event.monitor()
+        self.event.callback(eventmon)
+
         self.teqmode.monitor()
         self.vmag.monitor()
         self.autofoc.monitor()
