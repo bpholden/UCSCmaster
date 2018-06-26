@@ -202,6 +202,8 @@ class APF:
     conditions = 'bad'
     cwd        = os.getcwd()
     slowdown   = 0.0 
+    ncountrate = 0
+    ccountrate = 0.0        
 
     # Initial Wind conditions
     wslist = []
@@ -275,8 +277,6 @@ class APF:
         self.task = task
         
         self.cloudObsNum = 1
-        self.ncountrate = 0
-        self.ccountrate = 0.0        
   
         # Set the callbacks and monitors
         self.wx.monitor()
