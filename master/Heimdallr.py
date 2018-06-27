@@ -180,12 +180,16 @@ class Master(threading.Thread):
         self.VMAG = None
         self.decker = "W"
         self.obsBstar = False
+        self.lastObsSuccess = False
         self.fixedList = None
         self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
         self.starttime = None
-
+        self.apftask = ktl.Service('apftask')
+        self.lineresult = apftask['sciprtobs_line_result']
+        self.lineresult.monitor()
+        
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
 
@@ -199,6 +203,26 @@ class Master(threading.Thread):
             APF.autofoc.write("robot_autofocus_disable")
 
 
+    def lastOBsSuccess(self):
+        retval = False
+        
+        if lineresult.read(binary=True) == 3:
+            retval = True
+        return retval
+            
+
+    def obsBstar(self,haveobserved):
+        if haveobserved and self.lastObsSuccess:
+            self.obsBstar = False
+        try:
+            s=""
+            if self.obsBstar:
+                s="True"
+            APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
+        except:
+            apflog("Error: Cannot communicate with apftask",level="error")
+            
+    
     def run(self):
         APF = self.APF
 
@@ -471,22 +495,17 @@ class Master(threading.Thread):
             # If scriptobs is running and waiting for input, give it a target
             if running == True and float(sunel) < sunel_lim and APF.sop.read().strip() == 'Input':
                 if self.fixedList is None or self.shouldstartlist() == False:
+                    self.lastObsSuccess = self.checkObsSuccess()
+                    self.obsBstar = self.checkBstar(haveobserved)
+                    
                     APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget",wait=False)
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
                     apflog("Observing target")
                     APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
                     APFTask.waitfor(self.task, True, timeout=15)
+                    
                     haveobserved = True                    
-                    if self.obsBstar:
-                        self.obsBstar = False
-                    try:
-                        s=""
-                        if self.obsBstar:
-                            s="True"
-                        APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
-                    except:
-                        apflog("Error: Cannot communicate with apftask",level="error")
                 elif self.shouldstartlist() :
                     APF.killRobot()
 
@@ -494,8 +513,7 @@ class Master(threading.Thread):
             lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
             if time.time() - lastfoc > FOCUSTIME and running and float(sunel) <= sunel_lim and haveobserved and APF.sop.read().strip() == 'Input':
                 APFTask.set(parent,suffix="MESSAGE",value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.),wait=False)
-#                APF.focusTel()
-                haveobserved = False
+
                 
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation
