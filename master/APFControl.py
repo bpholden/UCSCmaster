@@ -106,8 +106,8 @@ def countratemon(kcountrate):
      except:
          apflog("Cannot read apfguide.countrate",level='warn',echo=True)
          return
-     APF.countrate += ctr
-     APF.countrate *= (1.0*APF.ncountrate)/(APF.ncountrate+1)
+     APF.countrate *=  (1.0*APF.ncountrate)/(APF.ncountrate+1)
+     APF.countrate += ctr/(APF.ncountrate+1)
      APF.ncountrate += 1
      return
 
