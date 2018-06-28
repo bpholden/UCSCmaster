@@ -222,6 +222,14 @@ class Master(threading.Thread):
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
             
+    def shouldstartlist(self):
+        if self.starttime == None:
+            return True
+        ct = time.time()
+        if ct - self.starttime < 3600 or self.starttime - ct < 1800:
+            return True
+        return False
+        
     
     def run(self):
         APF = self.APF
@@ -355,14 +363,6 @@ class Master(threading.Thread):
             return
 
 
-        def shouldstartlist():
-            if self.starttime == None:
-                return True
-            ct = time.time()
-            if ct - self.starttime < 3600 or self.starttime - ct < 1800:
-                return True
-            return False
-        
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
