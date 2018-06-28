@@ -224,7 +224,7 @@ class Master(threading.Thread):
             
     def shouldstartlist(self):
         if self.starttime == None:
-            return True
+            return False
         ct = time.time()
         if ct - self.starttime < 3600 or self.starttime - ct < 1800:
             return True
@@ -507,7 +507,8 @@ class Master(threading.Thread):
                     
                     haveobserved = True                    
                 elif self.shouldstartlist() :
-                    APF.killRobot()
+                    pass
+                    #APF.killRobot()
 
             # check last telescope focus
             lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
