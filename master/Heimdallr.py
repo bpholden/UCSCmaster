@@ -187,7 +187,7 @@ class Master(threading.Thread):
         self.targetlog = None
         self.starttime = None
         self.apftask = ktl.Service('apftask')
-        self.lineresult = apftask['sciprtobs_line_result']
+        self.lineresult = apftask['scriptobs_line_result']
         self.lineresult.monitor()
         
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
