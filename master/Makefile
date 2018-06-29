@@ -6,7 +6,7 @@ destdir = ../bin/
 
 srcdir = .
 
-SRC =  	APFControl.py Heimdallr.py UCSCScheduler_V2.py x_gaussslit.py fake_apflog.py
+SRC =  	APFControl.py Heimdallr.py UCSCScheduler_V2.py x_gaussslit.py apflog.py Visible.py ExposureCalculations.py
 
 
 
