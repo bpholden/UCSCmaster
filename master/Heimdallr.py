@@ -219,6 +219,10 @@ class Master(threading.Thread):
             
 
     def obsBstar(self,haveobserved):
+        """ Master.obsBstar(haveobserved) 
+            if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_var_3 to
+            the current value of obsBstar
+        """
         if haveobserved and self.lastObsSuccess:
             self.obsBstar = False
         try:
