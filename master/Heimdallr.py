@@ -383,6 +383,17 @@ class Master(threading.Thread):
             return
 
 
+        # closing
+        def closing():
+            if running:
+                APF.killRobot(now=True)
+
+            APF.close()
+            if apf.ucam['OUTFILE'].read() == 'ucsc':
+                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            return
+        
+        # starts an instance of scriptobs 
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
