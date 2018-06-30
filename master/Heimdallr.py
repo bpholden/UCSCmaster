@@ -491,13 +491,7 @@ class Master(threading.Thread):
                 apflog("No longer ok to open.", echo=True)
                 apflog("OPREASON: " + APF.checkapf["OPREASON"].read(), echo=True)
                 apflog("WEATHER: " + APF.checkapf['WEATHER'].read(), echo=True)
-                if running:
-                    APF.killRobot(now=True)
-
-                APF.close()
-                if apf.ucam['OUTFILE'].read() == 'ucsc':
-                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-
+                closing()
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
@@ -515,8 +509,7 @@ class Master(threading.Thread):
                     # The slowdown is too high, we should close up and wait.
                     APFTask.set(parent,suffix="MESSAGE",value="Closing for clouds",wait=False)
                     apflog("Slowdown factor of %.2f is too high. Waiting 30 min to check again." % slow, echo=True)
-                    APF.killRobot(now=True)
-                    APF.close()
+                    closing()
                     APFTask.waitfor(self.task, True, timeout=60*30)
                     self.VMAG=None
                     self.BV=None
@@ -563,7 +556,7 @@ class Master(threading.Thread):
                 APFTask.set(parent,suffix="MESSAGE",value="Closing, sun is rising",wait=False)
                 if APF.isOpen()[0]:
                     msg = "APF is open, closing due to sun elevation = %4.2f" % float(sunel)
-                    APF.close()
+                    closing()
                 else:
                     msg = "Telescope was already closed when sun got to %4.2f" % float(sunel)
                 
