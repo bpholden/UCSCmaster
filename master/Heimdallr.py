@@ -407,7 +407,7 @@ class Master(threading.Thread):
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
 
-            if self.fixedList is not None and self.shouldstartlist():
+            if self.fixedList is not None and self.shouldStartList():
                 # We wish to observe a fixed target list, in it's original order
                 if not os.path.exists(self.fixedList):
                     apflog("Error: starlist %s does not exist" % (self.fixedList), level="error")
@@ -518,7 +518,7 @@ class Master(threading.Thread):
             
             # If scriptobs is running and waiting for input, give it a target
             if running == True and float(sunel) < sunel_lim and APF.sop.read().strip() == 'Input':
-                if self.fixedList is None or self.shouldstartlist() == False:
+                if self.fixedList is None or self.shouldStartList() == False:
                     self.lastObsSuccess = self.checkObsSuccess()
                     self.obsBstar = self.checkBstar(haveobserved)
                     
@@ -530,7 +530,7 @@ class Master(threading.Thread):
                     APFTask.waitfor(self.task, True, timeout=15)
                     
                     haveobserved = True                    
-                elif self.starttime != None and self.shouldstartlist() :
+                elif self.starttime != None and self.shouldStartList() :
                     APF.killRobot()
 
             # check last telescope focus
