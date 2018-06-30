@@ -207,7 +207,10 @@ class Master(threading.Thread):
             APF.autofoc.write("robot_autofocus_disable")
 
 
-    def lastOBsSuccess(self):
+    def checkObsSuccess(self):
+        """ Master.checkObsSuccess() 
+            checks the value of scriptobs_line_result to see if the last observation suceeded.
+        """
         retval = False
         
         if lineresult.read(binary=True) == 3:
