@@ -578,26 +578,22 @@ class Master(threading.Thread):
                     apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds",level="error")
                     APFTask.waitFor(parent,True,timeout=600)
                 
-            # Open at sunset
-            sun_between_limits = float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim 
-            if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim and APF.openOK and not rising:
-                APFTask.set(parent,suffix="MESSAGE",value="Open at sunset",wait=False)                    
-                success = opening( sunel, sunset=True)
+            # Open 
+
+            if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and APF.openOK :
+                if float(sunel) > sunel_lim and not rising :
+                    APFTask.set(parent,suffix="MESSAGE",value="Open at sunset",wait=False)                    
+                    success = opening( sunel, sunset=True)
+                elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
+                    APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
+                    success = opening( sunel)
+                else:
+                    success = True
                 if success == False:
                     apflog("Error: Cannot open the dome",echo=True,level='error')
                     APF.close()
                     os._exit()
                 
-            # Open at night
-            if not APF.isReadyForObserving()[0]  and float(sunel) < sunel_lim and APF.openOK:
-                if not rising or (rising and float(sunel) < (sunel_lim - 5)):
-                    APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
-                    success = opening( sunel)
-                    if success == False:
-                        apflog("Error: Cannot open the dome",echo=True,level='error')
-                        APF.close()
-                        os._exit()
-
             # Check for servo errors
             if APF.isOpen()[0] and APF.slew_allowed == False:
                 APFTask.set(parent,suffix="MESSAGE",value="Servo failure.",wait=False)                    
