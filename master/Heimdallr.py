@@ -534,10 +534,8 @@ class Master(threading.Thread):
                     APF.killRobot()
 
             # check last telescope focus
-            lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
-            if time.time() - lastfoc > FOCUSTIME and running and float(sunel) <= sunel_lim and haveobserved and APF.sop.read().strip() == 'Input':
-                APFTask.set(parent,suffix="MESSAGE",value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.),wait=False)
-
+            if running and  float(sunel) <= sunel_lim :
+                self.set_autofocval()
                 
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation
@@ -562,8 +560,6 @@ class Master(threading.Thread):
                 
                 if APF.isOpen()[0]:
                     apflog("Error: Closeup did not succeed", level='error', echo=True)
-                if apf.ucam['OUTFILE'].read() == 'ucsc':
-                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
                 self.exitMessage = msg
                 self.stop()
