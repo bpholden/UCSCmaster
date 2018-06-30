@@ -194,11 +194,15 @@ class Master(threading.Thread):
         self.nighttargetlog = None
 
     def set_autofocval(self):
+        """ Master.set_autofocval()
+            tests when the last time the telescope was focused, if more than FOCUSTIME enable focus check
+        """
         APF = self.APF
         # check last telescope focus
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
         if time.time() - lastfoc > FOCUSTIME :
             APF.autofoc.write("robot_autofocus_enable")
+            APFTask.set(parent,suffix="MESSAGE",value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.),wait=False)            
         else:
             APF.autofoc.write("robot_autofocus_disable")
 
@@ -222,16 +226,25 @@ class Master(threading.Thread):
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
             
-    def shouldstartlist(self):
+    def shouldStartList(self):
+        """ Master.shouldStartList()
+            should we start a fixed observing list or not? true if start time is None or if w/in + 1 hour - 0.5 hours of start time
+        """
         if self.starttime == None:
             return True
         ct = time.time()
         if ct - self.starttime < 3600 or self.starttime - ct < 1800:
             return True
         return False
-        
+
+
+    ####
+    # run is the main event loop, for historical reasons it has its own functions that are local in scope
+    ####
     
     def run(self):
+        """ Master.run() - runs the observing
+        """
         APF = self.APF
 
         # This is called when an observation finishes, and selects the next target
@@ -324,7 +337,7 @@ class Master(threading.Thread):
             apflog("getTarget(): Target= %s" % target["NAME"])
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
 
-
+        # opens the dome & telescope, if sunset is True calls open at sunset, else open at night
         def opening(sunel,sunset=False):
             when = "night"
             if sunset:
