@@ -612,7 +612,7 @@ class APF:
         if self.test: 
             print "Would be setting TEQMode to %s" % mode
             return
-        self.teqmode.write(mode)
+        self.teqmode.write(mode,wait=False)
         result = self.teqmode.waitfor('== %s' % mode, timeout=60)
         if not result:
             apflog("Error setting the TEQMODE.")
