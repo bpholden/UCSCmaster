@@ -185,7 +185,7 @@ class Master(threading.Thread):
         self.BV = None
         self.VMAG = None
         self.decker = "W"
-        self.obsBstar = False
+        self.obsBstar = True
         self.lastObsSuccess = False
         self.fixedList = None
         self.sheetn = sheetn
@@ -219,16 +219,22 @@ class Master(threading.Thread):
         """
         retval = False
         
-        if lineresult.read(binary=True) == 3:
+        if self.lineresult.read(binary=True) == 3:
             retval = True
         return retval
             
 
-    def obsBstar(self,haveobserved):
+    def checkBstar(self,haveobserved):
         """ Master.obsBstar(haveobserved) 
             if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_var_3 to
             the current value of obsBstar
+            The variable VAR_3 still overrides
         """
+        vals = APFTask.get("master",("VAR_3"))
+        if prev['VAR_3'] == 'True'
+            self.obsBstar = True
+        else:
+            self.obsBstar = False
         if haveobserved and self.lastObsSuccess:
             self.obsBstar = False
         try:
