@@ -47,6 +47,12 @@ DMLIM = 1140
 paused = False
 
 def sunel_startlim():
+    """
+    Returns the start limit for the sun elevation
+
+    Returns:
+        float of the value in degrees
+    """
     return SUNEL_STARTLIM
 
 def control_watch(keyword,parent):
