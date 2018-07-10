@@ -102,7 +102,7 @@ def countratemon(kcountrate):
          return
 
      try:
-         ctr = float(kcountrate.read(binary=True))
+         ctr = float(kcountrate['binary'])
      except:
          apflog("Cannot read apfguide.countrate",level='warn',echo=True)
          return
