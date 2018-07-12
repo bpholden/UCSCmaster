@@ -1,4 +1,4 @@
-#!/usr/bin/env  /opt/kroot/bin/kpython
+from __future__ import print_function
 import sys
 sys.path.append("../master")
 #from ExposureCalc import *
@@ -39,7 +39,13 @@ if __name__ == "__main__":
 
     exp_times, exp_counts, i2cnts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV])
     exp_times *= options.slowdown
-    etimes, nobs = ds.format_time(exp_times,i2cnts,star_table[:, ds.DS_NSHOTS])
+    
+    mxtime = np.zeros_like(star_table[:,ds.DS_MAX])
+    mxtime += ds.MAX_EXPTIME
+    shorter = (star_table[:,ds.DS_MAX] < ds.MAX_EXPTIME)&(star_table[:,ds.DS_MAX] >0)
+    mxtime[shorter] = star_table[:,ds.DS_MAX][shorter]
+
+    etimes, nobs = ds.format_time(exp_times,i2cnts,star_table[:, ds.DS_NSHOTS],star_table[:, ds.DS_MIN],mxtime)
     exp_counts, nobs = ds.format_expmeter(exp_counts,nobs)
     fin_pre = precision
 #    exp_counts /= nobs
@@ -47,7 +53,10 @@ if __name__ == "__main__":
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
 
-        print "%15s %4.1f %3.1f %7.0f %7.0f %.3g %.1f %d" % (allnames[i],star_table[i, ds.DS_APFPRI],precision[i],i2counts[i],exp_times[i],exp_counts[i],etimes[i],nobs[i])
+        print ("%15s %4.1f %3.1f %7.0f %7.0f %.3g %.1f %d" % (allnames[i],
+                                                                 star_table[i, ds.DS_APFPRI],precision[i],
+                                                                 i2counts[i],exp_times[i],exp_counts[i],
+                                                                 etimes[i],nobs[i]))
 
     # plt.scatter(times, err, c=pri, cmap=plt.get_cmap("jet"), edgecolor='none')
     # plt.xlabel("Exposure Time")
