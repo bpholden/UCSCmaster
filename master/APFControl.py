@@ -622,10 +622,14 @@ class APF:
     def focusTel(self):
         star = self.find_star()
         if not star:
+            apflog("Cannot find star near current positon!?",level='error',echo=True)
             return False
+        apflog("Targeting telescope on %s" % star[0], echo=True)
+        
         if self.slew(star):
-            return self.run_focustel()
-
+            if self.run_autoexposure(ind=1):
+                if self.run_centerup():
+                    return self.run_focustel()
         return False
     
                 
