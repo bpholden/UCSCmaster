@@ -385,6 +385,12 @@ class Master(threading.Thread):
             else:
                 setting = False
             APF.DMReset()
+
+            if setting:
+                rv = APF.evening_star()
+                if not rv:
+                    apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
+            
             chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
             result = False
             while float(sunel.read()) > SUNEL_STARTLIM and setting:
