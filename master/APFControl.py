@@ -589,7 +589,7 @@ class APF:
             apflog("Running focusinstr routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
             cmd = os.path.join(cmdpath,'focus_telescope')
-            result, code = cmdexec(cmd,cwd=os.path.curdir)
+            result, code = cmdexec([cmd,"-f"],cwd=os.path.curdir)
             if not result:
                 apflog("focustel failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
