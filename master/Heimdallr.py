@@ -438,7 +438,8 @@ class Master(threading.Thread):
                 elif APF.ldone == tot and APF.user == "ucsc":
                     self.fixedList = None
                     self.starttime = None
-                    APFTask.set(self.task,suffix="STARLIST",value="")
+                    if not APF.test:
+                        APFTask.set(self.task,suffix="STARLIST",value="")
                     ripd, running = APF.findRobot()
                     if running:
                         APF.killRobot(now=True)
