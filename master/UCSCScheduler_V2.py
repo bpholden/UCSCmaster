@@ -930,7 +930,7 @@ def format_expmeter(exp_counts, nexp):
     nexp[toofew_idx] = np.ceil((exp_counts[toofew_idx]/MAX_EXPMETER) + 1)
     exp_counts[long_idx] = MAX_EXPMETER
     exps[exps < nexp] = nexp[exps < nexp]
-    return exp_counts, exps
+    return exp_counts/exps, exps
 
 def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     total = np.array(total)
