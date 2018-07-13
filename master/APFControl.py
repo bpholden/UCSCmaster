@@ -874,7 +874,7 @@ class APF:
                 apflog("Setting scriptobs_windshield to Enable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
-    def target(self, name, ra, dec, pmra, pmdec):
+    def evening_star(self):
         """Aim the APF at the desired target. This calls prep-obs, slewlock, and focus-telescope. A workaround to relying on scriptobs."""
         if self.isOpen()[0] == False:
             apflog("APF is not open. Can't target a star while closed.",echo=True)
