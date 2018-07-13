@@ -877,30 +877,30 @@ class APF:
     def evening_star(self):
         """Aim the APF at the desired target. This calls prep-obs, slewlock, and focus-telescope. A workaround to relying on scriptobs."""
         if self.isOpen()[0] == False:
-            apflog("APF is not open. Can't target a star while closed.",echo=True)
+            apflog("APF is not open. Can't target a star while closed.",level='error',echo=True)
             return
-        apflog("Targeting telescope on %s" % name, echo=True)
         # Move the shutters to fully open ( This might have already been done by open at sunset. In this case we rely on shutters to realize this and simply return)
-        apflog("Fully opening shutters.")
+        self.DMReset()
+        apflog("Fully opening shutters.",echo=True)
         result = subprocess.call(["shutters","-o"])
         if result != 0:
             apflog("Shutters returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
             return
+        self.DMReset()
         # Call prep-obs
-        apflog("Calling prep-obs.")
+        apflog("Calling prep-obs.",echo=True)
         result = subprocess.call(['prep-obs'])
         if result != 0:
             apflog("Prep-obs returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
             return
         # Slew to the specified RA and DEC, set guide camera settings, and centerup( Slewlock )
-        apflog("Calling slewlock.")
-        result = subprocess.call(["slewlock","target",name,str(ra),str(dec),str(pmra),str(pmdec),'210'])
-        if result != 0:
-            apflog("Slewlock returned error code %d. Targeting object %s has failed." % (result, name), level='error',echo=True)
-            return
         # Focus the telescope?
-            
-
+        self.DMReset()
+        if self.focusTel():
+            return True
+        else:
+            return False
+    
     def checkClouds(self, target):
         """
         This function will take a test exposure of a B-Star. By using scriptobs to take this exposure,
