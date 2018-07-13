@@ -596,7 +596,29 @@ class APF:
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                     apflog("focus_telescope failed to exit" ,echo=True)
                 return result
-            
+
+
+    def run_autoexposure(self,ind=5):
+        cmdpath = '/usr/local/lick/bin/robot/'
+        cmd = os.path.join(cmdpath,'autoexposure')
+        istr = "%d" % (ind)
+        cmdargs = [cmd]
+#       cmdargs = [cmd,"-i",istr]
+        result, code = cmdexec(cmdargs,cwd=os.path.curdir)
+
+#        result, code = cmdexec([cmd,istr],cwd=os.path.curdir)
+        if not result:
+            apflog("autoexposure failed with code %d" % code, echo=True)
+        return result
+
+    def run_centerup(self):
+        cmdpath = '/usr/local/lick/bin/robot/'
+        cmd = os.path.join(cmdpath,'centerup')
+        result, code = cmdexec(cmd,cwd=os.path.curdir)
+        if not result:
+            apflog("centerup failed with code %d" % code, echo=True)
+        return result
+
     def focusTel(self):
         star = self.find_star()
         if not star:
