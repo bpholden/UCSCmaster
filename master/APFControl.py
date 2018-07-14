@@ -1,9 +1,5 @@
 # Class definition for an APF object which tracks the state of the telescope.
 
-import ktl
-import APF as APFLib
-import APFTask
-
 import subprocess
 import time
 import os
@@ -13,7 +9,13 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from apflog import *
+try:
+    from apflog import *
+    import ktl
+    import APF as APFLib
+    import APFTask
+except:
+    from fake_apflog import *
 
 
 windlim = 40.0
@@ -48,7 +50,7 @@ apfteq     = ktl.Service('apfteq')
 teqmode    = apfteq['MODE']
 guide      = ktl.Service('apfguide')
 counts     = ktl.cache('apfguide','COUNTS')
-countrate     = ktl.cache('apfguide','COUNTRATE')
+kcountrate     = ktl.cache('apfguide','COUNTRATE')
 thresh     = guide['xpose_thresh']
 elapsed    = ktl.cache('apfucam','ELAPSED')
 motor      = ktl.Service('apfmot')
@@ -90,25 +92,38 @@ def countmon(counts):
         return
 
     try:
-        APF.countrate = cnts/time
+        APF.ccountrate = cnts/time
     except:
         return
 
 
-# def countratemon(countrate):
-#     if countrate['populated'] == False:
-#         return
+def countratemon(kcountrate):
+     if kcountrate['populated'] == False:
+         return
 
-#     try:
-#         ctr = float(countrate)
-#     except:
-#         apflog("Cannot read apfguide.countrate",level='warn',echo=True)
-#         return
-#     APF.countrate += countrate
-#     APF.countrate *= (1.0*APF.ncountrate)/(APF.ncountrate+1)
-#     APF.ncountrate += 1
-#     return
+     try:
+         ctr = float(kcountrate['binary'])
+     except:
+         apflog("Cannot read apfguide.countrate",level='warn',echo=True)
+         return
+     APF.countrate *=  (1.0*APF.ncountrate)/(APF.ncountrate+1)
+     APF.countrate += ctr/(APF.ncountrate+1)
+     APF.ncountrate += 1
+     return
 
+def eventmon(event):
+    if event['populated'] == False:
+        return
+
+    try:
+        eventval = event.read(binary=True)
+        if eventval == 0 or eventval == 7 :
+            APF.ncountrate = 0
+    except:
+        return
+
+    return
+ 
 # Callback for ok2open permission
 # -- Check that if we fall down a logic hole we don't error out
 def okmon(ok2open):
@@ -200,6 +215,8 @@ class APF:
     conditions = 'bad'
     cwd        = os.getcwd()
     slowdown   = 0.0 
+    ncountrate = 0
+    countrate = 0.0        
 
     # Initial Wind conditions
     wslist = []
@@ -244,6 +261,7 @@ class APF:
     user       = ucam['OUTFILE']
     elapsed    = ucam['elapsed']
     obsnum     = ucam['obsnum']
+    event     = ucam['event']    
 
     apfschedule= ktl.Service('apfschedule')
     
@@ -252,6 +270,7 @@ class APF:
 
     guide      = ktl.Service('apfguide')
     counts     = guide['COUNTS']
+    kcountrate     = guide['COUNTRATE']
     thresh     = guide['xpose_thresh']
     avg_fwhm   = guide['AVG_FWHM']
 
@@ -272,7 +291,6 @@ class APF:
         self.task = task
         
         self.cloudObsNum = 1
-        self.ncountrate = 0
   
         # Set the callbacks and monitors
         self.wx.monitor()
@@ -293,15 +311,17 @@ class APF:
         self.counts.monitor()
         self.counts.callback(countmon)
 
+        self.kcountrate.monitor()
+        self.kcountrate.callback(countratemon)
+
         self.elapsed.monitor()
-        try:
-            self.countrate = self.counts/self.elapsed
-        except:
-            self.countrate = 0.0
 
         self.obsnum.monitor()
         self.obsnum.callback(self.updateLastObs)
-        
+
+        self.event.monitor()
+        self.event.callback(eventmon)
+
         self.teqmode.monitor()
         self.vmag.monitor()
         self.autofoc.monitor()
@@ -342,6 +362,10 @@ class APF:
         s += "Front/Rear Shutter=%4.2f / %4.2f\n"%(self.fspos, self.rspos)
         s += "Wind = %3.1f mph \n" % (self.wvel)
         s += "Slowdown = %5.2f x\n" % self.slowdown
+        s += "countrate = %5.2g cts/s\n" % self.countrate
+        s += "ccountrate = %5.2g cts/s\n" % self.ccountrate
+        s += "ncountrate = %d frames \n" % self.ncountrate
+        s += "elapsed = %5.2f sec \n" % self.elapsed
         #s += "Conditions are - %s\n" % self.conditions
         s += "Teq Mode - %s\n" % self.teqmode
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
@@ -565,21 +589,47 @@ class APF:
             apflog("Running focusinstr routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
             cmd = os.path.join(cmdpath,'focus_telescope')
-            result, code = cmdexec(cmd,cwd=os.path.curdir)
+            result, code = cmdexec([cmd,"-f"],cwd=os.path.curdir)
             if not result:
                 apflog("focustel failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                     apflog("focus_telescope failed to exit" ,echo=True)
                 return result
-            
+
+
+    def run_autoexposure(self,ind=5):
+        cmdpath = '/usr/local/lick/bin/robot/'
+        cmd = os.path.join(cmdpath,'autoexposure')
+        istr = "%d" % (ind)
+        cmdargs = [cmd]
+#       cmdargs = [cmd,"-i",istr]
+        result, code = cmdexec(cmdargs,cwd=os.path.curdir)
+
+#        result, code = cmdexec([cmd,istr],cwd=os.path.curdir)
+        if not result:
+            apflog("autoexposure failed with code %d" % code, echo=True)
+        return result
+
+    def run_centerup(self):
+        cmdpath = '/usr/local/lick/bin/robot/'
+        cmd = os.path.join(cmdpath,'centerup')
+        result, code = cmdexec(cmd,cwd=os.path.curdir)
+        if not result:
+            apflog("centerup failed with code %d" % code, echo=True)
+        return result
+
     def focusTel(self):
         star = self.find_star()
         if not star:
+            apflog("Cannot find star near current positon!?",level='error',echo=True)
             return False
+        apflog("Targeting telescope on %s" % star[0], echo=True)
+        
         if self.slew(star):
-            return self.run_focustel()
-
+            if self.run_autoexposure(ind=1):
+                if self.run_centerup():
+                    return self.run_focustel()
         return False
     
                 
@@ -588,7 +638,7 @@ class APF:
         if self.test: 
             print "Would be setting TEQMode to %s" % mode
             return
-        self.teqmode.write(mode)
+        self.teqmode.write(mode,wait=False)
         result = self.teqmode.waitfor('== %s' % mode, timeout=60)
         if not result:
             apflog("Error setting the TEQMODE.")
@@ -824,33 +874,33 @@ class APF:
                 apflog("Setting scriptobs_windshield to Enable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
-    def target(self, name, ra, dec, pmra, pmdec):
+    def evening_star(self):
         """Aim the APF at the desired target. This calls prep-obs, slewlock, and focus-telescope. A workaround to relying on scriptobs."""
         if self.isOpen()[0] == False:
-            apflog("APF is not open. Can't target a star while closed.",echo=True)
+            apflog("APF is not open. Can't target a star while closed.",level='error',echo=True)
             return
-        apflog("Targeting telescope on %s" % name, echo=True)
         # Move the shutters to fully open ( This might have already been done by open at sunset. In this case we rely on shutters to realize this and simply return)
-        apflog("Fully opening shutters.")
+        self.DMReset()
+        apflog("Fully opening shutters.",echo=True)
         result = subprocess.call(["shutters","-o"])
         if result != 0:
             apflog("Shutters returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
             return
+        self.DMReset()
         # Call prep-obs
-        apflog("Calling prep-obs.")
+        apflog("Calling prep-obs.",echo=True)
         result = subprocess.call(['prep-obs'])
         if result != 0:
             apflog("Prep-obs returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
             return
         # Slew to the specified RA and DEC, set guide camera settings, and centerup( Slewlock )
-        apflog("Calling slewlock.")
-        result = subprocess.call(["slewlock","target",name,str(ra),str(dec),str(pmra),str(pmdec),'210'])
-        if result != 0:
-            apflog("Slewlock returned error code %d. Targeting object %s has failed." % (result, name), level='error',echo=True)
-            return
         # Focus the telescope?
-            
-
+        self.DMReset()
+        if self.focusTel():
+            return True
+        else:
+            return False
+    
     def checkClouds(self, target):
         """
         This function will take a test exposure of a B-Star. By using scriptobs to take this exposure,
@@ -1103,13 +1153,8 @@ if __name__ == '__main__':
     print str(apf)
 
     while True:
-        try:
-            if raw_input("Print Telescope State? (y/n): ") != 'y':
-                break
-        except KeyboardInterrupt:
-            break
-        else:
-            print str(apf)
+        print str(apf)
+        time.sleep(10)
 
 
         

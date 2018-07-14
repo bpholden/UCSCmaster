@@ -18,9 +18,12 @@ import pickle
 import functools
 import glob
 
-import ktl
-import APF as APFLib
-import APFTask
+try:
+    import ktl
+    import APF as APFLib
+    import APFTask
+except:
+    pass
 
 import APFControl as ad
 from apflog import *
@@ -44,6 +47,12 @@ DMLIM = 1140
 paused = False
 
 def sunel_startlim():
+    """
+    Returns the start limit for the sun elevation
+
+    Returns:
+        float of the value in degrees
+    """
     return SUNEL_STARTLIM
 
 def control_watch(keyword,parent):
@@ -92,6 +101,10 @@ def shutdown():
         print status
         os._exit(0)
 
+def get_start_time(hr,mn):
+    ct = datetime.now()
+    st = datetime(ct.year,ct.month,ct.day+1,hr,mn)
+    return float(st.strftime("%s"))
 
 def args():
     p_c = ["ObsInfo", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
@@ -108,11 +121,22 @@ def args():
     parser.add_argument('-w', '--windshield', choices=w_c, default='auto', help="Turn windshielding on, off, or let the software decide based on the current average wind speed (Default is auto). Velocity > %.1f mph turns windshielding on." % (ad.WINDSHIELD_LIMIT))
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
-    parser.add_argument('-s', '--smartObs', default=False, action='store_true', help="When specified with a fixed starlist, this option will pass the starlist to a selection algorithm to choose the optimal unobserved target, regardless of starlist ordering.")
+    parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
     parser.add_argument('--sheet',default=None,help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='Vogt',help="Optional name for file owners")    
     
     opt = parser.parse_args()
+
+    if opt.start != None:
+
+        mtch = re.search("(\d+)\:(\d+)",opt.start)
+        if mtch:
+            hr = int(mtch.group(1))
+            mn = int(mtch.group(2))
+            opt.start = get_start_time(hr,mn)
+        else:
+            print ("Start time %s does not match required format hours:minutes where both the hours and the minutes are integers")
+            sys.exit()
     return opt
 
 
@@ -161,26 +185,85 @@ class Master(threading.Thread):
         self.BV = None
         self.VMAG = None
         self.decker = "W"
-        self.obsBstar = False
+        self.obsBstar = True
+        self.lastObsSuccess = False
         self.fixedList = None
         self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
-
+        self.starttime = None
+        self.apftask = ktl.Service('apftask')
+        self.lineresult = apftask['scriptobs_line_result']
+        self.lineresult.monitor()
+        
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
 
     def set_autofocval(self):
+        """ Master.set_autofocval()
+            tests when the last time the telescope was focused, if more than FOCUSTIME enable focus check
+        """
         APF = self.APF
         # check last telescope focus
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
         if time.time() - lastfoc > FOCUSTIME :
             APF.autofoc.write("robot_autofocus_enable")
+            APFTask.set(parent,suffix="MESSAGE",value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.),wait=False)            
         else:
             APF.autofoc.write("robot_autofocus_disable")
 
 
+    def checkObsSuccess(self):
+        """ Master.checkObsSuccess() 
+            checks the value of scriptobs_line_result to see if the last observation suceeded.
+        """
+        retval = False
+        
+        if self.lineresult.read(binary=True) == 3:
+            retval = True
+        return retval
+            
+
+    def checkBstar(self,haveobserved):
+        """ Master.obsBstar(haveobserved) 
+            if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_var_3 to
+            the current value of obsBstar
+            The variable VAR_3 still overrides
+        """
+        vals = APFTask.get("master",("VAR_3"))
+        if prev['VAR_3'] == 'True':
+            self.obsBstar = True
+        else:
+            self.obsBstar = False
+        if haveobserved and self.lastObsSuccess:
+            self.obsBstar = False
+        try:
+            s=""
+            if self.obsBstar:
+                s="True"
+            APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
+        except:
+            apflog("Error: Cannot communicate with apftask",level="error")
+            
+    def shouldStartList(self):
+        """ Master.shouldStartList()
+            should we start a fixed observing list or not? true if start time is None or if w/in + 1 hour - 0.5 hours of start time
+        """
+        if self.starttime == None:
+            return True
+        ct = time.time()
+        if ct - self.starttime < 3600 or self.starttime - ct < 1800:
+            return True
+        return False
+
+
+    ####
+    # run is the main event loop, for historical reasons it has its own functions that are local in scope
+    ####
+    
     def run(self):
+        """ Master.run() - runs the observing
+        """
         APF = self.APF
 
         # This is called when an observation finishes, and selects the next target
@@ -248,16 +331,7 @@ class Master(threading.Thread):
                 seeing = float(APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            if self.fixedList is None:
-                # Pull from the dynamic scheduler
-                target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
-            else:
-                # Get the best target from the star list
-                if os.path.exists(self.fixedList):
-                    target = ds.smartList(self.fixedList, time.time(), seeing, slowdown)
-                else:
-                    apflog("Error: starlist %s does not exist" % (self.fixedList), level="error",echo=True)
-                    self.fixedList=None
+            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
 
             self.set_autofocval()
             if target is None:
@@ -282,7 +356,7 @@ class Master(threading.Thread):
             apflog("getTarget(): Target= %s" % target["NAME"])
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
 
-
+        # opens the dome & telescope, if sunset is True calls open at sunset, else open at night
         def opening(sunel,sunset=False):
             when = "night"
             if sunset:
@@ -311,6 +385,12 @@ class Master(threading.Thread):
             else:
                 setting = False
             APF.DMReset()
+
+            if setting:
+                rv = APF.evening_star()
+                if not rv:
+                    apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
+            
             chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
             result = False
             while float(sunel.read()) > SUNEL_STARTLIM and setting:
@@ -320,6 +400,18 @@ class Master(threading.Thread):
                 APF.DMReset()
             return
 
+
+        # closing
+        def closing():
+            if running:
+                APF.killRobot(now=True)
+
+            APF.close()
+            if apf.ucam['OUTFILE'].read() == 'ucsc':
+                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            return
+        
+        # starts an instance of scriptobs 
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
@@ -333,7 +425,7 @@ class Master(threading.Thread):
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
 
-            if self.fixedList is not None and self.smartObs == False:
+            if self.fixedList is not None and self.shouldStartList():
                 # We wish to observe a fixed target list, in it's original order
                 if not os.path.exists(self.fixedList):
                     apflog("Error: starlist %s does not exist" % (self.fixedList), level="error")
@@ -351,8 +443,9 @@ class Master(threading.Thread):
                     # The fixed list has been completely observed so nothing left to do
                 elif APF.ldone == tot and APF.user == "ucsc":
                     self.fixedList = None
-                    self.smartObs = False
-                    APFTask.set(self.task,suffix="STARLIST",value="")
+                    self.starttime = None
+                    if not APF.test:
+                        APFTask.set(self.task,suffix="STARLIST",value="")
                     ripd, running = APF.findRobot()
                     if running:
                         APF.killRobot(now=True)
@@ -417,13 +510,7 @@ class Master(threading.Thread):
                 apflog("No longer ok to open.", echo=True)
                 apflog("OPREASON: " + APF.checkapf["OPREASON"].read(), echo=True)
                 apflog("WEATHER: " + APF.checkapf['WEATHER'].read(), echo=True)
-                if running:
-                    APF.killRobot(now=True)
-
-                APF.close()
-                if apf.ucam['OUTFILE'].read() == 'ucsc':
-                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-
+                closing()
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
@@ -441,8 +528,7 @@ class Master(threading.Thread):
                     # The slowdown is too high, we should close up and wait.
                     APFTask.set(parent,suffix="MESSAGE",value="Closing for clouds",wait=False)
                     apflog("Slowdown factor of %.2f is too high. Waiting 30 min to check again." % slow, echo=True)
-                    APF.killRobot(now=True)
-                    APF.close()
+                    closing()
                     APFTask.waitfor(self.task, True, timeout=60*30)
                     self.VMAG=None
                     self.BV=None
@@ -451,40 +537,24 @@ class Master(threading.Thread):
             
             # If scriptobs is running and waiting for input, give it a target
             if running == True and float(sunel) < sunel_lim and APF.sop.read().strip() == 'Input':
-                if self.fixedList is None:
+                if self.fixedList is None or self.shouldStartList() == False:
+                    self.lastObsSuccess = self.checkObsSuccess()
+                    self.obsBstar = self.checkBstar(haveobserved)
+                    
                     APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget",wait=False)
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
                     apflog("Observing target")
                     APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
                     APFTask.waitfor(self.task, True, timeout=15)
+                    
                     haveobserved = True                    
-                    if self.obsBstar:
-                        self.obsBstar = False
-                    try:
-                        s=""
-                        if self.obsBstar:
-                            s="True"
-                        APFTask.set(parent,suffix="VAR_3",value=s,wait=False)
-                    except:
-                        apflog("Error: Cannot communicate with apftask",level="error")
+                elif self.starttime != None and self.shouldStartList() :
+                    APF.killRobot()
 
-
-                elif self.smartObs == True:
-                    apflog("Scriptobs phase is input ( smartlist ), calling getTarget.")
-                    APFTask.set(parent,suffix="MESSAGE",value="Calling getTarget for a smartlist",wait=False)
-                    getTarget()
-                    APFTask.waitfor(self.task, True, timeout=15)
-                    apflog("Observing target")
-                    APFTask.set(parent,suffix="MESSAGE",value="Observing Target",wait=False)
-                    haveobserved = True
-                                                           
             # check last telescope focus
-            lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
-            if time.time() - lastfoc > FOCUSTIME and running and float(sunel) <= sunel_lim and haveobserved and APF.sop.read().strip() == 'Input':
-                APFTask.set(parent,suffix="MESSAGE",value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.),wait=False)
-#                APF.focusTel()
-                haveobserved = False
+            if running and  float(sunel) <= sunel_lim :
+                self.set_autofocval()
                 
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation
@@ -503,14 +573,12 @@ class Master(threading.Thread):
                 APFTask.set(parent,suffix="MESSAGE",value="Closing, sun is rising",wait=False)
                 if APF.isOpen()[0]:
                     msg = "APF is open, closing due to sun elevation = %4.2f" % float(sunel)
-                    APF.close()
+                    closing()
                 else:
                     msg = "Telescope was already closed when sun got to %4.2f" % float(sunel)
                 
                 if APF.isOpen()[0]:
                     apflog("Error: Closeup did not succeed", level='error', echo=True)
-                if apf.ucam['OUTFILE'].read() == 'ucsc':
-                    APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
                 self.exitMessage = msg
                 self.stop()
@@ -529,26 +597,22 @@ class Master(threading.Thread):
                     apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds",level="error")
                     APFTask.waitFor(parent,True,timeout=600)
                 
-            # Open at sunset
-            sun_between_limits = float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim 
-            if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and float(sunel) > sunel_lim and APF.openOK and not rising:
-                APFTask.set(parent,suffix="MESSAGE",value="Open at sunset",wait=False)                    
-                success = opening( sunel, sunset=True)
+            # Open 
+
+            if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and APF.openOK :
+                if float(sunel) > sunel_lim and not rising :
+                    APFTask.set(parent,suffix="MESSAGE",value="Open at sunset",wait=False)                    
+                    success = opening( sunel, sunset=True)
+                elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
+                    APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
+                    success = opening( sunel)
+                else:
+                    success = True
                 if success == False:
                     apflog("Error: Cannot open the dome",echo=True,level='error')
                     APF.close()
                     os._exit()
                 
-            # Open at night
-            if not APF.isReadyForObserving()[0]  and float(sunel) < sunel_lim and APF.openOK:
-                if not rising or (rising and float(sunel) < (sunel_lim - 5)):
-                    APFTask.set(parent,suffix="MESSAGE",value="Open at night",wait=False)                    
-                    success = opening( sunel)
-                    if success == False:
-                        apflog("Error: Cannot open the dome",echo=True,level='error')
-                        APF.close()
-                        os._exit()
-
             # Check for servo errors
             if APF.isOpen()[0] and APF.slew_allowed == False:
                 APFTask.set(parent,suffix="MESSAGE",value="Servo failure.",wait=False)                    
@@ -850,7 +914,7 @@ if __name__ == '__main__':
         else:
             apflog("Starting dynamic scheduler", echo=True)
         master.fixedList = opt.fixed
-        master.smartObs = opt.smartObs
+        master.starttime = opt.start
         master.task = parent
         master.windsheild = opt.windshield
         master.start()
