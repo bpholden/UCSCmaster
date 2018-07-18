@@ -363,7 +363,7 @@ class APF:
         s += "Wind = %3.1f mph \n" % (self.wvel)
         s += "Slowdown = %5.2f x\n" % self.slowdown
         s += "countrate = %5.2g cts/s\n" % self.countrate
-        s += "ccountrate = %5.2g cts/s\n" % self.ccountrate
+        s += "kcountrate = %5.2g cts/s\n" % self.kcountrate
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
         #s += "Conditions are - %s\n" % self.conditions
