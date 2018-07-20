@@ -893,6 +893,11 @@ class APF:
         if result != 0:
             apflog("Prep-obs returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
             return
+        apflog("Slewing to lower el",echo=True)
+        result = subprocess.call(['slew -e 75'])
+        if result != 0:
+            apflog("Slew returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
+            return
         # Slew to the specified RA and DEC, set guide camera settings, and centerup( Slewlock )
         # Focus the telescope?
         self.DMReset()
