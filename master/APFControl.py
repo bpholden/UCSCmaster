@@ -879,13 +879,6 @@ class APF:
         if self.isOpen()[0] == False:
             apflog("APF is not open. Can't target a star while closed.",level='error',echo=True)
             return
-        # Move the shutters to fully open ( This might have already been done by open at sunset. In this case we rely on shutters to realize this and simply return)
-        self.DMReset()
-        apflog("Fully opening shutters.",echo=True)
-        result,ret_code = cmdexec("shutters -o")
-        if result == False:
-            apflog("Shutters returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
-            return
         self.DMReset()
         # Call prep-obs
         apflog("Calling prep-obs.",echo=True)
