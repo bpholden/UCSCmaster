@@ -882,21 +882,22 @@ class APF:
         # Move the shutters to fully open ( This might have already been done by open at sunset. In this case we rely on shutters to realize this and simply return)
         self.DMReset()
         apflog("Fully opening shutters.",echo=True)
-        result = subprocess.call(["shutters","-o"])
-        if result != 0:
-            apflog("Shutters returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
+        result,ret_code = cmdexec("shutters -o")
+        if result == False:
+            apflog("Shutters returned error code %d. Targeting object %s has failed." % (ret_code, name),level='error',echo=True)
             return
         self.DMReset()
         # Call prep-obs
         apflog("Calling prep-obs.",echo=True)
-        result = subprocess.call(['prep-obs'])
-        if result != 0:
-            apflog("Prep-obs returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
+        result, ret_code = cmdexec('prep-obs')
+        if result == False:
+            apflog("Prep-obs returned error code %d. Targeting object %s has failed." % (ret_code, name),level='error',echo=True)
             return
+        self.DMReset()
         apflog("Slewing to lower el",echo=True)
-        result = subprocess.call(['slew -e 75'])
-        if result != 0:
-            apflog("Slew returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
+        result, ret_code = cmdexec('slew -e 75')
+        if result == False:
+            apflog("Slew returned error code %d. Targeting object %s has failed." % (ret_code, name),level='error',echo=True)
             return
         # Slew to the specified RA and DEC, set guide camera settings, and centerup( Slewlock )
         # Focus the telescope?
