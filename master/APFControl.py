@@ -884,20 +884,20 @@ class APF:
         apflog("Fully opening shutters.",echo=True)
         result,ret_code = cmdexec("shutters -o")
         if result == False:
-            apflog("Shutters returned error code %d. Targeting object %s has failed." % (ret_code, name),level='error',echo=True)
+            apflog("Shutters returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
             return
         self.DMReset()
         # Call prep-obs
         apflog("Calling prep-obs.",echo=True)
         result, ret_code = cmdexec('prep-obs')
         if result == False:
-            apflog("Prep-obs returned error code %d. Targeting object %s has failed." % (ret_code, name),level='error',echo=True)
+            apflog("Prep-obs returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
             return
         self.DMReset()
         apflog("Slewing to lower el",echo=True)
         result, ret_code = cmdexec('slew -e 75')
         if result == False:
-            apflog("Slew returned error code %d. Targeting object %s has failed." % (ret_code, name),level='error',echo=True)
+            apflog("Slew returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
             return
         # Slew to the specified RA and DEC, set guide camera settings, and centerup( Slewlock )
         # Focus the telescope?
