@@ -242,9 +242,30 @@ def checkflag(key,didx,line,regexp,default):
     except:
         return default
     
-def make_local_copy(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
-    worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
-    full_codex = worksheet.get_all_values()
+def make_local_copy(sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
+    full_codex = []
+    # These are the columns we need for scheduling
+    req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
+                "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
+                "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
+                "B-V", "APF Desired Precision", "Close Companion", \
+                "APF decker","I2", "owner", "uth","utm","duration", "Template",
+                "Nobs", "Total Obs"
+                ]
+    full_codex.append(req_cols)
+        
+    for sheetn in sheetns:
+        worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
+        cur_codex = worksheet.get_all_values()
+        didx = findColumns(cur_codex[0],req_cols)
+
+        for row in cur_codex[1:]:
+            nrow = []
+            for c in req_cols:
+                nrow.append(row[didx[c]])
+            full_codex.append(nrow)
+        
+
     f = open(outfn,'wb')
     pickle.dump(full_codex, f)
     f.close()
