@@ -137,6 +137,11 @@ def args():
         else:
             print ("Start time %s does not match required format hours:minutes where both the hours and the minutes are integers")
             sys.exit()
+
+    if opt.sheet != None:
+        opt.sheet = opt.sheet.split(",")
+
+        
     return opt
 
 
@@ -172,7 +177,7 @@ def getTotalLines(filename):
                
 
 class Master(threading.Thread):
-    def __init__(self, apf, user='ucsc',sheetn="The Googledex",owner='Vogt'):
+    def __init__(self, apf, user='ucsc',sheetn=["2018B"],owner='Vogt'):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf
@@ -331,7 +336,7 @@ class Master(threading.Thread):
                 seeing = float(APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
+            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetns=self.sheetn, owner=self.owner)
 
             self.set_autofocval()
             if target is None:
