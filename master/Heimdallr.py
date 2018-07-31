@@ -696,7 +696,7 @@ if __name__ == '__main__':
 
 
     if not opt.sheet:
-        opt.sheet = "2017B"
+        opt.sheet = "2018B"
     apftask = ktl.Service("apftask")        
     # Establish this as the only running master script ( Or example task in test mode )
     try:
@@ -971,7 +971,7 @@ if __name__ == '__main__':
         if opt.name == "ucsc":
             try:
                 apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-                ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
+                ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn)
             except:
                 apflog("Error: Updating the online googledex has failed.", level="error")
         logpush(os.path.join(os.getcwd(),"observed_targets"))
