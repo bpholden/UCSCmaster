@@ -494,7 +494,7 @@ def readin_lastobs(filename,ctime):
             
     return fnames, lastjds
 
-def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
+def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
         update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json')
@@ -508,39 +508,42 @@ def update_googledex_lastobs(filename, sheetn="The Googledex",ctime=None,certifi
         ctime = datetime.utcfromtimestamp(int(time.time()))
     
 
-    ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
-    vals = ws.get_all_values()
+    for sheetn in sheetns:
+        ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
+        vals = ws.get_all_values()
 
-    col = vals[0].index("lastobs") 
-    nobscol = vals[0].index("Nobs")
+        col = vals[0].index("lastobs") 
+        nobscol = vals[0].index("Nobs")
     
-    for i, v in enumerate(vals):
-        # Did we observe this target tonight?
-        if v[0] in names:
-            # We observed this target, so update the cell in the worksheet
-            # update_cell(row, col, val) - col and row are 1 indexed
-            otime = times[names.index(v[0])]
-            if isinstance(otime,float):
-                t = datetime.utcfromtimestamp(otime)
-            else:
-                hr, mn = otime
-                t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
-            jd = float(ephem.julian_date(t))
-            try:
-                pastdate = float(v[col])
+        for i, v in enumerate(vals):
+            # Did we observe this target tonight?
+            if v[0] in names:
+                # We observed this target, so update the cell in the worksheet
+                # update_cell(row, col, val) - col and row are 1 indexed
+                otime = times[names.index(v[0])]
+                if isinstance(otime,float):
+                    t = datetime.utcfromtimestamp(otime)
+                else:
+                    hr, mn = otime
+                    t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
+                jd = float(ephem.julian_date(t))
                 try:
-                    n = int(v[nobscol])
-                except:
-                    n = 0
-                if jd > pastdate:
-                    ws.update_cell(i+1, col+1, round(jd, 2) )
-                    ws.update_cell(i+1, nobscol+1, n + 1 )
+                    pastdate = float(v[col])
+                    try:
+                        n = int(v[nobscol])
+                    except:
+                        n = 0
+                    if jd > pastdate:
+                        ws.update_cell(i+1, col+1, round(jd, 2) )
+                        ws.update_cell(i+1, nobscol+1, n + 1 )
 
-            except:
-                print (v[0], v[col])
-                ws.update_cell(i+1, col+1, round(jd,2) )
+                except:
+                    print (v[0], v[col])
+                    ws.update_cell(i+1, col+1, round(jd,2) )
                 
-    apflog( "Updated Googledex",echo=True)
+            apflog( "Updated %s" % (sheetn),echo=True)
+
+    return
 
 def update_local_googledex(intime,googledex_file="googledex.dat", observed_file="observed_targets"):
     """
