@@ -271,8 +271,8 @@ def make_local_copy(sheetns=["The Googledex"],certificate='UCSC Dynamic Schedule
     f.close()
     return full_codex
     
-def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' }):
-    """ parseGoogledex parses the google sheet and returns the output as a tuple
+def parseGoogledex(sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' }):
+    """ parseGoogledex parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
     names, star_table, do_flag, stars = parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat")
@@ -1276,7 +1276,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
 
 if __name__ == '__main__':
 
-    sheetn="The Googledex"
+#    sheetn=["2018B"]
+    sheetn="A015_SVogt_2018B,A009_SKane_2018B,A003_DeRosa_2018B,A007_PRobertson_2018B"
     
     # For some test input what would the best target be?
     otfn = "observed_targets"
