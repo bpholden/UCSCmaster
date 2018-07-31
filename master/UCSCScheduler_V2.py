@@ -293,9 +293,9 @@ def parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b
             full_codex = pickle.load(f)
             f.close()
         except:
-            full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
+            full_codex = make_local_copy(sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
     else:
-        full_codex = make_local_copy(sheetn=sheetn,certificate=certificate,outfn=os.path.join(outdir,outfn))
+        full_codex = make_local_copy(sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
 
     col_names = full_codex[0]
     codex = full_codex[1:]
@@ -978,7 +978,7 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     return times, exps
 
 
-def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetn="The Googledex",owner='S.Vogt',outfn="googledex.dat",outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetns=["The Googledex"],owner='S.Vogt',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -1073,7 +1073,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     if verbose:
         apflog("getNext(): Parsing the Googledex...",echo=True)
     config={'I2': 'Y', 'decker': 'W', 'owner' : owner}
-    sn, star_table, flags, stars = parseGoogledex(sheetn=sheetn,outfn=outfn,outdir=outdir,config=config)
+    sn, star_table, flags, stars = parseGoogledex(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
     sn = np.array(sn)
     targNum = len(sn)
     if verbose:
@@ -1282,13 +1282,13 @@ if __name__ == '__main__':
     otfn = "observed_targets"
     ot = open(otfn,"w")
     starttime = time.time()
-    result = getNext(starttime, 13.99, 1.8, bstar=True, verbose=True,sheetn=sheetn)
+    result = getNext(starttime, 13.99, 1.8, bstar=True, verbose=True,sheetns=sheetn.split(","))
     ot.write("%s\n" % (result["SCRIPTOBS"]))
     ot.close()
     starttime += 400
     for i in range(5):
         
-        result = getNext(starttime, 13.99, 1.8, bstar=False, verbose=True,sheetn=sheetn)
+        result = getNext(starttime, 13.99, 1.8, bstar=False, verbose=True,sheetns=sheetn)
         #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:
