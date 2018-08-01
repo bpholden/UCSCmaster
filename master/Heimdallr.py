@@ -235,8 +235,8 @@ class Master(threading.Thread):
             the current value of obsBstar
             The variable VAR_3 still overrides
         """
-        vals = APFTask.get("master",("VAR_3"))
-        if prev['VAR_3'] == 'True':
+        vals = APFTask.get("master",["VAR_3"])
+        if vals['VAR_3'] == 'True':
             self.obsBstar = True
         else:
             self.obsBstar = False
@@ -391,7 +391,7 @@ class Master(threading.Thread):
                 setting = False
             APF.DMReset()
 
-            if setting:
+            if setting and sunset:
                 rv = APF.evening_star()
                 if not rv:
                     apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
