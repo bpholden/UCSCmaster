@@ -386,7 +386,7 @@ class Master(threading.Thread):
                 setting = False
             APF.DMReset()
 
-            if setting:
+            if setting and sunset:
                 rv = APF.evening_star()
                 if not rv:
                     apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
