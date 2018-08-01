@@ -231,7 +231,7 @@ class Master(threading.Thread):
             The variable VAR_3 still overrides
         """
         vals = APFTask.get("master",["VAR_3"])
-        if prev['VAR_3'] == 'True':
+        if vals['VAR_3'] == 'True':
             self.obsBstar = True
         else:
             self.obsBstar = False
