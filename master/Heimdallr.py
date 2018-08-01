@@ -230,7 +230,7 @@ class Master(threading.Thread):
             the current value of obsBstar
             The variable VAR_3 still overrides
         """
-        vals = APFTask.get("master",("VAR_3"))
+        vals = APFTask.get("master",["VAR_3"])
         if prev['VAR_3'] == 'True':
             self.obsBstar = True
         else:
