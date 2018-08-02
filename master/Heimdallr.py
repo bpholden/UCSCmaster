@@ -122,7 +122,7 @@ def args():
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
     parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
-    parser.add_argument('--sheet',default=None,help="Optional name for a Google spreadsheet")
+    parser.add_argument('--sheet',default="2018B",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='Vogt',help="Optional name for file owners")    
     
     opt = parser.parse_args()
@@ -695,8 +695,6 @@ if __name__ == '__main__':
         parent = 'master'
 
 
-    if not opt.sheet:
-        opt.sheet = "2018B"
     apftask = ktl.Service("apftask")        
     # Establish this as the only running master script ( Or example task in test mode )
     try:
