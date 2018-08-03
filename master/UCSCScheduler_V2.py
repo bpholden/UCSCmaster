@@ -82,7 +82,7 @@ def computeMaxTimes(exp_times,maxtimes):
     return fintimes
 
 
-def compute_priorities(star_table,available,cur_dt,flags):
+def compute_priorities(star_table,available,cur_dt,flags,quotas,used):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     if any(star_table[available, DS_DUR] > 0):
         new_pri = np.zeros_like(star_table[:, DS_APFPRI])
@@ -97,6 +97,11 @@ def compute_priorities(star_table,available,cur_dt,flags):
         new_pri[available] += delta_pri
     else:
         new_pri = star_table[:, DS_APFPRI]
+
+    for k in quota.keys():
+        if used[k] > quota[k]:
+            new_pri[flags['owner'] == k] -= 2
+        
     return new_pri
 
 def float_keyval(instr):
@@ -447,6 +452,10 @@ def parseGoogledex(sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler
         star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
         stars.append(star)
 
+
+    for k in flags.key():
+        flags[k] = np.asarray(flags[k])
+        
     return (names, np.array(star_table), flags, stars)
 
 
@@ -465,7 +474,7 @@ def readin_lastobs(filename,ctime):
         
     except :
         codex = False
-        names, times = getObserved(filename)
+        names, times, owners = getObserved(filename)
         if len(names) == 0:
             return
         if ctime is None:
@@ -501,7 +510,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
 
         filename - where the observations are logged
     """
-    names, times = getObserved(filename)
+    names, times, owners = getObserved(filename)
     if len(names) == 0:
         return
     if ctime is None:
@@ -553,18 +562,21 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
         opens googledex_file and inputs date of last observation from observed_file
         in principle can use timestamps as well as scriptobs uth and utm values
     """
-    names, times = getObserved(observed_file)
-
+    names, times, owners = getObserved(observed_file)
+    used = dict()
+    for owner in owners:
+        used[owner] = 0.0
+        
     try:
         g = open(googledex_file, 'rb')
         full_codex = pickle.load(g)
         g.close()
     except IOError:
         apflog("googledex file did not exist, so can't be updated",echo=True)
-        return names,times
+        return names,times, used
     except EOFError:
         apflog("googledex file corrupt, so can't be updated",echo=True)
-        return names,times
+        return names,times, used
 
 
     codex_cols = full_codex[0]
@@ -604,7 +616,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
         pickle.dump(full_codex, f)
     f.close()
     
-    return names, times
+    return names, times, used
 
 
 def getLST(date, longitude):
@@ -759,13 +771,15 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
 
 def getObserved(filename):
     """ getObserved parses a file to find the object names and times
-    names, times = getObserved(filename)
+    names, times, owners = getObserved(filename)
     names - list of names, must be first column of file called filename
     times - times either as a timestamp in second column or a (hour,minute) tuple from a scriptobs line
+    owners - list of file name owners if available from scriptobs line
 
     """
     obs = []
     times = []
+    owners = []
     nobs = dict()
     try:
         f = open(filename, 'r')
@@ -785,10 +799,15 @@ def getObserved(filename):
                         times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
                     else:
                         times.append(float(ls[1]))
+                    if len(ls) > 21:
+                        owners.append(ls[21].split('=')[1])
+                    else:
+                        owners.append("")
             
     obs.reverse()
     times.reverse()
-    return obs, times
+    owners.reverse()
+    return obs, times, owners
 	
 def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W"):
     """ calculate_ucsc_exposure_time uses the recipe from Burt et al. (2015) to compute the exposure time for a target.
@@ -863,7 +882,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
         
     if not outdir:
         outdir = os.getcwd()
-    observed, _ = getObserved(os.path.join(outdir,"observed_targets"))
+    observed, times, owners = getObserved(os.path.join(outdir,"observed_targets"))
 
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
@@ -981,7 +1000,7 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     return times, exps
 
 
-def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetns=["The Googledex"],owner='S.Vogt',outfn="googledex.dat",outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetns=["The Googledex"],owner='S.Vogt',outfn="googledex.dat",outdir=None,quotas=dict()):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -1023,7 +1042,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         else:
             ptime = datetime.utcfromtimestamp(int(time.time()))
             
-    observed, obstimes = update_local_googledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
+    observed, obstimes, used = update_local_googledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
 
     # List of targets already observed
 #    observed, _ = getObserved(os.path.join(os.getcwd(),'observed_targets'))
@@ -1200,7 +1219,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         return None
 
 
-    final_priorities = compute_priorities(star_table,available,dt,flags)
+    final_priorities = compute_priorities(star_table,available,dt,flags,quotas,used)
     
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
     good_cadence = np.where(cadence_check >  1.0, True, False)
