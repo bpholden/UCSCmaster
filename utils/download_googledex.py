@@ -1,27 +1,13 @@
-from __future__ import print_function
+#!/usr/bin/env  /opt/kroot/bin/kpython
+
 import sys
-import json
-import gspread
-import pickle
-from oauth2client.client import SignedJwtAssertionCredentials
+sys.path.append("../master")
+import UCSCScheduler_V2 as ds
 
-json_key = json.load(open('../master/UCSC Dynamic Scheduler-5b98d1283a95.json'))
-scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://spreadsheets.google.com/feeds']
+if __name__ == "__main__":
+    if len(sys.argv) <= 1:
+        print "needs a sheet list"
+        sys.exit()
+    sheetns = sys.argv[1]
+    ds.parseGoogledex(sheetns=sheetns)
 
-credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)
-gc = gspread.authorize(credentials)
-
-sheetn ="The Googledex"
-
-if len(sys.argv) > 1:
-    sheetn = sys.argv[1]
-
-spreadsheet = gc.open(sheetn)
-print ("got spreadsheet")
-worksheet = spreadsheet.sheet1
-full_codex = worksheet.get_all_values()
-print ("got all values from worksheet")
-f = open("./googledex.dat",'wb')
-pickle.dump(full_codex, f)
-print ("dumped a pickled file")
-f.close()
