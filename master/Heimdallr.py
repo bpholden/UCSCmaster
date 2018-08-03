@@ -891,7 +891,7 @@ if __name__ == '__main__':
         apflog("Starting the main watcher." ,echo=True)
         try:
             if opt.name == "ucsc":
-                names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
+                names,star_table,do_flags,stars = ds.parseGoogledex(sheetns=opt.sheet)
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
 
