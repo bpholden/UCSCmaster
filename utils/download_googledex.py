@@ -10,6 +10,7 @@ if __name__ == "__main__":
         print "needs a sheet list"
         sys.exit()
     sheetns = sys.argv[1].split(",")
-    os.unlink("googledex.dat")
+    if os.path.exists("googledex.dat")
+        os.unlink("googledex.dat")
     ds.parseGoogledex(sheetns=sheetns)
 
