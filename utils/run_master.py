@@ -39,7 +39,7 @@ def read_config(configfile,runstr):
 
 def finducscObsNum():
 
-    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
+    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC'))
         
     last += 100 - (last % 100)
 
