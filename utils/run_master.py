@@ -34,6 +34,9 @@ def read_config(configfile,runstr):
 
     if program == "ucsc":
         program_config['obsnum'] = finducscObsNum()
+    if program == "ucb":
+        program_config['name'] = getnightcode()
+        program_config['obsnum'] = 100
 
     return program_config
 
