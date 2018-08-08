@@ -182,7 +182,7 @@ def findObsNum(apf):
     return obsNum
 
 def set_obs_defaults(opt):
-    if opt.name is None:
+    if opt.name is None or opt.name == "ucsc":
         opt.owner = 'Vogt'
         opt.name = 'ucsc'
         if opt.obsnum == None:
@@ -197,7 +197,7 @@ def set_obs_defaults(opt):
         obsNum=100
     else:
         if opt.owner == None:
-        opt.owner = opt.name
+            opt.owner = opt.name
 
     return opt
 
