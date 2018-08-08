@@ -845,7 +845,6 @@ if __name__ == '__main__':
         result = apf.focus()
         if not result:
             focusdict = APFTask.get("focusinstr",["phase","nominal"])
-#            apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
             if not instr_perm:
                 while not instr_perm:
