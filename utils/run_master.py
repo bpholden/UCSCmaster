@@ -38,18 +38,13 @@ def read_config(configfile,runstr):
     return program_config
 
 def finducscObsNum():
-#    myPath = r"./"
-#    with open('/u/rjhanson/master/lastObs.txt','r') as f:
-#        l = f.readline()
-#        last = int(l.strip())
+
     last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
         
     last += 100 - (last % 100)
 
     if last % 10000 > 9700:
         last += 10000 - (last % 10000)
-
-    
 
     return last
 
