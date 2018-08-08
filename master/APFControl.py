@@ -453,7 +453,7 @@ class APF:
         else:
             return self.isReadyForObservingDirect()
 
-    def setObserverInfo(self, num=10000, name='Robot', owner=None):
+    def setObserverInfo(self, num=10000, name='Robot', owner='public'):
         if self.test: return
         apflog("Setting science camera parameters.")
         self.ucam('OBSERVER').write(name)
