@@ -181,6 +181,26 @@ def findObsNum(apf):
 
     return obsNum
 
+def set_obs_defaults(opt):
+    if opt.name is None:
+        opt.owner = 'Vogt'
+        opt.name = 'ucsc'
+        if opt.obsnum == None:
+            apflog("Figuring out what the observation number should be.",echo=False)
+            obsNum = findObsNum(apf)
+        else:
+            obsNum = int(opt.obsnum)
+    elif opt.name == "ucb":
+        apflog("Figuring out what the observation name should be.",echo=False)
+        opt.owner = 'Howard'
+        opt.name = "ucb-" + getnightcode()
+        obsNum=100
+    else:
+        if opt.owner == None:
+        opt.owner = opt.name
+
+    return opt
+
 def getTotalLines(filename):
     tot = 0
     with open(filename, 'r') as f:
@@ -801,13 +821,7 @@ if __name__ == '__main__':
     if "ObsInfo" == str(phase).strip():
         apflog("Setting the task step to 0")
         APFTask.step(parent,0)
-        if opt.obsnum == None:
-            apflog("Figuring out what the observation number should be.",echo=False)
-            obsNum = findObsNum(apf)
-        else:
-            obsNum = int(opt.obsnum)
 
-        apflog("Using %s for obs number." % repr(obsNum),echo=True)
         apflog("Setting Observer Information", echo=True)
         if opt.name is None:
             opt.owner = 'Vogt'
