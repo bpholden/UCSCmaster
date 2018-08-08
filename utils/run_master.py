@@ -48,6 +48,29 @@ def finducscObsNum():
 
     return last
 
+def getnightcode(lastcode=None):
+    apftask = ktl.Service('apftask')
+    if lastcode == None:
+        lastcode = ktl.read('apftask','MASTER_LAST_OBS_UCB')
+        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
+            print "Existing files detected for run %s. Not incrementing night code." % lastcode
+            return lastcode
+
+    zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
+
+    if 2 not in zloc:
+        ncode = lastcode[0:2] + chr(ord(lastcode[2])+1)   # increment last
+    if 2 in zloc and 1 not in zloc:
+        ncode = lastcode[0] + chr(ord(lastcode[1])+1) + 'a'   # increment middle
+    if 1 in zloc and 2 in zloc:
+        ncode = chr(ord(lastcode[0])+1) + 'aa'   # increment first
+
+    ktl.write('apftask','MASTER_LAST_OBS_UCB',ncode,wait=False)
+
+    return ncode
+
+
+
 def ok_config(config):
 
     return True
