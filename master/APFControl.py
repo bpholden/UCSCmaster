@@ -469,7 +469,7 @@ class APF:
         apflog("Observation number = %s" % self.ucam('OBSNUM').read(), echo=True)
         apflog("File prefix = %s" % self.ucam('OUTFILE').read(), echo=True)
 
-        
+        return
 
     def calibrate(self, script, time):
         s_calibrate = os.path.join(ScriptDir,"calibrate")
