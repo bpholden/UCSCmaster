@@ -823,14 +823,9 @@ if __name__ == '__main__':
         APFTask.step(parent,0)
 
         apflog("Setting Observer Information", echo=True)
-        if opt.name is None:
-            opt.owner = 'Vogt'
-            opt.name = 'ucsc'
-            apf.setObserverInfo(num=obsNum, name='ucsc',owner=opt.owner)
-        else:
-            if opt.owner == None:
-                opt.owner = opt.name
-            apf.setObserverInfo(num=obsNum, name=opt.name, owner=opt.owner)
+        opt = set_obs_defaults(opt)
+        apflog("Using %s for name and %s for obs number." % (opt.name,repr(obsNum)),echo=True)
+        apf.setObserverInfo(num=obsNum, name=opt.name, owner=opt.owner)
                 
         apflog("Setting ObsInfo finished. Setting phase to Focus.")
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
