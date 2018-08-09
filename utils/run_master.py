@@ -1,15 +1,17 @@
 #!/opt/kroot/bin/kpython
 
-import ktl
-import APF
-import subprocess
-import shlex
-from time import sleep
-import ConfigParser
-import os.path
 import os
 import sys
 import re
+import shlex
+from time import sleep
+
+import ConfigParser
+import numpy as np
+
+import ktl
+import APF
+import subprocess
 
 def primary_run(schedule):
     match = re.search("\A\s*(\d+)\s*",schedule)
