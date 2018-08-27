@@ -945,7 +945,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
     res['SCRIPTOBS'] = lines[idx]
     return res
 
-def format_expmeter(exp_counts, nexp):
+def format_expmeter(exp_counts, nexp, exptime):
 
     exps = np.zeros_like(exp_counts)
     exp_counts *= 1.1 
@@ -954,7 +954,16 @@ def format_expmeter(exp_counts, nexp):
     nexp[toofew_idx] = np.ceil((exp_counts[toofew_idx]/MAX_EXPMETER) + 1)
     exp_counts[long_idx] = MAX_EXPMETER
     exps[exps < nexp] = nexp[exps < nexp]
-    return exp_counts/exps, exps
+
+    exp_counts /= exps
+    # this is basically so that really bright stars do not get really short exposures
+    # certain targets we want to hit the exposure meter threshold per exposure not for the total
+    # this violates the spirit of the scheduler but leads to consistent exposures for bright standard
+    # stars like 185144 or tau Ceti
+    
+    really_short = exptime < MIN_TOTOBS
+    exp_counts[really_short] *= exps[really_short]
+    return exp_counts, exps
 
 def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     total = np.array(total)
@@ -976,6 +985,9 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     times[short_idx] = mintime[short_idx]  # pad out to make it more likely exposure meter threshold sets actual limit
     exps[short_idx] = np.ceil(mintime[short_idx]/(total[short_idx]+READOUT)) + 1
 
+    # I am not sure why these are falling through
+    times[times <= 0] = mintime[times <= 0]
+    
     exps[exps < nexp] = nexp[exps < nexp]
 
     return times, exps
@@ -1173,7 +1185,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
 
         if verbose:
             apflog("getNext(): Formating exposure meter",echo=True)
-        star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,exps)
+        star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,exps, totexptimes[f])
 
         # Is the exposure time too long?
         if verbose:
