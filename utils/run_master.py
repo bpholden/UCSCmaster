@@ -1,17 +1,15 @@
 #!/opt/kroot/bin/kpython
 
-import os
-import sys
-import re
-import shlex
-from time import sleep
-
-import ConfigParser
-import numpy as np
-
 import ktl
 import APF
 import subprocess
+import shlex
+from time import sleep
+import ConfigParser
+import os.path
+import os
+import sys
+import re
 
 def primary_run(schedule):
     match = re.search("\A\s*(\d+)\s*",schedule)
@@ -25,56 +23,31 @@ def remap_config(configlist):
     return config
 
 def read_config(configfile,runstr):
-    run = primary_run(runstr)
+    srun = primary_run(runstr)
     config = ConfigParser.ConfigParser()
     if not os.path.exists(configfile):
         sys.exit("configuration file %s does not exist"  % configfile)
     config.read(configfile)
     programs = remap_config(config.items('programs'))
-    program = programs[run]
+    program = programs[srun]
     program_config = remap_config(config.items(program))
 
-    if program == "ucsc":
+    if program_config['obsnum'] == "ucsc":
         program_config['obsnum'] = finducscObsNum()
-    if program == "ucb":
-        program_config['name'] = getnightcode()
-        program_config['obsnum'] = 100
 
     return program_config
 
 def finducscObsNum():
-
-    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC'))
+    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
         
     last += 100 - (last % 100)
 
     if last % 10000 > 9700:
         last += 10000 - (last % 10000)
 
+    
+
     return last
-
-def getnightcode(lastcode=None):
-    apftask = ktl.Service('apftask')
-    if lastcode == None:
-        lastcode = ktl.read('apftask','MASTER_LAST_OBS_UCB')
-        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
-            print "Existing files detected for run %s. Not incrementing night code." % lastcode
-            return lastcode
-
-    zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
-
-    if 2 not in zloc:
-        ncode = lastcode[0:2] + chr(ord(lastcode[2])+1)   # increment last
-    if 2 in zloc and 1 not in zloc:
-        ncode = lastcode[0] + chr(ord(lastcode[1])+1) + 'a'   # increment middle
-    if 1 in zloc and 2 in zloc:
-        ncode = chr(ord(lastcode[0])+1) + 'aa'   # increment first
-
-    ktl.write('apftask','MASTER_LAST_OBS_UCB',ncode,wait=False)
-
-    return ncode
-
-
 
 def ok_config(config):
 
@@ -121,6 +94,13 @@ def config_kwds(config):
         raise
         sys.exit('Cannot communicate with apfschedule service')
 
+    try:
+        ownr = ktl.read('apfschedule','OWNRNAME')
+        ktl.write('apfschedule','OWNRHINT',ownr)
+    except:
+        raise
+        sys.exit('Cannot communicate with apfschedule service')
+
     if config['name'] == 'ucsc':
         try: 
             ktl.write('apfucam','outfile',config['name'])
@@ -151,6 +131,14 @@ if __name__ == "__main__":
     except:
         sys.exit("cannot read apfschedule.SCHEDULED_RUNS")
         
+    try:
+        userkind = ktl.read('checkapf','USERKIND',binary=True)
+    except:
+        sys.exit("cannot read checkapf.USERKIND")
+
+    if userkind != 3:
+        sys.exit("checkapf not in robotic mode")
+
     cpath = os.path.dirname(os.path.abspath(__file__))
     configfile = "master.config"
     masterstatus=ktl.read('apftask','MASTER_PID',binary=True)
@@ -171,5 +159,5 @@ if __name__ == "__main__":
                 print out
         else:
             print "Master cannot be run by this account"
-    else:
-        print "Master script is already running"
+
+        
