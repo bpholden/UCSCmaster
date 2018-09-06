@@ -1,5 +1,5 @@
 #!/opt/kroot/bin/kpython
-
+from __future__ import print_function
 import ktl
 import APF
 import subprocess
@@ -154,16 +154,16 @@ if __name__ == "__main__":
 
         stuff_to_run = build_exec_str(config)
         env = modify_env(config)
-        print " ".join(stuff_to_run)
+        print(" ".join(stuff_to_run))
         if os.getuid() == int(config['user']):
             p=subprocess.Popen(stuff_to_run,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
             sleep(10)
             if p.poll():
-                print "Master failed for some reason or another."
+                print("Master failed for some reason or another.")
                 (out,err) = p.communicate()
-                print err
-                print out
+                print(err)
+                print(out)
         else:
-            print "Master cannot be run by this account"
+            print("Master cannot be run by this account")
 
         
