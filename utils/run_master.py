@@ -139,12 +139,18 @@ if __name__ == "__main__":
     if userkind != 3:
         sys.exit("checkapf not in robotic mode")
 
+    try:
+        master_status = ktl.read('apftask','master_status',binary=True)
+        if master_status < 3:
+            sys.exit("master has been started")
+    except:
+        sys.exit("cannot read apftask.MASTER_STATUS")
+
     cpath = os.path.dirname(os.path.abspath(__file__))
     configfile = "master.config"
-    masterstatus=ktl.read('apftask','MASTER_PID',binary=True)
     config = read_config(os.path.join(cpath,configfile),schedule)
 
-    if masterstatus < 0 and ok_config(config) and config_kwds(config):
+    if ok_config(config) and config_kwds(config):
 
         stuff_to_run = build_exec_str(config)
         env = modify_env(config)
