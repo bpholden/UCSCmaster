@@ -104,7 +104,6 @@ def focusloop():
     focmul = np.array(range(numsteps)) - np.median(range(numsteps))
     focsteps = stepsize*focmul + normfoc
     apflog("Focus trials = %s" % repr(focsteps))
-    
     imfiles = []
     for foc in focsteps:
         apflog("Setting dewar focus to %d" % foc)
@@ -113,12 +112,14 @@ def focusloop():
         while abs(dewfoc.binary - foc) > 10:
             time.sleep(2)
         apflog("Actual dewar focus value %d" % dewfoc.binary)
+        APFTask.set('focusinstr','MESSAGE',"Actual dewar focus value %d" % dewfoc.binary)
         fname = os.path.join(ucam('OUTDIR').read(), ucam('OUTFILE').read() + ucam('OBSNUM').read() + '.fits')
         imfiles.append(fname)
         exposure('Focus', tharexp, readwait=False)
 
     apflog("Returning focus to starting position...")
     dewfoc.write(startfoc, wait=False)
+    APFTask.set('focusinstr','MESSAGE','Returning focus to starting position...')
 
     return imfiles
 
@@ -176,8 +177,11 @@ if __name__ == '__main__':
     APFTask.establish('focusinstr',os.getpid())
     try:
         waitwrite(ucam['AUTOSHUT'], True)
+        APFTask.set('focusinstr','PHASE','Configuring instrument for pinhole ThAr Focus')
         stagesetup(focuspos)
+        APFTask.set('focusinstr','PHASE','Focus loop')
         focimages = focusloop()
+        APFTask.set('focusinstr','PHASE','Finding Best Focus Value')
         bestfoc = findfoc(focimages)
         if abs(bestfoc - normfoc) < 2500:
             apflog("Setting dewar focus to %d" % bestfoc)    # Disabled updating to best focus, use UCSC value instead
@@ -188,6 +192,7 @@ if __name__ == '__main__':
             apflog("ERROR: Best focus value (%d) is very far from nominal!" % bestfoc, level="error")
             APFTask.set('focusinstr','STATUS','Exited/Failure')
         
+        APFTask.set('focusinstr','PHASE','Configuring instrument for Data')
         stagesetup(obspos)
 
         APFTask.set('focusinstr','STATUS','Exited/Success')
