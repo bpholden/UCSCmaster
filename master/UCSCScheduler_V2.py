@@ -704,7 +704,7 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
     decker - one character field for the decker, defaults to "W"
     I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
     """
-    focval = 1
+    focval = 0
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
     ret = name + ' '
