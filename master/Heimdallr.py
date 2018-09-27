@@ -838,10 +838,13 @@ if __name__ == '__main__':
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-        while not instr_perm:
+        userkind = ktl.read("checkapf","USERKIND",binary=True)
+        while not instr_perm and userkind != 3:
             apflog("Waiting for instrument permission to be true")
             APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
+            APFTask.waitfor(parent,True,expression="$checkapf.USERKIND = robotic",timeout=600)
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+            userkind = ktl.read("checkapf","USERKIND",binary=True)
         result = apf.focus()
         if not result:
             focusdict = APFTask.get("focusinstr",["phase","nominal"])
