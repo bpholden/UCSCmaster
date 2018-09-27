@@ -706,6 +706,18 @@ class Master(threading.Thread):
         threading.Thread._Thread__stop(self)
 
 
+def instr_permit():
+    instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+    userkind = ktl.read("checkapf","USERKIND",binary=True)
+    while not instr_perm and userkind != 3:
+        apflog("Waiting for instrument permission to be true")
+        APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
+        APFTask.waitfor(parent,True,expression="$checkapf.USERKIND = robotic",timeout=600)
+        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+        userkind = ktl.read("checkapf","USERKIND",binary=True)
+
+    return True
+
 if __name__ == '__main__':
 
     apflog("Starting Heimdallr...")
@@ -837,14 +849,8 @@ if __name__ == '__main__':
     # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
-        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-        userkind = ktl.read("checkapf","USERKIND",binary=True)
-        while not instr_perm and userkind != 3:
-            apflog("Waiting for instrument permission to be true")
-            APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
-            APFTask.waitfor(parent,True,expression="$checkapf.USERKIND = robotic",timeout=600)
-            instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-            userkind = ktl.read("checkapf","USERKIND",binary=True)
+        instr_permit()
+        
         result = apf.focus()
         if not result:
             focusdict = APFTask.get("focusinstr",["phase","nominal"])
@@ -892,12 +898,8 @@ if __name__ == '__main__':
             
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
-        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-        while not instr_perm:
-            apflog("Waiting for instrument permission to be true")
-            APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
-            instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-
+        instr_permit()
+        
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
         if apf.ucam['OUTFILE'].read() == 'ucsc':
             APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
