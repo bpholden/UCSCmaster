@@ -342,10 +342,12 @@ class Master(threading.Thread):
                 try:
                     if APF.countrate <= 0:
                         try:
-                            APF.countrate = APF.counts / APF.elapsed
+                            APF.countrate = APF.ccountrate
                         except:
-                            APF.countrate = 0.0
+                            APF.countrate = -1.0
                     slowdown = exp_cnts_sec / APF.countrate
+                    if APF.countrate*10 <  APF.ccountrate:
+                        APF.countrate = APF.ccountrate
                     if slowdown < 0:
                         slowdown = 1
                         apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
@@ -365,7 +367,7 @@ class Master(threading.Thread):
                     slowdown = 1
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
             APFLib.write(apf.robot["MASTER_VAR_1"], slowdown)
-            apflog("getTarget(): countrate = %.2f" % APF.countrate)
+            apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (APF.countrate,APF.ccountrate))
 
             # Check for a valid seeing measurment. If there isn't one, use a default
             if APF.avg_fwhm == 0.:
