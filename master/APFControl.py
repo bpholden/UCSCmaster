@@ -216,7 +216,8 @@ class APF:
     cwd        = os.getcwd()
     slowdown   = 0.0 
     ncountrate = 0
-    countrate = 0.0        
+    countrate = 0.0
+    ccountrate = 0.0        
 
     # Initial Wind conditions
     wslist = []
@@ -295,21 +296,15 @@ class APF:
         # Set the callbacks and monitors
         self.wx.monitor()
         self.wx.callback(windmon)
+
         self.altwx.monitor()
         self.altwx.callback(altwindmon)
-        self.down.monitor()
-        self.temp.monitor()
-        
+
         self.ok2open.monitor()
         self.ok2open.callback(okmon)
 
         self.dmtimer.monitor()
         self.dmtimer.callback(dmtimemon)
-
-        self.whatsopn.monitor()
-
-        self.counts.monitor()
-        self.counts.callback(countmon)
 
         self.kcountrate.monitor()
         self.kcountrate.callback(countratemon)
@@ -322,6 +317,11 @@ class APF:
         self.event.monitor()
         self.event.callback(eventmon)
 
+        self.down.monitor()
+        self.temp.monitor()
+        self.whatsopn.monitor()
+
+        self.counts.monitor()
         self.teqmode.monitor()
         self.vmag.monitor()
         self.autofoc.monitor()
