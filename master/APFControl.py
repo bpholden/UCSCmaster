@@ -122,8 +122,17 @@ def eventmon(event):
     except:
         return
 
-    return
- 
+
+    try:
+        cnts = float(counts.read(binary=True))
+        time = float(elapsed.read(binary=True))
+    except:
+        return
+    try:
+        APF.ccountrate = cnts/time
+    except:
+        return
+
 # Callback for ok2open permission
 # -- Check that if we fall down a logic hole we don't error out
 def okmon(ok2open):
