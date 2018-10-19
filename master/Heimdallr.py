@@ -115,7 +115,7 @@ def args():
     parser.add_argument('-o', '--obsnum', type=int, help='Sets the UCAM observation number to this integer value.')
     parser.add_argument('-b', '--binning', choices=b_c, default=1, type=int, help='Sets the UCAM binning, bins in both pixels, allowed to be 1, 2 or 4.')
     parser.add_argument('-p', '--phase', choices=p_c, help='Specify the starting phase of the watcher. Allows for skipping standard procedures.')
-    parser.add_argument('-f', '--fixed', help='Specify a fixed target list to observe. File will be searched for relative to the current working directory.')
+    parser.add_argument('-f', '--fixed', default="", help='Specify a fixed target list to observe. File will be searched for relative to the current working directory.')
     parser.add_argument('-t', '--test', action='store_true', help="Start the watcher in test mode. No modification to telescope, instrument, or observer settings will be made.")
 #    parser.add_argument('-r', '--restart', action='store_true', default=False, help="Restart the specified fixed star list from the beginning. This resets scriptobs_lines_done to 0.") # removed should possible make default True and this option be False
     parser.add_argument('-w', '--windshield', choices=w_c, default='auto', help="Turn windshielding on, off, or let the software decide based on the current average wind speed (Default is auto). Velocity > %.1f mph turns windshielding on." % (ad.WINDSHIELD_LIMIT))
@@ -803,8 +803,9 @@ if __name__ == '__main__':
     # Regardless of phase, if a name, obsnum, or reset was commanded, make sure we perform these operations.
     apflog("Setting scriptobs_lines_done=0")
     APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
-    if not opt.fixed and not debug:
-        APFTask.set(parent,"STARLIST","")
+    if not opt.fixed:
+        if not debug:
+            APFTask.set(parent,"STARLIST","")
     else:
         if not os.path.exists(opt.fixed):
             errmsg = "starlist %s does not exist" % (opt.fixed)
