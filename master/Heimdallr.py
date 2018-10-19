@@ -835,8 +835,8 @@ if __name__ == '__main__':
 
         apflog("Setting Observer Information", echo=True)
         opt = set_obs_defaults(opt)
-        apflog("Using %s for name and %s for obs number." % (opt.name,repr(obsNum)),echo=True)
-        apf.setObserverInfo(num=obsNum, name=opt.name, owner=opt.owner)
+        apflog("Using %s for name and %s for obs number." % (opt.name,repr(opt.obsnum)),echo=True)
+        apf.setObserverInfo(num=opt.obsnum, name=opt.name, owner=opt.owner)
                 
         apflog("Setting ObsInfo finished. Setting phase to Focus.")
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
