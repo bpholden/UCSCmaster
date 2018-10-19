@@ -168,13 +168,7 @@ def findObsNum(apf):
 
     obsNum = int(apf.robot["MASTER_LAST_OBS_UCSC"].read().strip())
 
-    last_times = int(float(apf.robot["MASTER_VAR_2"].read()))
-    deltat = time.time() - last_times
-    deltat /= (24*3600)
-    ndays = int(deltat+0.5)
-
     obsNum += 100 - (obsNum % 100)
-    obsNum += ndays*200
 
     if obsNum % 10000 > 9700:
         obsNum += 10000 - (obsNum % 10000)
@@ -187,14 +181,14 @@ def set_obs_defaults(opt):
         opt.name = 'ucsc'
         if opt.obsnum == None:
             apflog("Figuring out what the observation number should be.",echo=False)
-            obsNum = findObsNum(apf)
+            opt.obsnum = findObsNum(apf)
         else:
-            obsNum = int(opt.obsnum)
+            opt.obsnum = int(opt.obsnum)
     elif opt.name == "ucb":
         apflog("Figuring out what the observation name should be.",echo=False)
         opt.owner = 'Howard'
         opt.name = "ucb-" + getnightcode()
-        obsNum=100
+        opt.obsnum=100
     else:
         if opt.owner == None:
             opt.owner = opt.name
