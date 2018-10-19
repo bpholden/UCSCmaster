@@ -236,6 +236,7 @@ class Master(threading.Thread):
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
         self.starttime = None
+        self.debug = False
         self.apftask = ktl.Service('apftask')
         self.lineresult = apftask['scriptobs_line_result']
         self.lineresult.monitor()
@@ -802,14 +803,15 @@ if __name__ == '__main__':
     # Regardless of phase, if a name, obsnum, or reset was commanded, make sure we perform these operations.
     apflog("Setting scriptobs_lines_done=0")
     APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
-    if not opt.fixed:
+    if not opt.fixed and not debug:
         APFTask.set(parent,"STARLIST","")
     else:
         if not os.path.exists(opt.fixed):
             errmsg = "starlist %s does not exist" % (opt.fixed)
             apflog(errmsg,level="error",echo=True)
             sys.exit(errmsg)
-        APFTask.set(parent,"STARLIST",opt.fixed)
+        if not debug:
+            APFTask.set(parent,"STARLIST",opt.fixed)
 
     if str(phase).strip() != "ObsInfo":
         if opt.obsnum:
@@ -874,7 +876,8 @@ if __name__ == '__main__':
 #            sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
         if apf.ucam['OUTFILE'].read() == 'ucsc':
-            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            if not debug:
+                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
@@ -895,7 +898,7 @@ if __name__ == '__main__':
         # except:
         #     apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
 
-        if apf.ucam['OUTFILE'].read() == 'ucsc':
+        if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
             APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
             
 
@@ -903,7 +906,7 @@ if __name__ == '__main__':
         instr_permit()
         
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
-        if apf.ucam['OUTFILE'].read() == 'ucsc':
+        if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
             APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         if result == False:
@@ -915,8 +918,6 @@ if __name__ == '__main__':
         apflog("Calibrate Pre has finished. Setting phase to Watching.")
         APFTask.phase(parent, "Watching")
         apflog("Phase is now %s" % phase)
-        if apf.ucam['OUTFILE'].read() == 'ucsc':
-            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
 
     # 4) Start the main watcher thread
@@ -954,6 +955,7 @@ if __name__ == '__main__':
         master.starttime = opt.start
         master.task = parent
         master.windsheild = opt.windshield
+        master.debug = debug
         master.start()
     else:
         master.signal = False
