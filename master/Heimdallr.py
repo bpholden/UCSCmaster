@@ -1043,7 +1043,7 @@ if __name__ == '__main__':
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
             APFTask.set(parent,suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
 
-    if apf.ucam['OUTFILE'].read() == 'ucsc':
+    if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
         APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
     bstr = "%d,%d" % (1,1)
@@ -1063,7 +1063,7 @@ if __name__ == '__main__':
     apf.setTeqMode('Day')
 
     # Update the last observation number to account for the morning calibration shots.
-    if apf.ucam['OUTFILE'].read() == 'ucsc':
+    if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
         APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
     
     APFTask.set(parent,suffix="MESSAGE",value="Updating last observation number",wait=False)
