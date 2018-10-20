@@ -849,6 +849,7 @@ if __name__ == '__main__':
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
         instr_permit()
+
         
         result = apf.focus()
         if not result:
@@ -941,9 +942,9 @@ if __name__ == '__main__':
                 APFLib.write(apf.robot["MASTER_STARLIST"], opt.fixed)
             if opt.line != None:
                 APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], int(opt.line))
-                apflog("Starting star list %s at line %d" % (opt.fixed, int(opt.line)),echo=True)
+                apflog("Will be starting star list %s at line %d" % (opt.fixed, int(opt.line)),echo=True)
             else:
-                apflog("Starting star list %s" % opt.fixed,echo=True)
+                apflog("Will be starting star list %s at line 0" % opt.fixed,echo=True)
         else:
             apflog("Starting dynamic scheduler", echo=True)
         master.fixedList = opt.fixed
