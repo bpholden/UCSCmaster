@@ -456,7 +456,7 @@ class Master(threading.Thread):
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
-            if apf.ucam['OUTFILE'].read() == 'ucsc':
+            if apf.ucam['OUTFILE'].read() == 'ucsc' and apf.test == False:
                 APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
             APF.updateWindshield(self.windshield)
