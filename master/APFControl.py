@@ -221,7 +221,6 @@ class APF:
     # Initial seeing conditions
     seeinglist = []
     speedlist  = []
-    conditions = 'bad'
     cwd        = os.getcwd()
     slowdown   = 0.0 
     ncountrate = 0
@@ -375,7 +374,6 @@ class APF:
         s += "kcountrate = %5.2g cts/s\n" % self.kcountrate
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
-        #s += "Conditions are - %s\n" % self.conditions
         s += "Teq Mode - %s\n" % self.teqmode
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
