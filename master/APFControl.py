@@ -520,14 +520,15 @@ class APF:
             result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
             if not result:
                 apflog("focusinstr failed with code %d" % code, echo=True)
-                expression="($apftask.FOCUSINSTR_STATUS == 3)"
-                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                    apflog("focusinstr failed" ,echo=True, level="error")
-                    result = False
-                expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
-                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                    apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
-                    result = False
+                result = False
+            expression="($apftask.FOCUSINSTR_STATUS == 3)"
+            if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                apflog("focusinstr failed" ,echo=True, level="error")
+                result = False
+            expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
+            if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
+                result = False
             return result
 
 
