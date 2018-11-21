@@ -10,6 +10,7 @@ import numpy as np
 import os
 import os.path
 from select import select
+import re
 import subprocess
 import sys
 import threading
