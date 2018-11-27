@@ -707,8 +707,8 @@ class Master(threading.Thread):
 def instr_permit():
     instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
     userkind = ktl.read("checkapf","USERKIND",binary=True)
-    while not instr_perm and userkind != 3:
-        apflog("Waiting for instrument permission to be true")
+    while not instr_perm or userkind != 3:
+        apflog("Waiting for instrument permission to be true and userkind to be robotic")
         APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
         APFTask.waitfor(parent,True,expression="$checkapf.USERKIND = robotic",timeout=600)
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
