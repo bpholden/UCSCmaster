@@ -521,6 +521,7 @@ class APF:
             if not result:
                 apflog("focusinstr failed with code %d" % code, echo=True)
                 result = False
+                
             expression="($apftask.FOCUSINSTR_STATUS == 3)"
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                 apflog("focusinstr failed" ,echo=True, level="error")
