@@ -595,7 +595,7 @@ class APF:
             apflog("Test Mode: Would be running focus_telescope.",echo=True)
             return True
         else:
-            apflog("Running focusinstr routine.",echo=True)
+            apflog("Running focus_telescope routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
             cmd = os.path.join(cmdpath,'focus_telescope')
             result, code = cmdexec(cmd,cwd=os.path.curdir)
@@ -605,7 +605,7 @@ class APF:
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                     apflog("focus_telescope failed to exit" ,echo=True)
                 return result
-
+            return True
 
     def run_autoexposure(self,ind=5):
         cmdpath = '/usr/local/lick/bin/robot/'
