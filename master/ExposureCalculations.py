@@ -12,7 +12,7 @@ A number of modules rely on the dictionary slit_size which is defined at the top
 """
 
 import numpy as np
-from x_gaussslit import *
+from x_gaussslit import x_gaussslit
 
 # slit_size is a dictionary that defines the apertures of the APF in pixels. 
 
