@@ -62,7 +62,7 @@ def getEXPMeter(i2, bv):
     x += 0.05
     return i2 * 10**x
 
-def getEXPMeter_Rate(v, bv, el, seeing, decker="W"):
+def getEXPMeter_Rate(v, bv, el, seeing, deckers):
     """
     expcountrate = getEXPMeter_Rate(vmag, bmv, elevation, seeing, decker="W")
 
@@ -81,16 +81,20 @@ def getEXPMeter_Rate(v, bv, el, seeing, decker="W"):
 #        apflog( "Warning: AVG_FWHM seems to be 0. Using 15 instead.",level="Warn")
         seeing = np.array(15)
     # seeing  = 13.99
-    light = x_gaussslit(slit_size[decker][0]/seeing, slit_size[decker][1]/seeing, 0, 0)
+    light = np.zeros_like(v)
+    unique_decker_list = list( np.unique(deckers))
+    for decker in unique_decker_list:
+        curdeck_light = x_gaussslit(slit_size[decker][0]/seeing, slit_size[decker][1]/seeing, 0, 0)
+        light[deckers == decker] += curdeck_light
     # light = 0.442272
     
     VC = v - 2.5*np.log10(light)
     x = (-1/2.5) * (VC + alpha*bv + beta*(1/np.cos(np.radians(90-el))) + Const)
     return (10 ** x)
 
-def getSpec_Rate( v, bv, el, seeing, decker="W"):
+def getSpec_Rate( v, bv, el, seeing, deckers):
     """
-    rate = getSpec_Rate(vmag, bmv, el, seeing, decker="W")
+    rate = getSpec_Rate(vmag, bmv, el, seeing, deckers)
 
     rate - arrival rate in photons per second in the I2 region of the spectrometer.
     
@@ -98,7 +102,7 @@ def getSpec_Rate( v, bv, el, seeing, decker="W"):
     bmv - color of the star (B-V, Johnson filters, Vega mags.)
     el - elevation in degrees
     seeing - seeing in pixels on the guider
-    decker - an ascii letter, must match value in dictionary defined at top of module
+    decker - array of deckers, must be contained in dictionary at the top of the module
     """
     alpha = -0.0311
     beta = 0.158
@@ -106,7 +110,13 @@ def getSpec_Rate( v, bv, el, seeing, decker="W"):
     if seeing <= 0:
         seeing = np.array(15)
     # seeing  = 13.99
-    light = x_gaussslit(slit_size[decker][0]/seeing, slit_size[decker][1]/seeing, 0, 0)
+
+    light = np.zeros_like(v)
+    unique_decker_list = list( np.unique(deckers))
+    for decker in unique_decker_list:
+        curdeck_light = x_gaussslit(slit_size[decker][0]/seeing, slit_size[decker][1]/seeing, 0, 0)
+        light[deckers == decker] += curdeck_light
+
     # light = 0.442272
     
     #if el < 15.0:
@@ -119,7 +129,7 @@ def getSpec_Rate( v, bv, el, seeing, decker="W"):
     cnt_rate = 10**x
     return cnt_rate
 
-def getEXPTime(cnts, v, bv, el, seeing, decker="W"):
+def getEXPTime(cnts, v, bv, el, seeing, deckers):
     """ time = getEXPTime(cnts, v, bv, el, seeing, decker="W")
 
     time - time in seconds
@@ -132,7 +142,7 @@ def getEXPTime(cnts, v, bv, el, seeing, decker="W"):
 
     """
     time = 0
-    cnt_rate = getSpec_Rate(v, bv, el, seeing, decker="W")
+    cnt_rate = getSpec_Rate(v, bv, el, seeing, deckers)
     fin_cnt_rate = np.where(cnt_rate > 0,cnt_rate,1.0e-5)
     time = cnts/fin_cnt_rate
     return time
