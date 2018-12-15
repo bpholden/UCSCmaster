@@ -11,7 +11,7 @@ import ephem
 import gspread
 import json
 from oauth2client.client import SignedJwtAssertionCredentials
-from ExposureCalculations import getI2_M, getI2_K, getEXPMeter, getEXPMeter, getEXPTime
+from ExposureCalculations import getI2_M, getI2_K, getEXPMeter, getEXPMeter_Rate, getEXPTime
 
 try:
     from apflog import *
