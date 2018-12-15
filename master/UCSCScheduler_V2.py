@@ -790,7 +790,7 @@ def getObserved(filename):
     times.reverse()
     return obs, times
 	
-def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W"):
+def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, deckers):
     """ calculate_ucsc_exposure_time uses the recipe from Burt et al. (2015) to compute the exposure time for a target.
 
     exp_time, exp_counts, i2counts = calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W")
@@ -829,7 +829,7 @@ def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker
     exp_counts = getEXPMeter(i2counts, bmv)
     #	exp_counts = 1e9
 	# Exposure time to reach desired I2 counts
-    exp_time = getEXPTime(i2counts, vmag, bmv, elevation, seeing, decker=decker)
+    exp_time = getEXPTime(i2counts, vmag, bmv, elevation, seeing, deckers)
 	
     return exp_time, exp_counts, i2counts
 
@@ -1090,6 +1090,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     config={'I2': 'Y', 'decker': 'W', 'owner' : owner}
     sn, star_table, flags, stars = parseGoogledex(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
     sn = np.array(sn)
+    deckers = np.array(flags['decker'])
     targNum = len(sn)
     if verbose:
         apflog("getNext(): Parsed the Googledex...",echo=True)
@@ -1170,7 +1171,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
             apflog("getNext(): Computing exposure times",echo=True)
         exp_times, exp_counts, i2counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
                                             star_table[f,DS_ERR], star_elevations[np.array(vis)], seeing, \
-                                            star_table[f,DS_BV])
+                                            star_table[f,DS_BV], deckers[f])
         
         exp_times = exp_times * slowdown
         totexptimes[f] += computeMaxTimes(exp_times,star_table[f, DS_MAX])
