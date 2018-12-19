@@ -334,7 +334,7 @@ class Master(threading.Thread):
             else:
                 apflog("Calculating expected counts")
                 apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
-                exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm, decker=self.decker)
+                exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm, self.decker)
                 try:
                     if APF.countrate <= 0:
                         try:
