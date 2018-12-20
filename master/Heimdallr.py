@@ -29,7 +29,6 @@ except:
 import APFControl as ad
 from apflog import *
 import UCSCScheduler_V2 as ds
-from x_gaussslit import *
 import ExposureCalculations
 
 os.umask(0007)
