@@ -1159,7 +1159,7 @@ if __name__ == '__main__':
     apf = APF(task=task,test=False)
 
     # Give the monitors some time to start up
-    APFTask.waitFor(task, True,timeout=10)
+    APFTask.waitFor(task, True,timeout=2)
 
     
     print str(apf)
