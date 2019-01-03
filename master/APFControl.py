@@ -493,6 +493,9 @@ class APF:
                 apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % (self.dewarfoc), level = "error", echo=True)
                 return False
             apflog("Running calibrate %s %s" % (script, time), level = 'info')
+            owner = self.apfschedule('OWNRHINT').read()        
+            self.apfschedule('OWNRHINT').write('public')        
+            
             cmd = '%s %s %s' % (s_calibrate,script, time)
             result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
             if not result:
@@ -500,6 +503,7 @@ class APF:
             expression="($apftask.CALIBRATE_STATUS != 0) and ($apftask.CALIBRATE_STATUS != 1) "
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                 apflog("%s %s failed to exit" % (s_calibrate,script),echo=True)
+            self.apfschedule('OWNRHINT').write(owner)        
                 
             return result
         else:
