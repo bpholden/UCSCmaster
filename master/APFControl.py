@@ -517,6 +517,12 @@ class APF:
             print "Test Mode: Would be running focusinstr."
             return True
         else:
+            supplies = ('PS1_48V_ENA', 'PS2_48V_ENA')
+            for keyword in supplies:
+                value = motor[keyword].read(binary=True)
+                if value != 1:
+                    motor[keyword].write('Enabled', wait=False)
+                    
             apflog("Running focusinstr routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
             execstr = " ".join(['focusinstr',flags])
