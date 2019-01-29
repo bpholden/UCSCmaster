@@ -29,7 +29,10 @@ except:
 import APFControl as ad
 from apflog import *
 import UCSCScheduler_V2 as ds
+from x_gaussslit import *
 import ExposureCalculations
+import ParseGoogledex
+import SchedulerConsts
 
 os.umask(0007)
 
@@ -40,7 +43,7 @@ parent = 'master'
 SUNEL_ENDLIM = -10.0
 SUNEL_STARTLIM = -9.0
 SUNEL_HOR = -3.2
-FOCUSTIME = 1800.
+FOCUSTIME = 3600.
 AVERAGE_INSTRFOC = 8522
 DMLIM = 1140
 # global
@@ -350,12 +353,12 @@ class Master(threading.Thread):
                         APF.counts.monitor(start=True)
                         APF.counts.callback(ad.countmon)
                         # yes this happened.
-                    if slowdown < ds.SLOWDOWN_MIN:
-                        slowdown = ds.SLOWDOWN_MIN
+                    if slowdown < SchedulerConsts.SLOWDOWN_MIN:
+                        slowdown = SchedulerConsts.SLOWDOWN_MIN
                         apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
                         # yes this happened.
-                    if slowdown > ds.SLOWDOWN_MAX:
-                        slowdown = ds.SLOWDOWN_MAX
+                    if slowdown > SchedulerConsts.SLOWDOWN_MAX:
+                        slowdown = SchedulerConsts.SLOWDOWN_MAX
                         apflog("slowdown too high, countrate= %g" % (APF.countrate), echo=True, level='debug')
                 except ZeroDivisionError:
                     apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
@@ -922,7 +925,7 @@ if __name__ == '__main__':
         apflog("Starting the main watcher." ,echo=True)
         try:
             if opt.name == "ucsc":
-                names,star_table,do_flags,stars = ds.parseGoogledex(sheetns=opt.sheet)
+                names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
 
@@ -1001,7 +1004,7 @@ if __name__ == '__main__':
         if opt.name == "ucsc":
             try:
                 apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-                ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn)
+                ParseGoogledex.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn)
             except:
                 apflog("Error: Updating the online googledex has failed.", level="error")
         logpush(os.path.join(os.getcwd(),"observed_targets"))
