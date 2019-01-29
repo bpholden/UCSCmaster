@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import ephem
 from ExposureCalculations import getI2_M, getI2_K, getEXPMeter, getEXPMeter_Rate, getEXPTime
-from ParseGoogledex import update_local_googledex, update_googledex_lastobs, parseGoogledex
+import ParseGoogledex 
 import ObservedLog 
 import Coords
 from SchedulerConsts import * # I know
