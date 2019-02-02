@@ -226,8 +226,10 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
 
     for sheetn in sheetns:
         ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
-        vals = ws.get_all_values()
-
+        if ws:
+            vals = ws.get_all_values()
+        else:
+            next
         col = vals[0].index("lastobs") 
         nobscol = vals[0].index("Nobs")
     
@@ -336,14 +338,15 @@ def make_local_copy(sheetns=["The Googledex"],certificate='UCSC Dynamic Schedule
         
     for sheetn in sheetns:
         worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
-        cur_codex = worksheet.get_all_values()
-        didx = findColumns(cur_codex[0],req_cols)
-
-        for row in cur_codex[1:]:
-            nrow = []
-            for c in req_cols:
-                nrow.append(row[didx[c]])
-            full_codex.append(nrow)
+        if worksheet:
+            cur_codex = worksheet.get_all_values()
+            didx = findColumns(cur_codex[0],req_cols)
+            
+            for row in cur_codex[1:]:
+                nrow = []
+                for c in req_cols:
+                    nrow.append(row[didx[c]])
+                full_codex.append(nrow)
         
 
     f = open(outfn,'wb')
@@ -375,14 +378,22 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
     scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://spreadsheets.google.com/feeds']
 
     credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)
-    gs = gspread.authorize(credentials)
 
-    apflog("Successfully logged in.", echo=True)
-    spreadsheet = gs.open(sheetn)
-    apflog("Loaded Main %s" % (sheetn),echo=True)
-    worksheet = spreadsheet.sheet1
-    apflog("Got spreadsheet", echo=True)
-
+    try:
+        gs = gspread.authorize(credentials)
+        apflog("Successfully logged in.", echo=True)
+    except:
+        apflog("Cannot logg in.", echo=True,level='error')
+        return None
+    apflog("Attempting to Open %s" % (sheetn),echo=True)
+    try:
+        spreadsheet = gs.open(sheetn)
+        apflog("Loaded Main %s" % (sheetn),echo=True)
+        worksheet = spreadsheet.sheet1
+        apflog("Got spreadsheet", echo=True)
+    except:
+        apflog("Cannot Read %s"  % (sheetn), echo=True, level='error')
+        worksheet = None
     return worksheet
 
 
