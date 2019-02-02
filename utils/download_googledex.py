@@ -1,7 +1,7 @@
 from __future__ import print_function
 import sys
 sys.path.append("../master")
-import UCSCScheduler_V2 as ds
+import ParseGoogledex
 import os
 
 if __name__ == "__main__":
@@ -11,5 +11,5 @@ if __name__ == "__main__":
     sheetns = sys.argv[1].split(",")
     if os.path.exists("googledex.dat"):
         os.unlink("googledex.dat")
-    ds.parseGoogledex(sheetns=sheetns)
+    ParseGoogledex.parseGoogledex(sheetns=sheetns)
 
