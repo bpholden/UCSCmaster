@@ -36,9 +36,9 @@ def checkflag(key,didx,line,regexp,default):
 def parse_starname(starname):
 
     ostarname = starname
-    m= re.search("\AHD\s\d+",starname)
+    m= re.search("HD\s+\d+",starname)
     if m:
-        ostarname = re.sub("\s+","",starname)
+        ostarname = re.sub("HD\s+","HD",starname)
     m = re.search("\s+",ostarname)
     while m:
         ostarname = re.sub("\s+","_",ostarname)
