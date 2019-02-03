@@ -1,6 +1,7 @@
 from __future__ import print_function
 from datetime import datetime, timedelta
 import os
+import re
 import pickle
 import sys
 import time
@@ -30,7 +31,20 @@ def checkflag(key,didx,line,regexp,default):
             return default
     except:
         return default
-    
+
+
+def parse_starname(starname):
+
+    ostarname = starname
+    m= re.search("\AHD\s\d+",starname)
+    if m:
+        ostarname = re.sub("\s+","",starname)
+    m = re.search("\s+",ostarname)
+    while m:
+        ostarname = re.sub("\s+","_",ostarname)
+        m = re.search("\s+",ostarname)
+        
+    return ostarname
 
 def parseGoogledex(sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' }):
     """ parseGoogledex parses google sheets and returns the output as a tuple
@@ -95,7 +109,7 @@ def parseGoogledex(sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler
         if apfpri < 0.5: continue
         row = []
         # Get the star name
-        names.append(ls[didx["Star Name"]])
+        names.append(parse_starname(ls[didx["Star Name"]]))
         # Get the RA
         raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval:
