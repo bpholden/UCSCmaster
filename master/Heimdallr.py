@@ -125,7 +125,7 @@ def args():
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
     parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
-    parser.add_argument('--sheet',default="Bstars_2018B,A015_SVogt_2018B,A009_SKane_2018B,A003_DeRosa_2018B,A007_PRobertson_2018B,A013_MBolte_2018B",help="Optional name for a Google spreadsheet")
+    parser.add_argument('--sheet',default="Bstars,A020_SVogt_2019A,A017_ICzekala_2019A,A018_ICzekala_2019A,A005_PRobertson_2019A,A000_BHolden_2019A,A006_BHolden_2019A",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='Vogt',help="Optional name for file owners")    
     
     opt = parser.parse_args()
