@@ -11,6 +11,30 @@ import ConfigParser
 
 import ktl
 import APF
+sys.path.append("../master")
+import apflog
+
+def readem_or_weep(service,keyword,binary=False):
+
+    try:
+        value = ktl.read(service,keyword,binary=binary)
+    except:
+        apflog.apflog("cannot read %s.%s" % (service,keyword),echo=True,level='error')
+        sys.exit("cannot read %s.%s" % (service,keyword))
+
+    return value
+
+def writeem(service,keyword,value,binary=False):
+
+    try:
+        ktl.write(service,keyword,value,binary=binary)
+    except:
+        raise
+        apflog.apflog("cannot write %s.%s" % (service,keyword),echo=True,level='error')
+        sys.exit("cannot write %s.%s" % (service,keyword))
+
+    return value
+
 
 def primary_run(schedule):
     match = re.search("\A\s*(\d+)\s*",schedule)
@@ -27,6 +51,7 @@ def read_config(configfile,runstr):
     srun = primary_run(runstr)
     config = ConfigParser.ConfigParser()
     if not os.path.exists(configfile):
+        apflog.apflog("configuration file %s does not exist"  % configfile)
         sys.exit("configuration file %s does not exist"  % configfile)
     config.read(configfile)
     programs = remap_config(config.items('programs'))
@@ -79,43 +104,20 @@ def define_observer(config):
 
 def config_kwds(config):
     obs = define_observer(config)
-    try:
-        ktl.write('checkapf','OBSLOCAT',obs)
-    except:
-        raise
-        sys.exit('Cannot communicate with checkapf service')
-    try:
-        ktl.write('apfucam','OBSERVER',config['observer'])
-    except:
-        raise
-        sys.exit('Cannot communicate with checkapf service')
-    try:
-        ktl.write('apfschedule','ACTIVE_RUN',primary_run(schedule))
-    except:
-        raise
-        sys.exit('Cannot communicate with apfschedule service')
 
-    try:
-        ownr = ktl.read('apfschedule','OWNRNAME')
-        ktl.write('apfschedule','OWNRHINT',ownr)
-    except:
-        raise
-        sys.exit('Cannot communicate with apfschedule service')
+    writeem('checkapf','OBSLOCAT',obs)
+    writeem('apfucam','OBSERVER',config['observer'])
+    writeem('apfschedule','ACTIVE_RUN',primary_run(schedule))
+
+    ownr = readem_or_weep('apfschedule','OWNRNAME')
+    writeem('apfschedule','OWNRHINT',ownr)
 
     if config['name'] == 'ucsc':
-        try: 
-            ktl.write('apfucam','outfile',config['name'])
-            ktl.write('apfucam','obsnum',config['obsnum'])
-        except:
-            raise
-            sys.exit('Cannot communicate with apfucam service')
+            writeem('apfucam','outfile',config['name'])
+            writeem('apfucam','obsnum',config['obsnum'])
 
     if config['owner']:
-        try: 
-            ktl.write('apfschedule','ownrhint',config['owner'])
-        except:
-            raise
-            sys.exit('Cannot communicate with apfschedule service')
+        writeem('apfschedule','ownrhint',config['owner'])
 
     return True
 
@@ -124,28 +126,20 @@ def modify_env(config):
     cenv['PATH'] = config['pathvar']
     cenv['PYTHONPATH'] = config['pythonpathvar']
     return cenv
-            
+
+        
 if __name__ == "__main__":
 
-    try:
-        schedule = ktl.read('apfschedule','SCHEDULED_RUNS')
-    except:
-        sys.exit("cannot read apfschedule.SCHEDULED_RUNS")
-        
-    try:
-        userkind = ktl.read('checkapf','USERKIND',binary=True)
-    except:
-        sys.exit("cannot read checkapf.USERKIND")
+    schedule = readem_or_weep('apfschedule','SCHEDULED_RUNS')
 
+    userkind = readem_or_weep('checkapf','USERKIND',binary=True)
     if userkind != 3:
         sys.exit("checkapf not in robotic mode")
 
-    try:
-        master_status = ktl.read('apftask','master_status',binary=True)
-        if master_status < 3:
-            sys.exit("master has been started")
-    except:
-        sys.exit("cannot read apftask.MASTER_STATUS")
+
+    master_status = readem_or_weep('apftask','master_status',binary=True)
+    if master_status < 3:
+        sys.exit("master has been started")
 
     cpath = os.path.dirname(os.path.abspath(__file__))
     configfile = "master.config"
