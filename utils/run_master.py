@@ -10,8 +10,6 @@ import shlex
 import ConfigParser
 
 import ktl
-import APF
-sys.path.append("../master")
 import apflog
 
 def readem_or_weep(service,keyword,binary=False):
