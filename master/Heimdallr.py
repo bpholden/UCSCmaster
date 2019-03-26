@@ -213,7 +213,7 @@ def getTotalLines(filename):
                
 
 class Master(threading.Thread):
-    def __init__(self, apf, user='ucsc',sheetn=["2018B"],owner='Vogt'):
+    def __init__(self, apf, user='ucsc',sheetn=["Bstars"],owner='public'):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf

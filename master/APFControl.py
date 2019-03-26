@@ -641,7 +641,7 @@ class APF:
     def focusTel(self):
         star = self.find_star()
         if not star:
-            apflog("Cannot find star near current positon!?",level='error',echo=True)
+            apflog("Cannot find star near current position!?",level='error',echo=True)
             return False
         apflog("Targeting telescope on %s" % star[0], echo=True)
         

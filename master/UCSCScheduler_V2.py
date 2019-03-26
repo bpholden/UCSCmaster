@@ -437,7 +437,7 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     return times, exps
 
 
-def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetns=["The Googledex"],owner='S.Vogt',outfn="googledex.dat",outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -737,7 +737,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
 if __name__ == '__main__':
 
 #    sheetn=["2018B"]
-    sheetn="Bstars_2018B,A015_SVogt_2018B,A009_SKane_2018B,A003_DeRosa_2018B,A007_PRobertson_2018B"
+    sheetn="Bstars,A020_SVogt_2019A,A017_ICzekala_2019A,A018_ICzekala_2019A,A005_PRobertson_2019A,A000_BHolden_2019A,A006_BHolden_2019A,A015_TBrandt_2019A"
     
     # For some test input what would the best target be?
     otfn = "observed_targets"
