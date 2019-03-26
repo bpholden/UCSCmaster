@@ -34,10 +34,10 @@ def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab,owne
     if abs(metersig) > 3:
         metersig = 3.
     
-    meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+    meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm,result['DECKER'])
     meterrate *= 1 + 0.11*metersig
     meterrate /= actslow
-    specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+    specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm,result['DECKER'])
     specrate *= 1 + 0.11*specsig
     specrate /= actslow
     metertime = result['COUNTS'] / meterrate
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     
     for datestr in datelist:
 
-        allnames, star_table, do_flag, stars  = ParseGoogledex.parseGoogledex(sheetn=options.googledex,outfn=os.path.join(options.outdir,options.infile))
+        allnames, star_table, do_flag, stars  = ParseGoogledex.parseGoogledex(sheetns=options.googledex,outfn=os.path.join(options.outdir,options.infile))
     
         fwhms = ns.gen_seeing()
         slowdowns = ns.gen_clouds()
