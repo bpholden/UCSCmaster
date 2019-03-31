@@ -57,11 +57,13 @@ def read_config(configfile,runstr):
     program_config = remap_config(config.items(program))
 
     if program_config['obsnum'] == "ucsc":
-        program_config['obsnum'] = finducscObsNum()
+        program_config['obsnum'] = findUCSCObsNum()
+    if program_config['name'] == "ucb":
+        program_config['name'] = findUCBObsNum()
 
     return program_config
 
-def finducscObsNum():
+def findUCSCObsNum():
     last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
         
     last += 100 - (last % 100)
@@ -69,9 +71,29 @@ def finducscObsNum():
     if last % 10000 > 9700:
         last += 10000 - (last % 10000)
 
-    
-
     return last
+
+
+def findUCBObsNum(lastcode=None):
+    apftask = ktl.Service('apftask')
+    if lastcode == None:
+        lastcode = apftask['MASTER_LAST_OBS_UCB'].read()
+        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
+            print "Existing files detected for run %s. Not incrementing night code." % lastcode
+            return lastcode
+
+    zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
+
+    if 2 not in zloc:
+        ncode = lastcode[0:2] + chr(ord(lastcode[2])+1)   # increment last
+    if 2 in zloc and 1 not in zloc:
+        ncode = lastcode[0] + chr(ord(lastcode[1])+1) + 'a'   # increment middle
+    if 1 in zloc and 2 in zloc:
+        ncode = chr(ord(lastcode[0])+1) + 'aa'   # increment first
+
+    apftask['MASTER_LAST_OBS_UCB'].write(ncode)
+    return ncode
+
 
 def ok_config(config):
 
