@@ -169,6 +169,7 @@ if __name__ == "__main__":
 
         stuff_to_run = build_exec_str(config)
         env = modify_env(config)
+        print(" ".join(stuff_to_run))
         if os.getuid() == int(config['user']):
             p=subprocess.Popen(stuff_to_run,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
             sleep(10)
