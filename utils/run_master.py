@@ -11,6 +11,7 @@ import ConfigParser
 
 import ktl
 import apflog
+import numpy as np
 
 def readem_or_weep(service,keyword,binary=False):
 
