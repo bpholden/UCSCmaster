@@ -93,6 +93,7 @@ def findUCBObsNum(lastcode=None):
         ncode = chr(ord(lastcode[0])+1) + 'aa'   # increment first
 
     apftask['MASTER_LAST_OBS_UCB'].write(ncode)
+    ncode = 'ucb-' + ncode
     return ncode
 
 
