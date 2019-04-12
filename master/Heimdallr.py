@@ -812,13 +812,13 @@ if __name__ == '__main__':
             APFTask.set(parent,"STARLIST","")
 
     if str(phase).strip() != "ObsInfo":
-        if opt.obsnum:
-            apflog("option -o specified. Setting UCAM OBSNUM to %d." % int(opt.obsnum)) 
-            APFLib.write(apf.ucam["OBSNUM"], int(opt.obsnum))
         if opt.name:
             apflog("option -n specified. Setting UCAM Observer to %s." % opt.name)
             APFLib.write(apf.ucam["OBSERVER"], opt.name)
             APFLib.write(apf.ucam["OUTFILE"], opt.name)
+        if opt.obsnum:
+            apflog("option -o specified. Setting UCAM OBSNUM to %d." % int(opt.obsnum)) 
+            APFLib.write(apf.ucam["OBSNUM"], int(opt.obsnum))
 
     # Start the actual operations
     # Goes through 5 steps:
