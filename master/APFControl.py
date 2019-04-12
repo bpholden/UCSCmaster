@@ -465,9 +465,9 @@ class APF:
         apflog("Setting science camera parameters.")
         self.ucam('OBSERVER').write(name)
         self.apfschedule('OWNRHINT').write(owner)        
-        self.ucam('OBSNUM').write(str(num))
-        self.ucam('OUTDIR').write('/data/apf/')
         self.ucam('OUTFILE').write(name)
+        self.ucam('OUTDIR').write('/data/apf/')
+        self.ucam('OBSNUM').write(str(num))
 
         apflog("Updated science camera parameters:")
         apflog("Observer = %s" % self.ucam('OBSERVER').read(),echo=True)
@@ -868,8 +868,9 @@ class APF:
         if obsnum['populated']:
             if self.ucam('OUTFILE').read() == 'ucsc':
                 APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
-#                apflog("UCAM Observer name is not ucsc, so the lastObs file will not be updated.")
-#                apflog("Number of last observation is %s" % self.obsnum.read())
+            else:
+                apflog("UCAM Observer name is not ucsc, so the lastObs value will not be updated.")
+                apflog("Number of last observation is %s" % self.obsnum.read())
         return
 
 
