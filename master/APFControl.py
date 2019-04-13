@@ -868,7 +868,7 @@ class APF:
         if obsnum['populated']:
             if self.ucam('OUTFILE').read() == 'ucsc':
                 APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
-            else:
+#            else:
 #                apflog("UCAM Observer name is not ucsc, so the lastObs value will not be updated.")
 #                apflog("Number of last observation is %s" % self.obsnum.read())
         return
