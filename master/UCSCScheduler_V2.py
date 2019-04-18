@@ -391,6 +391,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
 
 def format_expmeter(exp_counts, nexp, exptime):
 
+    nexp[nexp <= 0] = 1
     exps = np.zeros_like(exp_counts)
     exp_counts *= 1.1 
     long_idx = exp_counts > MAX_EXPMETER
