@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append("../master")
-import UCSCScheduler_V2 as ds
+import ParseGoogledex 
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
@@ -15,4 +15,4 @@ if __name__ == "__main__":
         sheetnl = "The Googledex"
 
     sheetns = sheetnl.split(",")
-    ds.update_googledex_lastobs(fn,sheetns=sheetns)
+    ParseGoogledex.update_googledex_lastobs(fn,sheetns=sheetns)
