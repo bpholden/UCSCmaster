@@ -80,7 +80,7 @@ def findUCBObsNum(lastcode=None):
     if lastcode == None:
         lastcode = apftask['MASTER_LAST_OBS_UCB'].read()
         if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
-            apflog( "Existing files detected for run %s. Not incrementing night code." % lastcode,echo=True)
+            apflog.apflog( "Existing files detected for run %s. Not incrementing night code." % lastcode,echo=True)
             return lastcode
 
     zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
