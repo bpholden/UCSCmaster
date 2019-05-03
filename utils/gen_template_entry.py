@@ -57,6 +57,7 @@ if __name__ == "__main__":
     bstars = np.array([ True if 'HR' in n else False for n in allnames ], dtype=bool)
     npallnames = np.asarray(allnames)
     dt = datetime.utcfromtimestamp(int(time.time()))
+    bline = ""
     for arg in args:
         if arg in allnames:
             i = allnames.index(arg)
@@ -70,5 +71,5 @@ if __name__ == "__main__":
             fp.write(bline + "\n")
             oline ="%s #  %s\n" % (line,"pri = %s" % (star_table[i, sc.DS_APFPRI])) 
             fp.write(oline)
-            fp.write(bline + "\n")
 
+    fp.write(bline + "\n")
