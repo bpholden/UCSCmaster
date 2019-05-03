@@ -53,7 +53,7 @@ if __name__ == "__main__":
         sys.exit()
 
     fp = open("tonight","a+")
-    allnames, star_table, flags, stars  = ParseGoogledex.parseGoogparseGoogledexledex()
+    allnames, star_table, flags, stars  = ParseGoogledex.parseGoogledex()
     bstars = np.array([ True if 'HR' in n else False for n in allnames ], dtype=bool)
     npallnames = np.asarray(allnames)
     dt = datetime.utcfromtimestamp(int(time.time()))
