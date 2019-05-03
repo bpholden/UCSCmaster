@@ -2,9 +2,6 @@ from __future__ import print_function
 import sys
 sys.path.append("../master")
 #from ExposureCalc import *
-import UCSCScheduler_V2 as ds
-import ExposureCalculations as ec
-import Generate_Errors as ge
 
 import numpy as np
 import pickle
@@ -14,18 +11,22 @@ from datetime import datetime
 import re
 import os
 
+import UCSCScheduler_V2 as ds
+import ExposureCalculations as ec
+import Generate_Errors as ge
 import NightSim as ns
+import ParseGoogledex
 
-def compute_simulation(curtime,star,apf_obs,slowdowns,fwhms,outfp):
+def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
     actel,actaz = ns.compute_el(curtime,star,apf_obs)
     actslow, actfwhm = ns.rand_obs_sample(slowdowns,fwhms)
     actfwhm = ns.gen_seeing_el(actfwhm,actel)
     lastfwhm = actfwhm
     lastslow = actslow
-    meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+    meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm,result['DECKER'])
     meterrate *= 1 + 0.11*np.random.randn(1)
     meterrate /= actslow
-    specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+    specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm,result['DECKER'])
     specrate *= 1 + 0.11*np.random.randn(1)
     specrate /= actslow
     metertime = result['COUNTS'] / meterrate
@@ -93,7 +94,7 @@ outfp.write(hdrstr)
 if options.fixed != "":
     allnames, star_table, lines, stars = ds.parseStarlist(options.fixed)
 else:
-    allnames, star_table, flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=os.path.join(outdir,options.infile))
+    allnames, star_table, flag, stars  = ParseGoogledex.parseGoogledex(sheetns=options.googledex,outfn=os.path.join(outdir,options.infile))
 
 fwhms = ns.gen_seeing(val=0.1) # good conditions
 slowdowns = ns.gen_clouds(val=0.1) # good conditions
@@ -118,7 +119,7 @@ while observing:
         curtime += 70./86400 # acquisition time
         idx = allnames.index(result['NAME'])
         for i in range(0,int(result['NEXP'])):
-            (curtime,lastfwhm,lastslow) = compute_simulation(curtime,stars[idx],apf_obs,slowdowns,fwhms,outfp)
+            (curtime,lastfwhm,lastslow) = compute_simulation(result,curtime,stars[idx],apf_obs,slowdowns,fwhms,outfp)
         ot = open(otfn,"a+")
         ot.write("%s\n" % (result["SCRIPTOBS"]))
         ot.close()
@@ -133,6 +134,6 @@ while observing:
         
 print ("sun rose")
 fn = "observed_targets"
-observed, obstimes = ds.update_local_googledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
+observed, obstimes = ParseGoogledex.update_local_googledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
 
 outfp.close()

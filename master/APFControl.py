@@ -122,8 +122,17 @@ def eventmon(event):
     except:
         return
 
-    return
- 
+
+    try:
+        cnts = float(counts.read(binary=True))
+        time = float(elapsed.read(binary=True))
+    except:
+        return
+    try:
+        APF.ccountrate = cnts/time
+    except:
+        return
+
 # Callback for ok2open permission
 # -- Check that if we fall down a logic hole we don't error out
 def okmon(ok2open):
@@ -212,11 +221,11 @@ class APF:
     # Initial seeing conditions
     seeinglist = []
     speedlist  = []
-    conditions = 'bad'
     cwd        = os.getcwd()
     slowdown   = 0.0 
     ncountrate = 0
-    countrate = 0.0        
+    countrate = 0.0
+    ccountrate = 0.0        
 
     # Initial Wind conditions
     wslist = []
@@ -295,21 +304,15 @@ class APF:
         # Set the callbacks and monitors
         self.wx.monitor()
         self.wx.callback(windmon)
+
         self.altwx.monitor()
         self.altwx.callback(altwindmon)
-        self.down.monitor()
-        self.temp.monitor()
-        
+
         self.ok2open.monitor()
         self.ok2open.callback(okmon)
 
         self.dmtimer.monitor()
         self.dmtimer.callback(dmtimemon)
-
-        self.whatsopn.monitor()
-
-        self.counts.monitor()
-        self.counts.callback(countmon)
 
         self.kcountrate.monitor()
         self.kcountrate.callback(countratemon)
@@ -322,6 +325,11 @@ class APF:
         self.event.monitor()
         self.event.callback(eventmon)
 
+        self.down.monitor()
+        self.temp.monitor()
+        self.whatsopn.monitor()
+
+        self.counts.monitor()
         self.teqmode.monitor()
         self.vmag.monitor()
         self.autofoc.monitor()
@@ -363,10 +371,9 @@ class APF:
         s += "Wind = %3.1f mph \n" % (self.wvel)
         s += "Slowdown = %5.2f x\n" % self.slowdown
         s += "countrate = %5.2g cts/s\n" % self.countrate
-        s += "ccountrate = %5.2g cts/s\n" % self.ccountrate
+        s += "kcountrate = %5.2g cts/s\n" % self.kcountrate
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
-        #s += "Conditions are - %s\n" % self.conditions
         s += "Teq Mode - %s\n" % self.teqmode
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
@@ -453,14 +460,14 @@ class APF:
         else:
             return self.isReadyForObservingDirect()
 
-    def setObserverInfo(self, num=10000, name='Robot', owner=None):
+    def setObserverInfo(self, num=10000, name='Robot', owner='public'):
         if self.test: return
         apflog("Setting science camera parameters.")
         self.ucam('OBSERVER').write(name)
         self.apfschedule('OWNRHINT').write(owner)        
-        self.ucam('OBSNUM').write(str(num))
-        self.ucam('OUTDIR').write('/data/apf/')
         self.ucam('OUTFILE').write(name)
+        self.ucam('OUTDIR').write('/data/apf/')
+        self.ucam('OBSNUM').write(str(num))
 
         apflog("Updated science camera parameters:")
         apflog("Observer = %s" % self.ucam('OBSERVER').read(),echo=True)
@@ -469,7 +476,7 @@ class APF:
         apflog("Observation number = %s" % self.ucam('OBSNUM').read(), echo=True)
         apflog("File prefix = %s" % self.ucam('OUTFILE').read(), echo=True)
 
-        
+        return
 
     def calibrate(self, script, time):
         s_calibrate = os.path.join(ScriptDir,"calibrate")
@@ -486,6 +493,9 @@ class APF:
                 apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % (self.dewarfoc), level = "error", echo=True)
                 return False
             apflog("Running calibrate %s %s" % (script, time), level = 'info')
+            owner = self.apfschedule('OWNRHINT').read()        
+            self.apfschedule('OWNRHINT').write('public')        
+            
             cmd = '%s %s %s' % (s_calibrate,script, time)
             result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
             if not result:
@@ -493,6 +503,7 @@ class APF:
             expression="($apftask.CALIBRATE_STATUS != 0) and ($apftask.CALIBRATE_STATUS != 1) "
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                 apflog("%s %s failed to exit" % (s_calibrate,script),echo=True)
+            self.apfschedule('OWNRHINT').write(owner)        
                 
             return result
         else:
@@ -506,6 +517,12 @@ class APF:
             print "Test Mode: Would be running focusinstr."
             return True
         else:
+            supplies = ('PS1_48V_ENA', 'PS2_48V_ENA')
+            for keyword in supplies:
+                value = motor[keyword].read(binary=True)
+                if value != 1:
+                    motor[keyword].write('Enabled', wait=False)
+                    
             apflog("Running focusinstr routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
             execstr = " ".join(['focusinstr',flags])
@@ -513,14 +530,16 @@ class APF:
             result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
             if not result:
                 apflog("focusinstr failed with code %d" % code, echo=True)
-                expression="($apftask.FOCUSINSTR_STATUS == 3)"
-                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                    apflog("focusinstr failed" ,echo=True, level="error")
-                    result = False
-                expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
-                if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                    apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
-                    result = False
+                result = False
+                
+            expression="($apftask.FOCUSINSTR_STATUS == 3)"
+            if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                apflog("focusinstr failed" ,echo=True, level="error")
+                result = False
+            expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
+            if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+                apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
+                result = False
             return result
 
 
@@ -586,24 +605,24 @@ class APF:
             apflog("Test Mode: Would be running focus_telescope.",echo=True)
             return True
         else:
-            apflog("Running focusinstr routine.",echo=True)
+            apflog("Running focus_telescope routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
             cmd = os.path.join(cmdpath,'focus_telescope')
-            result, code = cmdexec([cmd,"-f"],cwd=os.path.curdir)
+            result, code = cmdexec(cmd,cwd=os.path.curdir)
             if not result:
                 apflog("focustel failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
                 if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                     apflog("focus_telescope failed to exit" ,echo=True)
                 return result
-
+            return True
 
     def run_autoexposure(self,ind=5):
         cmdpath = '/usr/local/lick/bin/robot/'
         cmd = os.path.join(cmdpath,'autoexposure')
         istr = "%d" % (ind)
-        cmdargs = [cmd]
-#       cmdargs = [cmd,"-i",istr]
+        cmdargs = cmd
+#       cmdargs = cmd + " -i " + istr
         result, code = cmdexec(cmdargs,cwd=os.path.curdir)
 
 #        result, code = cmdexec([cmd,istr],cwd=os.path.curdir)
@@ -622,7 +641,7 @@ class APF:
     def focusTel(self):
         star = self.find_star()
         if not star:
-            apflog("Cannot find star near current positon!?",level='error',echo=True)
+            apflog("Cannot find star near current position!?",level='error',echo=True)
             return False
         apflog("Targeting telescope on %s" % star[0], echo=True)
         
@@ -849,7 +868,8 @@ class APF:
         if obsnum['populated']:
             if self.ucam('OUTFILE').read() == 'ucsc':
                 APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
-#                apflog("UCAM Observer name is not ucsc, so the lastObs file will not be updated.")
+#            else:
+#                apflog("UCAM Observer name is not ucsc, so the lastObs value will not be updated.")
 #                apflog("Number of last observation is %s" % self.obsnum.read())
         return
 
@@ -879,19 +899,18 @@ class APF:
         if self.isOpen()[0] == False:
             apflog("APF is not open. Can't target a star while closed.",level='error',echo=True)
             return
-        # Move the shutters to fully open ( This might have already been done by open at sunset. In this case we rely on shutters to realize this and simply return)
-        self.DMReset()
-        apflog("Fully opening shutters.",echo=True)
-        result = subprocess.call(["shutters","-o"])
-        if result != 0:
-            apflog("Shutters returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
-            return
         self.DMReset()
         # Call prep-obs
         apflog("Calling prep-obs.",echo=True)
-        result = subprocess.call(['prep-obs'])
-        if result != 0:
-            apflog("Prep-obs returned error code %d. Targeting object %s has failed." % (result, name),level='error',echo=True)
+        result, ret_code = cmdexec('prep-obs')
+        if result == False:
+            apflog("Prep-obs returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
+            return
+        self.DMReset()
+        apflog("Slewing to lower el",echo=True)
+        result, ret_code = cmdexec('slew -e 75')
+        if result == False:
+            apflog("Slew returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
             return
         # Slew to the specified RA and DEC, set guide camera settings, and centerup( Slewlock )
         # Focus the telescope?
@@ -1147,7 +1166,7 @@ if __name__ == '__main__':
     apf = APF(task=task,test=False)
 
     # Give the monitors some time to start up
-    APFTask.waitFor(task, True,timeout=10)
+    APFTask.waitFor(task, True,timeout=2)
 
     
     print str(apf)

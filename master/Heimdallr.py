@@ -10,6 +10,7 @@ import numpy as np
 import os
 import os.path
 from select import select
+import re
 import subprocess
 import sys
 import threading
@@ -30,6 +31,8 @@ from apflog import *
 import UCSCScheduler_V2 as ds
 from x_gaussslit import *
 import ExposureCalculations
+import ParseGoogledex
+import SchedulerConsts
 
 os.umask(0007)
 
@@ -115,14 +118,14 @@ def args():
     parser.add_argument('-o', '--obsnum', type=int, help='Sets the UCAM observation number to this integer value.')
     parser.add_argument('-b', '--binning', choices=b_c, default=1, type=int, help='Sets the UCAM binning, bins in both pixels, allowed to be 1, 2 or 4.')
     parser.add_argument('-p', '--phase', choices=p_c, help='Specify the starting phase of the watcher. Allows for skipping standard procedures.')
-    parser.add_argument('-f', '--fixed', help='Specify a fixed target list to observe. File will be searched for relative to the current working directory.')
+    parser.add_argument('-f', '--fixed', default=None, help='Specify a fixed target list to observe. File will be searched for relative to the current working directory.')
     parser.add_argument('-t', '--test', action='store_true', help="Start the watcher in test mode. No modification to telescope, instrument, or observer settings will be made.")
 #    parser.add_argument('-r', '--restart', action='store_true', default=False, help="Restart the specified fixed star list from the beginning. This resets scriptobs_lines_done to 0.") # removed should possible make default True and this option be False
     parser.add_argument('-w', '--windshield', choices=w_c, default='auto', help="Turn windshielding on, off, or let the software decide based on the current average wind speed (Default is auto). Velocity > %.1f mph turns windshielding on." % (ad.WINDSHIELD_LIMIT))
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
     parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
-    parser.add_argument('--sheet',default=None,help="Optional name for a Google spreadsheet")
+    parser.add_argument('--sheet',default="Bstars,A020_SVogt_2019A,A017_ICzekala_2019A,A018_ICzekala_2019A,A005_PRobertson_2019A,A000_BHolden_2019A,A006_BHolden_2019A",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='Vogt',help="Optional name for file owners")    
     
     opt = parser.parse_args()
@@ -137,25 +140,63 @@ def args():
         else:
             print ("Start time %s does not match required format hours:minutes where both the hours and the minutes are integers")
             sys.exit()
+
+    if opt.sheet != None:
+        opt.sheet = opt.sheet.split(",")
+
+        
     return opt
 
+def getnightcode(lastcode=None):
+    apftask = ktl.Service('apftask')
+    if lastcode == None:
+        lastcode = apftask['MASTER_LAST_OBS_UCB'].read()
+        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
+            print "Existing files detected for run %s. Not incrementing night code." % lastcode
+            return lastcode
+
+    zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
+
+    if 2 not in zloc:
+        ncode = lastcode[0:2] + chr(ord(lastcode[2])+1)   # increment last
+    if 2 in zloc and 1 not in zloc:
+        ncode = lastcode[0] + chr(ord(lastcode[1])+1) + 'a'   # increment middle
+    if 1 in zloc and 2 in zloc:
+        ncode = chr(ord(lastcode[0])+1) + 'aa'   # increment first
+
+    apftask['MASTER_LAST_OBS_UCB'].write(ncode)
+    return ncode
 
 def findObsNum(apf):
 
     obsNum = int(apf.robot["MASTER_LAST_OBS_UCSC"].read().strip())
 
-    last_times = int(float(apf.robot["MASTER_VAR_2"].read()))
-    deltat = time.time() - last_times
-    deltat /= (24*3600)
-    ndays = int(deltat+0.5)
-
     obsNum += 100 - (obsNum % 100)
-    obsNum += ndays*200
 
     if obsNum % 10000 > 9700:
         obsNum += 10000 - (obsNum % 10000)
 
     return obsNum
+
+def set_obs_defaults(opt):
+    if opt.name is None or opt.name == "ucsc":
+        opt.owner = 'Vogt'
+        opt.name = 'ucsc'
+        if opt.obsnum == None:
+            apflog("Figuring out what the observation number should be.",echo=False)
+            opt.obsnum = findObsNum(apf)
+        else:
+            opt.obsnum = int(opt.obsnum)
+    elif opt.name == "ucb":
+        apflog("Figuring out what the observation name should be.",echo=False)
+        opt.owner = 'Howard'
+        opt.name = "ucb-" + getnightcode()
+        opt.obsnum=100
+    else:
+        if opt.owner == None:
+            opt.owner = opt.name
+
+    return opt
 
 def getTotalLines(filename):
     tot = 0
@@ -172,7 +213,7 @@ def getTotalLines(filename):
                
 
 class Master(threading.Thread):
-    def __init__(self, apf, user='ucsc',sheetn="The Googledex",owner='Vogt'):
+    def __init__(self, apf, user='ucsc',sheetn=["Bstars"],owner='public'):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf
@@ -192,6 +233,7 @@ class Master(threading.Thread):
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
         self.starttime = None
+        self.debug = False
         self.apftask = ktl.Service('apftask')
         self.lineresult = apftask['scriptobs_line_result']
         self.lineresult.monitor()
@@ -230,8 +272,8 @@ class Master(threading.Thread):
             the current value of obsBstar
             The variable VAR_3 still overrides
         """
-        vals = APFTask.get("master",("VAR_3"))
-        if prev['VAR_3'] == 'True':
+        vals = APFTask.get("master",["VAR_3"])
+        if vals['VAR_3'] == 'True':
             self.obsBstar = True
         else:
             self.obsBstar = False
@@ -294,14 +336,16 @@ class Master(threading.Thread):
             else:
                 apflog("Calculating expected counts")
                 apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
-                exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm, decker=self.decker)
+                exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael,APF.avg_fwhm, self.decker)
                 try:
                     if APF.countrate <= 0:
                         try:
-                            APF.countrate = APF.counts / APF.elapsed
+                            APF.countrate = APF.ccountrate
                         except:
-                            APF.countrate = 0.0
+                            APF.countrate = -1.0
                     slowdown = exp_cnts_sec / APF.countrate
+                    if APF.countrate*10 <  APF.ccountrate:
+                        APF.countrate = APF.ccountrate
                     if slowdown < 0:
                         slowdown = 1
                         apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
@@ -309,19 +353,19 @@ class Master(threading.Thread):
                         APF.counts.monitor(start=True)
                         APF.counts.callback(ad.countmon)
                         # yes this happened.
-                    if slowdown < ds.SLOWDOWN_MIN:
-                        slowdown = ds.SLOWDOWN_MIN
+                    if slowdown < SchedulerConsts.SLOWDOWN_MIN:
+                        slowdown = SchedulerConsts.SLOWDOWN_MIN
                         apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
                         # yes this happened.
-                    if slowdown > ds.SLOWDOWN_MAX:
-                        slowdown = ds.SLOWDOWN_MAX
+                    if slowdown > SchedulerConsts.SLOWDOWN_MAX:
+                        slowdown = SchedulerConsts.SLOWDOWN_MAX
                         apflog("slowdown too high, countrate= %g" % (APF.countrate), echo=True, level='debug')
                 except ZeroDivisionError:
                     apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                     slowdown = 1
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
             APFLib.write(apf.robot["MASTER_VAR_1"], slowdown)
-            apflog("getTarget(): countrate = %.2f" % APF.countrate)
+            apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (APF.countrate,APF.ccountrate))
 
             # Check for a valid seeing measurment. If there isn't one, use a default
             if APF.avg_fwhm == 0.:
@@ -331,7 +375,7 @@ class Master(threading.Thread):
                 seeing = float(APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetn=self.sheetn, owner=self.owner)
+            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetns=self.sheetn, owner=self.owner)
 
             self.set_autofocval()
             if target is None:
@@ -386,7 +430,7 @@ class Master(threading.Thread):
                 setting = False
             APF.DMReset()
 
-            if setting:
+            if setting and sunset:
                 rv = APF.evening_star()
                 if not rv:
                     apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
@@ -415,7 +459,7 @@ class Master(threading.Thread):
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
-            if apf.ucam['OUTFILE'].read() == 'ucsc':
+            if apf.ucam['OUTFILE'].read() == 'ucsc' and apf.test == False:
                 APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
             APF.updateWindshield(self.windshield)
@@ -662,6 +706,18 @@ class Master(threading.Thread):
         threading.Thread._Thread__stop(self)
 
 
+def instr_permit():
+    instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+    userkind = ktl.read("checkapf","USERKIND",binary=True)
+    while not instr_perm or userkind != 3:
+        apflog("Waiting for instrument permission to be true and userkind to be robotic")
+        APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
+        APFTask.waitfor(parent,True,expression="$checkapf.USERKIND = robotic",timeout=600)
+        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+        userkind = ktl.read("checkapf","USERKIND",binary=True)
+
+    return True
+
 if __name__ == '__main__':
 
     apflog("Starting Heimdallr...")
@@ -690,8 +746,6 @@ if __name__ == '__main__':
         parent = 'master'
 
 
-    if not opt.sheet:
-        opt.sheet = "2017B"
     apftask = ktl.Service("apftask")        
     # Establish this as the only running master script ( Or example task in test mode )
     try:
@@ -746,23 +800,25 @@ if __name__ == '__main__':
     # Regardless of phase, if a name, obsnum, or reset was commanded, make sure we perform these operations.
     apflog("Setting scriptobs_lines_done=0")
     APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
-    if not opt.fixed:
-        APFTask.set(parent,"STARLIST","")
-    else:
+    if opt.fixed:
         if not os.path.exists(opt.fixed):
             errmsg = "starlist %s does not exist" % (opt.fixed)
             apflog(errmsg,level="error",echo=True)
             sys.exit(errmsg)
-        APFTask.set(parent,"STARLIST",opt.fixed)
+        if not debug:
+            APFTask.set(parent,"STARLIST",opt.fixed)
+    else:
+        if not debug:
+            APFTask.set(parent,"STARLIST","")
 
     if str(phase).strip() != "ObsInfo":
-        if opt.obsnum:
-            apflog("option -o specified. Setting UCAM OBSNUM to %d." % int(opt.obsnum)) 
-            APFLib.write(apf.ucam["OBSNUM"], int(opt.obsnum))
         if opt.name:
             apflog("option -n specified. Setting UCAM Observer to %s." % opt.name)
             APFLib.write(apf.ucam["OBSERVER"], opt.name)
             APFLib.write(apf.ucam["OUTFILE"], opt.name)
+        if opt.obsnum:
+            apflog("option -o specified. Setting UCAM OBSNUM to %d." % int(opt.obsnum)) 
+            APFLib.write(apf.ucam["OBSNUM"], int(opt.obsnum))
 
     # Start the actual operations
     # Goes through 5 steps:
@@ -779,22 +835,11 @@ if __name__ == '__main__':
     if "ObsInfo" == str(phase).strip():
         apflog("Setting the task step to 0")
         APFTask.step(parent,0)
-        if opt.obsnum == None:
-            apflog("Figuring out what the observation number should be.",echo=False)
-            obsNum = findObsNum(apf)
-        else:
-            obsNum = int(opt.obsnum)
 
-        apflog("Using %s for obs number." % repr(obsNum),echo=True)
         apflog("Setting Observer Information", echo=True)
-        if opt.name is None:
-            opt.owner = 'Vogt'
-            opt.name = 'ucsc'
-            apf.setObserverInfo(num=obsNum, name='ucsc',owner=opt.owner)
-        else:
-            if opt.owner == None:
-                opt.owner = opt.name
-            apf.setObserverInfo(num=obsNum, name=opt.name, owner=opt.owner)
+        opt = set_obs_defaults(opt)
+        apflog("Using %s for name and %s for obs number." % (opt.name,repr(opt.obsnum)),echo=True)
+        apf.setObserverInfo(num=opt.obsnum, name=opt.name, owner=opt.owner)
                 
         apflog("Setting ObsInfo finished. Setting phase to Focus.")
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
@@ -806,15 +851,12 @@ if __name__ == '__main__':
     # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
-        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-        while not instr_perm:
-            apflog("Waiting for instrument permission to be true")
-            APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
-            instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+        instr_permit()
+
+        
         result = apf.focus()
         if not result:
             focusdict = APFTask.get("focusinstr",["phase","nominal"])
-#            apflog("Focusinstr has failed. Observer is exiting.",level='error',echo=True)
             instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
             if not instr_perm:
                 while not instr_perm:
@@ -833,7 +875,8 @@ if __name__ == '__main__':
 #            sys.exit(1)
         apflog("Focus has finished. Setting phase to Cal-Pre")
         if apf.ucam['OUTFILE'].read() == 'ucsc':
-            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            if not debug:
+                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
@@ -854,19 +897,15 @@ if __name__ == '__main__':
         # except:
         #     apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
 
-        if apf.ucam['OUTFILE'].read() == 'ucsc':
+        if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
             APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
             
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
-        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-        while not instr_perm:
-            apflog("Waiting for instrument permission to be true")
-            APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
-            instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-
+        instr_permit()
+        
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
-        if apf.ucam['OUTFILE'].read() == 'ucsc':
+        if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
             APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         if result == False:
@@ -878,8 +917,6 @@ if __name__ == '__main__':
         apflog("Calibrate Pre has finished. Setting phase to Watching.")
         APFTask.phase(parent, "Watching")
         apflog("Phase is now %s" % phase)
-        if apf.ucam['OUTFILE'].read() == 'ucsc':
-            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
 
     # 4) Start the main watcher thread
@@ -888,7 +925,7 @@ if __name__ == '__main__':
         apflog("Starting the main watcher." ,echo=True)
         try:
             if opt.name == "ucsc":
-                names,star_table,do_flags,stars = ds.parseGoogledex(sheetn=opt.sheet)
+                names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
 
@@ -908,15 +945,16 @@ if __name__ == '__main__':
                 APFLib.write(apf.robot["MASTER_STARLIST"], opt.fixed)
             if opt.line != None:
                 APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], int(opt.line))
-                apflog("Starting star list %s at line %d" % (opt.fixed, int(opt.line)),echo=True)
+                apflog("Will be starting star list %s at line %d" % (opt.fixed, int(opt.line)),echo=True)
             else:
-                apflog("Starting star list %s" % opt.fixed,echo=True)
+                apflog("Will be starting star list %s at line 0" % opt.fixed,echo=True)
         else:
             apflog("Starting dynamic scheduler", echo=True)
         master.fixedList = opt.fixed
         master.starttime = opt.start
         master.task = parent
         master.windsheild = opt.windshield
+        master.debug = debug
         master.start()
     else:
         master.signal = False
@@ -966,7 +1004,7 @@ if __name__ == '__main__':
         if opt.name == "ucsc":
             try:
                 apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-                ds.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetn=master.sheetn)
+                ParseGoogledex.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn)
             except:
                 apflog("Error: Updating the online googledex has failed.", level="error")
         logpush(os.path.join(os.getcwd(),"observed_targets"))
@@ -1004,7 +1042,7 @@ if __name__ == '__main__':
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
             APFTask.set(parent,suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
 
-    if apf.ucam['OUTFILE'].read() == 'ucsc':
+    if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
         APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
     bstr = "%d,%d" % (1,1)
@@ -1024,7 +1062,7 @@ if __name__ == '__main__':
     apf.setTeqMode('Day')
 
     # Update the last observation number to account for the morning calibration shots.
-    if apf.ucam['OUTFILE'].read() == 'ucsc':
+    if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
         APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
     
     APFTask.set(parent,suffix="MESSAGE",value="Updating last observation number",wait=False)

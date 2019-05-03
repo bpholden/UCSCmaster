@@ -1,9 +1,8 @@
+from __future__ import print_function
 import sys
 sys.path.append("../master")
 
-import numpy as np
 import pickle
-import ephem
 import optparse
 from datetime import datetime, timedelta
 import random
@@ -11,10 +10,14 @@ import re
 import os
 import shutil
 
+import ephem
+import numpy as np
+
 import NightSim as ns
 import UCSCScheduler_V2 as ds
 import ExposureCalculations as ec
 import Generate_Errors as ge
+import ParseGoogledex
 
 def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab,owner):
     actel,actaz = ns.compute_el(curtime,star,apf_obs)
@@ -31,10 +34,10 @@ def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab,owne
     if abs(metersig) > 3:
         metersig = 3.
     
-    meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+    meterrate = ec.getEXPMeter_Rate(result['VMAG'],result['BV'],actel,actfwhm,result['DECKER'])
     meterrate *= 1 + 0.11*metersig
     meterrate /= actslow
-    specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm)
+    specrate = ec.getSpec_Rate(result['VMAG'],result['BV'],actel,actfwhm,result['DECKER'])
     specrate *= 1 + 0.11*specsig
     specrate /= actslow
     metertime = result['COUNTS'] / meterrate
@@ -49,13 +52,8 @@ def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab,owne
     barycentertime += fexptime/(2.*86400)
     totcounts = fexptime * specrate
 
-#    precision, deviation, true_error = ge.compute_real_uncertainty(totcounts,result['BV'],jitter)
-#    precision, deviation, true_error = ge.compute_real_uncertainty_sinnoise(totcounts,ephem.julian_date(curtime),star_tab)
-    
     outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts,  actel,actaz, actfwhm, actslow, owner)
-#    print outstr
-#    for outfp in outfps:
-#        outfp.write(outstr + "\n")
+
     return curtime, lastfwhm, lastslow, outstr
 
 
@@ -64,14 +62,14 @@ def read_datefile(datefn):
     try:
         datefile = open(options.datefile)
     except Exception as e:
-        print "cannot open %s, and we died trying: %s" % (args[0], e)
+        print ("cannot open %s, and we died trying: %s" % (args[0], e))
         sys.exit()
 
     datelist = []
     for line in datefile:
         datestr, = line.split()
         if not ns.checkdate(datestr):
-            print "%s is not an acceptable date string" % (datestr)
+            print ("%s is not an acceptable date string" % (datestr))
             sys.exit()
         datelist.append(datestr)
         
@@ -144,7 +142,7 @@ def prep_master(outdir,mastername):
         try:
             masterfp = open(mastername)
         except Exception as e:
-            print "Cannot open file %s for output, %s,  exiting" % (mastername, e)
+            print ("Cannot open file %s for output, %s,  exiting" % (mastername, e))
             sys.exit()
         
         for ln in masterfp:
@@ -154,7 +152,7 @@ def prep_master(outdir,mastername):
     try:
         masterfp = open(mastername,"a+")
     except Exception as e:
-        print "Cannot open file %s for output, %s,  exiting" % (mastername, e)
+        print ("Cannot open file %s for output, %s,  exiting" % (mastername, e))
         sys.exit()
 
     return masterfp,star_strs, star_dates
@@ -173,7 +171,7 @@ def parse_args():
     (options, args) = parser.parse_args()    
 
     if len(args) < 2 and options.datefile == "":
-        print "needs either a date pair or an input file which lists the dates"
+        print ("needs either a date pair or an input file which lists the dates")
         sys.exit()    
 
     if options.datefile != "":
@@ -190,7 +188,7 @@ def parse_args():
         try:
             os.mkdir(options.outdir)
         except Exception as e:
-            print "cannot make output directory: %s - %s" % (options.outdir,e)
+            print ("cannot make output directory: %s - %s" % (options.outdir,e))
             sys.exit()
 
     gd = os.path.join(options.outdir,options.infile)
@@ -198,7 +196,7 @@ def parse_args():
         try:    
             shutil.copyfile(options.infile, gd)
         except Exception as e:
-            print "cannot copy %s to %s: %s" % (options.infile,options.outdir,e)
+            print ("cannot copy %s to %s: %s" % (options.infile,options.outdir,e))
             sys.exit()
             
     return options, datelist
@@ -214,7 +212,7 @@ if __name__ == "__main__":
     
     for datestr in datelist:
 
-        allnames, star_table, do_flag, stars  = ds.parseGoogledex(sheetn=options.googledex,outfn=os.path.join(options.outdir,options.infile))
+        allnames, star_table, do_flag, stars  = ParseGoogledex.parseGoogledex(sheetns=options.googledex,outfn=os.path.join(options.outdir,options.infile))
     
         fwhms = ns.gen_seeing()
         slowdowns = ns.gen_clouds()
@@ -238,7 +236,7 @@ if __name__ == "__main__":
                 for i in range(0,int(result['NEXP'])):
                     (curtime,lastfwhm,lastslow,outstr) = compute_simulation(curtime,result,stars[idx],apf_obs,slowdowns,fwhms,star_table[idx],result['owner'])
                     sim_results(outstr,star_strs,star_dates)
-                    print outstr
+                    print (outstr)
                     masterfp.write("%s\n" % (outstr))
                     
                 ot = open(otfn,"a+")
@@ -253,13 +251,13 @@ if __name__ == "__main__":
         
             curtime = ephem.Date(curtime)
         
-        print "sun rose"
+        print ("sun rose")
 
         if os.path.isfile(otfn):
             try:
                 os.unlink(otfn)
             except:
-                print "cannot unlink %s" %(otfn)
+                print ("cannot unlink %s" %(otfn))
     if masterfp:
         masterfp.close()
         

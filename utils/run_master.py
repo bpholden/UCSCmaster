@@ -1,15 +1,39 @@
 #!/opt/kroot/bin/kpython
-
-import ktl
-import APF
-import subprocess
-import shlex
-from time import sleep
-import ConfigParser
-import os.path
+from __future__ import print_function
 import os
 import sys
 import re
+from time import sleep
+
+import subprocess
+import shlex
+import ConfigParser
+
+import ktl
+import apflog
+import numpy as np
+
+def readem_or_weep(service,keyword,binary=False):
+
+    try:
+        value = ktl.read(service,keyword,binary=binary)
+    except:
+        apflog.apflog("cannot read %s.%s" % (service,keyword),echo=True,level='error')
+        sys.exit("cannot read %s.%s" % (service,keyword))
+
+    return value
+
+def writeem(service,keyword,value,binary=False):
+
+    try:
+        ktl.write(service,keyword,value,binary=binary)
+    except:
+        raise
+        apflog.apflog("cannot write %s.%s" % (service,keyword),echo=True,level='error')
+        sys.exit("cannot write %s.%s" % (service,keyword))
+
+    return value
+
 
 def primary_run(schedule):
     match = re.search("\A\s*(\d+)\s*",schedule)
@@ -23,25 +47,24 @@ def remap_config(configlist):
     return config
 
 def read_config(configfile,runstr):
-    run = primary_run(runstr)
+    srun = primary_run(runstr)
     config = ConfigParser.ConfigParser()
     if not os.path.exists(configfile):
+        apflog.apflog("configuration file %s does not exist"  % configfile)
         sys.exit("configuration file %s does not exist"  % configfile)
     config.read(configfile)
     programs = remap_config(config.items('programs'))
-    program = programs[run]
+    program = programs[srun]
     program_config = remap_config(config.items(program))
 
-    if program == "ucsc":
-        program_config['obsnum'] = finducscObsNum()
+    if program_config['obsnum'] == "ucsc":
+        program_config['obsnum'] = findUCSCObsNum()
+    if program_config['name'] == "ucb":
+        program_config['name'] = findUCBObsNum()
 
     return program_config
 
-def finducscObsNum():
-#    myPath = r"./"
-#    with open('/u/rjhanson/master/lastObs.txt','r') as f:
-#        l = f.readline()
-#        last = int(l.strip())
+def findUCSCObsNum():
     last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
         
     last += 100 - (last % 100)
@@ -49,9 +72,30 @@ def finducscObsNum():
     if last % 10000 > 9700:
         last += 10000 - (last % 10000)
 
-    
-
     return last
+
+
+def findUCBObsNum(lastcode=None):
+    apftask = ktl.Service('apftask')
+    if lastcode == None:
+        lastcode = apftask['MASTER_LAST_OBS_UCB'].read()
+        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
+            apflog.apflog( "Existing files detected for run %s. Not incrementing night code." % lastcode,echo=True)
+            return lastcode
+
+    zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
+
+    if 2 not in zloc:
+        ncode = lastcode[0:2] + chr(ord(lastcode[2])+1)   # increment last
+    if 2 in zloc and 1 not in zloc:
+        ncode = lastcode[0] + chr(ord(lastcode[1])+1) + 'a'   # increment middle
+    if 1 in zloc and 2 in zloc:
+        ncode = chr(ord(lastcode[0])+1) + 'aa'   # increment first
+
+    apftask['MASTER_LAST_OBS_UCB'].write(ncode)
+    ncode = 'ucb-' + ncode
+    return ncode
+
 
 def ok_config(config):
 
@@ -82,36 +126,20 @@ def define_observer(config):
 
 def config_kwds(config):
     obs = define_observer(config)
-    try:
-        ktl.write('checkapf','OBSLOCAT',obs)
-    except:
-        raise
-        sys.exit('Cannot communicate with checkapf service')
-    try:
-        ktl.write('apfucam','OBSERVER',config['observer'])
-    except:
-        raise
-        sys.exit('Cannot communicate with checkapf service')
-    try:
-        ktl.write('apfschedule','ACTIVE_RUN',primary_run(schedule))
-    except:
-        raise
-        sys.exit('Cannot communicate with apfschedule service')
+
+    writeem('checkapf','OBSLOCAT',obs)
+    writeem('apfucam','OBSERVER',config['observer'])
+    writeem('apfschedule','ACTIVE_RUN',primary_run(schedule))
+
+    ownr = readem_or_weep('apfschedule','OWNRNAME')
+    writeem('apfschedule','OWNRHINT',ownr)
 
     if config['name'] == 'ucsc':
-        try: 
-            ktl.write('apfucam','outfile',config['name'])
-            ktl.write('apfucam','obsnum',config['obsnum'])
-        except:
-            raise
-            sys.exit('Cannot communicate with apfucam service')
+            writeem('apfucam','outfile',config['name'])
+            writeem('apfucam','obsnum',config['obsnum'])
 
     if config['owner']:
-        try: 
-            ktl.write('apfschedule','ownrhint',config['owner'])
-        except:
-            raise
-            sys.exit('Cannot communicate with apfschedule service')
+        writeem('apfschedule','ownrhint',config['owner'])
 
     return True
 
@@ -120,33 +148,39 @@ def modify_env(config):
     cenv['PATH'] = config['pathvar']
     cenv['PYTHONPATH'] = config['pythonpathvar']
     return cenv
-            
+
+        
 if __name__ == "__main__":
 
-    try:
-        schedule = ktl.read('apfschedule','SCHEDULED_RUNS')
-    except:
-        sys.exit("cannot read apfschedule.SCHEDULED_RUNS")
-        
+    schedule = readem_or_weep('apfschedule','SCHEDULED_RUNS')
+
+    userkind = readem_or_weep('checkapf','USERKIND',binary=True)
+    if userkind != 3:
+        sys.exit("checkapf not in robotic mode")
+
+
+    master_status = readem_or_weep('apftask','master_status',binary=True)
+    if master_status < 3:
+        sys.exit("master has been started")
+
     cpath = os.path.dirname(os.path.abspath(__file__))
     configfile = "master.config"
-    masterstatus=ktl.read('apftask','MASTER_PID',binary=True)
     config = read_config(os.path.join(cpath,configfile),schedule)
 
-    if masterstatus < 0 and ok_config(config) and config_kwds(config):
+    if ok_config(config) and config_kwds(config):
 
         stuff_to_run = build_exec_str(config)
         env = modify_env(config)
-        print " ".join(stuff_to_run)
+        print(" ".join(stuff_to_run))
         if os.getuid() == int(config['user']):
             p=subprocess.Popen(stuff_to_run,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
             sleep(10)
             if p.poll():
-                print "Master failed for some reason or another."
+                print("Master failed for some reason or another.")
                 (out,err) = p.communicate()
-                print err
-                print out
+                print(err)
+                print(out)
         else:
-            print "Master cannot be run by this account"
-    else:
-        print "Master script is already running"
+            print("Master cannot be run by this account")
+
+        

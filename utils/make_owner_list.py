@@ -1,11 +1,10 @@
+from __future__ import print_function
 import sys
-sys.path.append("../master")
-import UCSCScheduler_V2 as ds
-import numpy as np
+
 from optparse import OptionParser
-import datetime
-import time
-import re
+
+sys.path.append("../master")
+import ParseGoogledex
 
 if __name__ == "__main__":
 
@@ -15,10 +14,9 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()    
 
 
-    (names, star_table, flags, stars) = ds.parseGoogledex(sheetn=options.sheet)
-#    print options.owner 
+    (names, star_table, flags, stars) = ParseGoogledex.parseGoogledex(sheetns=options.sheet)
      
     for i in range(0,len(names)):
-#        print flags['owner'][i]
+
         if options.owner in flags['owner'][i]:
-            print names[i]
+            print (names[i])
