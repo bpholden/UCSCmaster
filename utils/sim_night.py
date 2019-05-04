@@ -107,15 +107,21 @@ ot.close()
 observing = True
 curtime, endtime, apf_obs = ns.sun_times(datestr)
 bstar = options.bstar
+doTemp = True
+tempcount = 0
 while observing:
 
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime, lastfwhm, lastslow)
     else:
-        result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile), verbose=True)
+        result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile), verbose=True,template=doTemp)
     if result:
         if bstar:
             bstar = False
+        if result['isTemp']:
+            tempcount = tempcount + 1
+        if tempcount == 2:
+            doTemp=False # two per night
         curtime += 70./86400 # acquisition time
         idx = allnames.index(result['NAME'])
         for i in range(0,int(result['NEXP'])):
