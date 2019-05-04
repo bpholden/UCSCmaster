@@ -807,13 +807,13 @@ if __name__ == '__main__':
     otfn = "observed_targets"
     ot = open(otfn,"w")
     starttime = time.time()
-    result = getNext(starttime, 13.99, 1.8, bstar=True, verbose=True,sheetns=sheetn.split(","))
+    result = getNext(starttime, 7.99, 0.4, bstar=True, verbose=True,sheetns=sheetn.split(","))
     ot.write("%s\n" % (result["SCRIPTOBS"]))
     ot.close()
     starttime += 400
     for i in range(5):
 
-        result = getNext(starttime, 13.99, 1.8, bstar=False, verbose=True,sheetns=sheetn)
+        result = getNext(starttime, 7.99, 0.4, bstar=False, verbose=True,sheetns=sheetn)
         #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:
