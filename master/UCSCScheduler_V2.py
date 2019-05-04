@@ -482,7 +482,18 @@ def makeTempRow(star_table,ind,bstar=False):
             row.append(7)
     return row
 
-
+def enoughTime(apf_obs,star_table,stars,idx,row):
+    tot_time = row[DS_NSHOTS]*row[DS_EXPT]
+    tot_time += 70 + (140 + 300)
+    vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
+    sunrise = apf_obs.next_rising(ephem.Sun())  
+    timeleft = (sunrise - apf_obs.date)*86400.
+    if tot_time < timeleft  and vis:
+        return True
+    else:
+        return False
+        
+    
 def findBstar(snames,star_table,idx, bstars):
 
     near_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],star_table[idx,DS_RA],star_table[idx,DS_DEC])
