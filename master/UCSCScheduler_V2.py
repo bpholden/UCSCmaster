@@ -439,10 +439,10 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
 
 def template_conditions(moon, seeing, slowdown):
 
-    if seeing < 13 and slowdown < 0.5:
-        if moon.phase < 0.5 and moon.alt < 0:
+    if seeing < 15 and slowdown < 0.5:
+        if moon.phase < 14 and moon.alt < 0:
             return True
-        elif moon.phase < 0.25 and moon.alt < 0.7:
+        elif moon.phase < 7 and moon.alt < 0.7:
             return True
         else:
             return False
