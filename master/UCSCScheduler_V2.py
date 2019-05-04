@@ -804,9 +804,11 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     if do_templates and flags['template'][idx] == 'N':
         bname,brow = findBstar(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
-        bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner=flags['owner'][idx])
-        line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
-        res['SCRIPTOBS'] = bline + line + bline
+        if enoughTime(apf_obs,star_table,stars,idx,row):
+            bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner=flags['owner'][idx])
+            line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
+            res['SCRIPTOBS'] = bline + "\n" + line + "\n" + bline
+            res['isTemp'] = True
 
     return res
 
