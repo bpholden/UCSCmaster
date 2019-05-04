@@ -462,21 +462,21 @@ def makeTempRow(star_table,ind,bstar=False):
 
     row = []
 
-    row.append(star_table[ind, ds.DS_RA])
-    row.append( star_table[ind, ds.DS_DEC])
-    row.append(star_table[ind, ds.DS_PMRA])
-    row.append(star_table[ind, ds.DS_PMDEC])
-    row.append(star_table[ind, ds.DS_VMAG])
+    row.append(star_table[ind, DS_RA])
+    row.append( star_table[ind, DS_DEC])
+    row.append(star_table[ind, DS_PMRA])
+    row.append(star_table[ind, DS_PMDEC])
+    row.append(star_table[ind, DS_VMAG])
     row.append(1200)
     row.append(1e9)
-    row.append( star_table[ind, ds.DS_APFPRI])
+    row.append( star_table[ind, DS_APFPRI])
     row.append(0)
     if bstar:
         row.append(2)
     else:
-        if star_table[ind, ds.DS_VMAG] > 10:
+        if star_table[ind, DS_VMAG] > 10:
             row.append(9)
-        elif star_table[ind, ds.DS_VMAG] < 8:
+        elif star_table[ind, DS_VMAG] < 8:
             row.append(5)
         else:
             row.append(7)
@@ -485,7 +485,7 @@ def makeTempRow(star_table,ind,bstar=False):
 
 def findBstar(snames,star_table,idx, bstars):
 
-    near_idx = findClosest(star_table[:,ds.DS_RA][bstars],star_table[:,ds.DS_DEC][bstars],star_table[idx,ds.DS_RA],star_table[idx,ds.DS_DEC])
+    near_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],star_table[idx,DS_RA],star_table[idx,DS_DEC])
     row = makeTempRow(star_table[bstars],near_idx,bstar=True)
     return snames[near_idx],row
 
