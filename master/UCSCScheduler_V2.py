@@ -487,8 +487,8 @@ def enoughTime(apf_obs,star_table,stars,idx,row):
     tot_time += 70 + (140 + 300)
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
     sunrise = apf_obs.next_rising(ephem.Sun())  
-    timeleft = (sunrise - apf_obs.date)*86400.
-    if tot_time < timeleft  and vis:
+    time_left = (sunrise - apf_obs.date)*86400.
+    if tot_time < time_left  and vis:
         return True
     else:
         return False
