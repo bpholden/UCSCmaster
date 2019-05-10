@@ -246,6 +246,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
             next
         col = vals[0].index("lastobs") 
         nobscol = vals[0].index("Nobs")
+        tempcol = vals[0].index("Template")
     
         for i, v in enumerate(vals):
             # Did we observe this target tonight?
@@ -253,6 +254,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                 # We observed this target, so update the cell in the worksheet
                 # update_cell(row, col, val) - col and row are 1 indexed
                 otime = times[names.index(v[0])]
+                taketemp = temps[names.index(v[0])]
                 if isinstance(otime,float):
                     t = datetime.utcfromtimestamp(otime)
                 else:
@@ -272,7 +274,12 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                 except:
                     print (v[0], v[col])
                     ws.update_cell(i+1, col+1, round(jd,2) )
-                
+                try:
+                   have_temp = v[tempcol]
+                   if taketemp == "Y" and have_temp == "N":
+                       ws.update_cell(i+1, tempcol+1, "Y")
+                except:
+                    apflog( "Error logging template obs for %s" % (names.index(v[0])),echo=True,level='error')
             apflog( "Updated %s" % (sheetn),echo=True)
 
     return
