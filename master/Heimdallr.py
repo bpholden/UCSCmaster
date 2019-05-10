@@ -234,6 +234,8 @@ class Master(threading.Thread):
         self.targetlog = None
         self.starttime = None
         self.debug = False
+        self.doTemp = True
+        self.nTemps = 0
         self.apftask = ktl.Service('apftask')
         self.lineresult = apftask['scriptobs_line_result']
         self.lineresult.monitor()
@@ -375,7 +377,7 @@ class Master(threading.Thread):
                 seeing = float(APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetns=self.sheetn, owner=self.owner)
+            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar, verbose=True, sheetns=self.sheetn, owner=self.owner, template=self.doTemp)
 
             self.set_autofocval()
             if target is None:
@@ -401,6 +403,10 @@ class Master(threading.Thread):
 
             apflog("getTarget(): Target= %s Temp=%s" % target["NAME"],istemp)
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
+            if target['isTemp']:
+                self.nTemps += 1
+                if self.nTemps >= 2:
+                    self.doTemp = False
 
         # opens the dome & telescope, if sunset is True calls open at sunset, else open at night
         def opening(sunel,sunset=False):
