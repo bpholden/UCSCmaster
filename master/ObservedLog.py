@@ -1,3 +1,4 @@
+import re
 try:
     from apflog import *
 except:
@@ -9,10 +10,12 @@ def getObserved(filename):
     names, times = getObserved(filename)
     names - list of names, must be first column of file called filename
     times - times either as a timestamp in second column or a (hour,minute) tuple from a scriptobs line
+    temps - a list of template observations
 
     """
     obs = []
     times = []
+    temps = []
     nobs = dict()
     try:
         f = open(filename, 'r')
@@ -32,8 +35,16 @@ def getObserved(filename):
                         times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
                     else:
                         times.append(float(ls[1]))
+                    length = len(ls)
+                    mtch = re.search("temp\=Y",ls[length-1])
+                    if mtch:
+                        temps.append("Y")
+                    else:
+                        temps.append("N")
+
             
     obs.reverse()
     times.reverse()
-    return obs, times
+    temps.reverse()
+    return obs, times, temps
 	

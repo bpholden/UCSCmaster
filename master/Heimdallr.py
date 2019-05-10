@@ -1009,12 +1009,11 @@ if __name__ == '__main__':
 
     # Keep a copy of observed_targets around for a bit just in case
     if os.path.exists(os.path.join(os.getcwd(),"observed_targets")):
-        if opt.name == "ucsc":
-            try:
-                apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-                ParseGoogledex.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn)
-            except:
-                apflog("Error: Updating the online googledex has failed.", level="error")
+        try:
+            apflog("Updating the online googledex with the observed times", level='Info', echo=True)
+            ParseGoogledex.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn)
+        except:
+            apflog("Error: Updating the online googledex has failed.", level="error")
         logpush(os.path.join(os.getcwd(),"observed_targets"))
         
     if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
