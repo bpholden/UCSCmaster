@@ -828,7 +828,7 @@ if __name__ == '__main__':
     starttime += 400
     for i in range(5):
 
-        result = getNext(starttime, 7.99, 0.4, bstar=False, verbose=True,sheetns=sheetn)
+        result = getNext(starttime, 7.99, 0.4, bstar=False, verbose=True,sheetns=sheetn,template=True)
         #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:
