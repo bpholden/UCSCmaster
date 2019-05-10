@@ -809,6 +809,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
             line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
             res['SCRIPTOBS'] = bline + "\n" + line + "\n" + bline
             res['isTemp'] = True
+            apflog("Attempting template observation of %s" % (sn[idx]),echo=True)
 
     return res
 
