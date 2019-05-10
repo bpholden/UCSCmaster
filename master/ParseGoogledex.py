@@ -231,7 +231,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
 
         filename - where the observations are logged
     """
-    names, times = ObservedLog.getObserved(filename)
+    names, times, temps = ObservedLog.getObserved(filename)
     if len(names) == 0:
         return
     if ctime is None:
@@ -285,7 +285,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
         opens googledex_file and inputs date of last observation from observed_file
         in principle can use timestamps as well as scriptobs uth and utm values
     """
-    names, times = ObservedLog.getObserved(observed_file)
+    names, times, temps = ObservedLog.getObserved(observed_file)
 
     try:
         g = open(googledex_file, 'rb')
