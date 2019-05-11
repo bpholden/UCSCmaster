@@ -252,7 +252,7 @@ class Master(threading.Thread):
         APF = self.APF
         # check last telescope focus
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
-        if time.time() - lastfoc > FOCUSTIME :
+        if time.time() - lastfoc > FOCUSTIME:
             APF.autofoc.write("robot_autofocus_enable")
             APFTask.set(parent, suffix="MESSAGE", value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.), wait=False)            
         else:
@@ -452,7 +452,7 @@ class Master(threading.Thread):
                 apflog(outstr,level='info', echo=True)
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
                 APF.DMReset()
-            return
+            return result
 
 
         # closing
@@ -568,7 +568,7 @@ class Master(threading.Thread):
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
-                exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael, APF.avg_fwhm)
+                exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael, APF.avg_fwhm,["W"])
                 try:
                     slow = exp_cntrate / APF.countrate
                     if slow < 0:
@@ -603,11 +603,11 @@ class Master(threading.Thread):
                     APFTask.waitfor(self.task, True, timeout=15)
                     
                     haveobserved = True                    
-                elif self.starttime != None and self.shouldStartList() :
+                elif self.starttime != None and self.shouldStartList():
                     APF.killRobot()
 
             # check last telescope focus
-            if running and  float(sunel) <= sunel_lim :
+            if running and  float(sunel) <= sunel_lim:
                 self.set_autofocval()
                 
             # If the sun is rising and we are finishing an observation
@@ -653,13 +653,13 @@ class Master(threading.Thread):
                 
             # Open 
 
-            if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and APF.openOK :
-                if float(sunel) > sunel_lim and not rising :
+            if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and APF.openOK:
+                if float(sunel) > sunel_lim and not rising:
                     APFTask.set(parent, suffix="MESSAGE", value="Open at sunset", wait=False)                    
-                    success = opening( sunel, sunset=True)
+                    success = opening(sunel, sunset=True)
                 elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
                     APFTask.set(parent, suffix="MESSAGE", value="Open at night", wait=False)                    
-                    success = opening( sunel)
+                    success = opening(sunel)
                 else:
                     success = True
                 if success == False:
@@ -1005,7 +1005,7 @@ if __name__ == '__main__':
 
     # We have finished taking data, and presumably it is the morning.
     apf.setTeqMode('Morning')
-
+    apf.close()
 
     # Keep a copy of observed_targets around for a bit just in case
     if os.path.exists(os.path.join(os.getcwd(),"observed_targets")):
