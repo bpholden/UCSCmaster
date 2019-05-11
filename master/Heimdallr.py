@@ -6,7 +6,6 @@
 import argparse
 import atexit
 from datetime import datetime, timedelta
-import numpy as np
 import os
 import os.path
 from select import select
@@ -18,6 +17,8 @@ import time
 import pickle
 import functools
 import glob
+
+import numpy as np
 
 try:
     import ktl
