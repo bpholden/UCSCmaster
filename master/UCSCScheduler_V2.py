@@ -3,6 +3,7 @@ from __future__ import print_function
 import os
 import sys
 import time
+import re
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -18,7 +19,6 @@ try:
     import ktl
 except:
     from fake_apflog import *
-import re
 import Visible
 
 
@@ -87,7 +87,7 @@ def parseStarlist(starlist):
         return None
     else:
         for line in f:
-            if not re.search("\A\#",line):
+            if not re.search("\A\#", line):
                 ls = line.split()
                 names.append(ls[0])
                 row = []
@@ -129,7 +129,7 @@ def parseStarlist(starlist):
 def readin_lastobs(filename,ctime):
     codex = False
     try:
-        fp = open(filename,'rb')
+        fp = open(filename, 'rb')
         full_codex = pickle.load(fp)
         fp.close()
         codex = True
@@ -137,7 +137,7 @@ def readin_lastobs(filename,ctime):
         codex = full_codex[1:]
         # These are the columns we need for scheduling
         req_cols = ["Star Name", "lastobs", "Template", "Nobs"]
-        didx = findColumns(colhead,req_cols)
+        didx = findColumns(colhead, req_cols)
 
     except :
         codex = False
@@ -158,10 +158,10 @@ def readin_lastobs(filename,ctime):
             fnames.append(cline[didx['Star Name']])
             nobs.append(int(cline[didx['Nobs']]))
     else:
-        for i in range(0,len(names)):
+        for i in range(0, len(names)):
             fnames.append(names[i])
             otime = times[i]
-            if isinstance(otime,float):
+            if isinstance(otime, float):
                 t = datetime.utcfromtimestamp(otime)
             else:
                 hr, mn = otime
@@ -185,7 +185,7 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
     # Start with the target name
     ret = name + ' '
     # Add the RA as three elements, HR, MIN, SEC
-    rastr = Coords.getCoordStr(np.degrees(row[DS_RA]),isRA=True)
+    rastr = Coords.getCoordStr(np.degrees(row[DS_RA]), isRA=True)
     ret += rastr + ' '
     # Add the DEC as three elements, DEG, MIN, SEC
     decstr = Coords.getCoordStr(np.degrees(row[DS_DEC]))
@@ -307,7 +307,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
 
     if not outdir:
         outdir = os.getcwd()
-    observed, _ = ObservedLog.getObserved(os.path.join(outdir,"observed_targets"))
+    observed, _ = ObservedLog.getObserved(os.path.join(outdir, "observed_targets"))
 
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
@@ -329,7 +329,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
         sn, star_table, lines, stars = parseStarlist(starlist)
     except ValueError:
         # This will be raised when the starlist could not be parsed successfully.
-        apflog( "No target could be selected because starlist could not be parsed.", level="warn",echo=True)
+        apflog( "No target could be selected because starlist could not be parsed.", level="warn", echo=True)
         return None
     targNum = len(sn)
 
@@ -347,18 +347,18 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
     available = available & moon_check
 
     # If seeing is bad, only observe bright targets ( Large VMAG is dim star )
-    brightenough = np.where(star_table[:, DS_VMAG] < VMAX,True,False)
+    brightenough = np.where(star_table[:, DS_VMAG] < VMAX, True, False)
     available = available & brightenough
 
     obs_length = star_table[:,DS_EXPT] * star_table[:,DS_NSHOTS] + 45 * (star_table[:,DS_NSHOTS]-1)
-    vis, star_elevations, fin_els = Visible.is_visible(apf_obs,stars,obs_length)
+    vis, star_elevations, fin_els = Visible.is_visible(apf_obs, stars, obs_length)
     available = available & vis
 
     done = [ True if n in observed else False for n in sn ]
     availableandnotdone = available & np.logical_not(done)
 
     if not any(availableandnotdone):
-        apflog( "All visible targets have been observed",level="warn",echo=True)
+        apflog( "All visible targets have been observed", level="warn", echo=True)
         (good,) = np.where(available)
     else:
         (good,) = np.where(availableandnotdone)
@@ -781,7 +781,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         sort_j = cur_elevations[sort_i].argsort()[::-1]
     else:
         sort_j = scaled_elevations[sort_i].argsort()[::-1]
-        cstr= "getNext(): cadence check: %s" %( cadence_check[sort_i][sort_j][0])
+        cstr= "getNext(): cadence check: %s" % (cadence_check[sort_i][sort_j][0])
         apflog(cstr,echo=True)
 
     t_n = sn[sort_i][sort_j][0]
@@ -791,13 +791,13 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
 
     t_n = sn[sort_i][sort_j][0]
 
-    apflog("getNext(): selected target %s" %( t_n) )
+    apflog("getNext(): selected target %s" % (t_n) )
 
     idx, = np.where(sn == t_n)
     idx = idx[0]
 
     stars[idx].compute(apf_obs)
-    cstr= "getNext(): cadence check: %f (%f %f %f)" %( ((ephem.julian_date(dt) - star_table[idx, DS_LAST]) / star_table[idx, DS_CAD]), ephem.julian_date(dt), star_table[idx, DS_LAST], star_table[idx, DS_CAD])
+    cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table[idx, DS_LAST]) / star_table[idx, DS_CAD]), ephem.julian_date(dt), star_table[idx, DS_LAST], star_table[idx, DS_CAD])
     apflog(cstr,echo=True)
 
     res =  makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx)
@@ -833,13 +833,13 @@ if __name__ == '__main__':
         #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:
-            print ("Get None target")
+            print("Get None target")
         else:
             for k in result:
-                print (k, result[k])
+                print(k, result[k])
         ot = open(otfn,"a")
         ot.write("%s\n" % (result["SCRIPTOBS"]))
         ot.close()
         starttime += result["EXP_TIME"]
 
-    print ("Done")
+    print("Done")
