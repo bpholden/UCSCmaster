@@ -489,7 +489,7 @@ class APF:
                 APFLib.write("apfmot.DEWARFOCRAW",ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True))
             except:
                 apflog("Cannot read the last best fitting focus value or write the dewar focus value", level='error')
-            if self.dewarfoc > 8600 or self.dewarfoc < 8400:
+            if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
                 apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % (self.dewarfoc), level = "error", echo=True)
                 return False
             apflog("Running calibrate %s %s" % (script, time), level = 'info')
@@ -993,7 +993,7 @@ class APF:
         if self.teqmode.read() != 'Night':
             self.setTeqMode('Night')
         # Check the instrument focus for a reasonable value
-        if self.dewarfoc > 8600 or self.dewarfoc < 8400:
+        if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
             lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
             apflog("Error: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
             APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
