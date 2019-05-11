@@ -807,7 +807,7 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         if enoughTime(apf_obs,star_table,stars,idx,row):
             bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public')
             line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
-            line = line + "# temp=Y"
+            line = line + " # temp=Y"
             res['SCRIPTOBS'] = bline + "\n" + line + "\n" + bline
             res['isTemp'] = True
             apflog("Attempting template observation of %s" % (sn[idx]),echo=True)
