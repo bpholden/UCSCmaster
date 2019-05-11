@@ -71,7 +71,7 @@ def control_watch(keyword,parent):
             os.kill(os.getpid(), signal.SIGINT)
         elif value == "Pause":
             try:
-                APFTask.set(parent,suffix='STATUS', value='PAUSED')
+                APFTask.set(parent, suffix='STATUS', value='PAUSED')
                 paused = True
             except:
                 APF.log("Failure to set STATUS in APFTask", level=error)
@@ -461,7 +461,7 @@ class Master(threading.Thread):
 
             APF.close()
             if apf.ucam['OUTFILE'].read() == 'ucsc':
-                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+                APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
             return
         
         # starts an instance of scriptobs 
@@ -469,7 +469,7 @@ class Master(threading.Thread):
             # Update the last obs file and hitlist if needed
 
             if apf.ucam['OUTFILE'].read() == 'ucsc' and apf.test == False:
-                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+                APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
             APF.updateWindshield(self.windshield)
             apflog("Starting an instance of scriptobs",echo=True)
@@ -489,7 +489,7 @@ class Master(threading.Thread):
                 if APF.ldone == tot and APF.user != "ucsc":
                     APF.close()
                     if apf.ucam['OUTFILE'].read() == 'ucsc':
-                        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+                        APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
                     
                     self.exitMessage = "Fixed list is finished. Exiting the watcher."
                     self.stop()
@@ -576,10 +576,10 @@ class Master(threading.Thread):
                 except ZeroDivisionError:
                     apflog("No current countrate", echo=True)
                     slow = 5
-                APFTask.set(parent,suffix="MESSAGE",value="FWHM = %.2f and slowdown %.2f" % (APF.avg_fwhm,slow), wait=False)
+                APFTask.set(parent, suffix="MESSAGE",value="FWHM = %.2f and slowdown %.2f" % (APF.avg_fwhm,slow), wait=False)
                 if slow > 16:
                     # The slowdown is too high, we should close up and wait.
-                    APFTask.set(parent,suffix="MESSAGE",value="Closing for clouds", wait=False)
+                    APFTask.set(parent, suffix="MESSAGE",value="Closing for clouds", wait=False)
                     apflog("Slowdown factor of %.2f is too high. Waiting 30 min to check again." % slow, echo=True)
                     closing()
                     APFTask.waitfor(self.task, True, timeout=60*30)
@@ -693,7 +693,7 @@ class Master(threading.Thread):
                     else:
                         lvl = "warn"
                     apflog("scriptobs is not running just after being started!", level=lvl, echo=True)
-                    APFTask.set(parent,suffix="MESSAGE",value="scriptobs is not running just after being started!",wait=False)                    
+                    APFTask.set(parent, suffix="MESSAGE",value="scriptobs is not running just after being started!",wait=False)                    
 
                 
             # Keep an eye on the deadman timer if we are open 
@@ -883,7 +883,7 @@ if __name__ == '__main__':
         apflog("Focus has finished. Setting phase to Cal-Pre")
         if apf.ucam['OUTFILE'].read() == 'ucsc':
             if not debug:
-                APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+                APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         APFTask.phase(parent, "Cal-Pre")
         apflog("Phase now %s" % phase)
@@ -891,7 +891,7 @@ if __name__ == '__main__':
     # 3) Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
         try:
-            APFTask.set(parent,suffix="VAR_3",value="True")
+            APFTask.set(parent, suffix="VAR_3",value="True")
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
 
@@ -905,7 +905,7 @@ if __name__ == '__main__':
         #     apflog("Cannot move instrument focus to %d" % (AVERAGE_INSTRFOC),level="error",echo=True)
 
         if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
-            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
             
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
@@ -913,7 +913,7 @@ if __name__ == '__main__':
         
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
         if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
-            APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         if result == False:
             apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
@@ -1046,10 +1046,10 @@ if __name__ == '__main__':
         result = apf.calibrate(script=opt.calibrate, time='post')
         if not result:
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
-            APFTask.set(parent,suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
+            APFTask.set(parent, suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
 
     if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
-        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+        APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
     bstr = "%d,%d" % (1,1)
     apf.ucam['BINNING'].write(bstr) 
@@ -1069,9 +1069,9 @@ if __name__ == '__main__':
 
     # Update the last observation number to account for the morning calibration shots.
     if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
-        APFTask.set(parent,suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+        APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
     
-    APFTask.set(parent,suffix="MESSAGE",value="Updating last observation number",wait=False)
+    APFTask.set(parent, suffix="MESSAGE",value="Updating last observation number",wait=False)
 
     # All Done!
     APFTask.phase(parent, "Finished")
