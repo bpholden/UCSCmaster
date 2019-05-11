@@ -401,7 +401,7 @@ class Master(threading.Thread):
             apflog("getTarget(): V=%.2f  B-V=%.2f Pri=%.2f " % (self.VMAG, self.BV, target["PRI"]))
             apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (APF.avg_fwhm, slowdown, APF.countrate))
 
-            apflog("getTarget(): Target= %s Temp=%s" % target["NAME"],istemp)
+            apflog("getTarget(): Target= %s Temp=%s" % (target["NAME"],istemp))
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
             if target['isTemp']:
                 self.nTemps += 1
