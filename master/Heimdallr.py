@@ -1005,7 +1005,7 @@ if __name__ == '__main__':
 
     # We have finished taking data, and presumably it is the morning.
     apf.setTeqMode('Morning')
-    apf.close()
+    apf.close(force=True)
 
     # Keep a copy of observed_targets around for a bit just in case
     if os.path.exists(os.path.join(os.getcwd(),"observed_targets")):
