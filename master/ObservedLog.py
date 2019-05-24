@@ -7,7 +7,7 @@ except:
 
 def getObserved(filename):
     """ getObserved parses a file to find the object names and times
-    names, times = getObserved(filename)
+    names, times, temps = getObserved(filename)
     names - list of names, must be first column of file called filename
     times - times either as a timestamp in second column or a (hour,minute) tuple from a scriptobs line
     temps - a list of template observations
