@@ -416,7 +416,7 @@ class Master(threading.Thread):
             if sunset:
                 when = "sunset"
                 
-            apflog("Running open at %s as sunel = %4.2f" % (when, float(sunel)))
+            apflog("Running open at %s as sunel = %4.2f" % (when, float(sunel)),echo=True)
             (apfopen,what) =APF.isOpen()
             if apfopen:
                 APF.DMReset()
@@ -432,7 +432,7 @@ class Master(threading.Thread):
                     if not result:
                         apflog("Error: openatsunset has failed twice.", level='error', echo=True)
                         APF.close()
-
+            
 
             if datetime.now().strftime("%p") == 'PM':
                 setting = True
@@ -445,13 +445,14 @@ class Master(threading.Thread):
                 if not rv:
                     apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
             
-            chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
-            result = False
-            while float(sunel.read()) > SUNEL_STARTLIM and setting:
-                outstr = "Sun setting is %s and sun at elevation of %.3f" % (setting, float(sunel.read()))
-                apflog(outstr,level='info', echo=True)
-                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
-                APF.DMReset()
+                chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
+                result = False
+                while float(sunel.read()) > SUNEL_STARTLIM and setting:
+                    outstr = "Sun setting is %s and sun at elevation of %.3f" % (setting, float(sunel.read()))
+                    apflog(outstr,level='info', echo=True)
+                    result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
+                    APF.DMReset()
+
             return result
 
 
