@@ -215,7 +215,7 @@ def getTotalLines(filename):
                
 
 class Master(threading.Thread):
-    def __init__(self, apf, user='ucsc',sheetn=["Bstars"],owner='public'):
+    def __init__(self, apf, user='ucsc',sheetn=["Bstars"],owner='public',totTemps=4):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf
@@ -238,6 +238,7 @@ class Master(threading.Thread):
         self.debug = False
         self.doTemp = True
         self.nTemps = 0
+        self.totTemps = totTemps        
         self.apftask = ktl.Service('apftask')
         self.lineresult = apftask['scriptobs_line_result']
         self.lineresult.monitor()
@@ -407,7 +408,7 @@ class Master(threading.Thread):
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
             if target['isTemp']:
                 self.nTemps += 1
-                if self.nTemps >= 2:
+                if self.nTemps >= self.totTemps:
                     self.doTemp = False
 
         # opens the dome & telescope, if sunset is True calls open at sunset, else open at night
