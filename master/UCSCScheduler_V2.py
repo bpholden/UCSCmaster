@@ -141,7 +141,7 @@ def readin_lastobs(filename,ctime):
 
     except :
         codex = False
-        names, times = ObservedLog.getObserved(filename)
+        names, times, temps = ObservedLog.getObserved(filename)
         if len(names) == 0:
             return
         if ctime is None:
@@ -307,7 +307,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
 
     if not outdir:
         outdir = os.getcwd()
-    observed, _ = ObservedLog.getObserved(os.path.join(outdir, "observed_targets"))
+    observed, times, temps = ObservedLog.getObserved(os.path.join(outdir, "observed_targets"))
 
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
