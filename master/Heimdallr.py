@@ -880,8 +880,12 @@ if __name__ == '__main__':
                     flags = "-b"
                 result = apf.focus(flags=flags)
             else:
-                apflog("Focusinstr has failed. Seeting to %s." % (focusdict["nominal"]), level='error', echo=True)
+                apflog("Focusinstr has failed. Setting to %s and trying again." % (focusdict["nominal"]), level='error', echo=True)
                 APFLib.write("apfmot.DEWARFOCRAW", focusdict["nominal"], binary=True)
+                result = apf.focus()
+                if not result:
+                    apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["nominal"]), level='error', echo=True)
+                    shutdown()
 
         apflog("Focus has finished. Setting phase to Cal-Pre")
         if apf.ucam['OUTFILE'].read() == 'ucsc':
