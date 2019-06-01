@@ -856,11 +856,15 @@ class APF:
                 APFTask.waitFor(self.task, True, timeout=30)
             else:
                 break
-        if result:    
+        if result:
+            try:
+                APFTask.waitFor(self.task, suffix='LAST_CLOSE', value=time.time())
+            except:
+                apflog("cannot write apftask.MASTER_LAST_CLOSE",level=warn,echo=True)
             return True
         else:
             apflog("After 30 minutes of trying, closeup could not successfully complete.")
-
+            return False
 
 
     def updateLastObs(self,obsnum):
