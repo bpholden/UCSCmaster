@@ -494,11 +494,15 @@ def enoughTime(apf_obs,star_table,stars,idx,row):
         return False
         
     
-def findBstar(snames,star_table,idx, bstars):
+def findBstars(snames,star_table,idx, bstars):
 
     near_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],star_table[idx,DS_RA],star_table[idx,DS_DEC])
     row = makeTempRow(star_table[bstars],near_idx,bstar=True)
-    return snames[near_idx],row
+    
+    end_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],(star_table[idx,DS_RA]+45*np.pi/180.),star_table[idx,DS_DEC])
+    finrow = makeTempRow(star_table[bstars],end_idx,bstar=True)
+    
+    return snames[near_idx],row,snames[end_idx],finrow
 
 
 def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx):
@@ -802,13 +806,14 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
 
     res =  makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx)
     if do_templates and flags['template'][idx] == 'N':
-        bname,brow = findBstar(sn,star_table,idx,bstars)
+        bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
         if enoughTime(apf_obs,star_table,stars,idx,row):
             bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public')
             line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
+            bfinline = makeScriptobsLine(bnamefin,browfin,'Y',dt,decker="N",I2="Y", owner='public')
             line = line + " # temp=Y"
-            res['SCRIPTOBS'] = bline + "\n" + line + "\n" + bline
+            res['SCRIPTOBS'] = bline + "\n" + line + "\n" + bfinline
             res['isTemp'] = True
             apflog("Attempting template observation of %s" % (sn[idx]),echo=True)
 
