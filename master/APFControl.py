@@ -858,9 +858,9 @@ class APF:
                 break
         if result:
             try:
-                APFTask.waitFor(self.task, suffix='LAST_CLOSE', value=time.time())
+                APFTask.set(self.task, suffix='LAST_CLOSE', value=time.time())
             except:
-                apflog("cannot write apftask.MASTER_LAST_CLOSE",level=warn,echo=True)
+                apflog("cannot write apftask.MASTER_LAST_CLOSE",level='warn',echo=True)
             return True
         else:
             apflog("After 30 minutes of trying, closeup could not successfully complete.")
@@ -908,8 +908,13 @@ class APF:
         apflog("Calling prep-obs.",echo=True)
         result, ret_code = cmdexec('prep-obs')
         if result == False:
-            apflog("Prep-obs returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
-            return
+            # try again
+            self.DMReset()
+            result, ret_code = cmdexec('prep-obs')
+            if result is False:
+                apflog("Prep-obs returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
+                return
+            
         self.DMReset()
         apflog("Slewing to lower el",echo=True)
         result, ret_code = cmdexec('slew -e 75')
