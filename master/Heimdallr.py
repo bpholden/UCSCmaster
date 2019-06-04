@@ -867,25 +867,20 @@ if __name__ == '__main__':
         
         result = apf.focus()
         if not result:
+            flags = "-b"
             focusdict = APFTask.get("focusinstr", ["phase", "nominal"])
             instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
             if not instr_perm:
-                while not instr_perm:
-                    apflog("Waiting for instrument permission to be true")
-                    APFTask.waitfor(parent,True,expression="$checkapf.INSTR_PERM = true",timeout=600)
-                    instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
+                instr_permit()
                 if len(focusdict['phase']) > 0:
                     flags = " ".join(["-p", focusdict['phase']])
-                else:
-                    flags = "-b"
-                result = apf.focus(flags=flags)
             else:
                 apflog("Focusinstr has failed. Setting to %s and trying again." % (focusdict["nominal"]), level='error', echo=True)
                 APFLib.write("apfmot.DEWARFOCRAW", focusdict["nominal"], binary=True)
-                result = apf.focus()
-                if not result:
-                    apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["nominal"]), level='error', echo=True)
-                    shutdown()
+            result = apf.focus(flags=flags)
+            if not result:
+                apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["nominal"]), level='error', echo=True)
+                shutdown()
 
         apflog("Focus has finished. Setting phase to Cal-Pre")
         if apf.ucam['OUTFILE'].read() == 'ucsc':
