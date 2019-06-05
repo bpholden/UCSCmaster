@@ -505,7 +505,7 @@ def findBstars(snames,star_table,idx, bstars):
     return snames[near_idx],row,snames[end_idx],finrow
 
 
-def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx):
+def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx,focval=0):
     res = dict()
 
     res['RA']     = stars[idx].a_ra
@@ -527,12 +527,12 @@ def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx):
     res['isTemp'] =    False
     res['owner'] =    flags['owner'][idx]
 
-    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx])
+    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx],focval=focval)
 
     return res
 
 
-def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",outdir=None,focval=0):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -803,7 +803,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table[idx, DS_LAST]) / star_table[idx, DS_CAD]), ephem.julian_date(dt), star_table[idx, DS_LAST], star_table[idx, DS_CAD])
     apflog(cstr,echo=True)
 
-    res =  makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx)
+    res =  makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx,focval=focval)
     if do_templates and flags['template'][idx] == 'N':
         bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
