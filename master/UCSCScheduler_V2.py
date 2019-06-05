@@ -170,7 +170,7 @@ def readin_lastobs(filename,ctime):
 
     return fnames, lastjds
 
-def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
+def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focval=0):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y")
     name - name of star, first column in line
@@ -180,7 +180,7 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt'):
     decker - one character field for the decker, defaults to "W"
     I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
     """
-    focval = 0
+
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
     ret = name + ' '
