@@ -392,6 +392,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
 def format_expmeter(exp_counts, nexp, exptime):
 
     nexp[nexp <= 0] = 1
+    nexp[nexp > MAX_NSHOTS] = MAX_NSHOTS
     exps = np.zeros_like(exp_counts)
     exp_counts *= 1.1
     long_idx = exp_counts > MAX_EXPMETER
@@ -399,7 +400,7 @@ def format_expmeter(exp_counts, nexp, exptime):
     nexp[toofew_idx] = np.ceil((exp_counts[toofew_idx]/MAX_EXPMETER) + 1)
     exp_counts[long_idx] = MAX_EXPMETER
     exps[exps < nexp] = nexp[exps < nexp]
-
+    exps[exps > MAX_NSHOTS] = MAX_NSHOTS
     exp_counts /= exps
     # this is basically so that really bright stars do not get really short exposures
     # certain targets we want to hit the exposure meter threshold per exposure not for the total
@@ -407,7 +408,7 @@ def format_expmeter(exp_counts, nexp, exptime):
     # stars like 185144 or tau Ceti
 
     really_short = exptime < MIN_TOTOBS
-    exp_counts[really_short] *= exps[really_short]
+    exp_counts[really_short] = MAX_EXPMETER/2.
     return exp_counts, exps
 
 def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
