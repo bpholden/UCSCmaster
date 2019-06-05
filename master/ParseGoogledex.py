@@ -144,7 +144,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
                     row.append(1000.0)
                     
         
-        for coln in ["lastobs"]
+        for coln in ["lastobs"]:
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
