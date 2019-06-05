@@ -238,6 +238,7 @@ class Master(threading.Thread):
         self.debug = False
         self.doTemp = True
         self.nTemps = 0
+        self.focval = 0
         self.totTemps = totTemps        
         self.apftask = ktl.Service('apftask')
         self.lineresult = apftask['scriptobs_line_result']
@@ -255,9 +256,11 @@ class Master(threading.Thread):
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
         if time.time() - lastfoc > FOCUSTIME:
             APF.autofoc.write("robot_autofocus_enable")
+            self.focval=2
             APFTask.set(parent, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
         else:
             APF.autofoc.write("robot_autofocus_disable")
+            self.focval=0
 
 
     def checkObsSuccess(self):
@@ -380,7 +383,7 @@ class Master(threading.Thread):
                 seeing = float(APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp)
+            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval)
 
             self.set_autofocval()
             if target is None:
