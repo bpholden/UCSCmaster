@@ -255,7 +255,7 @@ class Master(threading.Thread):
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
         if time.time() - lastfoc > FOCUSTIME:
             APF.autofoc.write("robot_autofocus_enable")
-            APFTask.set(parent, suffix="MESSAGE", value="More than %.1f hours since telescope focus, now focusing" % (FOCUSTIME/3600.), wait=False)            
+            APFTask.set(parent, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
         else:
             APF.autofoc.write("robot_autofocus_disable")
 
