@@ -858,7 +858,7 @@ if __name__ == '__main__':
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
         APFTask.phase(parent, "Focus")
-        apflog("Phase is now %s" % phase)
+        apflog("Phase is now %s" % phase,echo=True)
 
     # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
