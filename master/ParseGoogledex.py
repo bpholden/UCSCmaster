@@ -144,15 +144,24 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
                     row.append(1000.0)
                     
         
-        for coln in ["lastobs", "B-V", "APF Desired Precision" ]:
+        for coln in ["lastobs"]
             try:
                 row.append(float(ls[didx[coln]]))
             except ValueError:
-                if coln in ("lastobs", "B-V"):
-                    row.append(0.0)
-                else:
-                    row.append(1000.0)
+                row.append(0.0)
 
+        for coln in [ "B-V", "APF Desired Precision" ]:
+            try:
+                inval = float(ls[didx[coln]])
+                if inval < 0:
+                    inval = 1.
+                if coln is 'B-V' and inval > 2:
+                    inval = 1
+                if coln is 'APF Desired Precision' and inval > 10:
+                    inval = 10
+            except:
+                row.append(1.0)
+                    
         for coln in ["uth", "utm"]:
             try:
                 row.append(int(ls[didx[coln]]))
