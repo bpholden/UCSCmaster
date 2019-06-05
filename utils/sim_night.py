@@ -114,7 +114,7 @@ while observing:
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime, lastfwhm, lastslow)
     else:
-        result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile), verbose=True,template=doTemp)
+        result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp)
     if result:
         if bstar:
             bstar = False

@@ -532,7 +532,7 @@ def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx):
     return res
 
 
-def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",outdir=None):
+def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",outdir=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -556,8 +556,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     confg['I2'] = 'Y'
     confg['decker']='W'
 
-    if verbose:
-        apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
+
+    apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
     if slowdown > SLOWDOWN_MAX:
         apflog( "getNext(): Slowndown value of %f exceeds maximum of %f at time %s" % (slowdown,SLOWDOWN_MAX,dt),echo=True)
@@ -584,16 +584,16 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         if not bstar:             # otherwise from previous night
             lastobj = lastline.split()[0]
 
-        if verbose:
-            apflog( "getNext(): Last object attempted %s" % (lastobj),echo=True)
+
+        apflog( "getNext(): Last object attempted %s" % (lastobj),echo=True)
     except:
         lastobj = None
 
     if lastobj:
         if lastobj not in observed and lastobj not in last_objs_attempted:
             last_objs_attempted.append(lastobj)
-            if verbose:
-                apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
+            
+            apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
 
             if len(last_objs_attempted) > 5:
                 apflog( "getNext(): 5 failed acquisition attempts",echo=True)
@@ -626,20 +626,20 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
 
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
-    if verbose:
-        apflog("getNext(): Parsing the Googledex...",echo=True)
+
+    apflog("getNext(): Parsing the Googledex...",echo=True)
     config={'I2': 'Y', 'decker': 'W', 'owner' : owner}
     sn, star_table, flags, stars = ParseGoogledex.parseGoogledex(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
     sn = np.array(sn)
     deckers = np.array(flags['decker'])
     targNum = len(sn)
-    if verbose:
-        apflog("getNext(): Parsed the Googledex...",echo=True)
+    
+    apflog("getNext(): Parsed the Googledex...",echo=True)
 
     # Note which of these are B-Stars for later.
     bstars = np.array([ True if 'HR' in n else False for n in sn ], dtype=bool)
-    if verbose:
-        apflog("getNext(): Finding B stars",echo=True)
+
+    apflog("getNext(): Finding B stars",echo=True)
 
 
     # Distance to stay away from the moon
@@ -656,8 +656,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     i2cnts = np.zeros(targNum, dtype=float)
 
     # Is the target behind the moon?
-    if verbose:
-        apflog("getNext(): Culling stars behind the moon",echo=True)
+
+    apflog("getNext(): Culling stars behind the moon",echo=True)
     moon_check = moonDist > minMoonDist
     available = available & moon_check
 
@@ -666,13 +666,13 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
 
     # We just need a B star, so restrict our math to those
     if bstar:
-        if verbose:
-            apflog("getNext(): Selecting B stars",echo=True)
+        
+        apflog("getNext(): Selecting B stars",echo=True)
         available = available & bstars
 
         f = available
-        if verbose:
-            apflog("getNext(): Computing star elevations",echo=True)
+        
+        apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
         vis,star_elevations,fin_star_elevations = Visible.is_visible(apf_obs, fstars, [400]*len(bstars[f]))
 
@@ -687,8 +687,8 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
     # Just need a normal star for observing
     else:
         # Available and not a BStar
-        if verbose:
-            apflog("getNext(): Culling B stars",echo=True)
+
+        apflog("getNext(): Culling B stars",echo=True)
         available = np.logical_and(available, np.logical_not(bstars))
 
         # has the star been observed - commented out as redundant with cadence
@@ -700,16 +700,16 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
         f = available
-        if verbose:
-            apflog("getNext(): Computing star elevations",echo=True)
+
+        apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
         vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, [0]*len(fstars))
 #        vis,star_elevations,fin_star_elevations = Visible.is_visible( apf_obs,fstars,[0]*len(fstars))
         available[f] = available[f] & vis
         f = available
         fstars = [s for s,_ in zip(stars,f) if _ ]
-        if verbose:
-            apflog("getNext(): Computing exposure times",echo=True)
+
+        apflog("getNext(): Computing exposure times",echo=True)
         exp_times, exp_counts, i2counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
                                             star_table[f,DS_ERR], star_elevations[np.array(vis)], seeing, \
                                             star_table[f,DS_BV], deckers[f])
@@ -717,29 +717,28 @@ def getNext(ctime, seeing, slowdown, bstar=False, verbose=False,template=False,s
         exp_times = exp_times * slowdown
         totexptimes[f] += computeMaxTimes(exp_times,star_table[f, DS_MAX])
         i2cnts[f] += i2counts
-        if verbose:
-            apflog("getNext(): Formating exposure times",echo=True)
+
+        apflog("getNext(): Formating exposure times",echo=True)
         mxtime = np.zeros_like(star_table[f,DS_MAX])
         mxtime += MAX_EXPTIME
         shorter = (star_table[f,DS_MAX] < MAX_EXPTIME)&(star_table[f,DS_MAX] >0)
         mxtime[shorter] = star_table[f,DS_MAX][shorter]
         star_table[f, DS_EXPT], exps = format_time(totexptimes[f],i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],mxtime)
 
-        if verbose:
-            apflog("getNext(): Formating exposure meter",echo=True)
+
+        apflog("getNext(): Formating exposure meter",echo=True)
         star_table[f, DS_COUNTS], star_table[f, DS_NSHOTS] = format_expmeter(exp_counts,exps, totexptimes[f])
 
         # Is the exposure time too long?
-        if verbose:
-            apflog("getNext(): Removing really long exposures",echo=True)
+
+        apflog("getNext(): Removing really long exposures",echo=True)
         time_check = np.where( exp_times < TARGET_EXPOSURE_TIME_MAX, True, False)
 
         available[f] = available[f] & time_check
         f = available
 
         # Is the star currently visible?
-        if verbose:
-            apflog("getNext(): Computing stars visibility",echo=True)
+        apflog("getNext(): Computing stars visibility",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
         vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, exp_times)
         if vis != []:
@@ -828,13 +827,13 @@ if __name__ == '__main__':
     otfn = "observed_targets"
     ot = open(otfn,"w")
     starttime = time.time()
-    result = getNext(starttime, 7.99, 0.4, bstar=True, verbose=True,sheetns=sheetn.split(","))
+    result = getNext(starttime, 7.99, 0.4, bstar=True,sheetns=sheetn.split(","))
     ot.write("%s\n" % (result["SCRIPTOBS"]))
     ot.close()
     starttime += 400
     for i in range(5):
 
-        result = getNext(starttime, 7.99, 0.4, bstar=False, verbose=True,sheetns=sheetn,template=True)
+        result = getNext(starttime, 7.99, 0.4, bstar=False,sheetns=sheetn,template=True)
         #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:

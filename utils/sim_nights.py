@@ -226,7 +226,7 @@ if __name__ == "__main__":
         curtime, endtime, apf_obs = ns.sun_times(datestr)
         while observing:
 
-            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(options.outdir,options.infile),verbose=True)
+            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(options.outdir,options.infile))
             if result:
                 if bstar:
                     bstar = False
