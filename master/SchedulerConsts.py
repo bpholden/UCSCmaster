@@ -17,6 +17,8 @@ MIN_I2 = 500
 
 MAX_EXPMETER = 2e9 # above this saturates the CCD
 
+MAX_NSHOTS = 10 # because people are stupid
+
 # A few constants to make accessing the star table more readable
 DS_RA     = 0
 DS_DEC    = 1
