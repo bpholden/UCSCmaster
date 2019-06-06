@@ -159,6 +159,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
                     inval = 1
                 if coln is 'APF Desired Precision' and inval > 10:
                     inval = 10
+                row.append(inval)
             except:
                 row.append(1.0)
                     
