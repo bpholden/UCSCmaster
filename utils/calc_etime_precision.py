@@ -1,10 +1,11 @@
 from __future__ import print_function
+from optparse import OptionParser
 import sys
 sys.path.append("../master")
 #from ExposureCalc import *
 import UCSCScheduler_V2 as ds
+import ParseGoogledex
 import numpy as np
-from optparse import OptionParser
 
 if __name__ == "__main__":
 
@@ -23,7 +24,7 @@ if __name__ == "__main__":
 #    vals = ws.get_all_values()
 #    texpcol = vals[0].index("APFtexp") 
     
-    allnames, star_table, flags, stars  = ds.parseGoogledex()
+    allnames, star_table, flags, stars  = ParseGoogledex.parseGoogledex()
 
     el = np.zeros_like(star_table[:, ds.DS_BV])
     el += options.el
