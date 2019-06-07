@@ -48,7 +48,7 @@ if __name__ == "__main__":
     
     mxtime = np.zeros_like(star_table[:,ds.DS_MAX])
     mxtime += ds.MAX_EXPTIME
-    shorter = (star_table[:,ds.DS_MAX] < MAX_EXPTIME)&(star_table[:,ds.DS_MAX] >0)
+    shorter = (star_table[:,ds.DS_MAX] < ds.MAX_EXPTIME)&(star_table[:,ds.DS_MAX] >0)
     mxtime[shorter] = star_table[:,ds.DS_MAX][shorter]
 
     etimes, nobs = ds.format_time(totexptimes,i2cnts,star_table[:,ds.DS_NSHOTS],star_table[:, DS_MIN], mxtime)
