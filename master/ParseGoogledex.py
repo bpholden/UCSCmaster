@@ -212,11 +212,11 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
                 row.append(0)
                 
                     
-        check = checkflag("Close Companion",didx,ls,"\A(n|N)","Y")
-        if check == "N" or check == "n":
-            flags['do'].append("")
-        else:
+        check = checkflag("Close Companion",didx,ls,"\A(y|Y)","")
+        if check == "Y" or check == "y" :
             flags['do'].append(check)
+        else:
+            flags['do'].append("")
             
         flags['decker'].append(checkflag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
         flags['I2'].append(checkflag("I2",didx,ls,"\A(n|N)",config["I2"]))
