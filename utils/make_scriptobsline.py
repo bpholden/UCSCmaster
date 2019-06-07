@@ -47,7 +47,7 @@ if __name__ == "__main__":
     
     
     mxtime = np.zeros_like(star_table[:,ds.DS_MAX])
-    mxtime += MAX_EXPTIME
+    mxtime += ds.MAX_EXPTIME
     shorter = (star_table[:,ds.DS_MAX] < MAX_EXPTIME)&(star_table[:,ds.DS_MAX] >0)
     mxtime[shorter] = star_table[:,ds.DS_MAX][shorter]
 
