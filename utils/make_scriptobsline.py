@@ -33,13 +33,14 @@ if __name__ == "__main__":
     el += options.el
     fwhm = np.array(options.fwhm)
     i2counts = np.zeros_like(star_table[:, ds.DS_BV])
-
+    deckers = np.array(flags['decker'])
+    
     precision = star_table[:, ds.DS_ERR]
     i2counts = ds.getI2_K(precision)
     mstars_inds = np.where(star_table[:, ds.DS_BV] > 1.2)
     i2counts[mstars_inds] = ds.getI2_M(precision[mstars_inds])
 
-    exp_times, exp_counts, i2cnts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV])
+    exp_times, exp_counts, i2cnts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV],deckers)
     exp_times *= options.slowdown
     etimes, nobs = ds.format_time(exp_times,i2cnts,star_table[:,ds.DS_NSHOTS])
     exp_counts, nobs = ds.format_expmeter(exp_counts,nobs)
