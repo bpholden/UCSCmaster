@@ -43,13 +43,13 @@ if __name__ == "__main__":
     exp_times, exp_counts, i2cnts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV],deckers)
     exp_times *= options.slowdown
 
-    totexptimes += ds.computeMaxTimes(exp_times,star_table[:, DS_MAX])
+    totexptimes += ds.computeMaxTimes(exp_times,star_table[:, ds.DS_MAX])
     
     
-    mxtime = np.zeros_like(star_table[:,DS_MAX])
+    mxtime = np.zeros_like(star_table[:,ds.DS_MAX])
     mxtime += MAX_EXPTIME
-    shorter = (star_table[:,DS_MAX] < MAX_EXPTIME)&(star_table[:,DS_MAX] >0)
-    mxtime[shorter] = star_table[:,DS_MAX][shorter]
+    shorter = (star_table[:,ds.DS_MAX] < MAX_EXPTIME)&(star_table[:,ds.DS_MAX] >0)
+    mxtime[shorter] = star_table[:,ds.DS_MAX][shorter]
 
     etimes, nobs = ds.format_time(totexptimes,i2cnts,star_table[:,ds.DS_NSHOTS],star_table[:, DS_MIN], mxtime)
 
