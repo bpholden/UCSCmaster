@@ -655,8 +655,8 @@ class Master(threading.Thread):
                         apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
             
                     chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
-                    while float(sunel.read()) > SUNEL_STARTLIM and setting:
-                        outstr = "Sun setting is %s and sun at elevation of %.3f" % (setting, float(sunel.read()))
+                    while float(sunel.read()) > SUNEL_STARTLIM and not rising:
+                        outstr = "Sun is setting and sun at elevation of %.3f" % (float(sunel.read()))
                         apflog(outstr,level='info', echo=True)
                         result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
                         APF.DMReset()
