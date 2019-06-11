@@ -290,7 +290,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                        ws.update_cell(i+1, tempcol+1, "Y")
                 except:
                     apflog( "Error logging template obs for %s" % (names.index(v[0])),echo=True,level='error')
-            apflog( "Updated %s" % (sheetn),echo=True)
+                apflog( "Updated %s in %s" % (v[0],sheetn),echo=True)
 
     return
 
