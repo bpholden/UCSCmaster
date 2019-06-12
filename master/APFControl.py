@@ -263,6 +263,7 @@ class APF:
     vmag       = robot['scriptobs_vmag']
     ldone      = robot['scriptobs_lines_done']
     sop        = robot['scriptobs_phase']
+    message    = robot['scriptobs_message']  
     autofoc    = robot["SCRIPTOBS_AUTOFOC"]
     slew_allowed = robot['slew_allowed']
 
