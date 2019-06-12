@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 try:
     from apflog import *
     import ktl
+    import APFTask
 except:
     from fake_apflog import *
 
