@@ -79,7 +79,7 @@ class UCAM_recovery():
         
         if self.ucam_status == 0:
             self.ucam_command.write(0)
-            rv = APFTask.waitfor(self.task, True, expression="$apftask.UCAMLAUNCHER_UCAM_COMMAND == Stop", timeout=3)
+            rv = APFTask.waitfor(self.task, True, expression="$apftask.UCAMLAUNCHER_UCAM_STATUS == 'Not running'", timeout=3)
             return rv
         else:
             return False
@@ -88,7 +88,7 @@ class UCAM_recovery():
         
         if self.ucam_status == 0:
             self.ucam_command.write(1)
-            rv = APFTask.waitfor(self.task, True, expression="$apftask.UCAMLAUNCHER_UCAM_COMMAND == Run", timeout=3)
+            rv = APFTask.waitfor(self.task, True, expression="$apftask.UCAMLAUNCHER_UCAM_STATUS == 'Running'", timeout=3)
             return rv
         else:
             return False
