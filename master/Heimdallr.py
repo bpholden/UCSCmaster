@@ -465,12 +465,18 @@ class Master(threading.Thread):
                 APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
             APF.updateWindshield(self.windshield)
-            apflog("Starting an instance of scriptobs",echo=True)
             ripd, running = APF.findRobot()
             if running:
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
-
+            message = self.message.read()
+            mtch = re.search("ERR/UCAM",message)
+            if mtch:
+                # uh oh
+                return
+            
+            
+            apflog("Starting an instance of scriptobs",echo=True)
             if self.fixedList is not None and self.shouldStartList():
                 # We wish to observe a fixed target list, in it's original order
                 if not os.path.exists(self.fixedList):
