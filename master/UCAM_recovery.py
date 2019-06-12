@@ -44,18 +44,18 @@ class UCAM_recovery():
             if rv is False:
                 apflog("UCAM software did not stop running, rebooting anyway",level='Error',echo=True)
             
-            self.ucam_command.write(2)
-            rv = APFTask.waitfor(self.task, True, expression="$apftask.UCAMLAUNCHER_STATUS == Running", timeout=120)
-            if rv:
+        self.ucam_command.write(2)
+        rv = APFTask.waitfor(self.task, True, expression="$apftask.UCAMLAUNCHER_STATUS == Running", timeout=120)
+        if rv:
                 # yay!
-                self.ucam_command.write(1)
-                rv = self.power_cycle_fousb()
-                return rv
-            else:
-                # this is bad
-                apflog("UCAM host not re-booted",level='Alert',echo=True)
+            self.ucam_command.write(1)
+            rv = self.power_cycle_fousb()
+            return rv
+        else:
+            # this is bad
+            apflog("UCAM host not re-booted",level='Alert',echo=True)
 
-            return False
+        return False
 
     def power_cycle_fousb(self):
 
