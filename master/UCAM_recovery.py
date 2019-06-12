@@ -34,7 +34,7 @@ class UCAM_recovery():
 
 
     def __repr__(self):
-        rstr = "task=%s combops=%s ctalkto=%s command=%s status=%s " % (self.task,self.combops,self.ctalkto,self.ucam_command,self.ucam_status)
+        rstr = "task=%s combops=%s ctalkto=%s command=%s status=%s " % (self.task,self.combo_ps,self.ctalkto,self.ucam_command,self.ucam_status)
         return rstr
                 
     def reboot_warsaw(self):
