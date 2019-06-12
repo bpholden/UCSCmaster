@@ -39,7 +39,7 @@ class UCAM_recovery():
                 
     def reboot_warsaw(self):
 
-        if self.ucam_status == 0:
+        if self.ucam_status.read(binary=True) == 1:
             rv = self.stop_ucam_software()
             if rv is False:
                 apflog("UCAM software did not stop running, rebooting anyway",level='Error',echo=True)
@@ -77,7 +77,7 @@ class UCAM_recovery():
 
     def stop_ucam_software(self):
         
-        if self.ucam_status == 0:
+        if self.ucam_status.read(binary=True) != 0:
             self.ucam_command.write(0)
             rv = APFTask.waitfor(self.task, True, expression="$apftask.UCAMLAUNCHER_UCAM_STATUS == 'Not running'", timeout=3)
             return rv
@@ -86,7 +86,7 @@ class UCAM_recovery():
 
     def start_ucam_software(self):
         
-        if self.ucam_status == 0:
+        if self.ucam_status.read(binary=True) == 0:
             self.ucam_command.write(1)
             rv = APFTask.waitfor(self.task, True, expression="$apftask.UCAMLAUNCHER_UCAM_STATUS == 'Running'", timeout=3)
             return rv
