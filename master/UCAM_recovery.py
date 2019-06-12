@@ -60,7 +60,7 @@ class UCAM_recovery():
     def power_cycle_fousb(self):
 
         self.apfmot['FOUSB_POWER'].write(0)
-        rv = APFTask.waitfor(self.task, expression="$apfmot.FOUSB_POWER == Off",True, timeout=10)
+        rv = APFTask.waitfor(self.task, True, expression="$apfmot.FOUSB_POWER == Off", timeout=10)
         if rv:
             APFTask.wait(self.task,True,timeout=1)
         else:
