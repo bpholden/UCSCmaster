@@ -473,6 +473,8 @@ class Master(threading.Thread):
             mtch = re.search("ERR/UCAM",message)
             if mtch:
                 # uh oh
+                apflog("scirptobs has failed post UCAM recovery",level="error",echo=True)
+                
                 return
             
             
