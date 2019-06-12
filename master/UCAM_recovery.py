@@ -93,3 +93,7 @@ class UCAM_recovery():
         else:
             return False
         
+if __name__ == "__main__":
+    uc = UCAM_recovery()
+    print(uc)
+    
