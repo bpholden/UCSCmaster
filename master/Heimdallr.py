@@ -701,7 +701,6 @@ class Master(threading.Thread):
                 if float(sunel) > sunel_lim and not rising:
                     APFTask.set(parent, suffix="MESSAGE", value="Open at sunset", wait=False)                    
                     success = opening(sunel, sunset=True)
-
                     rv = APF.evening_star()
                     if not rv:
                         apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
