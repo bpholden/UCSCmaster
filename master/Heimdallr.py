@@ -734,10 +734,7 @@ class Master(threading.Thread):
                 if not result and "DomeShutter" in APF.isOpen()[1]:
                     apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
 
-                APF.close(force=True)
-                if not APF.power_down_telescope():
-                    apflog("Error: Cannot reset telescope after servo failure", level="error", echo=True)
-                    os._exit(1)
+                closing(force=True)
                 
             # If we are open and scriptobs isn't running, start it up
             if APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
