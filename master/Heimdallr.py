@@ -823,6 +823,7 @@ if __name__ == '__main__':
     # Regardless of phase, if a name, obsnum, or reset was commanded, make sure we perform these operations.
     apflog("Setting scriptobs_lines_done=0")
     APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
+    APFLib.write(apf.robot["SCRIPTOBS_MESSAGE"], "")
     if opt.fixed:
         if not os.path.exists(opt.fixed):
             errmsg = "starlist %s does not exist" % (opt.fixed)
