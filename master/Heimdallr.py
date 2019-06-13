@@ -469,7 +469,7 @@ class Master(threading.Thread):
             if running:
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
-            message = self.message.read()
+            message = apf.message.read()
             mtch = re.search("ERR/UCAM",message)
             if mtch:
                 # uh oh
