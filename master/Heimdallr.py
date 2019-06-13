@@ -460,6 +460,46 @@ class Master(threading.Thread):
                 os._exit(1)
             
             return
+
+        def checkTelState():
+            slewing     = '$eostele.AZSSTATE == Slewing  or  $eostele.ELSSTATE == Slewing'
+            tracking    = '$eostele.AZSSTATE == Tracking and $eostele.ELSSTATE == Tracking'
+            istracking = ktl.Expression(tracking)
+            isslewing = ktl.Expression(slewing)
+
+            if istracking.evaluate() or isslewing.evaluate():
+                rv = True
+            else:
+                rv = False
+            return rv
+
+        def startTelescope():
+            '''This starts up the telescope if the Az drive is disabled or the E-Stop State is True
+            If the telescope is just disabled, the start up procedure for a new version of scriptobs should clear that state.
+            '''
+            rv = False
+
+            eosdome = ktl.Service('eosdome')
+            isenabled = eosdome['AZDRVENA'].read(binary=True)
+            isstopped = eosdome['ESTOPST'].read(binary=True)
+            fullstop = eosdome['SWESTOP'].read(binary=True)
+            if fullstop:
+                rv = False
+                # cannot start the telescope
+            else:
+                # we can!
+                if isstopped:
+                    eosdome['ESTOPCMD'].write('ResetEStop')
+                if isenabled is False:
+                    eosdome['AZENABLE'].write('Enable')
+                isenabled = eosdome['AZDRVENA'].read(binary=True)
+                isstopped = eosdome['ESTOPST'].read(binary=True)
+                if isenabled and isstopped is False:
+                    rv = True
+                else:
+                    rv = False
+            
+            return rv
         
         # starts an instance of scriptobs 
         def startScriptobs():
