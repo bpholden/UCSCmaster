@@ -744,7 +744,7 @@ class Master(threading.Thread):
                     # this means that the telescope is not slewing and is not tracking
                     rv = startTelescope()
                     # if needed, will power up the Az drive and clear the estop state
-                    if rv = False:
+                    if rv == False:
                         apflog("Telescope stopped and cannot be restarted", level='Alert', echo=True)
                         closing(force=True)
 
