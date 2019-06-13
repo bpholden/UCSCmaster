@@ -448,13 +448,17 @@ class Master(threading.Thread):
 
 
         # closing
-        def closing():
+        def closing(force=False):
             if running:
                 APF.killRobot(now=True)
-
-            APF.close()
             if apf.ucam['OUTFILE'].read() == 'ucsc':
                 APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
+            APF.close(force=force)
+            if not APF.power_down_telescope():
+                apflog("Error: Cannot close and power off telescope ", level="alert", echo=True)
+                os._exit(1)
+            
             return
         
         # starts an instance of scriptobs 
