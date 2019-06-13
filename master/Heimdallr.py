@@ -739,6 +739,15 @@ class Master(threading.Thread):
             # If we are open and scriptobs isn't running, start it up
             if APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
                 APFTask.set(parent, suffix="MESSAGE", value="Starting scriptobs", wait=False)
+                rv = checkTelState()
+                if rv is False:
+                    # this means that the telescope is not slewing and is not tracking
+                    rv = startTelescope()
+                    # if needed, will power up the Az drive and clear the estop state
+                    if rv = False:
+                        apflog("Telescope stopped and cannot be restarted", level='Alert', echo=True)
+                        closing(force=True)
+
                 startScriptobs()
                 if not APFTask.waitFor(self.task,True,expression="$apftask.SCRIPTOBS_STATUS == 'Running'",timeout=10):
                     if failstart % 11 == 0 and failstart > 0:
