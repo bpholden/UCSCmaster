@@ -728,9 +728,8 @@ class Master(threading.Thread):
                 APFTask.set(parent, suffix="MESSAGE", value="Servo failure.", wait=False)                    
                 
                 apflog("Error: APF is open, and slew_allowed is false. Likely an amplifier fault.", level="error", echo=True)
-#                apflog("Forcing checkapf to close the dome. Heimdallr will then exit.", echo=True)
                 chk_done = "$checkapf.MOVE_PERM == true"
-#                APFLib.write(APF.dmtimer, 0)
+
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
                 if not result and "DomeShutter" in APF.isOpen()[1]:
                     apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
