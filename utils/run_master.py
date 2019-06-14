@@ -152,15 +152,20 @@ def modify_env(config):
         
 if __name__ == "__main__":
 
+    if len(sys.argv) > 1:
+        test = True
+    else:
+        test = False
+    
     schedule = readem_or_weep('apfschedule','SCHEDULED_RUNS')
 
     userkind = readem_or_weep('checkapf','USERKIND',binary=True)
-    if userkind != 3:
+    if userkind != 3 and test is False:
         sys.exit("checkapf not in robotic mode")
 
 
     master_status = readem_or_weep('apftask','master_status',binary=True)
-    if master_status < 3:
+    if master_status < 3 and test is False:
         sys.exit("master has been started")
 
     cpath = os.path.dirname(os.path.abspath(__file__))
@@ -172,7 +177,7 @@ if __name__ == "__main__":
         stuff_to_run = build_exec_str(config)
         env = modify_env(config)
         print(" ".join(stuff_to_run))
-        if os.getuid() == int(config['user']):
+        if os.getuid() == int(config['user']) and test is False:
             p=subprocess.Popen(stuff_to_run,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
             sleep(10)
             if p.poll():
@@ -180,6 +185,8 @@ if __name__ == "__main__":
                 (out,err) = p.communicate()
                 print(err)
                 print(out)
+        elif test:
+            pass
         else:
             print("Master cannot be run by this account")
 
