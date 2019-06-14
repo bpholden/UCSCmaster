@@ -790,11 +790,15 @@ class APF:
         if not result:
             apflog("Didn't have move permission after 5 minutes.", echo=True) 
             return False
+        # one last check
+        if APF.isOpen()[0] is False or  APF.slew_allowed:
+            apflog("The APF is either closed or slews are allowed, why are we here?",level='error',echo=True)
+            return True
+        
         apflog("Running power_down_telescope script")
         result, code = cmdexec(cmd)
         if not result:
             apflog("power_down_telescope has failed. Human intervention likely required.", level='error', echo=True)
-            APFTask.waitFor(self.task, True, timeout=30)
         else:
             pass
         if result:    
