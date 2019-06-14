@@ -124,22 +124,32 @@ def define_observer(config):
 
     return obs
 
-def config_kwds(config):
+def config_kwds(config,test=False):
     obs = define_observer(config)
-
-    writeem('checkapf','OBSLOCAT',obs)
-    writeem('apfucam','OBSERVER',config['observer'])
-    writeem('apfschedule','ACTIVE_RUN',primary_run(schedule))
-
     ownr = readem_or_weep('apfschedule','OWNRNAME')
-    writeem('apfschedule','OWNRHINT',ownr)
+    
+    if test:
+        print(obs)
+        print(config['observer'])
+        print(primary_run(schedule))
+        print(ownr)
+        print(config['owner'])
+        print(config['name'])
+        print(config['obsnum'])
+    else:
+        writeem('checkapf','OBSLOCAT',obs)
+        writeem('apfucam','OBSERVER',config['observer'])
+        writeem('apfschedule','ACTIVE_RUN',primary_run(schedule))
 
-    if config['name'] == 'ucsc':
+
+        writeem('apfschedule','OWNRHINT',ownr)
+
+        if config['name'] == 'ucsc':
             writeem('apfucam','outfile',config['name'])
             writeem('apfucam','obsnum',config['obsnum'])
-
-    if config['owner']:
-        writeem('apfschedule','ownrhint',config['owner'])
+            
+        if config['owner']:
+            writeem('apfschedule','ownrhint',config['owner'])
 
     return True
 
