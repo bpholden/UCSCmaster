@@ -586,7 +586,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
             lastobj = lastline.split()[0]
 
 
-        apflog( "getNext(): Last object attempted %s" % (lastobj),echo=True)
     except:
         lastobj = None
 
@@ -600,7 +599,11 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
                 apflog( "getNext(): 5 failed acquisition attempts",echo=True)
                 last_objs_attempted = []
                 return None
+        else:
+            last_objs_attempted = []
+            # we had a succes so we are zeroing this out
 
+            
     ###
     # Need to update the googledex with the lastObserved date for observed targets
     # Scriptobs line uth utm can be used for this
