@@ -870,7 +870,7 @@ class APF:
         else:
             apflog("After 30 minutes of trying, closeup could not successfully complete.")
             return False
-
+        return False
 
     def updateLastObs(self,obsnum):
         """ If the last observation was a success, this function updates the file storing the last observation number and the hit_list which is required by the dynamic scheduler."""
