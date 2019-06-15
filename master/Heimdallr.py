@@ -454,8 +454,10 @@ class Master(threading.Thread):
             if apf.ucam['OUTFILE'].read() == 'ucsc':
                 APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
-            APF.close(force=force)
-            if not APF.power_down_telescope():
+            rv = APF.close(force=force)
+            if rv:
+                return
+            if APF.power_down_telescope() is False:
                 apflog("Error: Cannot close and power off telescope ", level="alert", echo=True)
                 os._exit(1)
             
