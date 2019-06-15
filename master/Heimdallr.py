@@ -993,8 +993,7 @@ if __name__ == '__main__':
     if 'Watching' == str(phase).strip():
         apflog("Starting the main watcher." ,echo=True)
         try:
-            if opt.name == "ucsc":
-                names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
+            names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
 
