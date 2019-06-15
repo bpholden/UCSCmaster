@@ -584,7 +584,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         lastline = ktl.read("apftask","SCRIPTOBS_LINE")
         if not bstar:             # otherwise from previous night
             lastobj = lastline.split()[0]
-
+        else:
+            lastobj = None
 
     except:
         lastobj = None
