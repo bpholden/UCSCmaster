@@ -610,6 +610,11 @@ class APF:
             cmdpath = '/usr/local/lick/bin/robot/'
             cmd = os.path.join(cmdpath,'focus_telescope')
             result, code = cmdexec(cmd,cwd=os.path.curdir)
+            try:
+                self.guide['MODE'].write('Guide')
+            except:
+                apflog('Cannot modify apfguide.MODE to Guide.',level='error',echo=True)
+
             if not result:
                 apflog("focustel failed with code %d" % code, echo=True)
                 expression="($apftask.FOCUSINSTR_STATUS != 0) and ($apftask.FOCUSINSTR_STATUS != 1) "
