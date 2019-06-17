@@ -693,6 +693,16 @@ class Master(threading.Thread):
                         apflog("Error: Cannot enable AZ drive, exiting", level="error")
                         return
                     apf.setTeqMode('Evening')
+                    vent_open = "$eosdome.VD4STATE = VENT_OPENED"
+                    result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
+                    if result:
+                        try:
+                            APFLib.write(APF.dome['AZENABLE'], 'disable', timeout=10)
+                        except:
+                            apflog("Error: Cannot disable AZ drive, exiting", level="error",echo=True)
+                            return
+                    else:
+                        apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='error',echo=True)
                 else:
                     apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds", level="error")
                     APFTask.waitFor(parent, True, timeout=600)
