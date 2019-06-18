@@ -690,8 +690,8 @@ class Master(threading.Thread):
                     try:
                         APFLib.write(APF.dome['AZENABLE'], 'enable', timeout=10)
                     except:
-                        apflog("Error: Cannot enable AZ drive, exiting", level="error")
-                        return
+                        apflog("Error: Cannot enable AZ drive", level="error")
+
                     apf.setTeqMode('Evening')
                     vent_open = "$eosdome.VD4STATE = VENT_OPENED"
                     result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
@@ -699,8 +699,8 @@ class Master(threading.Thread):
                         try:
                             APFLib.write(APF.dome['AZENABLE'], 'disable', timeout=10)
                         except:
-                            apflog("Error: Cannot disable AZ drive, exiting", level="error",echo=True)
-                            return
+                            apflog("Error: Cannot disable AZ drive", level="error",echo=True)
+
                     else:
                         apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='error',echo=True)
                 else:
@@ -713,6 +713,10 @@ class Master(threading.Thread):
                 if float(sunel) > sunel_lim and not rising:
                     APFTask.set(parent, suffix="MESSAGE", value="Open at sunset", wait=False)                    
                     success = opening(sunel, sunset=True)
+                    if success is False:
+                        apflog("Error: Cannot open the dome", level="alert",echo=True)
+                        os._exit()
+                        
                     rv = APF.evening_star()
                     if not rv:
                         apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
