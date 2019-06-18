@@ -796,7 +796,7 @@ class APF:
             apflog("Didn't have move permission after 5 minutes.", echo=True) 
             return False
         # one last check
-        if APF.isOpen()[0] is False or  APF.slew_allowed:
+        if self.isOpen()[0] is False or  self.slew_allowed:
             apflog("The APF is either closed or slews are allowed, why are we here?",level='error',echo=True)
             return True
         
