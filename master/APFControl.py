@@ -813,6 +813,7 @@ class APF:
 
 
     def servo_failure(self):
+        """checks for amplifier faults"""
         servo_failed = False
         prefixs = ["AZ","EL","FA","FB","FC","TR" ]
         for pr in prefixs:
