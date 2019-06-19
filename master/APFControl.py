@@ -796,9 +796,6 @@ class APF:
             apflog("Didn't have move permission after 5 minutes.", echo=True) 
             return False
         # one last check
-        if self.isOpen()[0] is False or  self.slew_allowed:
-            apflog("The APF is either closed or slews are allowed, why are we here?",level='error',echo=True)
-            return True
         
         apflog("Running power_down_telescope script")
         result, code = cmdexec(cmd)
