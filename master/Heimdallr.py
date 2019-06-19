@@ -740,17 +740,23 @@ class Master(threading.Thread):
 
 
             # Check for servo errors
-            if APF.isOpen()[0] and APF.slew_allowed == False:
-                APFTask.set(parent, suffix="MESSAGE", value="Servo failure.", wait=False)                    
+            if APF.isOpen()[0] and APF.slew_allowed is False:
+                APFTask.set(parent, suffix="MESSAGE", value="Likely servo failure.", wait=False)                    
                 
-                apflog("Error: APF is open, and slew_allowed is false. Likely an amplifier fault.", level="error", echo=True)
+                apflog("Error: APF is open, and slew_allowed is false. Likely a servo error/amplifier fault.", level="error", echo=True)
                 chk_done = "$checkapf.MOVE_PERM == true"
-
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
-                if not result and "DomeShutter" in APF.isOpen()[1]:
+                if result:
+                    rv = APF.power_down_telescope()
+                    if rv:
+                        apflog("APF power cycled.", echo=True)
+                    else:
+                        apflog("Error: APF is open, and power cycle failed.", level="error", echo=True)
+                        closing(force=True)
+                elif result is False and "DomeShutter" in APF.isOpen()[1]:
                     apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
 
-                closing(force=True)
+                    closing(force=True)
                 
             # If we are open and scriptobs isn't running, start it up
             if APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
