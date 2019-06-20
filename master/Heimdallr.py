@@ -325,6 +325,9 @@ class Master(threading.Thread):
                 self.obsBstar = bool(ktl.read("apftask", "master_var_3"))
             except:
                 self.obsBstar = True
+
+            if self.obsBstar:
+                APF.autofoc.write("robot_autofocus_enable")
                 
             if self.scriptobs is None:
                 apflog("Called getTarget, but there is not instance of scriptobs associated with Heimdallr. This is an error condition.", echo=True)
