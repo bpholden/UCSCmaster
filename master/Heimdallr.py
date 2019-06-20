@@ -1056,14 +1056,14 @@ if __name__ == '__main__':
         # Master is running, check for keyboard interupt
         try:
             currTime = datetime.now()
-            # Check if it is after ~9:00AM.
+            # Check if it is after ~8:00AM.
             # If it is, something must be hung up, so lets force
             #  a closeup and run post cals. 
             #  Log that we force a close so we can look into why this happened.
-            if currTime.hour == 9:
+            if currTime.hour == 8:
                 # Its 9 AM. Lets closeup
                 master.stop()
-                apflog("Master was still running at 9AM. It was stopped and post calibrations will be attempted.", level='warn')
+                apflog("Master was still running at 8AM. It was stopped and post calibrations will be attempted.", level='warn')
                 break
 
             if debug:
