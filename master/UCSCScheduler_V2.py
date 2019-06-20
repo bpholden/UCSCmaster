@@ -787,6 +787,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     if bstar:
         sort_j = cur_elevations[sort_i].argsort()[::-1]
+        focval=2
     else:
         sort_j = scaled_elevations[sort_i].argsort()[::-1]
         cstr= "getNext(): cadence check: %s" % (cadence_check[sort_i][sort_j][0])
