@@ -743,7 +743,7 @@ class Master(threading.Thread):
 
 
             # Check for servo errors
-            if APF.isOpen()[0] and APF.slew_allowed is False:
+            if APF.slew_allowed is False and APF.isReadyForObserving()[0]:
                 APFTask.set(parent, suffix="MESSAGE", value="Likely servo failure.", wait=False)                    
                 
                 apflog("Error: APF is open, and slew_allowed is false. Likely a servo error/amplifier fault.", level="error", echo=True)
@@ -754,7 +754,7 @@ class Master(threading.Thread):
                     if rv:
                         apflog("APF power cycled.", echo=True)
                     else:
-                        apflog("Error: APF is open, and power cycle failed.", level="error", echo=True)
+                        apflog("Error: APF power cycle failed.", level="error", echo=True)
                         closing(force=True)
                 elif result is False and "DomeShutter" in APF.isOpen()[1]:
                     apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
