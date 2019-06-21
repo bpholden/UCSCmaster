@@ -544,7 +544,7 @@ class Master(threading.Thread):
                     self.exitMessage = "Fixed list is finished. Exiting the watcher."
                     self.stop()
                     # The fixed list has been completely observed so nothing left to do
-                elif APF.ldone == tot and APF.user == "ucsc":
+                elif APF.ldone == tot :
                     self.fixedList = None
                     self.starttime = None
                     if not APF.test:
