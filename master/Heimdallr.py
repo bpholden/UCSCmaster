@@ -745,6 +745,8 @@ class Master(threading.Thread):
             # Check for servo errors
             if APF.slew_allowed.read(binary=True) is False and APF.isReadyForObserving()[0]:
                 APFTask.set(parent, suffix="MESSAGE", value="Likely servo failure.", wait=False)                    
+                if running:
+                    APF.killRobot(now=True)
                 
                 apflog("Error: APF is open, and slew_allowed is false. Likely a servo error/amplifier fault.", level="error", echo=True)
                 chk_done = "$checkapf.MOVE_PERM == true"
