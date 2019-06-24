@@ -159,14 +159,21 @@ def modify_env(config):
     cenv['PYTHONPATH'] = config['pythonpathvar']
     return cenv
 
-def gen_int_files(cmd_str):
+def gen_int_files(cmd_str,cpath):
     cln_str = re.sub("-o \d+ ","",cmd_str)
     
     watch_str = re.sub("Focus","Watching",cln_str)
     cal_str = re.sub("Focus","Cal-Pre",cln_str)
     
+    fp = open(os.path.join(cpath,"watch.out"),"w+")
+    fp.write(watch_str)
+    fp.close()
+    fp = open(os.path.join(cpath,"cal.out"),"w+")
+    fp.write(cal_str)
+    fp.close()
 
-        
+    return
+           
 if __name__ == "__main__":
 
     if len(sys.argv) > 1:
@@ -194,7 +201,7 @@ if __name__ == "__main__":
         stuff_to_run = build_exec_str(config)
         env = modify_env(config)
         print(" ".join(stuff_to_run))
-        gen_int_files(" ".join(stuff_to_run))
+        gen_int_files(" ".join(stuff_to_run),cpath)
         if os.getuid() == int(config['user']) and test is False:
             p=subprocess.Popen(stuff_to_run,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
             sleep(10)
