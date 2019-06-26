@@ -271,7 +271,8 @@ class APF:
     user       = ucam['OUTFILE']
     elapsed    = ucam['elapsed']
     obsnum     = ucam['obsnum']
-    event     = ucam['event']    
+    event      = ucam['event']
+    combo_ps   = ucam['combo_ps']
 
     apfschedule= ktl.Service('apfschedule')
     
@@ -474,8 +475,8 @@ class APF:
         apflog("Observer = %s" % self.ucam('OBSERVER').read(),echo=True)
         apflog("Ownrhint = %s" % self.apfschedule('OWNRHINT').read(),echo=True)        
         apflog("Output directory = %s" % self.ucam('OUTDIR').read(),echo=True)
-        apflog("Observation number = %s" % self.ucam('OBSNUM').read(), echo=True)
-        apflog("File prefix = %s" % self.ucam('OUTFILE').read(), echo=True)
+        apflog("File prefix = %s" % self.user.read(), echo=True)
+        apflog("Observation number = %s" % self.obsnum.read(), echo=True)
 
         return
 
