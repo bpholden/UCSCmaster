@@ -1135,7 +1135,7 @@ class APF:
 
 
 
-    def ucam_restart(parent,comb,fake=False):
+    def ucam_restart(self,fake=False):
 
         # modify -s apftask UCAMLAUNCHER_UCAM_COMMAND=Stop
         if fake:
@@ -1145,10 +1145,10 @@ class APF:
         else:
             try:
                 ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
-                v= comb.waitFor(" == MissingProcesses",timeout=10)
+                v= self.combo_ps.waitFor(" == MissingProcesses",timeout=10)
                 if v:
                     ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
-                    nv = comb.waitFor(" == Ok",timeout=10)
+                    nv = self.combo_ps.waitFor(" == Ok",timeout=10)
                     return nv
                 else:
                     return False
