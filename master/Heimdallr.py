@@ -952,23 +952,27 @@ if __name__ == '__main__':
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
         instr_permit()
-        
+        lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
+        if float(lastfocus_dict["lastfocus"]) > ad.DEWARMAX or float(lastfocus_dict["lastfocus"]) < ad.DEWARMIN:
+            lastfocus_dict["lastfocus"] =  lastfocus_dict["nominal"]
         result = apf.focus()
-        if not result:
+        apfmot = ktl.Service('apfmot')
+        dewarfocraw = apfmot['DEWARFOCRAW'].read(binary=True)
+        if not result or (dewarfocraw > ad.DEWARMAX or dewarfocraw < ad.DEWARMIN):
             flags = "-b"
-            focusdict = APFTask.get("focusinstr", ["phase", "nominal"])
+            focusdict = APFTask.get("focusinstr", ["phase"])
             instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
             if not instr_perm:
                 instr_permit()
                 if len(focusdict['phase']) > 0:
                     flags = " ".join(["-p", focusdict['phase']])
             else:
-                apflog("Focusinstr has failed. Setting to %s and trying again." % (focusdict["nominal"]), level='error', echo=True)
-                APFLib.write("apfmot.DEWARFOCRAW", focusdict["nominal"], binary=True)
+                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
+                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["lastfocus"])
             result = apf.focus(flags=flags)
             if not result:
-                apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["nominal"]), level='error', echo=True)
-                shutdown()
+                apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["lastfocus"]), level='error', echo=True)
+                
 
         apflog("Focus has finished. Setting phase to Cal-Pre")
         if apf.ucam['OUTFILE'].read() == 'ucsc':
