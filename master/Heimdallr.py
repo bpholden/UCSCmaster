@@ -525,8 +525,6 @@ class Master(threading.Thread):
                 apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
                 # reboot warsaw
                 APF.ucam_restart()
-                return
-            
             
             apflog("Starting an instance of scriptobs",echo=True)
             if self.fixedList is not None and self.shouldStartList():
