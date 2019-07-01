@@ -480,6 +480,46 @@ class APF:
 
         return
 
+    def instr_permit():
+        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
+        userkind = ktl.read("checkapf","USERKIND",binary=True)
+        while not instr_perm or userkind != 3:
+            apflog("Waiting for instrument permission to be true and userkind to be robotic")
+            APFTask.waitfor(parent, True, expression="$checkapf.INSTR_PERM = true", timeout=600)
+            APFTask.waitfor(parent, True, expression="$checkapf.USERKIND = robotic", timeout=600)
+            instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
+            userkind = ktl.read("checkapf", "USERKIND", binary=True)
+
+        return True
+
+    def focusinstr(self):
+        self.instr_permit()
+        
+        lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
+        if float(lastfocus_dict["lastfocus"]) > ad.DEWARMAX or float(lastfocus_dict["lastfocus"]) < ad.DEWARMIN:
+            lastfocus_dict["lastfocus"] =  lastfocus_dict["nominal"]
+        result = self.focus()
+
+        apfmot = ktl.Service('apfmot')
+        dewarfocraw = apfmot['DEWARFOCRAW'].read(binary=True)
+        
+        if not result or (dewarfocraw > DEWARMAX or dewarfocraw < DEWARMIN):
+            flags = "-b"
+            focusdict = APFTask.get("focusinstr", ["phase"])
+            instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
+            if not instr_perm:
+                self.instr_permit()
+                if len(focusdict['phase']) > 0:
+                    flags = " ".join(["-p", focusdict['phase']])
+            else:
+                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
+                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["lastfocus"])
+            result = self.focus(flags=flags)
+            if not result:
+                apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["lastfocus"]), level='error', echo=True)
+
+        return result
+        
     def calibrate(self, script, time):
         s_calibrate = os.path.join(ScriptDir,"calibrate")
         if self.test: 
