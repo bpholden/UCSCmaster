@@ -803,17 +803,6 @@ class Master(threading.Thread):
         threading.Thread._Thread__stop(self)
 
 
-def instr_permit():
-    instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-    userkind = ktl.read("checkapf","USERKIND",binary=True)
-    while not instr_perm or userkind != 3:
-        apflog("Waiting for instrument permission to be true and userkind to be robotic")
-        APFTask.waitfor(parent, True, expression="$checkapf.INSTR_PERM = true", timeout=600)
-        APFTask.waitfor(parent, True, expression="$checkapf.USERKIND = robotic", timeout=600)
-        instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
-        userkind = ktl.read("checkapf", "USERKIND", binary=True)
-
-    return True
 
 if __name__ == '__main__':
 
@@ -949,29 +938,9 @@ if __name__ == '__main__':
     # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
-        instr_permit()
-        lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
-        if float(lastfocus_dict["lastfocus"]) > ad.DEWARMAX or float(lastfocus_dict["lastfocus"]) < ad.DEWARMIN:
-            lastfocus_dict["lastfocus"] =  lastfocus_dict["nominal"]
-        result = apf.focus()
-        apfmot = ktl.Service('apfmot')
-        dewarfocraw = apfmot['DEWARFOCRAW'].read(binary=True)
-        if not result or (dewarfocraw > ad.DEWARMAX or dewarfocraw < ad.DEWARMIN):
-            flags = "-b"
-            focusdict = APFTask.get("focusinstr", ["phase"])
-            instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
-            if not instr_perm:
-                instr_permit()
-                if len(focusdict['phase']) > 0:
-                    flags = " ".join(["-p", focusdict['phase']])
-            else:
-                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
-                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["lastfocus"])
-            result = apf.focus(flags=flags)
-            if not result:
-                apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["lastfocus"]), level='error', echo=True)
-                
 
+        result = apf.focusinstr()
+        
         apflog("Focus has finished. Setting phase to Cal-Pre")
         if apf.ucam['OUTFILE'].read() == 'ucsc':
             if not debug:
