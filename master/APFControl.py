@@ -1157,7 +1157,6 @@ class APF:
                 errstr = "Cannot abort scriptobs: %s" % (e)
                 apflog(errstr,level="Warn",echo=True)
 
-
     def ucam_powercycle(self, fake=False):
 
         if fake:
@@ -1214,6 +1213,11 @@ class APF:
 
         if comb.read(binary=True) > 0:
             # brains!
+            rv = self.ucam_restart(comb,fake=fake)
+            return rv
+
+        ucamsta = apfmon['UCAMSTA'].read(binary=True)
+        if ucamsta > 2:
             rv = self.ucam_restart(comb,fake=fake)
             return rv
 
