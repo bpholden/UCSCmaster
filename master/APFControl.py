@@ -1216,7 +1216,7 @@ class APF:
             rv = self.ucam_restart(comb,fake=fake)
             return rv
 
-        ucamsta = apfmon['UCAMSTA'].read(binary=True)
+        ucamsta = self.apfmon['UCAMSTA'].read(binary=True)
         if ucamsta > 2:
             rv = self.ucam_restart(comb,fake=fake)
             return rv
