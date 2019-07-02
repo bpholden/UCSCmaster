@@ -975,7 +975,7 @@ if __name__ == '__main__':
             
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
-        instr_permit()
+        apf.instr_permit()
 
         result = apf.ucam_status()
         if result is False:
@@ -1110,6 +1110,7 @@ if __name__ == '__main__':
         apflog("Note: Cannot stop monitoring ok2open. %s" % (e), level="warn", echo=True)
     # 5) Take morning calibrations
     APFTask.phase(parent, "Cal-Post")
+    apf.instr_permit()
     result = apf.calibrate(script=opt.calibrate, time='post')
     if not result:
         apflog("Calibrate Post has failed.", level='warn',echo=True)
