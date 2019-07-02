@@ -422,6 +422,12 @@ class Master(threading.Thread):
             when = "night"
             if sunset:
                 when = "sunset"
+
+            result = APF.ucam_status()
+            if result is False:
+                apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
+                os._exit()
+
                 
             apflog("Running open at %s as sunel = %4.2f" % (when, float(sunel)),echo=True)
             (apfopen,what) =APF.isOpen()
@@ -939,6 +945,11 @@ if __name__ == '__main__':
     if "Focus" == str(phase).strip():
         apflog("Starting focusinstr script.", level='Info', echo=True)
 
+        result = apf.ucam_status()
+        if result is False:
+            apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
+            sys.exit()
+            
         result = apf.focusinstr()
         
         apflog("Focus has finished. Setting phase to Cal-Pre")
@@ -965,6 +976,11 @@ if __name__ == '__main__':
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
         instr_permit()
+
+        result = apf.ucam_status()
+        if result is False:
+            apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
+            sys.exit()
         
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
         if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
