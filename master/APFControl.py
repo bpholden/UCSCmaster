@@ -480,7 +480,7 @@ class APF:
 
         return
 
-    def instr_permit():
+    def instr_permit(self):
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
         userkind = ktl.read("checkapf","USERKIND",binary=True)
         while not instr_perm or userkind != 3:
