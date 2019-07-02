@@ -496,7 +496,7 @@ class APF:
         self.instr_permit()
         
         lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
-        if float(lastfocus_dict["lastfocus"]) > ad.DEWARMAX or float(lastfocus_dict["lastfocus"]) < ad.DEWARMIN:
+        if float(lastfocus_dict["lastfocus"]) > DEWARMAX or float(lastfocus_dict["lastfocus"]) < DEWARMIN:
             lastfocus_dict["lastfocus"] =  lastfocus_dict["nominal"]
         result = self.focus()
 
