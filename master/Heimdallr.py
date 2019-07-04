@@ -230,6 +230,7 @@ class Master(threading.Thread):
         self.decker = "W"
         self.obsBstar = True
         self.lastObsSuccess = True
+        self.lastObsFinished = True
         self.fixedList = None
         self.sheetn = sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
