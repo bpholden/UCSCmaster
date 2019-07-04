@@ -438,11 +438,8 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
 
     return times, exps
 
-def template_conditions(moon, seeing, slowdown, time_left_before_sunrise):
+def template_conditions(moon, seeing, slowdown):
 
-    if time_left_before_sunrise < 9000:
-        return False
-    
     if seeing < 15 and slowdown < 0.5:
         if moon.phase < 50 and float(moon.alt) < 0:
             return True
@@ -630,11 +627,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     moon = ephem.Moon()
     moon.compute(apf_obs)
 
-    #compute sun rise
-    sunrise = apf_obs.next_rising(ephem.Sun())
-    time_left = 86400*(sunrise - ephem.Date(dt))
-
-    do_templates = template and template_conditions(moon, seeing, slowdown,time_left_before_sunrise)
+    do_templates = template and template_conditions(moon, seeing, slowdown)
 
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
