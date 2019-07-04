@@ -260,19 +260,19 @@ class APF:
     temp       = apfmet('M5OUTEMP')
 
     robot      = ktl.Service('apftask')
-    vmag       = robot['scriptobs_vmag']
-    ldone      = robot['scriptobs_lines_done']
-    sop        = robot['scriptobs_phase']
-    message    = robot['scriptobs_message']  
+    vmag       = robot['SCRIPTOBS_VMAG']
+    ldone      = robot['SCRIPTOBS_LINES_DONE']
+    sop        = robot['SCRIPTOBS_PHASE']
+    message    = robot['SCRIPTOBS_MESSAGE']  
     autofoc    = robot["SCRIPTOBS_AUTOFOC"]
-    slew_allowed = robot['slew_allowed']
+    slew_allowed = robot['SLEW_ALLOWED']
 
     ucam       = ktl.Service('apfucam')
     user       = ucam['OUTFILE']
-    elapsed    = ucam['elapsed']
-    obsnum     = ucam['obsnum']
-    event      = ucam['event']
-    combo_ps   = ucam['combo_ps']
+    elapsed    = ucam['ELAPSED']
+    obsnum     = ucam['OBSNUM']
+    event      = ucam['EVENT']
+    combo_ps   = ucam['COMBO_PS']
 
     apfschedule= ktl.Service('apfschedule')
     
