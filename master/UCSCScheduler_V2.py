@@ -438,8 +438,11 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
 
     return times, exps
 
-def template_conditions(moon, seeing, slowdown):
+def template_conditions(moon, seeing, slowdown, time_left_before_sunrise):
 
+    if time_left_before_sunrise < 9000:
+        return False
+    
     if seeing < 15 and slowdown < 0.5:
         if moon.phase < 50 and float(moon.alt) < 0:
             return True
@@ -488,7 +491,7 @@ def enoughTime(apf_obs,star_table,stars,idx,row):
     tot_time += 70 + (140 + 300)
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
     sunrise = apf_obs.next_rising(ephem.Sun())  
-    time_left = (sunrise - apf_obs.date)*86400.
+    time_left_before_sunrise = (sunrise - apf_obs.date)*86400.
     if tot_time < time_left  and vis:
         return True
     else:
@@ -627,7 +630,11 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     moon = ephem.Moon()
     moon.compute(apf_obs)
 
-    do_templates = template and template_conditions(moon, seeing, slowdown)
+    #compute sun rise
+    sunrise = apf_obs.next_rising(ephem.Sun())
+    time_left = 86400*(sunrise - ephem.Date(dt))
+
+    do_templates = template and template_conditions(moon, seeing, slowdown,time_left_before_sunrise)
 
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
@@ -840,7 +847,7 @@ if __name__ == '__main__':
     starttime += 400
     for i in range(5):
 
-        result = getNext(starttime, 7.99, 0.4, bstar=False,sheetns=sheetn,template=True)
+        result = getNext(starttime, 17.99, 0.4, bstar=False,sheetns=sheetn,template=True)
         #result = smartList("tst_targets", time.time(), 13.5, 2.4)
 
         if result is None:
