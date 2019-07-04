@@ -817,8 +817,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
             bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
             line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
             bfinline = makeScriptobsLine(bnamefin,browfin,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
-            line = line + " # temp=Y"
-            res['SCRIPTOBS'] = bline + "\n" + line + "\n" + bfinline + "\n"
+            res['SCRIPTOBS'] = bline + " # temp=Y\n" + line + " # temp=Y\n" + bfinline + " # temp=Y\n"
             res['isTemp'] = True
             apflog("Attempting template observation of %s" % (sn[idx]),echo=True)
 
