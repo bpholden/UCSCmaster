@@ -402,6 +402,7 @@ class Master(threading.Thread):
                 return
             else:
                 apflog("Observing target: %s" % target['NAME'], echo=True)
+                APFTask.set(parent, suffix="MESSAGE", value="Observing target: %s"  % target['NAME'], wait=False)                
                 self.scriptobs.stdin.write(target["SCRIPTOBS"] + '\n')
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = target["VMAG"]
