@@ -394,6 +394,7 @@ class Master(threading.Thread):
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
                 self.scriptobs.stdin.close()
+                APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
                 APF.close()
                 apf.countrate = -1.0
                 # sleep for a half hour to see if the clouds blow by
