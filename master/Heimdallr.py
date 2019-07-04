@@ -652,8 +652,6 @@ class Master(threading.Thread):
                     APFTask.set(parent, suffix="MESSAGE", value="Calling getTarget", wait=False)
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
-                    apflog("Observing target")
-                    APFTask.set(parent, suffix="MESSAGE", value="Observing Target", wait=False)
                     APFTask.waitfor(self.task, True, timeout=15)
                     
                     haveobserved = True                    
