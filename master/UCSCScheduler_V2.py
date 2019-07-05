@@ -821,7 +821,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
             res['isTemp'] = True
             apflog("Attempting template observation of %s" % (sn[idx]),echo=True)
     else:
-        res['SCRIPTOBS'] += "# end"
+        res['SCRIPTOBS'] += " # end"
 
     return res
 
