@@ -270,10 +270,21 @@ class Master(threading.Thread):
         """
         retval = False
         
-        if self.lineresult.read(binary=True) == 3:
+        if self.apf.lineresult.read(binary=True) == 3:
             retval = True
         return retval
-            
+
+    def checkObsFinished(self):
+        """ Master.checkObsFinished() 
+            checks the value of scriptobs_line to see if the last observation finished
+        """
+        retval = False
+
+        mtch = re.search("end\Z",self.apf.line.read())
+        if self.apf.ldone.read(binary=True) == 0 or mtch:
+            retval = True
+        return retval
+
 
     def checkBstar(self,haveobserved):
         """ Master.obsBstar(haveobserved) 
@@ -394,8 +405,9 @@ class Master(threading.Thread):
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
                 self.scriptobs.stdin.close()
-                APFLib.write(apf.ldone, 0)
                 APF.close()
+                if self.fixedList is None:
+                    APFLib.write(apf.ldone, 0)
                 apf.countrate = -1.0
                 # sleep for a half hour to see if the clouds blow by
                 APFTask.waitfor(self.task, True, timeout=60*30)
@@ -652,12 +664,13 @@ class Master(threading.Thread):
                     self.lastObsSuccess = self.checkObsSuccess()
                     self.obsBstar = self.checkBstar(haveobserved)
                     
-                    APFTask.set(parent, suffix="MESSAGE", value="Calling getTarget", wait=False)
-                    apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
-                    getTarget()
-                    APFTask.waitfor(self.task, True, timeout=15)
+                    if self.checkObsFinished():
+                        APFTask.set(parent, suffix="MESSAGE", value="Calling getTarget", wait=False)
+                        apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
+                        getTarget()
+                        APFTask.waitfor(self.task, True, timeout=15)
                     
-                    haveobserved = True                    
+                        haveobserved = True                    
                 elif self.starttime != None and self.shouldStartList():
                     APF.killRobot()
 
