@@ -385,10 +385,11 @@ class Master(threading.Thread):
         def getTarget():
             APFLib.write(APF.ucam["RECORD"], "Yes") # safe / sorry
 
-            if len(self.target["SCRIPTOBS"]) > 0:
-                # just keep going with last block
-                self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
-                return
+            if self.target is not None and 'SCRIPTOBS' in self.target.keys():
+                if len(self.target["SCRIPTOBS"]) > 0:
+                    # just keep going with last block
+                    self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
+                    return
             
             apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
 
