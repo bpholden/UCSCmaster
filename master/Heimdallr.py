@@ -242,7 +242,7 @@ class Master(threading.Thread):
         self.focval = 0
         self.totTemps = totTemps        
         self.apftask = ktl.Service('apftask')
-        self.lineresult = apftask['scriptobs_line_result']
+        self.lineresult = apftask['SCRIPTOBS_LINE_RESULT']
         self.lineresult.monitor()
         
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
