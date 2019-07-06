@@ -332,6 +332,51 @@ class Master(threading.Thread):
         """
         APF = self.APF
 
+    def slowdown(self):
+        
+        if self.BV is None:
+            apflog("Warning!: Ended up in getTarget() with no B Magnitude value, slowdown can't be computed.", echo=True)
+            self.BV = 0.6 # use a default average
+
+        if self.VMAG is None:
+            apflog("Warning!: Ended up in getTarget() with no V Magnitude value, slowdown can't be computed.", echo=True)
+            slowdown = 5
+        elif APF.avg_fwhm < 1.0:
+            apflog("Warning!: AVG_FWHM = %4.2f. By Odin's beard that seems low." % APF.avg_fwhm, echo=True)
+            slowdown = 5
+        else:
+            apflog("Calculating expected counts")
+            apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
+            exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael, APF.avg_fwhm, self.decker)
+            try:
+                if APF.countrate <= 0:
+                    try:
+                        APF.countrate = APF.ccountrate
+                    except:
+                        APF.countrate = -1.0
+                    slowdown = exp_cnts_sec / APF.countrate
+                    if APF.countrate*10 <  APF.ccountrate:
+                        APF.countrate = APF.ccountrate
+                    if slowdown < 0:
+                        slowdown = 1
+                        apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
+                        APF.counts.monitor(start=False)
+                        APF.counts.monitor(start=True)
+                        APF.counts.callback(ad.countmon)
+                        # yes this happened.
+                    if slowdown < SchedulerConsts.SLOWDOWN_MIN:
+                        slowdown = SchedulerConsts.SLOWDOWN_MIN
+                        apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
+                        # yes this happened.
+                    if slowdown > SchedulerConsts.SLOWDOWN_MAX:
+                        slowdown = SchedulerConsts.SLOWDOWN_MAX
+                        apflog("slowdown too high, countrate= %g" % (APF.countrate), echo=True, level='debug')
+            except ZeroDivisionError:
+                apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
+                slowdown = 1
+
+            return slowdown
+        
         # This is called when an observation finishes, and selects the next target
         def getTarget():
             apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
@@ -350,46 +395,7 @@ class Master(threading.Thread):
                 return None
             
             # Calculate the slowdown factor.
-            if self.BV is None:
-                apflog("Warning!: Ended up in getTarget() with no B Magnitude value, slowdown can't be computed.", echo=True)
-                self.BV = 0.6 # use a default average
 
-            if self.VMAG is None:
-                apflog("Warning!: Ended up in getTarget() with no V Magnitude value, slowdown can't be computed.", echo=True)
-                slowdown = 5
-            elif APF.avg_fwhm < 1.0:
-                apflog("Warning!: AVG_FWHM = %4.2f. By Odin's beard that seems low." % APF.avg_fwhm, echo=True)
-                slowdown = 5
-            else:
-                apflog("Calculating expected counts")
-                apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
-                exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael, APF.avg_fwhm, self.decker)
-                try:
-                    if APF.countrate <= 0:
-                        try:
-                            APF.countrate = APF.ccountrate
-                        except:
-                            APF.countrate = -1.0
-                    slowdown = exp_cnts_sec / APF.countrate
-                    if APF.countrate*10 <  APF.ccountrate:
-                        APF.countrate = APF.ccountrate
-                    if slowdown < 0:
-                        slowdown = 1
-                        apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
-                        APF.counts.monitor(start=False)
-                        APF.counts.monitor(start=True)
-                        APF.counts.callback(ad.countmon)
-                        # yes this happened.
-                    if slowdown < SchedulerConsts.SLOWDOWN_MIN:
-                        slowdown = SchedulerConsts.SLOWDOWN_MIN
-                        apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
-                        # yes this happened.
-                    if slowdown > SchedulerConsts.SLOWDOWN_MAX:
-                        slowdown = SchedulerConsts.SLOWDOWN_MAX
-                        apflog("slowdown too high, countrate= %g" % (APF.countrate), echo=True, level='debug')
-                except ZeroDivisionError:
-                    apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
-                    slowdown = 1
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
             APFLib.write(apf.robot["MASTER_VAR_1"], slowdown)
             apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (APF.countrate, APF.ccountrate))
@@ -418,8 +424,10 @@ class Master(threading.Thread):
                 return
             else:
                 apflog("Observing target: %s" % target['NAME'], echo=True)
-                APFTask.set(parent, suffix="MESSAGE", value="Observing target: %s"  % target['NAME'], wait=False)                
+                APFTask.set(parent, suffix="MESSAGE", value="Observing target: %s"  % target['NAME'], wait=False)
+                
                 self.scriptobs.stdin.write(target["SCRIPTOBS"] + '\n')
+                
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = target["VMAG"]
             self.BV   = target["BV"]
@@ -435,6 +443,8 @@ class Master(threading.Thread):
                 self.nTemps += 1
                 if self.nTemps >= self.totTemps:
                     self.doTemp = False
+
+            return 
 
         # opens the dome & telescope, if sunset is True calls open at sunset, else open at night
         def opening(sunel,sunset=False):
