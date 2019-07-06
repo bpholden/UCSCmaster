@@ -399,7 +399,7 @@ class Master(threading.Thread):
                 return None
             
             # Calculate the slowdown factor.
-
+            slowdown = calcSlowdown()
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
             APFLib.write(apf.robot["MASTER_VAR_1"], slowdown)
             apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (APF.countrate, APF.ccountrate))
