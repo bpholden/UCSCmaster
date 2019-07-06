@@ -325,6 +325,7 @@ class Master(threading.Thread):
     ####
     # run is the main event loop, for historical reasons it has its own functions that are local in scope
     ####
+
     
     def run(self):
         """ Master.run() - runs the observing
