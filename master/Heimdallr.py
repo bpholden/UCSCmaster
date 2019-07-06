@@ -385,6 +385,10 @@ class Master(threading.Thread):
         def getTarget():
             APFLib.write(APF.ucam["RECORD"], "Yes") # safe / sorry
 
+            if len(self.target["SCRIPTOBS"]) > 0:
+                # just keep going with last block
+                self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
+                return
             
             apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
 
@@ -432,7 +436,7 @@ class Master(threading.Thread):
                 apflog("Observing target: %s" % self.target['NAME'], echo=True)
                 APFTask.set(parent, suffix="MESSAGE", value="Observing target: %s"  % self.target['NAME'], wait=False)
                 
-                self.scriptobs.stdin.write(self.target["SCRIPTOBS"] + '\n')
+                self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
                 
             # Set the Vmag and B-V mag of the latest target
             self.VMAG = self.target["VMAG"]
