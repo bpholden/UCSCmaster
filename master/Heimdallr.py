@@ -412,10 +412,10 @@ class Master(threading.Thread):
                 seeing = float(APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval)
+            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval)
 
             self.set_autofocval()
-            if target is None:
+            if self.target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
                 self.scriptobs.stdin.close()
@@ -427,23 +427,23 @@ class Master(threading.Thread):
                 APFTask.waitfor(self.task, True, timeout=60*30)
                 return
             else:
-                apflog("Observing target: %s" % target['NAME'], echo=True)
-                APFTask.set(parent, suffix="MESSAGE", value="Observing target: %s"  % target['NAME'], wait=False)
+                apflog("Observing target: %s" % self.target['NAME'], echo=True)
+                APFTask.set(parent, suffix="MESSAGE", value="Observing target: %s"  % self.target['NAME'], wait=False)
                 
-                self.scriptobs.stdin.write(target["SCRIPTOBS"] + '\n')
+                self.scriptobs.stdin.write(self.target["SCRIPTOBS"] + '\n')
                 
             # Set the Vmag and B-V mag of the latest target
-            self.VMAG = target["VMAG"]
-            self.BV   = target["BV"]
-            self.decker = target["DECKER"]
-            istemp = str(target['isTemp'])
+            self.VMAG = self.target["VMAG"]
+            self.BV   = self.target["BV"]
+            self.decker = self.target["DECKER"]
+            istemp = str(self.target['isTemp'])
             
-            apflog("getTarget(): V=%.2f  B-V=%.2f Pri=%.2f " % (self.VMAG, self.BV, target["PRI"]))
+            apflog("getTarget(): V=%.2f  B-V=%.2f Pri=%.2f " % (self.VMAG, self.BV, self.target["PRI"]))
             apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (APF.avg_fwhm, slowdown, APF.countrate))
 
-            apflog("getTarget(): Target= %s Temp=%s" % (target["NAME"], istemp))
-            apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (target["COUNTS"], target["EXP_TIME"], target["NEXP"]))
-            if target['isTemp']:
+            apflog("getTarget(): Target= %s Temp=%s" % (self.target["NAME"], istemp))
+            apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (self.target["COUNTS"], self.target["EXP_TIME"], self.target["NEXP"]))
+            if self.target['isTemp']:
                 self.nTemps += 1
                 if self.nTemps >= self.totTemps:
                     self.doTemp = False
