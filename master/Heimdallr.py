@@ -270,7 +270,7 @@ class Master(threading.Thread):
         """
         retval = False
         
-        if apf.lineresult.read(binary=True) == 3:
+        if self.lineresult.read(binary=True) == 3:
             retval = True
         return retval
 
