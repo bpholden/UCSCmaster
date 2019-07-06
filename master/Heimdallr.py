@@ -270,7 +270,7 @@ class Master(threading.Thread):
         """
         retval = False
         
-        if self.apf.lineresult.read(binary=True) == 3:
+        if apf.lineresult.read(binary=True) == 3:
             retval = True
         return retval
 
@@ -280,8 +280,8 @@ class Master(threading.Thread):
         """
         retval = False
 
-        mtch = re.search("end\Z",self.apf.line.read())
-        if self.apf.ldone.read(binary=True) == 0 or mtch:
+        mtch = re.search("end\Z",apf.line.read())
+        if apf.ldone.read(binary=True) == 0 or mtch:
             retval = True
         return retval
 
