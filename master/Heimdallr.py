@@ -383,8 +383,10 @@ class Master(threading.Thread):
         
         # This is called when an observation finishes, and selects the next target
         def getTarget():
-            apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
             APFLib.write(APF.ucam["RECORD"], "Yes") # safe / sorry
+
+            
+            apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
 
             try:
                 self.obsBstar = bool(ktl.read("apftask", "master_var_3"))
@@ -396,7 +398,7 @@ class Master(threading.Thread):
                 
             if self.scriptobs is None:
                 apflog("Called getTarget, but there is not instance of scriptobs associated with Heimdallr. This is an error condition.", echo=True)
-                return None
+                return 
             
             # Calculate the slowdown factor.
             slowdown = calcSlowdown()
