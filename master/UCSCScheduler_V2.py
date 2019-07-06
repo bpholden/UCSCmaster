@@ -386,7 +386,7 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
     res['EXP_TIME'] = star_table[idx, DS_EXPT]
     res['NEXP'] = star_table[idx, DS_NSHOTS]
     res['NAME']   = sn[idx]
-    res['SCRIPTOBS'] = lines[idx]
+    res['SCRIPTOBS'] = [lines[idx]]
     return res
 
 def format_expmeter(exp_counts, nexp, exptime):
@@ -527,9 +527,9 @@ def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx,focval=0):
     res['I2'] =    flags['I2'][idx]
     res['isTemp'] =    False
     res['owner'] =    flags['owner'][idx]
-
-    res['SCRIPTOBS'] = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx],focval=focval)
-
+    res['SCRIPTOBS'] = []
+    scriptobs_line = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx],focval=focval) + " # end"
+    res['SCRIPTOBS'].append(scriptobs_line)
     return res
 
 
@@ -817,11 +817,12 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
             bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
             line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
             bfinline = makeScriptobsLine(bnamefin,browfin,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
-            res['SCRIPTOBS'] = bline + " # temp=Y\n" + line + " # temp=Y\n" + bfinline + " # temp=Y end"
+            res['SCRIPTOBS'] = []
+            res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
+            res['SCRIPTOBS'].append(line + " # temp=Y")
+            res['SCRIPTOBS'].append(bline + " # temp=Y")
             res['isTemp'] = True
             apflog("Attempting template observation of %s" % (sn[idx]),echo=True)
-    else:
-        res['SCRIPTOBS'] += " # end"
 
     return res
 
@@ -835,7 +836,7 @@ if __name__ == '__main__':
     ot = open(otfn,"w")
     starttime = time.time()
     result = getNext(starttime, 7.99, 0.4, bstar=True,sheetns=sheetn.split(","))
-    ot.write("%s\n" % (result["SCRIPTOBS"]))
+    ot.write("%s\n" % (result["SCRIPTOBS"].pop()))
     ot.close()
     starttime += 400
     for i in range(5):
@@ -848,9 +849,10 @@ if __name__ == '__main__':
         else:
             for k in result:
                 print(k, result[k])
-        ot = open(otfn,"a")
-        ot.write("%s\n" % (result["SCRIPTOBS"]))
-        ot.close()
-        starttime += result["EXP_TIME"]
+        while len(result["SCRIPTOBS"]) > 0:
+            ot = open(otfn,"a")
+            ot.write("%s\n" % (result["SCRIPTOBS"].pop()))
+            ot.close()
+            starttime += result["EXP_TIME"]
 
     print("Done")
