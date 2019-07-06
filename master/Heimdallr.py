@@ -278,7 +278,8 @@ class Master(threading.Thread):
 
     def checkObsFinished(self):
         """ Master.checkObsFinished() 
-            checks the value of scriptobs_line to see if the last observation finished
+            checks the value of scriptobs_line to see if we are on the last line of the block
+            checks scriptobs_line_result and scriptobs_observed to see if the last line is done
         """
         retval = False
 
