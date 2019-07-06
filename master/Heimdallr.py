@@ -337,17 +337,18 @@ class Master(threading.Thread):
 
         def calcSlowdown(self):
         
-        if self.BV is None:
-            apflog("Warning!: Ended up in getTarget() with no B Magnitude value, slowdown can't be computed.", echo=True)
-            self.BV = 0.6 # use a default average
+            if self.BV is None:
+                apflog("Warning!: Ended up in getTarget() with no B Magnitude value, slowdown can't be computed.", echo=True)
+                self.BV = 0.6 # use a default average
 
-        if self.VMAG is None:
-            apflog("Warning!: Ended up in getTarget() with no V Magnitude value, slowdown can't be computed.", echo=True)
-            slowdown = 5
-        elif APF.avg_fwhm < 1.0:
-            apflog("Warning!: AVG_FWHM = %4.2f. By Odin's beard that seems low." % APF.avg_fwhm, echo=True)
-            slowdown = 5
-        else:
+            if self.VMAG is None:
+                apflog("Warning!: Ended up in getTarget() with no V Magnitude value, slowdown can't be computed.", echo=True)
+                return 5
+                
+            if APF.avg_fwhm < 1.0:
+                apflog("Warning!: AVG_FWHM = %4.2f. By Odin's beard that seems low." % APF.avg_fwhm, echo=True)
+                return 5
+            
             apflog("Calculating expected counts")
             apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
             exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael, APF.avg_fwhm, self.decker)
