@@ -335,7 +335,7 @@ class Master(threading.Thread):
         """
         APF = self.APF
 
-        def calcSlowdown(self):
+        def calcSlowdown():
         
             if self.BV is None:
                 apflog("Warning!: Ended up in getTarget() with no B Magnitude value, slowdown can't be computed.", echo=True)
