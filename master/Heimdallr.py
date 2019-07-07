@@ -348,7 +348,7 @@ class Master(threading.Thread):
             if APF.avg_fwhm < 1.0:
                 apflog("Warning!: AVG_FWHM = %4.2f. By Odin's beard that seems low." % APF.avg_fwhm, echo=True)
                 return 5
-            
+            slowdown = 1
             apflog("Calculating expected counts")
             apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
             exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael, APF.avg_fwhm, self.decker)
