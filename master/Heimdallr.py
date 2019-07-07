@@ -358,23 +358,23 @@ class Master(threading.Thread):
                         APF.countrate = APF.ccountrate
                     except:
                         APF.countrate = -1.0
-                    slowdown = exp_cnts_sec / APF.countrate
-                    if APF.countrate*10 <  APF.ccountrate:
-                        APF.countrate = APF.ccountrate
-                    if slowdown < 0:
-                        slowdown = 1
-                        apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
-                        APF.counts.monitor(start=False)
-                        APF.counts.monitor(start=True)
-                        APF.counts.callback(ad.countmon)
-                        # yes this happened.
-                    if slowdown < SchedulerConsts.SLOWDOWN_MIN:
-                        slowdown = SchedulerConsts.SLOWDOWN_MIN
-                        apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
-                        # yes this happened.
-                    if slowdown > SchedulerConsts.SLOWDOWN_MAX:
-                        slowdown = SchedulerConsts.SLOWDOWN_MAX
-                        apflog("slowdown too high, countrate= %g" % (APF.countrate), echo=True, level='debug')
+                if APF.countrate*10 <  APF.ccountrate:
+                    APF.countrate = APF.ccountrate
+                slowdown = exp_cnts_sec / APF.countrate
+                if slowdown < 0:
+                    slowdown = 1
+                    apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
+                    APF.counts.monitor(start=False)
+                    APF.counts.monitor(start=True)
+                    APF.counts.callback(ad.countmon)
+                    # yes this happened.
+                if slowdown < SchedulerConsts.SLOWDOWN_MIN:
+                    slowdown = SchedulerConsts.SLOWDOWN_MIN
+                    apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
+                    # yes this happened.
+                if slowdown > SchedulerConsts.SLOWDOWN_MAX:
+                    slowdown = SchedulerConsts.SLOWDOWN_MAX
+                    apflog("slowdown too high, countrate= %g" % (APF.countrate), echo=True, level='debug')
             except ZeroDivisionError:
                 apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                 slowdown = 1
