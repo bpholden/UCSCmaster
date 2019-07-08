@@ -489,6 +489,11 @@ def enoughTime(apf_obs,star_table,stars,idx,row):
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
     sunrise = apf_obs.next_rising(ephem.Sun())  
     time_left_before_sunrise = (sunrise - apf_obs.date)*86400.
+    try:
+        apflog( "enoughTime(): %.1f %.3f %.3f %.1f " % (tot_time, sunrise, apf_obs.date, time_left_before_sunrise),echo=True)
+    except:
+        apflog("enoughTime(): cannot log times!?!",echo=True)
+        
     if tot_time < time_left_before_sunrise  and vis:
         return True
     else:
