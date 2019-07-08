@@ -260,13 +260,16 @@ class Master(threading.Thread):
         APF = self.APF
         # check last telescope focus
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
+        current_val = APF.autofoc.read()
         if time.time() - lastfoc > FOCUSTIME:
-            APF.autofoc.write("robot_autofocus_enable")
-            self.focval=2
-            APFTask.set(parent, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
+            if current_val != "robot_autofocus_enable":
+                APF.autofoc.write("robot_autofocus_enable")
+                self.focval=1
+                APFTask.set(parent, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
         else:
-            APF.autofoc.write("robot_autofocus_disable")
-            self.focval=0
+            if current_val == "robot_autofocus_enable":
+                APF.autofoc.write("robot_autofocus_disable")
+                self.focval=0
 
 
     def checkObsSuccess(self):
