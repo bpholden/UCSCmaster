@@ -309,7 +309,8 @@ class Master(threading.Thread):
             s=""
             if self.obsBstar:
                 s="True"
-            APFTask.set(parent,suffix="VAR_3", value=s, wait=False)
+            if vals['VAR_3'] != s:
+                APFTask.set(parent,suffix="VAR_3", value=s, wait=False)
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
             
