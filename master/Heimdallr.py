@@ -693,13 +693,13 @@ class Master(threading.Thread):
                     self.lastObsSuccess = self.checkObsSuccess()
                     self.obsBstar = self.checkBstar(haveobserved)
                     
-                    if self.checkObsFinished():
-                        APFTask.set(parent, suffix="MESSAGE", value="Calling getTarget", wait=False)
-                        apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
-                        getTarget()
-                        APFTask.waitfor(self.task, True, timeout=15)
+
+                    APFTask.set(parent, suffix="MESSAGE", value="Calling getTarget", wait=False)
+                    apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
+                    getTarget()
+                    APFTask.waitfor(self.task, True, timeout=15)
                     
-                        haveobserved = True                    
+                    haveobserved = True                    
                 elif self.starttime != None and self.shouldStartList():
                     APF.killRobot()
 
