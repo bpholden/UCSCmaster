@@ -392,10 +392,14 @@ class Master(threading.Thread):
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
                     # just keep going with last block
+                    apflog("getTarget(): Going through remaining target queue.",echo=True)
                     self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
                     return
-            
-            apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
+            if self.checkObsFinished():
+                apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
+            else:
+                apflog("getTarget(): Not at end of block but out of targets.",echo=True)
+
 
             try:
                 self.obsBstar = bool(ktl.read("apftask", "master_var_3"))
@@ -693,7 +697,6 @@ class Master(threading.Thread):
                     self.lastObsSuccess = self.checkObsSuccess()
                     self.obsBstar = self.checkBstar(haveobserved)
                     
-
                     APFTask.set(parent, suffix="MESSAGE", value="Calling getTarget", wait=False)
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
