@@ -1185,21 +1185,37 @@ class APF:
         else:
             try:
                 ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
-                self.combo_ps.waitFor(" == MissingProcesses",timeout=10)
-                ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","reboot")
-                expression = "$apftask.ucamlauncher_status == Running"
-                if APFTask.waitfor(self.parent,True,expression=expression,timeout=600):
+                if self.combo_ps.waitFor(" == MissingProcesses",timeout=30):
                     ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
                     nv = self.combo_ps.waitFor(" == Ok",timeout=30)
-                    return nv
-                else:
-                    apflog("UCAM host reboot failure, UCAM not running" , level="alert", echo=True)
-                    return False
-
+                    if nv:
+                        return nv
+                    else:
+                        apflog("UCAM  restart failure, combo_ps still not ok" , level="error", echo=True)
             except:	      
                 apflog("UCAM status bad, cannot restart",level='alert')
                 return False
 
+            try:
+                ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
+                self.combo_ps.waitFor(" == MissingProcesses",timeout=30)
+                ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","reboot")
+                try:
+                    APFTask.wait("master",False,timeout=300)
+                except:
+                    pass
+                ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
+                nv = self.combo_ps.waitFor(" == Ok",timeout=30)
+                if nv:
+                    return nv
+                else:
+                    apflog("UCAM host reboot failure, combo_ps still not ok" , level="alert", echo=True)
+            except:	      
+                apflog("UCAM status bad, cannot restart",level='alert')
+                return False
+  
+
+            
         return False
 
 
