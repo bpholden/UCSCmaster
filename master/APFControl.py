@@ -1200,10 +1200,22 @@ class APF:
                 ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
                 self.combo_ps.waitFor(" == MissingProcesses",timeout=30)
                 ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","reboot")
+                noticeexpression = "$apfmon.UCAMSTA == Notice"
                 try:
-                    APFTask.wait("master",False,timeout=300)
+                    rv = ktl.waitfor(noticeexpression,timeout=600)
+                    if rv is False:
+                        apflog("UCAM host reboot failure" , level="alert", echo=True)
+                        return False
                 except:
-                    pass
+                    return False
+                okexpression = "$apfmon.UCAMSTA == Ok"
+                try:
+                    rv = ktl.waitfor(okexpression,timeout=600)
+                    if rv is False:
+                        apflog("UCAM host reboot failure" , level="alert", echo=True)
+                        return False
+                except:
+                    return False
                 ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
                 nv = self.combo_ps.waitFor(" == Ok",timeout=30)
                 if nv:
