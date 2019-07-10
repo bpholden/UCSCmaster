@@ -1214,7 +1214,7 @@ class APF:
 
         if comb.read(binary=True) > 0:
             # brains!
-            rv = self.ucam_restart(comb,fake=fake)
+            rv = self.ucam_restart(fake=fake)
             return rv
 
         ucamsta = self.apfmon['UCAMSTA'].read(binary=True)
