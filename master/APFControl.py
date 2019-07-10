@@ -1190,7 +1190,7 @@ class APF:
                 expression = "$apftask.ucamlauncher_status == Running"
                 if APFTask.waitfor(self.parent,True,expression=expression,timeout=600):
                     ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
-                    nv = self.combo_ps.waitFor(" == Ok",timeout=10)
+                    nv = self.combo_ps.waitFor(" == Ok",timeout=30)
                     return nv
                 else:
                     apflog("UCAM host reboot failure, UCAM not running" , level="alert", echo=True)
