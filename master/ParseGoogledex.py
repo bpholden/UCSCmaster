@@ -414,7 +414,7 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
         gs = gspread.authorize(credentials)
         apflog("Successfully logged in.", echo=True)
     except:
-        apflog("Cannot logg in.", echo=True,level='error')
+        apflog("Cannot log into Google API.", echo=True,level='error')
         return None
     apflog("Attempting to Open %s" % (sheetn),echo=True)
     try:
