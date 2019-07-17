@@ -520,6 +520,14 @@ class APF:
 
     def focusinstr(self):
         self.instr_permit()
+        rv = self.enable_inst()
+        if rv is False:
+            try:
+                ip = checkapf['INSTR_PERM'].read()
+            except:
+                ip = 'Unknown'
+            apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
+            return rv
         
         lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
         if float(lastfocus_dict["lastfocus"]) > DEWARMAX or float(lastfocus_dict["lastfocus"]) < DEWARMIN:
