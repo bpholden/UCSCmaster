@@ -1042,6 +1042,7 @@ if __name__ == '__main__':
             result = apf.calibrate(script = opt.calibrate, time = 'pre')
             if not result:
                 apflog("Error: Calibrate Pre has failed twice. Observer is exiting.",level='error',echo=True)
+                apf.turn_off_lamps()
                 sys.exit(2)
         apflog("Calibrate Pre has finished. Setting phase to Watching.")
         APFTask.phase(parent, "Watching")
