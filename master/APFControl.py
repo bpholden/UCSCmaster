@@ -493,6 +493,31 @@ class APF:
 
         return True
 
+    def turn_off_lamps(self):
+        for lamp in ("HALOGEN2","HALOGEN1","THORIUM1","THORIUM2"):
+            try:
+                rv = ktl.write("apfmot",lamp,"Off",wait=False)
+            except Exception, e:
+                apflog("Exception: %s" % (e),echo=True,level="alert")
+                rv = False
+            if rv is False:
+                apflog("Cannot turn off lamp %s" % (lamp),echo=True,level="alert")
+        return rv
+    
+    def enable_inst(self):
+
+        rv = True
+        for stage in ('GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC'):
+            curkwd = stage + "MOD"
+            try:
+                crv = ktl.write("apfmot",curkwd,"Pos",wait=True,timeout=10)
+                if crv is False:
+                    rv = False
+            except:
+                rv = False
+
+        return rv
+
     def focusinstr(self):
         self.instr_permit()
         
