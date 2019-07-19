@@ -925,7 +925,7 @@ if __name__ == '__main__':
         sys.exit()
     
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
-    possible_phases = ["ObsInfo", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
+    possible_phases = ["Init", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
 
     # If a command line phase was specified, use that.
     if opt.phase != None:
@@ -937,32 +937,7 @@ if __name__ == '__main__':
     apflog("Phase at start is: %s" % phase, echo=True)
     if str(phase).strip() not in possible_phases:
         apflog("Starting phase is not valid. Phase being set to ObsInfo", echo=True)
-        APFTask.phase(parent, "ObsInfo")
-
-    # Make sure that the command line arguments are respected.
-    # Regardless of phase, if a name, obsnum, or reset was commanded, make sure we perform these operations.
-    apflog("Setting scriptobs_lines_done=0")
-    APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
-    APFLib.write(apf.robot["SCRIPTOBS_MESSAGE"], "")
-    if opt.fixed:
-        if not os.path.exists(opt.fixed):
-            errmsg = "starlist %s does not exist" % (opt.fixed)
-            apflog(errmsg, level="error", echo=True)
-            sys.exit(errmsg)
-        if not debug:
-            APFTask.set(parent, "STARLIST", opt.fixed)
-    else:
-        if not debug:
-            APFTask.set(parent, "STARLIST", "")
-
-    if str(phase).strip() != "ObsInfo":
-        if opt.name:
-            apflog("option -n specified. Setting UCAM Observer to %s." % opt.name)
-            APFLib.write(apf.ucam["OBSERVER"], opt.name)
-            APFLib.write(apf.ucam["OUTFILE"], opt.name)
-        if opt.obsnum:
-            apflog("option -o specified. Setting UCAM OBSNUM to %d." % int(opt.obsnum)) 
-            APFLib.write(apf.ucam["OBSNUM"], int(opt.obsnum))
+        APFTask.phase(parent, "Init")
 
     # Start the actual operations
     # Goes through 5 steps:
@@ -974,21 +949,35 @@ if __name__ == '__main__':
     # Specifying a phase jumps straight to that point, and continues from there.
 
 
-    # 1) Setting the observer information.
-    # Sets the Observation number, observer name, file name, and file directory
-    if "ObsInfo" == str(phase).strip():
+    # Make sure that the command line arguments are respected.
+    # Regardless of phase, if a name, obsnum, or reset was commanded, make sure we perform these operations.
+    apflog("Setting Observer Information", echo=True)
+    opt = set_obs_defaults(opt)
+    apflog("Using %s for name and %s for obs number." % (opt.name, repr(opt.obsnum)), echo=True)
+    apf.setObserverInfo(num=opt.obsnum, name=opt.name, owner=opt.owner)
+    
+    if "Init" == str(phase).strip():
         apflog("Setting the task step to 0")
         APFTask.step(parent, 0)
 
-        apflog("Setting Observer Information", echo=True)
-        opt = set_obs_defaults(opt)
-        apflog("Using %s for name and %s for obs number." % (opt.name, repr(opt.obsnum)), echo=True)
-        apf.setObserverInfo(num=opt.obsnum, name=opt.name, owner=opt.owner)
-                
-        apflog("Setting ObsInfo finished. Setting phase to Focus.")
+        APFLib.write(apf.robot["SCRIPTOBS_MESSAGE"], "Setting defaults for observing.")
+        if opt.fixed:
+            if not os.path.exists(opt.fixed):
+                errmsg = "starlist %s does not exist" % (opt.fixed)
+                apflog(errmsg, level="error", echo=True)
+                sys.exit(errmsg)
+            if not debug:
+                APFTask.set(parent, "STARLIST", opt.fixed)
+        else:
+            if not debug:
+                APFTask.set(parent, "STARLIST", "")
+        
+
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
+        APFLib.write(apf.robot["MASTER_VAR_3"], 'True')        
+        apflog("Setting ObsInfo finished. Setting phase to Focus.")
         APFTask.phase(parent, "Focus")
         apflog("Phase is now %s" % phase,echo=True)
 
@@ -1018,12 +1007,8 @@ if __name__ == '__main__':
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
 
-            
-        APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
-
         if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
             APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-            
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
         apf.instr_permit()
@@ -1039,6 +1024,7 @@ if __name__ == '__main__':
 
         if result == False:
             apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
+            apf.instr_permit()
             result = apf.calibrate(script = opt.calibrate, time = 'pre')
             if not result:
                 apflog("Error: Calibrate Pre has failed twice. Observer is exiting.",level='error',echo=True)
