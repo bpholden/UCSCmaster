@@ -985,7 +985,8 @@ if __name__ == '__main__':
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
         APFLib.write(apf.robot["MASTER_VAR_3"], 'True')        
         apflog("Initialization finished. Setting phase to Focus.")
-        APFTask.phase(parent, "Focus")
+        phase = "Focus"
+        APFTask.phase(parent, phase)
         apflog("Phase is now %s" % phase,echo=True)
 
     # 2) Run autofocus cube
