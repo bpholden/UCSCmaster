@@ -112,7 +112,7 @@ def get_start_time(hr,mn):
     return float(st.strftime("%s"))
 
 def args():
-    p_c = ["ObsInfo", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
+    p_c = ["Init", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
     w_c = ["on", "off", "auto"]
     b_c = [1, 2, 4]
     parser = argparse.ArgumentParser(description="Set default options")
@@ -936,7 +936,7 @@ if __name__ == '__main__':
     # then assume we are starting a fresh night and start from setting the observer information.
     apflog("Phase at start is: %s" % phase, echo=True)
     if str(phase).strip() not in possible_phases:
-        apflog("Starting phase is not valid. Phase being set to ObsInfo", echo=True)
+        apflog("Starting phase is not valid. Phase being set to Init", echo=True)
         APFTask.phase(parent, "Init")
 
     # Start the actual operations
@@ -977,7 +977,7 @@ if __name__ == '__main__':
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
         APFLib.write(apf.robot["MASTER_VAR_3"], 'True')        
-        apflog("Setting ObsInfo finished. Setting phase to Focus.")
+        apflog("Initialization finished. Setting phase to Focus.")
         APFTask.phase(parent, "Focus")
         apflog("Phase is now %s" % phase,echo=True)
 
