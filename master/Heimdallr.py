@@ -113,10 +113,14 @@ def get_start_time(hr,mn):
 
 def calc_focus_start_time():
     # computes time 3.25 hours before sunset
-    dt = datetime.utcnow()
-    time_to_sunset = ds.compute_sunset(dt)
+    udt = datetime.utcnow()
+    dt = datetime.now()    
+    time_to_sunset = ds.compute_sunset(udt)
     start_time = time_to_sunset - 3.25*3600.
-    return start_time
+    t_delta = timedelta(0,start_time)
+    start_dt = dt + t_delta
+    start_str = "%s" % (start_dt)
+    return start_time, start_str
 
 def args():
     p_c = ["Init", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
@@ -992,10 +996,13 @@ if __name__ == '__main__':
     # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
 
-        stime = calc_focus_start_time()
+        stime, s_str = calc_focus_start_time()
         waitstr = "Will now wait %.1f seconds before starting focusinstr" % (stime)
         apflog(waitstr, echo=True)
         APFTask.set(parent, suffix="MESSAGE", value=waitstr, wait=False)
+        startstr = "Estimating that will be at %s" % (s_str)
+        apflog(startstr, echo=True)
+        APFTask.set(parent, suffix="MESSAGE", value=startstr, wait=False)
         
         APFTask.wait(parent, True, timeout=stime)
         
