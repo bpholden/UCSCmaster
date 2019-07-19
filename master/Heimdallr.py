@@ -990,6 +990,10 @@ if __name__ == '__main__':
 
     # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
+
+        stime = calc_focus_start_time()
+        waitstr = "Will now wait %.1f seconds before starting focusinstr" % (stime)
+        apflog(waitstr, echo=True)
         apflog("Starting focusinstr script.", level='Info', echo=True)
 
         result = apf.ucam_status()
