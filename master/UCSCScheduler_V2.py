@@ -286,15 +286,7 @@ def calc_elevations(stars, observer):
         els.append(cur_el)
     return np.array(els)
 
-
-def smartList(starlist, time, seeing, slowdown,outdir = None):
-    """ Determine the best target to observe from the provided scriptobs-compatible starlist.
-        Here the best target is defined as an unobserved target (ie not in observed targets )
-        that is visible above 30 degrees elevation. Higher elevation targets are prefered,
-        but those that rise above 85 degrees will be regected to avoid slewing through the zenith. """
-    # Convert the unix timestamp into a python datetime
-
-
+def compute_datetime(time):
     if type(time) == float:
         dt = datetime.utcfromtimestamp(int(time))
     elif type(time) == datetime:
@@ -304,11 +296,10 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
     else:
         #punt
         dt = datetime.utcfromtimestamp(int(time.time()))
+    return dt
 
-    if not outdir:
-        outdir = os.getcwd()
-    observed, times, temps = ObservedLog.getObserved(os.path.join(outdir, "observed_targets"))
 
+def make_apf_obs(dt):
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
     apf_obs.lat  = '37:20:33.1'
@@ -317,12 +308,25 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
     # Minimum observation to observe things at
     apf_obs.horizon = str(TARGET_ELEVATION_MIN)
     apf_obs.date = dt
+
+    return apf_obs
+
+def smartList(starlist, time, seeing, slowdown,outdir = None):
+    """ Determine the best target to observe from the provided scriptobs-compatible starlist.
+        Here the best target is defined as an unobserved target (ie not in observed targets )
+        that is visible above 30 degrees elevation. Higher elevation targets are prefered,
+        but those that rise above 85 degrees will be regected to avoid slewing through the zenith. """
+    # Convert the unix timestamp into a python datetime
+
+    dt = compute_datetime(time)
+
+    if not outdir:
+        outdir = os.getcwd()
+    observed, times, temps = ObservedLog.getObserved(os.path.join(outdir, "observed_targets"))
+
+    apf_obs = make_apf_obs(dt)
     # APF latitude in radians
     apf_lat = apf_obs.lat
-
-    # Calculate the moon's location
-    moon = ephem.Moon()
-    moon.compute(apf_obs)
 
     # Parse the starlist
     try:
@@ -335,6 +339,10 @@ def smartList(starlist, time, seeing, slowdown,outdir = None):
 
     # Minimum Brightness based on conditions
     VMAX = 14
+
+    # Calculate the moon's location
+    moon = ephem.Moon()
+    moon.compute(apf_obs)
 
     # Distance to stay away from the moon [Between 15 and 25 degrees]
 
@@ -547,16 +555,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     if not outdir:
         outdir = os.getcwd()
 
-    # Convert the unix timestamp into a python datetime
-    if type(ctime) == float:
-        dt = datetime.utcfromtimestamp(int(ctime))
-    elif type(ctime) == datetime:
-        dt = ctime
-    elif type(ctime) == ephem.Date:
-        dt = ctime.datetime()
-    else:
-        dt = datetime.utcfromtimestamp(int(time.time()))
-        # punt
+    dt = compute_datetime(time)
 
     confg = dict()
     confg['I2'] = 'Y'
@@ -617,14 +616,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # timedelta = now - uth,utm : minus current JD?
     ###
 
-    # Generate a pyephem observer for the APF
-    apf_obs = ephem.Observer()
-    apf_obs.lat  = '37:20:33.1'
-    apf_obs.long = '-121:38:17.7'
-    apf_obs.elevation = 1274
-    # Minimum observation to observe things at
-    apf_obs.horizon = str(TARGET_ELEVATION_MIN)
-    apf_obs.date = dt
+    apf_obs = make_apf_obs(dt)
     # APF latitude in radians
     apf_lat = (37 + 20/60. + 33.1/3600.) * np.pi/180.
 
@@ -655,7 +647,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # Distance to stay away from the moon
     md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
     minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN
-
 
     moonDist = np.degrees(np.sqrt((moon.ra - star_table[:,DS_RA])**2 + (moon.dec - star_table[:,DS_DEC])**2))
 
