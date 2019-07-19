@@ -994,6 +994,10 @@ if __name__ == '__main__':
         stime = calc_focus_start_time()
         waitstr = "Will now wait %.1f seconds before starting focusinstr" % (stime)
         apflog(waitstr, echo=True)
+        APFTask.set(parent, suffix="MESSAGE", value=waitstr, wait=False)
+        
+        APFTask.wait(parent, True, timeout=stime)
+        
         apflog("Starting focusinstr script.", level='Info', echo=True)
 
         result = apf.ucam_status()
