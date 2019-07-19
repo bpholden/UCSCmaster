@@ -111,6 +111,13 @@ def get_start_time(hr,mn):
     st = datetime(ct.year, ct.month, ct.day+1, hr, mn)
     return float(st.strftime("%s"))
 
+def calc_focus_start_time():
+    # computes time 3.25 hours before sunset
+    dt = datetime.utcnow()
+    time_to_sunset = ds.compute_sunset(dt)
+    start_time = time_to_sunset - 3.25*3600.
+    return start_time
+
 def args():
     p_c = ["Init", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
     w_c = ["on", "off", "auto"]
