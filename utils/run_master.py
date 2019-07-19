@@ -162,8 +162,8 @@ def modify_env(config):
 def gen_int_files(cmd_str,cpath):
     cln_str = re.sub("-o \d+ ","",cmd_str)
     
-    watch_str = re.sub("Focus","Watching",cln_str)
-    cal_str = re.sub("Focus","Cal-Pre",cln_str)
+    watch_str = re.sub("Init","Watching",cln_str)
+    cal_str = re.sub("Init","Cal-Pre",cln_str)
     
     fp = open(os.path.join(cpath,"watch.out"),"w+")
     fp.write(watch_str)
