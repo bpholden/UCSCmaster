@@ -311,6 +311,14 @@ def make_apf_obs(dt):
 
     return apf_obs
 
+def compute_sunset(dt):
+    # computes time in seconds before sunset
+    apf_obs = ds.make_apf_obs(dt)
+    sunset = apf_obs.next_setting(ephem.Sun())
+    sunset -= ephem.now()
+    sunset *= 86400.0 # convert to seconds
+    return sunset
+
 def smartList(starlist, time, seeing, slowdown,outdir = None):
     """ Determine the best target to observe from the provided scriptobs-compatible starlist.
         Here the best target is defined as an unobserved target (ie not in observed targets )
