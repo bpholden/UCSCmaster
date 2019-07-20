@@ -953,7 +953,7 @@ if __name__ == '__main__':
     # If a command line phase was specified, use that.
     if opt.phase != None:
         APFTask.phase(parent, opt.phase)
-        phase_index = possible_phases[str(opt.phase).strip()]
+        phase_index = possible_phases.index(str(opt.phase).strip())
         phase.poll()
         
     # If the phase isn't a valid option, (say the watchdog was run last)
