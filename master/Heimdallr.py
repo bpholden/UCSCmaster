@@ -940,10 +940,11 @@ if __name__ == '__main__':
     
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
     possible_phases = ["Init", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
-
+    phase_index = 0
     # If a command line phase was specified, use that.
     if opt.phase != None:
         APFTask.phase(parent, opt.phase)
+        phase_index = possible_phases[str(opt.phase).strip()]
         phase.poll()
         
     # If the phase isn't a valid option, (say the watchdog was run last)
@@ -965,14 +966,15 @@ if __name__ == '__main__':
 
     # Make sure that the command line arguments are respected.
     # Regardless of phase, if a name, obsnum, or reset was commanded, make sure we perform these operations.
-    apflog("Setting Observer Information", echo=True)
-    opt = set_obs_defaults(opt)
-    apflog("Using %s for name and %s for obs number." % (opt.name, repr(opt.obsnum)), echo=True)
-    apf.setObserverInfo(num=opt.obsnum, name=opt.name, owner=opt.owner)
     
     if "Init" == str(phase).strip():
         apflog("Setting the task step to 0")
         APFTask.step(parent, 0)
+        apflog("Setting Observer Information", echo=True)
+        opt = set_obs_defaults(opt)
+        apflog("Using %s for name and %s for obs number." % (opt.name, repr(opt.obsnum)), echo=True)
+        apf.setObserverInfo(num=opt.obsnum, name=opt.name, owner=opt.owner)
+
 
         APFLib.write(apf.robot["SCRIPTOBS_MESSAGE"], "Setting defaults for observing.")
         if opt.fixed:
@@ -992,8 +994,9 @@ if __name__ == '__main__':
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
         APFLib.write(apf.robot["MASTER_VAR_3"], 'True')        
         apflog("Initialization finished. Setting phase to Focus.")
-        phase = "Focus"
-        APFTask.phase(parent, phase)
+        
+        phase_index += 1
+        APFTask.phase(parent, possible_phases[phase_index])
         apflog("Phase is now %s" % phase,echo=True)
 
     # 2) Run autofocus cube
@@ -1022,8 +1025,8 @@ if __name__ == '__main__':
         if apf.ucam['OUTFILE'].read() == 'ucsc':
             if not debug:
                 APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-
-        APFTask.phase(parent, "Cal-Pre")
+        phase_index += 1
+        APFTask.phase(parent, possible_phases[phase_index])
         apflog("Phase now %s" % phase)
 
     # 3) Run pre calibrations
@@ -1057,7 +1060,8 @@ if __name__ == '__main__':
                 apf.turn_off_lamps()
                 sys.exit(2)
         apflog("Calibrate Pre has finished. Setting phase to Watching.")
-        APFTask.phase(parent, "Watching")
+        phase_index += 1
+        APFTask.phase(parent, possible_phases[phase_index])
         apflog("Phase is now %s" % phase)
 
 
@@ -1173,7 +1177,8 @@ if __name__ == '__main__':
     except Exception, e:
         apflog("Note: Cannot stop monitoring ok2open. %s" % (e), level="warn", echo=True)
     # 5) Take morning calibrations
-    APFTask.phase(parent, "Cal-Post")
+    phase_index += 1
+    APFTask.phase(parent, possible_phases[phase_index])
     apf.instr_permit()
     result = apf.calibrate(script=opt.calibrate, time='post')
     if not result:
@@ -1190,7 +1195,8 @@ if __name__ == '__main__':
     apf.ucam['BINNING'].write(bstr) 
             
     # Focus the instrument once more
-    APFTask.phase(parent, "Focus")
+    phase_index += 1
+    APFTask.phase(parent, possible_phases[phase_index])
     apflog("Running Focus Post", echo=True)
     result = apf.focus()
     if not result:
