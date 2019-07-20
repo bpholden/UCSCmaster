@@ -504,20 +504,35 @@ class APF:
                 apflog("Cannot turn off lamp %s" % (lamp),echo=True,level="alert")
         return rv
     
-    def enable_inst(self):
 
+    def write_stages(stagelist,component,state):
         rv = True
-        for stage in ('GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC'):
-            curkwd = stage + "MOD"
+        for stage in stagelist:
+            curkwd = stage + component
             try:
-                crv = ktl.write("apfmot",curkwd,"Pos",wait=True,timeout=10)
+                crv = ktl.write("apfmot",curkwd,state,wait=True,timeout=10)
                 if crv is False:
                     rv = False
             except:
                 rv = False
 
+    def enable_inst(self):
+
+        rv = True
+        stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
+        rv = write_stages(stagelist,'MOE','On')
+        rv = write_stages(stagelist,'MOD','Pos')
+
         return rv
 
+       
+    def disable_inst(self):
+
+        stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
+        rv = write_stages(stagelist,'MOE','Off')
+        rv = write_stages(['ADC','GUIDEFOC'],'MOO','Off')
+        return rv
+    
     def focusinstr(self):
         self.instr_permit()
         rv = self.enable_inst()
