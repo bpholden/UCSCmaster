@@ -299,21 +299,21 @@ def compute_datetime(time):
     return dt
 
 
-def make_apf_obs(dt):
+def make_apf_obs(dt,horizon=str(TARGET_ELEVATION_MIN)):
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
     apf_obs.lat  = '37:20:33.1'
     apf_obs.long = '-121:38:17.7'
     apf_obs.elevation = 1274
     # Minimum observation to observe things at
-    apf_obs.horizon = str(TARGET_ELEVATION_MIN)
+    apf_obs.horizon = horizon
     apf_obs.date = dt
 
     return apf_obs
 
 def compute_sunset(dt):
     # computes time in seconds before sunset
-    apf_obs = make_apf_obs(dt)
+    apf_obs = make_apf_obs(dt,horizon='0')
     sunset = apf_obs.next_setting(ephem.Sun())
     sunset -= ephem.now()
     sunset *= 86400.0 # convert to seconds
