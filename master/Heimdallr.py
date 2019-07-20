@@ -490,6 +490,13 @@ class Master(threading.Thread):
                 apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
                 os._exit()
 
+            result = APF.enable_inst()
+            if result == False:
+                apflog("Cannot enable instrument", level='warn', echo=True)
+                result = APF.enable_inst()
+                if not result:
+                    apflog("Error: cannot enable instrument twice.", level='alert', echo=True)
+                    return result
                 
             apflog("Running open at %s as sunel = %4.2f" % (when, float(sunel)),echo=True)
             (apfopen,what) =APF.isOpen()
@@ -509,6 +516,7 @@ class Master(threading.Thread):
                         APF.close()
                         return result
 
+                    
             if datetime.now().strftime("%p") == 'PM':
                 setting = True
             else:
