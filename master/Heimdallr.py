@@ -948,7 +948,7 @@ if __name__ == '__main__':
         sys.exit()
     
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
-    possible_phases = ["Init", "Focus", "Cal-Pre", "Cal-Post", "Watching"]
+    possible_phases = ["Init", "Focus", "Cal-Pre", "Watching", "Cal-Post", "Focus"]
     phase_index = 0
     # If a command line phase was specified, use that.
     if opt.phase != None:
