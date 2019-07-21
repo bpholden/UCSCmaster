@@ -505,7 +505,7 @@ class APF:
         return rv
     
 
-    def write_stages(stagelist,component,state):
+    def write_stages(self,stagelist,component,state):
         rv = True
         for stage in stagelist:
             curkwd = stage + component
@@ -520,8 +520,8 @@ class APF:
 
         rv = True
         stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
-        rv = write_stages(stagelist,'MOE','On')
-        rv = write_stages(stagelist,'MOD','Pos')
+        rv = self.write_stages(stagelist,'MOE','On')
+        rv = self.write_stages(stagelist,'MOD','Pos')
 
         return rv
 
@@ -529,8 +529,8 @@ class APF:
     def disable_inst(self):
 
         stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
-        rv = write_stages(stagelist,'MOE','Off')
-        rv = write_stages(['ADC','GUIDEFOC'],'MOO','Off')
+        rv = self.write_stages(stagelist,'MOE','Off')
+        rv = self.write_stages(['ADC','GUIDEFOC'],'MOO','Off')
         return rv
     
     def focusinstr(self):
