@@ -1068,10 +1068,11 @@ if __name__ == '__main__':
                 apflog("Error: Calibrate Pre has failed twice. Observer is exiting.",level='error',echo=True)
                 apf.turn_off_lamps()
                 sys.exit(2)
-        apflog("Calibrate Pre has finished. Setting phase to Watching.")
+
         phase_index += 1
+
         APFTask.phase(parent, possible_phases[phase_index])
-        apflog("Phase is now %s" % phase)
+        apflog("Calibrate Pre has finished. Setting phase to %s." % phase)
 
 
     # 4) Start the main watcher thread
