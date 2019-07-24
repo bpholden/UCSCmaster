@@ -303,7 +303,9 @@ class APF:
         self.task = task
         
         self.cloudObsNum = 1
-  
+
+        self.rising = self.sunRising()
+        
         # Set the callbacks and monitors
         self.wx.monitor()
         self.wx.callback(windmon)
