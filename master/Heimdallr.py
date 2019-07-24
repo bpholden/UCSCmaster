@@ -275,8 +275,11 @@ class Master(threading.Thread):
         # check last telescope focus
         lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
         current_val = APF.autofoc.read()
+        rising = APF.rising
+        cur_sunel = APF.sunel.read(binary=True)
+        too_close = rising and (cur_sunel > -15)
         if time.time() - lastfoc > FOCUSTIME:
-            if current_val != "robot_autofocus_enable":
+            if current_val != "robot_autofocus_enable" and not too_close:
                 APF.autofoc.write("robot_autofocus_enable")
                 self.focval=1
                 APFTask.set(parent, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
