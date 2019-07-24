@@ -526,6 +526,7 @@ class APF:
         rv = True
         stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
         rv = self.write_stages(stagelist,'MOE','On')
+        rv = self.write_stages(stagelist,'MOO','On')
         rv = self.write_stages(stagelist,'MOD','Pos')
 
         return rv
@@ -535,6 +536,7 @@ class APF:
 
         stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
         rv = self.write_stages(stagelist,'MOE','Off')
+        rv = self.write_stages(stagelist,'MOO','Off')        
         rv = self.write_stages(['ADC','GUIDEFOC'],'MOO','Off')
         return rv
     
