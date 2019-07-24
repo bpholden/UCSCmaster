@@ -943,10 +943,6 @@ if __name__ == '__main__':
     APFTask.waitFor(parent, True, timeout=5)
     apf.initGuidecam()
     
-    if apf.checkapf['USERKIND'].read(binary=True) != 3:
-        apflog("checkapf not in robotic mode, exiting", level="error", echo=True)
-        sys.exit()
-    
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
     possible_phases = ["Init", "Focus", "Cal-Pre", "Watching", "Cal-Post", "Focus"]
     phase_index = 0
