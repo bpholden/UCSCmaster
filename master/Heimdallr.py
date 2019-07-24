@@ -1078,6 +1078,7 @@ if __name__ == '__main__':
     # 4) Start the main watcher thread
     master = Master(apf,user=opt.name,sheetn=opt.sheet,owner=opt.owner)
     if 'Watching' == str(phase).strip():
+        apf.instr_permit()
         apflog("Starting the main watcher." ,echo=True)
         try:
             names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
