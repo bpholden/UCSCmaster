@@ -183,11 +183,6 @@ if __name__ == "__main__":
     
     schedule = readem_or_weep('apfschedule','SCHEDULED_RUNS')
 
-    userkind = readem_or_weep('checkapf','USERKIND',binary=True)
-    if userkind != 3 and test is False:
-        sys.exit("checkapf not in robotic mode")
-
-
     master_status = readem_or_weep('apftask','master_status',binary=True)
     if master_status < 3 and test is False:
         sys.exit("master has been started")
