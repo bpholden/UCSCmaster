@@ -363,6 +363,7 @@ class APF:
 
     def __str__(self):
         # Determine if the sun rising / setting check is working
+        now = datetime.now()
         s = ''
         s += "At %s state of telescope is:\n" % str(now)
         s += "Sun elevation = %4.2f %s\n" % (self.sunel, "Rising" if self.rising else "Setting")
