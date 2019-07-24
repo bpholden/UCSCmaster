@@ -395,6 +395,13 @@ class APF:
         return s
 
 
+    def sunRising(self):
+        now = datetime.now()
+        if now.strftime("%p") == 'AM':
+            return True
+        else:
+            return False
+
     def initGuidecam(self):
         self.save3d.write(False,binary=True)
         self.fits3pre.write('')
