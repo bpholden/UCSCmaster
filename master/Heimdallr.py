@@ -1224,6 +1224,9 @@ if __name__ == '__main__':
     
     APFTask.set(parent, suffix="MESSAGE",value="Updating last observation number",wait=False)
 
+    rv = APF.disable_inst()
+    APFTask.set(parent, suffix="MESSAGE",value="Turning off the motors",wait=False)
+
     # All Done!
     APFTask.phase(parent, "Finished")
 
