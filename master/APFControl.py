@@ -534,10 +534,10 @@ class APF:
        
     def disable_inst(self):
 
-        stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
+        stagelist = ['GUIDEFOC','CALMIRROR','CALSOURCE','IODINE']
         rv = self.write_stages(stagelist,'MOE','Off')
         rv = self.write_stages(stagelist,'MOO','Off')        
-        rv = self.write_stages(['ADC','GUIDEFOC'],'MOO','Off')
+        rv = self.write_stages(['ADC','DECKER','DEWARFOC'],'MOE','On')
         return rv
 
     def turnoff_inst(self):
