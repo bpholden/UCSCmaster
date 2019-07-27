@@ -539,6 +539,15 @@ class APF:
         rv = self.write_stages(stagelist,'MOO','Off')        
         rv = self.write_stages(['ADC','GUIDEFOC'],'MOO','Off')
         return rv
+
+    def turnoff_inst(self):
+
+        try:
+            ktl.write("apfmot","motorsoff","ADC,CalMirror,CalSrc,Decker,DewarFoc,GuideFoc,Iodine")
+            rv = True
+        except:
+            rv = False
+        return rv
     
     def focusinstr(self):
         self.instr_permit()
