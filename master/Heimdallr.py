@@ -1224,7 +1224,7 @@ if __name__ == '__main__':
     
     APFTask.set(parent, suffix="MESSAGE",value="Updating last observation number",wait=False)
 
-    rv = APF.turnoff_inst()
+    rv = apf.turnoff_inst()
     APFTask.set(parent, suffix="MESSAGE",value="Turning off the motors",wait=False)
 
     # All Done!
