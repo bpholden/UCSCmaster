@@ -1001,12 +1001,8 @@ if __name__ == '__main__':
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
         APFLib.write(apf.robot["MASTER_VAR_3"], 'True')        
-        apflog("Initialization finished. Setting phase to Focus.")
+        apflog("Initialization finished")
         
-        phase_index += 1
-        APFTask.phase(parent, possible_phases[phase_index])
-        apflog("Phase is now %s" % phase,echo=True)
-
         stime, s_str, sun_str = calc_focus_start_time()
         waitstr = "Will now wait %.1f seconds before starting focusinstr" % (stime)
         apflog(waitstr, echo=True)
@@ -1016,6 +1012,9 @@ if __name__ == '__main__':
         APFTask.set(parent, suffix="MESSAGE", value=startstr, wait=False)
         
         APFTask.wait(parent, True, timeout=stime)
+        phase_index += 1
+        APFTask.phase(parent, possible_phases[phase_index])
+        apflog("Phase is now %s" % phase,echo=True)
         
     # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
