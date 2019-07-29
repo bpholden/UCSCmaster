@@ -493,10 +493,10 @@ class Master(threading.Thread):
                 apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
                 os._exit()
 
-            result = APF.enable_inst()
+            result = APF.enable_obs_inst()
             if result == False:
                 apflog("Cannot enable instrument", level='warn', echo=True)
-                result = APF.enable_inst()
+                result = APF.enable_obs_inst()
                 if not result:
                     apflog("Error: cannot enable instrument twice.", level='alert', echo=True)
                     return result
@@ -1016,8 +1016,6 @@ if __name__ == '__main__':
         APFTask.set(parent, suffix="MESSAGE", value=startstr, wait=False)
         
         APFTask.wait(parent, True, timeout=stime)
-
-
         
     # 2) Run autofocus cube
     if "Focus" == str(phase).strip():
