@@ -521,37 +521,53 @@ class APF:
             except:
                 rv = False
 
-    def enable_inst(self):
+    def enable_obs_inst(self):
 
         rv = True
-        stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
+
+        stagelist = ['CALMIRROR','CALSOURCE','IODINE','GUIDEFOC']
+        rv = self.write_stages(stagelist,'MOE','Off')
+        rv = self.write_stages(stagelist,'MOO','Off')
+        rv = self.write_stages(stagelist,'MOD','Pos')
+        stagelist = ['ADC','DECKER','DEWARFOC']
         rv = self.write_stages(stagelist,'MOE','On')
         rv = self.write_stages(stagelist,'MOO','On')
         rv = self.write_stages(stagelist,'MOD','Pos')
 
         return rv
 
+    def enable_cal_inst(self):
+
+        rv = True
+        stagelist = ['ADC','CALMIRROR','CALSOURCE','IODINE','GUIDEFOC']
+        rv = self.write_stages(stagelist,'MOE','Off')
+        rv = self.write_stages(stagelist,'MOO','Off')
+        rv = self.write_stages(stagelist,'MOD','Pos')
+        stagelist = ['DECKER','DEWARFOC']
+        rv = self.write_stages(stagelist,'MOE','On')
+        rv = self.write_stages(stagelist,'MOO','On')
+        rv = self.write_stages(stagelist,'MOD','Pos')
+        return rv
+
        
     def disable_inst(self):
 
-        stagelist = ['GUIDEFOC','CALMIRROR','CALSOURCE','IODINE']
+        stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE']
         rv = self.write_stages(stagelist,'MOE','Off')
         rv = self.write_stages(stagelist,'MOO','Off')        
-        rv = self.write_stages(['ADC','DECKER','DEWARFOC'],'MOE','On')
+        rv = self.write_stages(['DECKER','DEWARFOC'],'MOE','On')
         return rv
 
     def turnoff_inst(self):
 
-        try:
-            ktl.write("apfmot","motorsoff","ADC,CalMirror,CalSrc,Decker,DewarFoc,GuideFoc,Iodine")
-            rv = True
-        except:
-            rv = False
+        stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
+        rv = self.write_stages(stagelist,'MOE','Off')
+        rv = self.write_stages(stagelist,'MOO','Off')        
         return rv
     
     def focusinstr(self):
         self.instr_permit()
-        rv = self.enable_inst()
+        rv = self.enable_cal_inst()
         if rv is False:
             try:
                 ip = checkapf['INSTR_PERM'].read()
@@ -592,6 +608,16 @@ class APF:
             APFTask.waitFor(self.task, True, timeout=10)
             return True
         if time == 'pre' or 'post':
+
+            rv = self.enable_cal_inst()
+            if rv is False:
+                try:
+                    ip = checkapf['INSTR_PERM'].read()
+                except:
+                    ip = 'Unknown'
+                apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
+                return rv
+            
             try:
                 APFLib.write("apfmot.DEWARFOCRAW",ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True))
             except:
