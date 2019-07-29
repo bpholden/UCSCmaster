@@ -1007,9 +1007,6 @@ if __name__ == '__main__':
         APFTask.phase(parent, possible_phases[phase_index])
         apflog("Phase is now %s" % phase,echo=True)
 
-    # 2) Run autofocus cube
-    if "Focus" == str(phase).strip():
-
         stime, s_str, sun_str = calc_focus_start_time()
         waitstr = "Will now wait %.1f seconds before starting focusinstr" % (stime)
         apflog(waitstr, echo=True)
@@ -1019,6 +1016,11 @@ if __name__ == '__main__':
         APFTask.set(parent, suffix="MESSAGE", value=startstr, wait=False)
         
         APFTask.wait(parent, True, timeout=stime)
+
+
+        
+    # 2) Run autofocus cube
+    if "Focus" == str(phase).strip():
         
         apflog("Starting focusinstr script.", level='Info', echo=True)
 
