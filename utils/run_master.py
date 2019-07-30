@@ -212,7 +212,7 @@ if __name__ == "__main__":
                     action="store_true")
     parser.add_argument("-c","--config_file", help="optional config file name", default = "master.config")
 
-    parser.parse_args()
+    args = parser.parse_args()
 
     if args.test:
         test = True
