@@ -210,7 +210,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t","--test", help="tests functionality but does not execute",
                     action="store_true")
-    parser.add_argument("config_file", help="optional config file name", default = "master.config")
+    parser.add_argument("-c","--config_file", help="optional config file name", default = "master.config")
 
     parser.parse_args()
 
@@ -218,7 +218,6 @@ if __name__ == "__main__":
         test = True
     else:
         test = False
-
 
 #    configfile = args.config_file
 
