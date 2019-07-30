@@ -12,8 +12,14 @@ import shlex
 import ConfigParser
 
 import ktl
-import apflog
 import numpy as np
+
+try:
+    sys.path.append('/home/holden/src/UCSCmaster/master')
+    import apflog
+except:
+    sys.path.append('/home/holden/src/UCSCmaster/master')
+    import fake_apflog
 
 def readem_or_weep(service,keyword,binary=False):
 
