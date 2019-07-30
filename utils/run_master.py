@@ -72,18 +72,18 @@ def read_config(configfile,runstr):
     if program_config['name'] == "ucb":
         program_config['name'] = findUCBObsNum()
     if program_config['name'] == "apf":
-        program_config['name'] = findAPFObsname()
+        program_config['name'] = findAPFObsName()
 
     return program_config
 
 
-def findAPFObsname():
+def findAPFObsName():
     dt = datetime.now()
     fn = "%d%02d%02d" % (dt.year,dt.month,dt.day)
 
     return fn
 
-def findAPFObsnum():
+def findAPFObsNum():
     last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
         
     last += 100 - (last % 100)
