@@ -87,12 +87,12 @@ def findAPFObsNum():
     last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
 
     if last > 20000:
-        last = last % 10000
-    
-    last += 100 - (last % 100)
-
-    if last % 10000 > 9700:
         last = 10000
+    else:    
+        last += 100 - (last % 100)
+
+        if last % 10000 > 9700:
+            last = 10000
 
     return last
 
