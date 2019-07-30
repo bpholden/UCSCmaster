@@ -4,6 +4,8 @@ import os
 import sys
 import re
 from time import sleep
+from datetime import datetime
+import argparse
 
 import subprocess
 import shlex
@@ -59,10 +61,32 @@ def read_config(configfile,runstr):
 
     if program_config['obsnum'] == "ucsc":
         program_config['obsnum'] = findUCSCObsNum()
+    if program_config['obsnum'] == "apf":
+        program_config['obsnum'] = findAPFObsNum()
     if program_config['name'] == "ucb":
         program_config['name'] = findUCBObsNum()
+    if program_config['name'] == "apf":
+        program_config['name'] = findAPFObsname()
 
     return program_config
+
+
+def findAPFObsname():
+    dt = datetime.now()
+    fn = "%d%02d%02d" % (dt.year,dt.month,dt.day)
+
+    return fn
+
+def findAPFObsnum():
+    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
+        
+    last += 100 - (last % 100)
+
+    if last % 10000 > 9700:
+        last = 10000
+
+    return last
+
 
 def findUCSCObsNum():
     last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
@@ -176,11 +200,23 @@ def gen_int_files(cmd_str,cpath):
            
 if __name__ == "__main__":
 
-    if len(sys.argv) > 1:
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t","--test", help="tests functionality but does not execute",
+                    action="store_true")
+    parser.add_argument("config_file", help="optional config file name", default = "master.config")
+
+    parser.parse_args()
+
+    if args.test:
         test = True
     else:
         test = False
-    
+
+
+#    configfile = args.config_file
+
+        
     schedule = readem_or_weep('apfschedule','SCHEDULED_RUNS')
 
     master_status = readem_or_weep('apftask','master_status',binary=True)
@@ -188,8 +224,7 @@ if __name__ == "__main__":
         sys.exit("master has been started")
 
     cpath = os.path.dirname(os.path.abspath(__file__))
-    configfile = "master.config"
-    config = read_config(os.path.join(cpath,configfile),schedule)
+    config = read_config(os.path.join(cpath,args.config_file),schedule)
 
     if ok_config(config) and config_kwds(config):
 
