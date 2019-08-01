@@ -1107,7 +1107,7 @@ if __name__ == '__main__':
         master.fixedList = opt.fixed
         master.starttime = opt.start
         master.task = parent
-        master.windsheild = opt.windshield
+        master.windshield = opt.windshield
         master.debug = debug
         master.start()
     else:
