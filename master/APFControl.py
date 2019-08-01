@@ -645,40 +645,6 @@ class APF:
         else:
             print "Couldn't understand argument %s, nothing was done." % time
 
-    def focus(self,flags="-b"):
-        """Runs the focus routine appropriate for the user."""
-
-        if self.test: 
-            APFTask.waitFor(self.task, True, timeout=10)
-            print "Test Mode: Would be running focusinstr."
-            return True
-        else:
-            supplies = ('PS1_48V_ENA', 'PS2_48V_ENA')
-            for keyword in supplies:
-                value = motor[keyword].read(binary=True)
-                if value != 1:
-                    motor[keyword].write('Enabled', wait=False)
-                    
-            apflog("Running focusinstr routine.",echo=True)
-            cmdpath = '/usr/local/lick/bin/robot/'
-            execstr = " ".join(['focusinstr',flags])
-            cmd = os.path.join(cmdpath,execstr)
-            result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
-            if not result:
-                apflog("focusinstr failed with code %d" % code, echo=True)
-                result = False
-                
-            expression="($apftask.FOCUSINSTR_STATUS == 3)"
-            if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                apflog("focusinstr failed" ,echo=True, level="error")
-                result = False
-            expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
-            if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
-                result = False
-            return result
-
-
     def find_star(self):
         ra = self.tel['RA'].read()
         dec = self.tel['DEC'].read()
