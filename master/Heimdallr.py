@@ -1207,7 +1207,7 @@ if __name__ == '__main__':
     phase_index += 1
     APFTask.phase(parent, possible_phases[phase_index])
     apflog("Running Focus Post", echo=True)
-    result = apf.focus()
+    result = apf.focusinstr()
     if not result:
         apflog("Focus cube post has failed", level='error', echo=True)
     else:
