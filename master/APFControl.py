@@ -575,6 +575,8 @@ class APF:
                 ip = 'Unknown'
             apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
             return rv
+        owner = self.apfschedule('OWNRHINT').read()        
+        self.apfschedule('OWNRHINT').write('public')        
         
         lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
         if float(lastfocus_dict["lastfocus"]) > DEWARMAX or float(lastfocus_dict["lastfocus"]) < DEWARMIN:
@@ -598,6 +600,7 @@ class APF:
             result = self.focus(flags=flags)
             if not result:
                 apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["lastfocus"]), level='error', echo=True)
+        self.apfschedule('OWNRHINT').write(owner)        
 
         return result
         
