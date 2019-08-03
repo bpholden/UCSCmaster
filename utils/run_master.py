@@ -205,6 +205,12 @@ def gen_int_files(cmd_str,cpath):
     fp.close()
 
     return
+
+def gen_output_files(cpath):
+
+    mstdout = open(os.path.join(cpath,"master.stdout","w+"))
+    mstderr = open(os.path.join(cpath,"master.stderr","w+"))
+    return mstdout, mstderr
            
 if __name__ == "__main__":
 
@@ -239,14 +245,12 @@ if __name__ == "__main__":
         env = modify_env(config)
         print(" ".join(stuff_to_run))
         gen_int_files(" ".join(stuff_to_run),cpath)
+        mstdout, mstderr = gen_output_files(cpath)
         if os.getuid() == int(config['user']) and test is False:
-            p=subprocess.Popen(stuff_to_run,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
+            p=subprocess.Popen(stuff_to_run,stdout=mstdout,stderr=mstderr,env=env)
             sleep(10)
             if p.poll():
                 print("Master failed for some reason or another.")
-                (out,err) = p.communicate()
-                print(err)
-                print(out)
         elif test:
             pass
         else:
