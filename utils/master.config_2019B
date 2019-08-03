@@ -24,7 +24,7 @@ executable : /u/holden/src/UCSCmaster/master/Heimdallr.py
 path : /u/holden/src/UCSCmaster/master
 pathvar : /bin:/usr/local/bin:/usr/bin:/sbin:/usr/sbin:/opt/kroot/bin:/usr/local/lick/bin/robot:/usr/local/lick/bin:/opt/ds9/bin:/opt/eos/shortcuts:/opt/idl/bin
 pythonpathvar : /opt/kroot/rel/default/lib/python:/opt/kroot/rel/default/lib:/usr/local/lick/lib/python:/usr/local/lick/lib:/u/holden/src/UCSCmaster/master:/sr/lib/python2.6/:/usr/lib/python2.6/site_packages:/local/u/holden/.local/lib/python2.6/site-packages
-argstr :  -n %s -o %s -p Init --sheet %s
+argstr :  -n %s -o %s --sheet %s
 args : name obsnum sheets
 name : ucsc 
 obsnum : ucsc
@@ -43,7 +43,7 @@ path : /u/holden/src/UCSCmaster/master
 pathvar : /bin:/usr/local/bin:/usr/bin:/sbin:/usr/sbin:/opt/kroot/bin:/usr/local/lick/bin/robot:/usr/local/lick/bin:/opt/ds9/bin:/opt/eos/shortcuts:/opt/idl/bin
 pythonpathvar : /local/u/user/bjscripts/lib/python:/local/u/user/bjscripts/apf:/local/u/user/.local/lib/python2.6/site-packages:/opt/kroot/rel/default/lib/python:/opt/kroot/rel/default/lib:/usr/local/lick/lib/python:/usr/local/lick/lib:/u/user/bjscripts/apf:/usr/lib/python2.6/:/usr/lib/python2.6/site_packages
 executable : /u/holden/src/UCSCmaster/master/Heimdallr.py
-argstr : -n %s -o %s -c ucb -p Init --sheet %s
+argstr : -n %s -o %s -c ucb --sheet %s
 args : name obsnum sheets
 name : ucb
 obsnum : 100
@@ -62,7 +62,7 @@ path : /u/holden/src/UCSCmaster/master
 pathvar : /bin:/usr/local/bin:/usr/bin:/sbin:/usr/sbin:/opt/kroot/bin:/usr/local/lick/bin/robot:/usr/local/lick/bin:/opt/ds9/bin:/opt/eos/shortcuts:/opt/idl/bin
 pythonpathvar : /opt/kroot/rel/default/lib/python:/opt/kroot/rel/default/lib:/usr/local/lick/lib/python:/usr/local/lick/lib:/u/holden/src/UCSCmaster/master:/sr/lib/python2.6/:/usr/lib/python2.6/site_packages:/local/u/holden/.local/lib/python2.6/site-packages
 executable : /u/holden/src/UCSCmaster/master/Heimdallr.py
-argstr : -n %s -o %s -c ucsc -p Init --sheet %s
+argstr : -n %s -o %s -c ucsc --sheet %s
 args : name obsnum sheets
 name : apf
 obsnum : apf
@@ -74,20 +74,3 @@ user : 10278
 
 
     
-[engineering]
-observer: Brad Holden
-Phone : 9-3387 / 831-421-1210
-Email : holden@ucolick.org
-Locat : Office / Home
-executable : /u/holden/src/UCSCmaster/master/
-path : /u/holden/src/UCSCmaster/master
-pathvar : /bin:/usr/local/bin:/usr/bin:/sbin:/usr/sbin:/opt/kroot/bin:/usr/local/lick/bin/robot:/usr/local/lick/bin:/opt/ds9/bin:/opt/eos/shortcuts:/opt/idl/bin
-pythonpathvar : /opt/kroot/rel/default/lib/python:/opt/kroot/rel/default/lib:/usr/local/lick/lib/python:/usr/local/lick/lib:/u/holden/src/UCSCmaster/master:/usr/lib/python2.6/:/usr/lib/python2.6/site_packages:/local/u/holden/.local/lib/python2.6/site-packages
-argstr :  -n %s -o %s -f %s -c %s
-args : name obsnum starlist calib
-name : holden
-owner: Holden
-obsnum : 10000
-starlist : test_starlist.lst
-calib :  ucsc
-user : 10278
