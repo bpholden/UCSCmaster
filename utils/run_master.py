@@ -133,13 +133,14 @@ def ok_config(config):
 
     return True
 
-def build_exec_str(config):
+def build_exec_str(config,phase="Init"):
     stuff_to_run = None
     if os.path.exists(config['executable']):
 
         arglist = config['args'].split()
         actual_args = [ config[a] for a in arglist] 
         args = config['argstr'] % tuple(actual_args)
+        args += " -p %s " % (phase)
         stuff_to_run = []
         stuff_to_run.append(config['executable'])
         stuff_to_run = stuff_to_run + shlex.split(args)
@@ -218,6 +219,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t","--test", help="tests functionality but does not execute",
                     action="store_true")
+    parser.add_argument("-p","--phase", help="start at the mentioned phase",choices=["Init", "Focus", "Cal-Pre", "Watching"],
+                            default='Init')
     parser.add_argument("-c","--config_file", help="optional config file name", default = "master.config")
 
     args = parser.parse_args()
@@ -241,7 +244,7 @@ if __name__ == "__main__":
 
     if ok_config(config) and config_kwds(config):
 
-        stuff_to_run = build_exec_str(config)
+        stuff_to_run = build_exec_str(config,phase=args.phase)
         env = modify_env(config)
         print(" ".join(stuff_to_run))
         gen_int_files(" ".join(stuff_to_run),cpath)
