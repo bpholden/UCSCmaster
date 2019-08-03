@@ -209,8 +209,8 @@ def gen_int_files(cmd_str,cpath):
 
 def gen_output_files(cpath):
 
-    mstdout = open(os.path.join(cpath,"master.stdout","w+"))
-    mstderr = open(os.path.join(cpath,"master.stderr","w+"))
+    mstdout = open(os.path.join(cpath,"master.stdout"),"w+")
+    mstderr = open(os.path.join(cpath,"master.stderr"),"w+")
     return mstdout, mstderr
            
 if __name__ == "__main__":
