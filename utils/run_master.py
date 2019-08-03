@@ -1,6 +1,7 @@
 #!/opt/kroot/bin/kpython
 from __future__ import print_function
 import os
+import stat
 import sys
 import re
 from time import sleep
@@ -202,8 +203,10 @@ def gen_int_files(config,cpath,phases):
         o_str = re.sub("-o \d+","",o_str)
         
         fp = open(os.path.join(cpath,outfilen),"w+")
+        fp.write("#!/bin/sh\n")
         fp.write(o_str)
         fp.close()
+        os.chmod(os.path.join(cpath,outfilen),stat.S_IEXEC|stat.S_IREAD|stat.S_IWRITE|stat.S_IRGRP|stat.S_IROTH)
 
     return
 
