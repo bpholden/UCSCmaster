@@ -198,6 +198,9 @@ def gen_int_files(config,cpath,phases):
         outfilen = cphase.lower() + ".out"
         o_list = build_exec_str(config,phase=cphase)
         o_str = " ".join(o_list)
+
+        o_str = re.sub("-o \d+","",o_str)
+        
         fp = open(os.path.join(cpath,outfilen),"w+")
         fp.write(o_str)
         fp.close()
