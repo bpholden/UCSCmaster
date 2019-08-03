@@ -192,18 +192,14 @@ def modify_env(config):
     cenv['PYTHONPATH'] = config['pythonpathvar']
     return cenv
 
-def gen_int_files(cmd_str,cpath):
-    cln_str = re.sub("-o \d+ ","",cmd_str)
-    
-    watch_str = re.sub("Init","Watching",cln_str)
-    cal_str = re.sub("Init","Cal-Pre",cln_str)
-    
-    fp = open(os.path.join(cpath,"watch.out"),"w+")
-    fp.write(watch_str)
-    fp.close()
-    fp = open(os.path.join(cpath,"cal.out"),"w+")
-    fp.write(cal_str)
-    fp.close()
+def gen_int_files(config,cpath,phases):
+
+    for cphase in phases:
+        outfilen = cphase.lower() + ".out"
+        o_str = build_exec_str(config,phase=cphase)
+        fp = open(os.path.join(cpath,outfilen),"w+")
+        fp.write(o_str)
+        fp.close()
 
     return
 
@@ -247,7 +243,7 @@ if __name__ == "__main__":
         stuff_to_run = build_exec_str(config,phase=args.phase)
         env = modify_env(config)
         print(" ".join(stuff_to_run))
-        gen_int_files(" ".join(stuff_to_run),cpath)
+        gen_int_files(config,cpath,phases=['Cal-Pre','Watching'])
         mstdout, mstderr = gen_output_files(cpath)
         if os.getuid() == int(config['user']) and test is False:
             p=subprocess.Popen(stuff_to_run,stdout=mstdout,stderr=mstderr,env=env)
