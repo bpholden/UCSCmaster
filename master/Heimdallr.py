@@ -533,8 +533,8 @@ class Master(threading.Thread):
         def closing(force=False):
             if running:
                 APF.killRobot(now=True)
-            if apf.ucam['OUTFILE'].read() == 'ucsc' or apf.ucam['OUTFILE'].read() == 'apf' :
-                APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+
+            APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
             rv = APF.close(force=force)
             if rv:
@@ -590,10 +590,7 @@ class Master(threading.Thread):
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
-            if apf.ucam['OUTFILE'].read() == 'ucsc' and apf.test == False:
-                APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-            elif apf.ucam['OUTFILE'].read() == 'apf' and apf.test == False:
-                APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
             APF.updateWindshield(self.windshield)
             ripd, running = APF.findRobot()
@@ -619,10 +616,7 @@ class Master(threading.Thread):
                 apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
                 if APF.ldone == tot and APF.user != "ucsc":
                     APF.close()
-                    if apf.ucam['OUTFILE'].read() == 'ucsc':
-                        APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-                    elif apf.ucam['OUTFILE'].read() == 'apf':
-                        APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+                    APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
                 
                     
                     self.exitMessage = "Fixed list is finished. Exiting the watcher."
@@ -1034,12 +1028,8 @@ if __name__ == '__main__':
         result = apf.focusinstr()
         
         apflog("Focus has finished. Setting phase to Cal-Pre")
-        if apf.ucam['OUTFILE'].read() == 'ucsc':
-            if not debug:
-                APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-        elif apf.ucam['OUTFILE'].read() == 'apf':
-            if not debug:
-                APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+        if not debug:
+            APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
         phase_index += 1
         APFTask.phase(parent, possible_phases[phase_index])
         apflog("Phase now %s" % phase)
@@ -1051,9 +1041,7 @@ if __name__ == '__main__':
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
 
-        if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
-            APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-        elif apf.ucam['OUTFILE'].read() == 'apf' and not debug:
+        if not debug:
             APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
@@ -1065,9 +1053,7 @@ if __name__ == '__main__':
             sys.exit()
         
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
-        if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
-            APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-        elif apf.ucam['OUTFILE'].read() == 'apf' and not debug:
+        if not debug:
             APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         if result == False:
@@ -1209,10 +1195,8 @@ if __name__ == '__main__':
             apflog("Calibrate Post has failed twice.", level='error',echo=True)
             APFTask.set(parent, suffix="MESSAGE",value="Calibrate Post failed twice",wait=False)
 
-    if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
+    if not debug:
         APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-    elif apf.ucam['OUTFILE'].read() == 'apf' and not debug:
-            APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
     bstr = "%d,%d" % (1,1)
     apf.ucam['BINNING'].write(bstr) 
@@ -1232,12 +1216,11 @@ if __name__ == '__main__':
     apf.setTeqMode('Day')
 
     # Update the last observation number to account for the morning calibration shots.
-    if apf.ucam['OUTFILE'].read() == 'ucsc' and not debug:
+
+    if not debug:
         APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-    elif apf.ucam['OUTFILE'].read() == 'apf' and not debug:
-        APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-    
-    APFTask.set(parent, suffix="MESSAGE",value="Updating last observation number",wait=False)
+        APFTask.set(parent, suffix="MESSAGE",value="Updating last observation number to %d" % (apf.ucam["OBSNUM"].read()),wait=False)
+
 
     rv = apf.turnoff_inst()
     APFTask.set(parent, suffix="MESSAGE",value="Turning off the motors",wait=False)
