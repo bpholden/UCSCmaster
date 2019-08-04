@@ -1013,15 +1013,8 @@ class APF:
     def updateLastObs(self,obsnum):
         """ If the last observation was a success, this function updates the file storing the last observation number and the hit_list which is required by the dynamic scheduler."""
         if obsnum['populated']:
-            if self.ucam('OUTFILE').read() == 'ucsc':
-                APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
-            elif self.ucam['OUTFILE'].read() == 'apf':
-                APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
-
+            APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
                 
-#            else:
-#                apflog("UCAM Observer name is not ucsc, so the lastObs value will not be updated.")
-#                apflog("Number of last observation is %s" % self.obsnum.read())
         return
 
 
