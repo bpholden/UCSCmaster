@@ -142,7 +142,7 @@ def args():
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
     parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
     parser.add_argument('--sheet',default="Bstars,A020_SVogt_2019A,A017_ICzekala_2019A,A018_ICzekala_2019A,A005_PRobertson_2019A,A000_BHolden_2019A,A006_BHolden_2019A",help="Optional name for a Google spreadsheet")
-    parser.add_argument('--owner',default='Vogt',help="Optional name for file owners")    
+    parser.add_argument('--owner',default='public',help="Optional name for file owners")    
     
     opt = parser.parse_args()
 
@@ -196,8 +196,8 @@ def findObsNum(apf):
 
 def set_obs_defaults(opt):
     if opt.name is None or opt.name == "ucsc":
-        opt.owner = 'Vogt'
-        opt.name = 'ucsc'
+        opt.owner = 'public'
+        opt.name = 'apf'
         if opt.obsnum == None:
             apflog("Figuring out what the observation number should be.",echo=False)
             opt.obsnum = findObsNum(apf)
