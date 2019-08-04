@@ -1015,7 +1015,7 @@ class APF:
         if obsnum['populated']:
             if self.ucam('OUTFILE').read() == 'ucsc':
                 APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
-            elif apf.ucam['OUTFILE'].read() == 'apf':
+            elif self.ucam['OUTFILE'].read() == 'apf':
                 APFLib.write(self.robot["MASTER_LAST_OBS_UCSC"], obsnum)
 
                 
