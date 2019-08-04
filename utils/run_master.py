@@ -80,7 +80,7 @@ def read_config(configfile,runstr):
 
 def findAPFObsName():
     dt = datetime.now()
-    fn = "%d%02d%02d" % (dt.year,dt.month,dt.day)
+    fn = "%d%02d%02d_" % (dt.year,dt.month,dt.day)
 
     return fn
 
