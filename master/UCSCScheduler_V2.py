@@ -30,7 +30,8 @@ last_objs_attempted = []
 
 def computeMaxTimes(exp_times,maxtimes):
     fintimes = np.zeros_like(exp_times)
-    fintimes[(exp_times > maxtimes)&(maxtimes>0)] = maxtimes[(exp_times > maxtimes)&(maxtimes>0)]
+    user_selected_max = (exp_times > maxtimes)&(maxtimes>0)
+    fintimes[user_selected_max] = maxtimes[user_selected_max]
     fintimes[exp_times < maxtimes] = exp_times[exp_times < maxtimes]
     fintimes[maxtimes<=0] = exp_times[maxtimes<=0]
 
