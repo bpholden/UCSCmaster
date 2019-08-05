@@ -430,7 +430,7 @@ def format_expmeter(exp_counts, nexp, exptime):
 def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
     total = np.array(total)
     times = np.zeros(len(total))
-    exps  = np.zeros(len(total))
+    exps  = np.ones(len(total))
 
     middle_idx = (total > mintime ) &(total < maxtime)
     times[middle_idx] = maxtime[middle_idx] # pad out to make it more likely exposure meter threshold sets actual limit
@@ -729,7 +729,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
         apflog("getNext(): Formating exposure times",echo=True)
         mxtime = np.zeros_like(star_table[f,DS_MAX])
-        mxtime += MAX_EXPTIME
+        mxtime += MAX_TOTOBS
         shorter = (star_table[f,DS_MAX] < MAX_EXPTIME)&(star_table[f,DS_MAX] >0)
         mxtime[shorter] = star_table[f,DS_MAX][shorter]
         star_table[f, DS_EXPT], exps = format_time(totexptimes[f],i2counts,star_table[f, DS_NSHOTS],star_table[f, DS_MIN],mxtime)
