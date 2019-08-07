@@ -320,6 +320,14 @@ def compute_sunset(dt):
     sunset *= 86400.0 # convert to seconds
     return sunset
 
+def compute_sunrise(dt):
+    # computes time in seconds before sunset
+    apf_obs = make_apf_obs(dt,horizon='-9')
+    sunrise = apf_obs.next_rising(ephem.Sun())
+    sunrise -= ephem.now()
+    sunrise *= 86400.0 # convert to seconds
+    return sunrise
+
 def smartList(starlist, time, seeing, slowdown,outdir = None):
     """ Determine the best target to observe from the provided scriptobs-compatible starlist.
         Here the best target is defined as an unobserved target (ie not in observed targets )
@@ -500,18 +508,18 @@ def makeTempRow(star_table,ind,bstar=False):
             row.append(7)
     return row
 
-def enoughTime(apf_obs,star_table,stars,idx,row):
+def enoughTime(star_table,stars,idx,row):
     tot_time = row[DS_NSHOTS]*row[DS_EXPT]
     tot_time += 70 + (140 + 300)
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
-    sunrise = apf_obs.next_rising(ephem.Sun())  
-    time_left_before_sunrise = (sunrise - apf_obs.date)*86400.
+    time_left_before_sunrise = compute_sunrise(datetime.utcnow())
+
     try:
-        apflog( "enoughTime(): %.1f %.3f %.3f %.1f " % (tot_time, sunrise, apf_obs.date, time_left_before_sunrise),echo=True)
+        apflog( "enoughTime(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
     except:
         apflog("enoughTime(): cannot log times!?!",echo=True)
         
-    if tot_time < time_left_before_sunrise  and vis:
+    if tot_time < time_left_before_sunrise  and vis and time_left_before_sunrise < 14*3600.:
         return True
     else:
         return False
@@ -818,7 +826,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     if do_templates and flags['template'][idx] == 'N':
         bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
-        if enoughTime(apf_obs,star_table,stars,idx,row):
+        if enoughTime(star_table,stars,idx,row):
             bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
             line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
             bfinline = makeScriptobsLine(bnamefin,browfin,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
