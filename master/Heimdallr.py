@@ -1219,7 +1219,7 @@ if __name__ == '__main__':
 
     if not debug:
         APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-        APFTask.set(parent, suffix="MESSAGE",value="Updating last observation number to %d" % (apf.ucam["OBSNUM"].read()),wait=False)
+        APFTask.set(parent, suffix="MESSAGE",value="Updating last observation number to %s" % (apf.ucam["OBSNUM"].read()),wait=False)
 
 
     rv = apf.turnoff_inst()
