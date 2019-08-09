@@ -6,11 +6,27 @@ except:
 
 
 class ObservedLog():
-    def __init__(self):
+    def __init__(self,filename=''):
         self.names = []
         self.times = []
         self.tempobs = []
-        self.filename = ""
+        self.owners = []        
+        self.filename = filename
+
+
+    def parse_key_vals(line_list):
+        keyvals = dict()
+        ovals = []
+        for ls in line_list:
+            split_vals = ls.split('=')
+            if len(split_vals) == 2:
+                keyvals[split_vals[0]] = split_vals[1]
+            else:
+                ovals.append(split_vals[0])
+
+        return ovals, keyvals
+        
+        
     def read_observed_log(self,filename):
         """ read_observed_log parses a file to find the object names and times
         ObservedLog.read_observed_log(filename)
@@ -24,7 +40,7 @@ class ObservedLog():
             f = open(filename, 'r')
         except IOError:
             apflog( "Couldn't open %s" % filename,level="warn",echo=True)
-            return obs, times
+            return (), (), (), ()
         else: 
             for line in f:
                 line = line.strip()
@@ -32,23 +48,25 @@ class ObservedLog():
                     if line[0] == '#' or line == "":
                         pass
                     else:
-                        ls = line.split()
-                        self.obs.append(ls[0])
-                        if len(ls) > 15:
-                            self.times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
+                        ovals, keyvals = self.parse_key_vals(line.split())
+                        self.obs.append(ovals[0])
+                        if 'uth' in keyvals.keys()
+                            self.times.append( ( int(keyvals['uth']), int(keyvals['utm']) ) )
                         else:
-                            self.times.append(float(ls[1]))
-                        length = len(ls)
-                        mtch = re.search("temp\=Y",ls[length-1])
-                        if mtch:
+                            self.times.append(float(ovals[1]))
+
+                        
+                        if 'temp' in keyvals.keys():
                             self.temps.append("Y")
                         else:
                             self.temps.append("N")
-
+                        if 'owner' in keyvals.keys():
+                            self.owners.append(keyvals['owner'])
             
         self.obs.reverse()
         self.times.reverse()
         self.temps.reverse()
+        self.owners.reverse()
         return 
         
 
