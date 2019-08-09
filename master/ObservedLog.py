@@ -1,4 +1,5 @@
 import re
+import os
 try:
     from apflog import *
 except:
@@ -9,12 +10,12 @@ class ObservedLog():
     def __init__(self,filename=''):
         self.names = []
         self.times = []
-        self.tempobs = []
+        self.temps = []
         self.owners = []        
         self.filename = filename
 
 
-    def parse_key_vals(line):
+    def parse_key_vals(self,line):
         keyvals = dict()
         ovals = []
         line_list = line.split()
@@ -50,7 +51,7 @@ class ObservedLog():
                         pass
                     else:
                         ovals, keyvals = self.parse_key_vals(line)
-                        self.obs.append(ovals[0])
+                        self.names.append(ovals[0])
                         if 'uth' in keyvals.keys():
                             self.times.append( ( int(keyvals['uth']), int(keyvals['utm']) ) )
                         else:
@@ -65,7 +66,7 @@ class ObservedLog():
                         if 'owner' in keyvals.keys():
                             self.owners.append(keyvals['owner'])
             
-        self.obs.reverse()
+        self.names.reverse()
         self.times.reverse()
         self.temps.reverse()
         self.owners.reverse()
@@ -80,7 +81,7 @@ def getObserved(filename):
     temps - a list of template observations
 
     """
-    obs = []
+    names = []
     times = []
     temps = []
     nobs = dict()
@@ -88,7 +89,7 @@ def getObserved(filename):
         f = open(filename, 'r')
     except IOError:
         apflog( "Couldn't open %s" % filename,level="warn",echo=True)
-        return obs, times
+        return names, times, temps
     else: 
         for line in f:
             line = line.strip()
@@ -97,7 +98,7 @@ def getObserved(filename):
                     pass
                 else:
                     ls = line.split()
-                    obs.append(ls[0])
+                    names.append(ls[0])
                     if len(ls) > 15:
                         times.append( (int(ls[14].split('=')[1]), int(ls[15].split('=')[1])) )
                     else:
@@ -110,8 +111,18 @@ def getObserved(filename):
                         temps.append("N")
 
             
-    obs.reverse()
+    names.reverse()
     times.reverse()
     temps.reverse()
-    return obs, times, temps
+    return names, times, temps
 	
+
+if __name__ == "__main__":
+    fn = 'observed_targets.1'
+    if os.path.exists(fn):
+        ol = ObservedLog(filename=fn)
+        ol.read_observed_log()
+        print(ol.names)
+        print(ol.times)
+        print(ol.temps)
+        print(ol.owners)
