@@ -50,7 +50,7 @@ class ObservedLog():
                     else:
                         ovals, keyvals = self.parse_key_vals(line.split())
                         self.obs.append(ovals[0])
-                        if 'uth' in keyvals.keys()
+                        if 'uth' in keyvals.keys():
                             self.times.append( ( int(keyvals['uth']), int(keyvals['utm']) ) )
                         else:
                             self.times.append(float(ovals[1]))
@@ -60,6 +60,7 @@ class ObservedLog():
                             self.temps.append("Y")
                         else:
                             self.temps.append("N")
+                            
                         if 'owner' in keyvals.keys():
                             self.owners.append(keyvals['owner'])
             
