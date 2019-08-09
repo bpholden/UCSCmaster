@@ -14,9 +14,10 @@ class ObservedLog():
         self.filename = filename
 
 
-    def parse_key_vals(line_list):
+    def parse_key_vals(line):
         keyvals = dict()
         ovals = []
+        line_list = line.split()
         for ls in line_list:
             split_vals = ls.split('=')
             if len(split_vals) == 2:
@@ -27,7 +28,7 @@ class ObservedLog():
         return ovals, keyvals
         
         
-    def read_observed_log(self,filename):
+    def read_observed_log(self):
         """ read_observed_log parses a file to find the object names and times
         ObservedLog.read_observed_log(filename)
         names - list of names, must be first column of file called filename
@@ -37,7 +38,7 @@ class ObservedLog():
         """
 
         try:
-            f = open(filename, 'r')
+            f = open(self.filename, 'r')
         except IOError:
             apflog( "Couldn't open %s" % filename,level="warn",echo=True)
             return (), (), (), ()
@@ -48,7 +49,7 @@ class ObservedLog():
                     if line[0] == '#' or line == "":
                         pass
                     else:
-                        ovals, keyvals = self.parse_key_vals(line.split())
+                        ovals, keyvals = self.parse_key_vals(line)
                         self.obs.append(ovals[0])
                         if 'uth' in keyvals.keys():
                             self.times.append( ( int(keyvals['uth']), int(keyvals['utm']) ) )
