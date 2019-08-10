@@ -219,8 +219,10 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
             flags['do'].append("")
             
         flags['decker'].append(checkflag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
-        flags['I2'].append(checkflag("I2",didx,ls,"\A(n|N)",config["I2"]))
-        flags['template'].append(checkflag("Template",didx,ls,"\A(n|N)",'Y'))
+        i2select = checkflag("I2",didx,ls,"\A(n|N)",config["I2"])
+        flags['I2'].append(i2select.upper())
+        tempselect = checkflag("Template",didx,ls,"\A(n|N)",'Y')
+        flags['template'].append(tempselect.upper())
 
         flags['owner'].append(checkflag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
 
