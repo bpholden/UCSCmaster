@@ -7,13 +7,14 @@ except:
 
 
 class ObservedLog():
-    def __init__(self,filename=''):
+    def __init__(self,filename):
         self.names = []
         self.times = []
         self.temps = []
         self.owners = []        
         self.filename = filename
 
+        self.read_observed_log()
 
     def parse_key_vals(self,line):
         keyvals = dict()
@@ -120,8 +121,8 @@ def getObserved(filename):
 if __name__ == "__main__":
     fn = 'observed_targets.1'
     if os.path.exists(fn):
-        ol = ObservedLog(filename=fn)
-        ol.read_observed_log()
+        ol = ObservedLog(fn)
+
         print(ol.names)
         print(ol.times)
         print(ol.temps)
