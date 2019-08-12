@@ -1006,7 +1006,7 @@ class APF:
                 apflog("cannot write apftask.MASTER_LAST_CLOSE",level='warn',echo=True)
             return True
         else:
-            apflog("After 30 minutes of trying, closeup could not successfully complete.")
+            apflog("Closeup could not successfully complete.")
             return False
         return False
 
