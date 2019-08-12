@@ -541,7 +541,7 @@ class Master(threading.Thread):
                 return
             if APF.power_down_telescope() is False:
                 apflog("Error: Cannot close and power off telescope ", level="alert", echo=True)
-                os._exit(1)
+                
             rv = APF.disable_inst()
             
             return
