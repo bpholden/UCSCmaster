@@ -980,6 +980,10 @@ class APF:
         attempts = 0
         close_start = datetime.now()
         while (datetime.now() - close_start).seconds < 1800:
+            result = APFTask.waitFor(self.task, False, chk_mv, timeout=300)
+            if not result:
+                apflog("Didn't have move permission after 5 minutes. ", echo=True) 
+                break
             attempts += 1
             result, code = cmdexec(cmd)
             if not result:
