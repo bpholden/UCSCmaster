@@ -140,6 +140,6 @@ while observing:
         
 print ("sun rose")
 fn = "observed_targets"
-observed, obstimes = ParseGoogledex.update_local_googledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
+ParseGoogledex.update_local_googledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
 
 outfp.close()
