@@ -599,7 +599,7 @@ class APF:
                 APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["lastfocus"])
             result = self.focus(flags=flags)
             if not result:
-                apflog("Focusinstr has failed. Setting to %s and exiting." % (focusdict["lastfocus"]), level='error', echo=True)
+                apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
         self.apfschedule('OWNRHINT').write(owner)        
 
         return result
