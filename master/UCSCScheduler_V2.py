@@ -596,7 +596,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         else:
             ptime = datetime.utcfromtimestamp(int(time.time()))
 
-    observed, obstimes = ParseGoogledex.update_local_googledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
+    ParseGoogledex.update_local_googledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
 
     # List of targets already observed
 
