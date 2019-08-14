@@ -243,8 +243,9 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
 
         filename - where the observations are logged
     """
-    names, times, temps = ObservedLog.getObserved(filename)
-    if len(names) == 0:
+#    names, times, temps, owners = ObservedLog.getObserved(filename)
+    obslog = ObservedLog.ObservedLog(filename)
+    if len(obslog.names) == 0:
         return
     if ctime is None:
         ctime = datetime.utcfromtimestamp(int(time.time()))
@@ -259,14 +260,16 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
         col = vals[0].index("lastobs") 
         nobscol = vals[0].index("Nobs")
         tempcol = vals[0].index("Template")
+        owncol = vals[0].index("owner")
     
         for i, v in enumerate(vals):
             # Did we observe this target tonight?
-            if v[0] in names:
+            if v[0] in obslog.names:
                 # We observed this target, so update the cell in the worksheet
                 # update_cell(row, col, val) - col and row are 1 indexed
-                otime = times[names.index(v[0])]
-                taketemp = temps[names.index(v[0])]
+                otime = obslog.times[names.index(v[0])]
+                taketemp = obslog.temps[names.index(v[0])]
+                curowner = obslog.owners[names.index(v[0])]
                 if isinstance(otime,float):
                     t = datetime.utcfromtimestamp(otime)
                 else:
@@ -279,7 +282,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                         n = int(v[nobscol])
                     except:
                         n = 0
-                    if jd > pastdate:
+                    if jd > pastdate and curowner == v[owncol]:
                         ws.update_cell(i+1, col+1, round(jd, 2) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
 
@@ -288,7 +291,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                     ws.update_cell(i+1, col+1, round(jd,2) )
                 try:
                    have_temp = v[tempcol]
-                   if taketemp == "Y" and have_temp == "N":
+                   if taketemp == "Y" and have_temp == "N" and curowner == v[owncol]:
                        ws.update_cell(i+1, tempcol+1, "Y")
                 except:
                     apflog( "Error logging template obs for %s" % (names.index(v[0])),echo=True,level='error')
@@ -304,18 +307,18 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
         opens googledex_file and inputs date of last observation from observed_file
         in principle can use timestamps as well as scriptobs uth and utm values
     """
-    names, times, temps = ObservedLog.getObserved(observed_file)
-
+    # names, times, temps = ObservedLog.getObserved(observed_file)
+    obslog = ObservedLog.ObservedLog(observed_file)
     try:
         g = open(googledex_file, 'rb')
         full_codex = pickle.load(g)
         g.close()
     except IOError:
         apflog("googledex file did not exist, so can't be updated",echo=True)
-        return names,times
+        return obslog.names
     except EOFError:
         apflog("googledex file corrupt, so can't be updated",echo=True)
-        return names,times
+        return obslog.names
 
 
     codex_cols = full_codex[0]
@@ -329,9 +332,9 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     
     for i in range(1, len(full_codex)):
         row = full_codex[i]
-        if row[starNameIdx] in names:
+        if row[starNameIdx] in obslog.names:
             # We have observed this star, so lets update the last obs field
-            obstime = times[names.index(row[starNameIdx])]
+            obstime = obslog.times[obslog.names.index(row[starNameIdx])]
             if isinstance(obstime,float):
                 t = datetime.utcfromtimestamp(obstime)
             else:
@@ -355,7 +358,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
         pickle.dump(full_codex, f)
     f.close()
     
-    return names, times
+    return obslog.names
 
 def make_local_copy(sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
     full_codex = []
