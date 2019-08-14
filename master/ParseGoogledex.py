@@ -345,9 +345,8 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
                     intime = ctime + td
                 t = datetime(intime.year, intime.month, intime.day, hr, min)
 
-            # This keeps the JD precision to one decimal point. There is no real reason for this other than
-            # the googledex currently only stores the lastObs field to one decimal precision. Legacy styles FTW.
-            jd = round(float(ephem.julian_date(t)), 2) 
+
+            jd = round(float(ephem.julian_date(t)), 4) 
             apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
             row[lastObsIdx] = str(jd)
             if nObsIdx > 0:
