@@ -267,9 +267,10 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
             if v[0] in obslog.names:
                 # We observed this target, so update the cell in the worksheet
                 # update_cell(row, col, val) - col and row are 1 indexed
-                otime = obslog.times[names.index(v[0])]
-                taketemp = obslog.temps[names.index(v[0])]
-                curowner = obslog.owners[names.index(v[0])]
+                nameidx = obslog.names.index(v[0])
+                otime = obslog.times[nameidx]
+                taketemp = obslog.temps[nameidx]
+                curowner = obslog.owners[nameidx]
                 if isinstance(otime,float):
                     t = datetime.utcfromtimestamp(otime)
                 else:
@@ -294,7 +295,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                    if taketemp == "Y" and have_temp == "N" and curowner == v[owncol]:
                        ws.update_cell(i+1, tempcol+1, "Y")
                 except:
-                    apflog( "Error logging template obs for %s" % (names.index(v[0])),echo=True,level='error')
+                    apflog( "Error logging template obs for %s" % (v[0]),echo=True,level='error')
                 apflog( "Updated %s in %s" % (v[0],sheetn),echo=True)
 
     return
