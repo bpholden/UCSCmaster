@@ -14,7 +14,7 @@ from oauth2client.client import SignedJwtAssertionCredentials
 
 import ObservedLog
 import Coords
-from SchedulerConsts import MIN_TOTOBS
+from SchedulerConsts import MIN_TOTOBS, DS_BV, DS_ERR
 import ExposureCalculations as ec
 
 try:
