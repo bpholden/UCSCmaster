@@ -253,7 +253,7 @@ def calculate_ucsc_exposure_time(vmag, i2counts, elevation, seeing, bmv, deckers
 
     """
     vmag = np.array(vmag)
-    precision = np.array(precision)
+    i2counts = np.array(i2counts)
     bmv = np.array(bmv)
 
 
