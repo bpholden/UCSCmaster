@@ -235,12 +235,12 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focv
     return ret
 
 
-def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, deckers):
+def calculate_ucsc_exposure_time(vmag, i2counts, elevation, seeing, bmv, deckers):
     """ calculate_ucsc_exposure_time uses the recipe from Burt et al. (2015) to compute the exposure time for a target.
 
     exp_time, exp_counts, i2counts = calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W")
     vmag - numpy array of V magnitudes (Johnson filter, Vega mags)
-    precision - required precision for the velocity in m/s
+    i2counts - the required number of median Iodine cell counts, this is calculated from the precision and color of the star, this, in effect, sets the exposure time.
     elevation - elevation of the star above the horizon at the start of the exposure
     seeing - FWHM of the seeing in pixels on the guider
     bmv - (B - V) for the star (both Johnson filters, Vega zeropoint)
@@ -248,7 +248,7 @@ def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker
 
     exp_time - a numpy array of times in seconds, are integer values
     exp_counts - values for the exposure meter, this can be a floating point value
-    i2counts - the required number of median Iodine cell counts, this is calculated from the precision and color of the star, this, in effect, sets the exposure time.
+
 
 
     """
@@ -258,12 +258,6 @@ def calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker
 
 
 	# Now lets calculate the exposure times
-
-	# Desired I2 counts for precision
-    i2counts = getI2_K(precision)
-    mstars = np.where(bmv > 1.2)
-    if len(mstars) > 0:
-        i2counts[mstars] = getI2_M(precision[mstars])
 
     # minimum I2 counts so exposures are not rejected by P. Butler's DRP
     mini2_idx = np.where(i2counts < MIN_I2)
@@ -729,7 +723,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
         apflog("getNext(): Computing exposure times",echo=True)
         exp_times, exp_counts, i2counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
-                                            star_table[f,DS_ERR], star_elevations[np.array(vis)], seeing, \
+                                            star_table[f,DS_I2CNTS], star_elevations[np.array(vis)], seeing, \
                                             star_table[f,DS_BV], deckers[f])
 
         exp_times = exp_times * slowdown
