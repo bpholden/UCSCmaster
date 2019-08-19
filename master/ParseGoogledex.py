@@ -15,7 +15,7 @@ from oauth2client.client import SignedJwtAssertionCredentials
 import ObservedLog
 import Coords
 from SchedulerConsts import MIN_TOTOBS
-
+import ExposureCalculations as ec
 
 try:
     from apflog import *
@@ -210,8 +210,13 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
                 row.append(0)
             except KeyError:
                 row.append(0)
+
+        if row[DS_BV] > 1.2:
+            i2cnts = ec.getI2_M(row[DS_ERR])
+        else:
+            i2cnts = ec.getI2_K(row[DS_ERR])
+        row.append(i2cnts)
                 
-                    
         check = checkflag("Close Companion",didx,ls,"\A(y|Y)","")
         if check == "Y" or check == "y" :
             flags['do'].append(check)
