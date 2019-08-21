@@ -144,7 +144,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
         row.append(1.e9)
         # APFpri
         row.append(apfpri)
-        for coln in [, "APFcad","APFnshots","lastobs"] :
+        for coln in ["APFcad","APFnshots","lastobs"] :
             row.append(float_or_default(ls[didx[coln]]))
 
         for coln in [ "B-V", "APF Desired Precision" ]:
