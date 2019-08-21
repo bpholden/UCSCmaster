@@ -142,34 +142,20 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
         # For now use the old 1e9 count value - these get recalculated 
         row.append(1200.0)
         row.append(1.e9)
-        for coln in ["APFpri", "APFcad","APFnshots"] :
-            try:
-                row.append(float(ls[didx[coln]]))
-            except ValueError:
-                if coln in ("APFpri","APFnshots"):
-                    row.append(0)
-                else:
-                    row.append(1000.0)
-                    
-        
-        for coln in ["lastobs"]:
-            try:
-                row.append(float(ls[didx[coln]]))
-            except ValueError:
-                row.append(0.0)
+        # APFpri
+        row.append(apfpri)
+        for coln in [, "APFcad","APFnshots","lastobs"] :
+            row.append(float_or_default(ls[didx[coln]]))
 
         for coln in [ "B-V", "APF Desired Precision" ]:
-            try:
-                inval = float(ls[didx[coln]])
-                if inval < 0:
-                    inval = 1.
-                if coln is 'B-V' and inval > 2:
-                    inval = 1
-                if coln is 'APF Desired Precision' and inval > 10:
-                    inval = 10
-                row.append(inval)
-            except:
-                row.append(1.0)
+            inval = float_or_default(ls[didx[coln]],default=1.0)
+            if inval < 0:
+                inval = 1.
+            if coln is 'B-V' and inval > 2:
+                inval = 1
+            if coln is 'APF Desired Precision' and inval > 10:
+                inval = 10
+            row.append(inval)
                     
         for coln in ["uth", "utm"]:
             try:
@@ -179,38 +165,23 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
             except KeyError:
                 row.append(0)
                 
-        for coln in ["duration"]:
-            try:
-                row.append(float(ls[didx[coln]]))
-            except ValueError:
-                row.append(0)
-            except KeyError:
-                row.append(0)
+        # duration:
+        row.append(float_or_default(ls[didx["duration"]]))
                 
-        for coln in ["APFmin"]:
-            try:
-                row.append(float(ls[didx[coln]]))
-            except ValueError:
-                row.append(MIN_TOTOBS)
-            except KeyError:
-                row.append(MIN_TOTOBS)
+        # APFmin
+        row.append(float(ls[didx["APFmin"]]),default=MIN_TOTOBS)
                 
-        for coln in ["APFmax"]:
-            try:
-                row.append(float(ls[didx[coln]]))
-            except ValueError:
-                row.append(0)
-            except KeyError:
-                row.append(0)
+        # APFmax
+        row.append(float(ls[didx["APFmax"]]))
 
-        for coln in ["Nobs"]:
-            row.append(nobs)
+        # Nobs
+        row.append(nobs)
                 
-        for coln in ["Total Obs"]:
-            if totobs >= 0:
-                row.append(totobs)
-            else:
-                row.append(0)
+        # Total Obs
+        if totobs >= 0:
+            row.append(totobs)
+        else:
+            row.append(0)
 
         if row[DS_BV] > 1.2:
             i2cnts = ec.getI2_M(row[DS_ERR])
