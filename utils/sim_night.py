@@ -110,6 +110,7 @@ bstar = options.bstar
 doTemp = True
 tempcount = 0
 while observing:
+    curtime = ephem.Date(curtime)
 
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime, lastfwhm, lastslow)
@@ -137,7 +138,6 @@ while observing:
     if curtime > endtime:
         observing = False
         
-    curtime = ephem.Date(curtime)
         
 print ("sun rose")
 fn = "observed_targets"
