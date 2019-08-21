@@ -1275,6 +1275,36 @@ class APF:
 
 
 
+    def ucam_reboot(self,fake=False):
+        if fake:
+            apflog("Would have rebooted UCAM host ")
+            return True
+        try:
+            ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
+            self.combo_ps.waitFor(" == MissingProcesses",timeout=30)
+            ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","reboot")
+        except:	      
+            apflog("UCAM status bad, cannot restart",level='alert')
+            return False
+
+        okexpression = "$apfmon.UCAMSTA == Ok"
+        try:
+            rv = ktl.waitfor(okexpression,timeout=600)
+            if rv is False:
+                apflog("UCAM host reboot failure" , level="alert", echo=True)
+                return False
+        except:
+            return False
+        try:
+            ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
+        except:
+            return False
+        nv = self.combo_ps.waitFor(" == Ok",timeout=30)
+        if nv:
+            return nv
+        else:
+            apflog("UCAM host reboot failure, combo_ps still not ok" , level="alert", echo=True)
+
     def ucam_restart(self,fake=False):
 
         # modify -s apftask UCAMLAUNCHER_UCAM_COMMAND=Stop
@@ -1296,36 +1326,7 @@ class APF:
                 apflog("UCAM status bad, cannot restart",level='alert')
                 return False
 
-            try:
-                ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
-                self.combo_ps.waitFor(" == MissingProcesses",timeout=30)
-                ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","reboot")
-                noticeexpression = "$apfmon.UCAMSTA == Notice"
-                try:
-                    rv = ktl.waitfor(noticeexpression,timeout=600)
-                    if rv is False:
-                        apflog("UCAM host reboot failure" , level="alert", echo=True)
-                        return False
-                except:
-                    return False
-                okexpression = "$apfmon.UCAMSTA == Ok"
-                try:
-                    rv = ktl.waitfor(okexpression,timeout=600)
-                    if rv is False:
-                        apflog("UCAM host reboot failure" , level="alert", echo=True)
-                        return False
-                except:
-                    return False
-                ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
-                nv = self.combo_ps.waitFor(" == Ok",timeout=30)
-                if nv:
-                    return nv
-                else:
-                    apflog("UCAM host reboot failure, combo_ps still not ok" , level="alert", echo=True)
-            except:	      
-                apflog("UCAM status bad, cannot restart",level='alert')
-                return False
-  
+            self.ucam_reboot()
 
             
         return False
