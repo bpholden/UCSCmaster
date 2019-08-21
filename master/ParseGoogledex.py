@@ -182,6 +182,9 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
             i2cnts = ec.getI2_M(row[DS_ERR])
         else:
             i2cnts = ec.getI2_K(row[DS_ERR])
+        if i2cnts < 100:
+            i2cnts = 100
+
         row.append(i2cnts)
                 
         check = checkflag("Close Companion",didx,ls,"\A(y|Y)","")
