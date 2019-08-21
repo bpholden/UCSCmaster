@@ -1127,7 +1127,7 @@ class APF:
         apflog("checkClouds(): File=%s - Num=%d - LinesDone=%d" % (self.ucam["OUTFILE"].read(), int(self.ucam["OBSNUM"].read()), int(self.robot["SCRIPTOBS_LINES_DONE"].read()) ) )
         return
 
-    def observe(self, observation,skip=False):
+    def observe(self, observation,skip=False,raster=False):
         """ Currently: Takes a string which is the filename of a properly formatted star list. """
 
         if self.test:
@@ -1156,11 +1156,14 @@ class APF:
         robotdir = "/usr/local/lick/bin/robot/"
         infile = open(observation,'r')
         outfile = open("robot.log", 'a')
-        
-        if skip:
-            args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip']
+
+        if raster:
+            args = ['/home/holden/src/raster_scan']
         else:
-            args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
+            if skip:
+                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip']
+            else:
+                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
 
         p = subprocess.Popen(args,stdin=infile, stdout=outfile,stderr = subprocess.PIPE, cwd=robotdir)
 
