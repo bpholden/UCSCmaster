@@ -46,6 +46,23 @@ def parse_starname(starname):
         
     return ostarname
 
+
+def int_or_default(value,default=0):
+    try:
+        attr = int(value)
+    except:
+        attr = default
+    return attr
+
+def float_or_default(value,default=0.0):
+    try:
+        rv = float(value)
+    except:
+        rv = default
+    return rv
+
+
+
 def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' }):
     """ parseGoogledex parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
