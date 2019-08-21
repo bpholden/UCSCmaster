@@ -127,7 +127,8 @@ while observing:
         for i in range(0,int(result['NEXP'])):
             (curtime,lastfwhm,lastslow) = compute_simulation(result,curtime,stars[idx],apf_obs,slowdowns,fwhms,outfp)
         ot = open(otfn,"a+")
-        ot.write("%s\n" % (result["SCRIPTOBS"]))
+        for i in range(0,len(result["SCRIPTOBS"]))
+            ot.write("%s\n" % (result["SCRIPTOBS"].pop()))
         ot.close()
     else:
         curtime += 2100./86400 # close for lack of target
