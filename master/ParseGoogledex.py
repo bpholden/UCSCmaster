@@ -196,19 +196,12 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
                 row.append(0)
 
         for coln in ["Nobs"]:
-            try:
-                row.append(int(ls[didx[coln]]))
-            except ValueError:
-                row.append(0)
-            except KeyError:
-                row.append(0)
+            row.append(nobs)
                 
         for coln in ["Total Obs"]:
-            try:
-                row.append(int(ls[didx[coln]]))
-            except ValueError:
-                row.append(0)
-            except KeyError:
+            if totobs >= 0:
+                row.append(totobs)
+            else:
                 row.append(0)
 
         if row[DS_BV] > 1.2:
