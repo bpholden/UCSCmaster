@@ -164,7 +164,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
         row.append(float_or_default(ls[didx["duration"]]))
                 
         # APFmin
-        row.append(float(ls[didx["APFmin"]]),default=MIN_TOTOBS)
+        row.append(float(ls[didx["APFmin"]],default=MIN_TOTOBS))
                 
         # APFmax
         row.append(float(ls[didx["APFmax"]]))
