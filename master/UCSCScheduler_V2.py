@@ -281,12 +281,12 @@ def calc_elevations(stars, observer):
         els.append(cur_el)
     return np.array(els)
 
-def compute_datetime(time):
-    if type(time) == float:
-        dt = datetime.utcfromtimestamp(int(time))
-    elif type(time) == datetime:
+def compute_datetime(ctime):
+    if type(ctime) == float:
+        dt = datetime.utcfromtimestamp(int(ctime))
+    elif type(ctime) == datetime:
         dt = time
-    elif type(time) == ephem.Date:
+    elif type(ctime) == ephem.Date:
         dt = time.datetime()
     else:
         #punt
@@ -322,14 +322,14 @@ def compute_sunrise(dt):
     sunrise *= 86400.0 # convert to seconds
     return sunrise
 
-def smartList(starlist, time, seeing, slowdown,outdir = None):
+def smartList(starlist, ctime, seeing, slowdown,outdir = None):
     """ Determine the best target to observe from the provided scriptobs-compatible starlist.
         Here the best target is defined as an unobserved target (ie not in observed targets )
         that is visible above 30 degrees elevation. Higher elevation targets are prefered,
         but those that rise above 85 degrees will be regected to avoid slewing through the zenith. """
     # Convert the unix timestamp into a python datetime
 
-    dt = compute_datetime(time)
+    dt = compute_datetime(ctime)
 
     if not outdir:
         outdir = os.getcwd()
@@ -566,7 +566,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     if not outdir:
         outdir = os.getcwd()
 
-    dt = compute_datetime(time)
+    dt = compute_datetime(ctime)
 
     confg = dict()
     confg['I2'] = 'Y'
