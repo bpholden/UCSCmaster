@@ -141,6 +141,8 @@ def args():
     parser.add_argument('-c', '--calibrate', default='ucsc', type=str, help="Specify the calibrate script to use. Specify string to be used in calibrate 'arg' pre/post")
     parser.add_argument('-l', '--line', type=int, help="If a fixed starlist is given, starts the list at line N.")
     parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
+    parser.add_argument('--raster', action='store_true', default=False, help="If a fixed starlist is given, use it for a raster scan.")
+
     parser.add_argument('--sheet',default="Bstars,A020_SVogt_2019A,A017_ICzekala_2019A,A018_ICzekala_2019A,A005_PRobertson_2019A,A000_BHolden_2019A,A006_BHolden_2019A",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='public',help="Optional name for file owners")    
     
@@ -250,6 +252,7 @@ class Master(threading.Thread):
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
         self.starttime = None
+        self.raster = False
         self.debug = False
         self.doTemp = True
         self.nTemps = 0
@@ -1104,6 +1107,7 @@ if __name__ == '__main__':
             apflog("Starting dynamic scheduler", echo=True)
         master.fixedList = opt.fixed
         master.starttime = opt.start
+        master.raster = opt.raster
         master.task = parent
         master.windshield = opt.windshield
         master.debug = debug
