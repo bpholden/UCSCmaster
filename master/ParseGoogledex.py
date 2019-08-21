@@ -119,6 +119,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
         row = []
         # Get the star name
         names.append(parse_starname(ls[didx["Star Name"]]))
+        
         # Get the RA
         raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval:
@@ -132,14 +133,12 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
         else:
             row.append(-3.14)
 
-        for coln in ("pmRA", "pmDEC", "Vmag"):
-            try:
-                row.append(float(ls[didx[coln]]))
-            except ValueError:
-                if coln == "Vmag":
-                    row.append(15.0)
-                else:
-                    row.append(0.0)
+        for coln in ("pmRA", "pmDEC"):
+            row.append(float_or_default(ls[didx[coln]]))
+
+        # Vmag
+        row.append(float_or_default(ls[didx["Vmag"]],default=15.0))
+        
         # For now use the old 1e9 count value - these get recalculated 
         row.append(1200.0)
         row.append(1.e9)
