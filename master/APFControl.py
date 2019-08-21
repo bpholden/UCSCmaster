@@ -1279,24 +1279,24 @@ class APF:
         if fake:
             apflog("Would have rebooted UCAM host ")
             return True
+
+        apftask = ktl.Service('apftask')
+        command = apftask['UCAMLAUNCHER_UCAM_COMMAND']
+        ucamstat = apftask['UCAMLAUNCHER_UCAM_STATUS']
+        status = apftask['UCAMLAUNCHER_STATUS']
+        
         try:
-            ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
+            command.write("stop")
             self.combo_ps.waitFor(" == MissingProcesses",timeout=30)
-            ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","reboot")
+            command.write("reboot")
         except:	      
             apflog("UCAM status bad, cannot restart",level='alert')
             return False
-
-        okexpression = "$apfmon.UCAMSTA == Ok"
+        status.waitFor(" != running",timeout=15)
+        status.waitFor(" == running",timeout=300)
         try:
-            rv = ktl.waitfor(okexpression,timeout=600)
-            if rv is False:
-                apflog("UCAM host reboot failure" , level="alert", echo=True)
-                return False
-        except:
-            return False
-        try:
-            ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
+            command.write("run")
+            ucamstat.waitFor(" == running",timeout=15)
         except:
             return False
         nv = self.combo_ps.waitFor(" == Ok",timeout=30)
