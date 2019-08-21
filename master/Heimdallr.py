@@ -617,15 +617,7 @@ class Master(threading.Thread):
                     return
                 tot = getTotalLines(self.fixedList)
                 apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
-                if APF.ldone == tot and APF.user != "ucsc":
-                    APF.close()
-                    APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
-                
-                    
-                    self.exitMessage = "Fixed list is finished. Exiting the watcher."
-                    self.stop()
-                    # The fixed list has been completely observed so nothing left to do
-                elif APF.ldone == tot :
+                if APF.ldone == tot :
                     self.fixedList = None
                     self.starttime = None
                     if not APF.test:
