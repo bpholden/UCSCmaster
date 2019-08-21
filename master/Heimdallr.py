@@ -409,6 +409,11 @@ class Master(threading.Thread):
         def getTarget():
             APFLib.write(APF.ucam["RECORD"], "Yes") # safe / sorry
 
+            if APF.nerase != 2:
+                APF.killRobot()
+                rv = APF.ucam_reboot()
+                APF.startRobot()
+            
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
                     # just keep going with last block
