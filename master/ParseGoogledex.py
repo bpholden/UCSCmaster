@@ -110,18 +110,10 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
     for ls in codex:
         if ls[0] == '':
             continue
-        try:
-            apfpri = float(ls[didx["APFpri"]])
-        except:
-            apfpri = 0.0
-        try:
-            nobs = int(ls[didx["Nobs"]])
-        except:
-            nobs = 0
-        try:
-            totobs = int(ls[didx["Total Obs"]])
-        except :
-            totobs = -1
+        apfpri = float_or_default(ls[didx["APFpri"]])
+        nobs = int_or_default(ls[didx["Nobs"]])
+        totobs = int_or_default(ls[didx["Total Obs"]],default=-1)
+
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < 0.5: continue
         row = []
