@@ -1292,13 +1292,8 @@ class APF:
         except:	      
             apflog("UCAM status bad, cannot restart",level='alert')
             return False
-        status.waitFor(" != running",timeout=15)
-        status.waitFor(" == running",timeout=300)
-        try:
-            command.write("run")
-            ucamstat.waitFor(" == running",timeout=15)
-        except:
-            return False
+        ucamstat.waitFor(" != running",timeout=15)
+        ucamstat.waitFor(" == running",timeout=300)
         nv = self.combo_ps.waitFor(" == Ok",timeout=30)
         if nv:
             return nv
