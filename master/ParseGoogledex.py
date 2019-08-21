@@ -158,12 +158,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
             row.append(inval)
                     
         for coln in ["uth", "utm"]:
-            try:
-                row.append(int(ls[didx[coln]]))
-            except ValueError:
-                row.append(0)
-            except KeyError:
-                row.append(0)
+            row.append(int_or_default(ls[didx[coln]]))
                 
         # duration:
         row.append(float_or_default(ls[didx["duration"]]))
