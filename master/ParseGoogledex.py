@@ -108,6 +108,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
     stars = []
     # Build the star table to return to 
     for ls in codex:
+        row = []
         if ls[0] == '':
             continue
         apfpri = float_or_default(ls[didx["APFpri"]])
@@ -116,7 +117,6 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
 
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < 0.5: continue
-        row = []
         # Get the star name
         names.append(parse_starname(ls[didx["Star Name"]]))
         
