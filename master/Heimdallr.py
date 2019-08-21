@@ -633,7 +633,7 @@ class Master(threading.Thread):
                 else:
                     apflog("Found Fixed list %s" % self.fixedList, echo=True)
                     apflog("Starting fixed list on line %d" % int(APF.ldone), echo=True)
-                    APF.observe(str(self.fixedList), skip=True)
+                    APF.observe(str(self.fixedList), skip=True,raster=self.raster)
                     APFTask.waitFor(self.task, True, timeout=10)
             else:
                 if self.BV is None:
