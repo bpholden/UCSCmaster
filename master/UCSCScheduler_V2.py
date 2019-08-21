@@ -285,11 +285,11 @@ def compute_datetime(ctime):
     if type(ctime) == float:
         dt = datetime.utcfromtimestamp(int(ctime))
     elif type(ctime) == datetime:
-        dt = time
+        dt = ctime
     elif type(ctime) == ephem.Date:
-        dt = time.datetime()
+        dt = ctime.datetime()
     else:
-        #punt
+        #punt and use current UT
         dt = datetime.utcfromtimestamp(int(time.time()))
     return dt
 
