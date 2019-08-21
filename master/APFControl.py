@@ -274,6 +274,7 @@ class APF:
     obsnum     = ucam['OBSNUM']
     event      = ucam['EVENT']
     combo_ps   = ucam['COMBO_PS']
+    nerase     = ucam['NERASE']
 
     apfschedule= ktl.Service('apfschedule')
     
@@ -329,6 +330,8 @@ class APF:
 
         self.event.monitor()
         self.event.callback(eventmon)
+
+        self.nerase.monitor()
 
         self.down.monitor()
         self.temp.monitor()
