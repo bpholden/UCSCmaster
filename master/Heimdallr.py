@@ -1128,6 +1128,7 @@ if __name__ == '__main__':
             if currTime.hour == 8:
                 # Its 8 AM. Lets closeup
                 master.stop()
+                master.signal=False
                 apflog("Master was still running at 8AM. It was stopped and post calibrations will be attempted.", level='warn')
                 break
 
