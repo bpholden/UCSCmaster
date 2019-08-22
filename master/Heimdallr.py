@@ -1078,7 +1078,7 @@ if __name__ == '__main__':
 
 
     # 4) Start the main watcher thread
-    master = Master(apf,user=opt.name,sheetn=opt.sheet,owner=opt.owner)
+    master = Master(apf,opt)
     if 'Watching' == str(phase).strip():
         apf.instr_permit()
         apflog("Starting the main watcher." ,echo=True)
@@ -1108,11 +1108,7 @@ if __name__ == '__main__':
                 apflog("Will be starting star list %s at line 0" % opt.fixed,echo=True)
         else:
             apflog("Starting dynamic scheduler", echo=True)
-        master.fixedList = opt.fixed
-        master.starttime = opt.start
-        master.raster = opt.raster
         master.task = parent
-        master.windshield = opt.windshield
         master.debug = debug
         master.start()
     else:
@@ -1137,12 +1133,8 @@ if __name__ == '__main__':
                 # master.signal will still be True
                 # overwrite master with a new instance and restart the thread
                 apflog("Master thread has died. Will attempt to restart.", level='error', echo=True)
-                master = Master(apf,user=opt.name,sheetn=opt.sheet,owner=opt.owner)
-                master.fixedList = opt.fixed
-                master.starttime = opt.start
-                master.raster = opt.raster
+                master = Master(apf,opt)
                 master.task = parent
-                master.windshield = opt.windshield
                 master.debug = debug
                 master.start()
                 
