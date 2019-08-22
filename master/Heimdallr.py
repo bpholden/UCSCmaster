@@ -1131,7 +1131,20 @@ if __name__ == '__main__':
                 master.signal=False
                 apflog("Master was still running at 8AM. It was stopped and post calibrations will be attempted.", level='warn')
                 break
-
+            if master.isAlive() is False:
+                # this means that the thread died, usually because of an uncaught exception
+                # master.signal will still be True
+                # overwrite master with a new instance and restart the thread
+                apflog("Master thread has died. Will attempt to restart.", level='error', echo=True)
+                master = Master(apf,user=opt.name,sheetn=opt.sheet,owner=opt.owner)
+                master.fixedList = opt.fixed
+                master.starttime = opt.start
+                master.raster = opt.raster
+                master.task = parent
+                master.windshield = opt.windshield
+                master.debug = debug
+                master.start()
+                
             if debug:
                 print 'Master is running.'
                 print str(apf)
