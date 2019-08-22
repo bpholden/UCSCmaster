@@ -231,7 +231,7 @@ def getTotalLines(filename):
                
 
 class Master(threading.Thread):
-    def __init__(self, apf, opt,parent,totTemps=4):
+    def __init__(self, apf, opt,totTemps=4):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf
