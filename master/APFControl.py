@@ -1286,9 +1286,9 @@ class APF:
         status = apftask['UCAMLAUNCHER_STATUS']
         
         try:
-            command.write("stop")
+            command.write("Stop")
             self.combo_ps.waitFor(" == MissingProcesses",timeout=30)
-            command.write("reboot")
+            command.write("Reboot")
         except:	      
             apflog("UCAM status bad, cannot restart",level='alert')
             return False
