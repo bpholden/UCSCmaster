@@ -412,7 +412,7 @@ class Master(threading.Thread):
             if APF.nerase != 2:
                 APF.killRobot()
                 rv = APF.ucam_reboot()
-                APF.startRobot()
+                self.scriptobs = APF.startRobot()
             
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
