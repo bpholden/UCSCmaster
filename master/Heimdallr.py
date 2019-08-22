@@ -249,7 +249,7 @@ class Master(threading.Thread):
         self.lastObsSuccess = True
         self.lastObsFinished = True
         self.fixedList = opt.fixed
-        self.sheetn = opt.sheetn
+        self.sheetn = opt.sheet
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
         self.starttime = opt.start
