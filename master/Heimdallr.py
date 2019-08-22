@@ -254,7 +254,7 @@ class Master(threading.Thread):
         self.targetlog = None
         self.starttime = opt.start
         self.raster = opt.raster
-        self.debug = False
+        self.debug = opt.test
         self.doTemp = True
         self.nTemps = 0
         self.focval = 0
@@ -1109,7 +1109,7 @@ if __name__ == '__main__':
         else:
             apflog("Starting dynamic scheduler", echo=True)
         master.task = parent
-        master.debug = debug
+
         master.start()
     else:
         master.signal = False
@@ -1135,7 +1135,7 @@ if __name__ == '__main__':
                 apflog("Master thread has died. Will attempt to restart.", level='error', echo=True)
                 master = Master(apf,opt)
                 master.task = parent
-                master.debug = debug
+
                 master.start()
                 
             if debug:
