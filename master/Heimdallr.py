@@ -418,7 +418,12 @@ class Master(threading.Thread):
                 if len(self.target["SCRIPTOBS"]) > 0:
                     # just keep going with last block
                     apflog("getTarget(): Going through remaining target queue.",echo=True)
-                    self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
+                    try:
+                        curstr = self.target["SCRIPTOBS"].pop() + '\n'
+                        self.scriptobs.stdin.write(curstr)
+                    except Exception, e:
+                        apflog("Failure in getTarget: %s" % (e),level='error',echo=True)
+                        pass
                     return
             if self.checkObsFinished():
                 apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
