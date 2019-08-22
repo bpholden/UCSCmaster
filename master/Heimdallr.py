@@ -231,15 +231,16 @@ def getTotalLines(filename):
                
 
 class Master(threading.Thread):
-    def __init__(self, apf, user='ucsc',sheetn=["Bstars"],owner='public',totTemps=4):
+    def __init__(self, apf, opt,parent,totTemps=4):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf
-        self.user = user
-        self.owner = owner
+        self.task = 'master'
+        self.user = opt.name
+        self.owner = opt.owner
         self.name = 'Heimdallr'
         self.signal = True
-        self.windshield = 'auto'
+        self.windshield = opt.windshield
         self.scriptobs = None
         self.BV = None
         self.VMAG = None
@@ -247,12 +248,12 @@ class Master(threading.Thread):
         self.obsBstar = True
         self.lastObsSuccess = True
         self.lastObsFinished = True
-        self.fixedList = None
-        self.sheetn = sheetn
+        self.fixedList = opt.fixed
+        self.sheetn = opt.sheetn
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
-        self.starttime = None
-        self.raster = False
+        self.starttime = opt.start
+        self.raster = opt.raster
         self.debug = False
         self.doTemp = True
         self.nTemps = 0
