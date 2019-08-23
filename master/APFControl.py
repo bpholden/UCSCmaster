@@ -1293,9 +1293,12 @@ class APF:
             apflog("UCAM status bad, cannot restart",level='alert')
             return False
         ucamstat.waitFor(" != running",timeout=15)
-        ucamstat.waitFor(" == running",timeout=300)
+        status.waitFor(" != Running",timeout=60)
+        status.waitFor(" == Running",timeout=60)
+        
         try:
             command.write("Run")
+            ucamstat.waitFor(" == running",timeout=300)
         except:
             apflog("UCAM status bad, cannot restart",level='alert')
             return False
