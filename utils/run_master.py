@@ -92,7 +92,7 @@ def findAPFObsNum():
     else:    
         last += 100 - (last % 100)
         if last % 1000 > 700:
-            llast += 1000 - (last % 1000)
+            last += 1000 - (last % 1000)
 
     return last
 
