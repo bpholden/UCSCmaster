@@ -1309,6 +1309,13 @@ class APF:
         else:
             apflog("UCAM host reboot failure, combo_ps still not ok" , level="alert", echo=True)
 
+        self.obsnum.monitor()
+        self.obsnum.callback(self.updateLastObs)
+
+        self.event.monitor()
+        self.event.callback(eventmon)
+
+
     def ucam_restart(self,fake=False):
 
         # modify -s apftask UCAMLAUNCHER_UCAM_COMMAND=Stop
