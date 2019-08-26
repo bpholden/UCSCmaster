@@ -64,7 +64,7 @@ outdir = "."
 
 if options.date == "today":
     today = datetime.now()
-    datestr = "%d/%02d/%02d" % (today.year,today.month,today.day)
+    datestr = "%d/%02d/%02d" % (today.year,today.month,today.day+1)
 else:
     datestr = options.date
 
