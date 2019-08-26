@@ -310,7 +310,7 @@ def compute_sunset(dt):
     # computes time in seconds before sunset
     apf_obs = make_apf_obs(dt,horizon='0')
     sunset = apf_obs.next_setting(ephem.Sun())
-    sunset -= ephem.now()
+    sunset -= ephem.Date(dt)
     sunset *= 86400.0 # convert to seconds
     return sunset
 
@@ -318,7 +318,7 @@ def compute_sunrise(dt):
     # computes time in seconds before sunset
     apf_obs = make_apf_obs(dt,horizon='-9')
     sunrise = apf_obs.next_rising(ephem.Sun())
-    sunrise -= ephem.now()
+    sunrise -= ephem.Date(dt)
     sunrise *= 86400.0 # convert to seconds
     return sunrise
 
