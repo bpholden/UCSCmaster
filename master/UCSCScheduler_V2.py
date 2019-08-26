@@ -502,11 +502,11 @@ def makeTempRow(star_table,ind,bstar=False):
             row.append(7)
     return row
 
-def enoughTime(star_table,stars,idx,row,apf_obs):
+def enoughTime(star_table,stars,idx,row,apf_obs,dt):
     tot_time = row[DS_NSHOTS]*row[DS_EXPT]
     tot_time += 210 + (2*40 + 40*(row[DS_NSHOTS]-1)) # two B star exposures + three 70 second acquisitions and the actual observation readout times
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
-    time_left_before_sunrise = compute_sunrise(datetime.utcnow())
+    time_left_before_sunrise = compute_sunrise(dt)
 
     try:
         apflog( "enoughTime(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
@@ -820,7 +820,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     if do_templates and flags['template'][idx] == 'N':
         bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
-        if enoughTime(star_table,stars,idx,row,apf_obs):
+        if enoughTime(star_table,stars,idx,row,apf_obs,dt):
             bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
             line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
             bfinline = makeScriptobsLine(bnamefin,browfin,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
