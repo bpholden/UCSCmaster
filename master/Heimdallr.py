@@ -1133,6 +1133,7 @@ if __name__ == '__main__':
                 # master.signal will still be True
                 # overwrite master with a new instance and restart the thread
                 apflog("Master thread has died. Will attempt to restart.", level='error', echo=True)
+                apf.killrobot()
                 master = Master(apf,opt)
                 master.task = parent
 
