@@ -504,7 +504,7 @@ def makeTempRow(star_table,ind,bstar=False):
 
 def enoughTime(star_table,stars,idx,row,apf_obs):
     tot_time = row[DS_NSHOTS]*row[DS_EXPT]
-    tot_time += 70 + (140 + 300)
+    tot_time += 210 + (2*40 + 40*(row[DS_NSHOTS]-1)) # two B star exposures + three 70 second acquisitions and the actual observation readout times
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
     time_left_before_sunrise = compute_sunrise(datetime.utcnow())
 
