@@ -502,7 +502,7 @@ def makeTempRow(star_table,ind,bstar=False):
             row.append(7)
     return row
 
-def enoughTime(star_table,stars,idx,row):
+def enoughTime(star_table,stars,idx,row,apf_obs):
     tot_time = row[DS_NSHOTS]*row[DS_EXPT]
     tot_time += 70 + (140 + 300)
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
@@ -820,7 +820,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     if do_templates and flags['template'][idx] == 'N':
         bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
-        if enoughTime(star_table,stars,idx,row):
+        if enoughTime(star_table,stars,idx,row,apf_obs):
             bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
             line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
             bfinline = makeScriptobsLine(bnamefin,browfin,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
