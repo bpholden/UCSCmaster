@@ -113,9 +113,9 @@ while observing:
     curtime = ephem.Date(curtime)
 
     if options.smartlist and options.fixed != "":
-        result = ds.smartList(options.fixed, curtime, lastfwhm, lastslow)
+        result = ds.smartList(options.fixed, curtime.datetime(), lastfwhm, lastslow)
     else:
-        result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp)
+        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp)
     if result:
         if bstar:
             bstar = False
