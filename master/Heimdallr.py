@@ -281,7 +281,7 @@ class Master(threading.Thread):
         current_val = APF.autofoc.read()
         rising = APF.rising
         cur_sunel = APF.sunel.read(binary=True)
-        too_close = rising and (cur_sunel > -15)
+        too_close = rising and (cur_sunel > -20)
         if time.time() - lastfoc > FOCUSTIME:
             if current_val != "robot_autofocus_enable" and not too_close:
                 APF.autofoc.write("robot_autofocus_enable")
