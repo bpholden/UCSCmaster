@@ -306,9 +306,9 @@ def make_apf_obs(dt,horizon=str(TARGET_ELEVATION_MIN)):
 
     return apf_obs
 
-def compute_sunset_n_rise(dt):
+def compute_sunset_n_rise(dt,horizon='0'):
     # computes time in seconds before sunset
-    apf_obs = make_apf_obs(dt,horizon='0')
+    apf_obs = make_apf_obs(dt,horizon=horizon)
     sunset = apf_obs.next_setting(ephem.Sun())
     sunset -= ephem.Date(dt)
     sunset *= 86400.0 # convert to seconds
@@ -318,13 +318,13 @@ def compute_sunset_n_rise(dt):
     sunrise *= 86400.0 # convert to seconds
     return sunset, sunrise
 
-def compute_sunset(dt):
+def compute_sunset(dt,horizon='0'):
 
-    sunset, sunrise = compute_sunset_n_rise(dt)
+    sunset, sunrise = compute_sunset_n_rise(dt,horizon=horizon)
     return sunset
     
-def compute_sunrise(dt):
-    sunset, sunrise = compute_sunset_n_rise(dt)
+def compute_sunrise(dt,horizon='0'):
+    sunset, sunrise = compute_sunset_n_rise(dt,horizon=horizon)
     return sunrise
 
 def smartList(starlist, ctime, seeing, slowdown,outdir = None):
@@ -511,7 +511,7 @@ def enoughTime(star_table,stars,idx,row,apf_obs,dt):
     tot_time = row[DS_NSHOTS]*row[DS_EXPT]
     tot_time += 210 + (2*40 + 40*(row[DS_NSHOTS]-1)) # two B star exposures + three 70 second acquisitions and the actual observation readout times
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
-    time_left_before_sunrise = compute_sunrise(dt)
+    time_left_before_sunrise = compute_sunrise(dt,horizon='-9')
 
     try:
         apflog( "enoughTime(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
