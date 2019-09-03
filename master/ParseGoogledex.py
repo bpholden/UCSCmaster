@@ -96,9 +96,9 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
             full_codex = pickle.load(f)
             f.close()
         except:
-            full_codex = make_local_copy(sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
+            full_codex = make_local_copy(req_cols,sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
     else:
-        full_codex = make_local_copy(sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
+        full_codex = make_local_copy(req_cols,sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
 
     col_names = full_codex[0]
     codex = full_codex[1:]
