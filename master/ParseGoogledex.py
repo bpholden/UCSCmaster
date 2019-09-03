@@ -74,6 +74,17 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
     stars - a list of pyEphem objects 
 
     """
+
+    # These are the columns we need for scheduling
+    req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
+                "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
+                "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
+                "B-V", "APF Desired Precision", "Close Companion", \
+                "APF decker","I2", "owner", "uth","utm","duration", "Template",
+                "Nobs", "Total Obs"
+                ]
+
+    
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
     apflog( "Starting Googledex parse",echo=True)    
@@ -92,14 +103,6 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
     col_names = full_codex[0]
     codex = full_codex[1:]
 
-    # These are the columns we need for scheduling
-    req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
-                "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
-                "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
-                "B-V", "APF Desired Precision", "Close Companion", \
-                "APF decker","I2", "owner", "uth","utm","duration", "Template",
-                "Nobs", "Total Obs"
-                ]
     didx = findColumns(col_names,req_cols)
     
     names = []
