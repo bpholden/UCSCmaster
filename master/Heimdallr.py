@@ -320,10 +320,10 @@ class Master(threading.Thread):
         """ Master.obsBstar(haveobserved) 
             if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_var_3 to
             the current value of obsBstar
-            The variable VAR_3 still overrides
+            The variable OBSBSTAR still overrides
         """
-        vals = APFTask.get("master",["VAR_3"])
-        if vals['VAR_3'] == 'True':
+        vals = APFTask.get("master",["OBSBSTAR"])
+        if vals['OBSBSTAR'] == 'True':
             self.obsBstar = True
         else:
             self.obsBstar = False
@@ -333,8 +333,8 @@ class Master(threading.Thread):
             s=""
             if self.obsBstar:
                 s="True"
-            if vals['VAR_3'] != s:
-                APFTask.set(parent,suffix="VAR_3", value=s, wait=False)
+            if vals['OBSBSTAR'] != s:
+                APFTask.set(parent,suffix="OBSBSTAR", value=s, wait=False)
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
             
@@ -447,7 +447,7 @@ class Master(threading.Thread):
             # Calculate the slowdown factor.
             slowdown = calcSlowdown()
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
-            APFLib.write(apf.robot["MASTER_VAR_1"], slowdown)
+            APFLib.write(apf.robot["MASTER_SLOWDOWN"], slowdown)
             apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (APF.countrate, APF.ccountrate))
 
             # Check for a valid seeing measurment. If there isn't one, use a default
@@ -1005,7 +1005,7 @@ if __name__ == '__main__':
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
-        APFLib.write(apf.robot["MASTER_VAR_3"], 'True')        
+        APFLib.write(apf.robot["MASTER_OBSBSTAR"], 'True')        
         apflog("Initialization finished")
         
         stime, s_str, sun_str = calc_focus_start_time()
@@ -1043,7 +1043,7 @@ if __name__ == '__main__':
     # 3) Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
         try:
-            APFTask.set(parent, suffix="VAR_3",value="True")
+            APFTask.set(parent, suffix="OBSBSTAR",value="True")
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
 
