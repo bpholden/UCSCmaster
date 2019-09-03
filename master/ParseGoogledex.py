@@ -335,16 +335,9 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     
     return obslog.names
 
-def make_local_copy(sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
+def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
     full_codex = []
     # These are the columns we need for scheduling
-    req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
-                "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
-                "APFpri", "APFcad", "APFnshots", "lastobs", "APFmin", "APFmax", \
-                "B-V", "APF Desired Precision", "Close Companion", \
-                "APF decker","I2", "owner", "uth","utm","duration", "Template",
-                "Nobs", "Total Obs"
-                ]
     full_codex.append(req_cols)
         
     for sheetn in sheetns:
