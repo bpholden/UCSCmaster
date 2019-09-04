@@ -1,3 +1,4 @@
+import re
 import numpy as np
 
 def getRARad(hr, mn, sec):
@@ -29,6 +30,31 @@ def getDECRad(deg, mn, sec, neg=False):
         return x*-1
     else:
         return x
+
+def getRARadSingle(ra):
+    mtch = re.search("(\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",ra)
+    if mtch:
+        return getRARad(mtch.group(1),mtch.group(3),mtch.group(5))
+
+    try:
+        rad = float(ra)
+        rad *= np.pi/180.0
+    except:
+        rad = -1
+    return rad
+
+def getDECRadSingle(dec):
+    mtch = re.search("(\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",dec)
+    if mtch:
+        return getDECRad(mtch.group(1),mtch.group(3),mtch.group(5))
+
+    try:
+        rad = float(dec)
+        rad *= np.pi/180.0
+    except:
+        rad = -91 * np.pi/180.0
+    return rad
+
 
 def getCoordStr(floatval,isRA=False):
 
@@ -88,3 +114,19 @@ def getElAz(ra, dec, lat, lng, time):
                          (np.cos(el) * np.cos(lat)))
     return (np.degrees(el), np.degrees(az))
 
+if __name__ == "__main__":
+
+    ra = "12 23 34.3"
+    print(getRARadSingle(ra))
+    ra = "12:23:34.3"
+    print(getRARadSingle(ra))
+    ra = "12 23:34.3"
+    print(getRARadSingle(ra))
+    
+    dec = "-84:23:21.23"
+    dect = "-84 23 21"
+
+    print(getDECRadSingle(dec))
+    print(getDECRadSingle(dect))
+    dect = "-84 23 21.000"
+    print(getDECRadSingle(dect))
