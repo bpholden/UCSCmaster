@@ -63,7 +63,7 @@ def float_or_default(value,default=0.0):
 
 
 
-def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' }):
+def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False):
     """ parseGoogledex parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
@@ -90,7 +90,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
     apflog( "Starting Googledex parse",echo=True)    
     if not outdir :
         outdir = os.getcwd()
-    if os.path.exists(os.path.join(outdir,outfn)):
+    if os.path.exists(os.path.join(outdir,outfn)) and force_download is False:
         try:
             f = open(os.path.join(outdir,outfn),'rb')
             full_codex = pickle.load(f)
