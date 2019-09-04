@@ -165,36 +165,19 @@ def args():
         
     return opt
 
-def getnightcode(lastcode=None):
-    apftask = ktl.Service('apftask')
-    if lastcode == None:
-        lastcode = apftask['MASTER_LAST_OBS_UCB'].read()
-        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
-            print "Existing files detected for run %s. Not incrementing night code." % lastcode
-            return lastcode
-
-    zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
-
-    if 2 not in zloc:
-        ncode = lastcode[0:2] + chr(ord(lastcode[2])+1)   # increment last
-    if 2 in zloc and 1 not in zloc:
-        ncode = lastcode[0] + chr(ord(lastcode[1])+1) + 'a'   # increment middle
-    if 1 in zloc and 2 in zloc:
-        ncode = chr(ord(lastcode[0])+1) + 'aa'   # increment first
-
-    apftask['MASTER_LAST_OBS_UCB'].write(ncode)
-    return ncode
 
 def findObsNum(apf):
 
-    obsNum = int(apf.robot["MASTER_LAST_OBS_UCSC"].read().strip())
+    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
 
-    obsNum += 100 - (obsNum % 100)
+    if last > 20000:
+        last = 10000
+    else:    
+        last += 100 - (last % 100)
+        if last % 1000 > 700:
+            last += 1000 - (last % 1000)
 
-    if obsNum % 10000 > 9700:
-        obsNum += 10000 - (obsNum % 10000)
-
-    return obsNum
+    return last
 
 def set_obs_defaults(opt):
     if opt.name is None or opt.name == "ucsc":
@@ -205,11 +188,6 @@ def set_obs_defaults(opt):
             opt.obsnum = findObsNum(apf)
         else:
             opt.obsnum = int(opt.obsnum)
-    elif opt.name == "ucb":
-        apflog("Figuring out what the observation name should be.",echo=False)
-        opt.owner = 'Howard'
-        opt.name = "ucb-" + getnightcode()
-        opt.obsnum=100
     else:
         if opt.owner == None:
             opt.owner = opt.name
