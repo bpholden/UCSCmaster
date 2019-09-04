@@ -72,22 +72,25 @@ class TOO(threading.Thread):
     def run(self):
 
         while True:
-            self.scriptobs_status.waitfor("== Running",timeout=86400)
-            self.event.waitfor("== ExposureBegin")
-            names, star_table, flags, stars = ParseGoogledex.parseGoogledex(sheetns=self.sheetns,outfn='too.dat',force_download=True)
-            dt = datetime.datetime.utcnow()
-            good_cadence = (ephem.julian_date(dt) - star_table[:, DS_LAST]) > star_table[:, DS_CAD]
-            immediate = (star_table[:,DS_APFoPRI] > IMMEDIATE) & good_cadence
-            next_exp = (star_table[:,DS_APFPRI] < IMMEDIATE) & (star_table[:,DS_APFPRI] >NEXT_EXP) & good_cadence
+            rv = self.scriptobs_status.waitfor("== Running",timeout=86400)
+            if rv:
+                rv = self.event.waitfor("== ExposureBegin")
+                # during an exposure get ToO sheet
+                if rv: 
+                    names, star_table, flags, stars = ParseGoogledex.parseGoogledex(sheetns=self.sheetns,outfn='too.dat',force_download=True)
+                    dt = datetime.datetime.utcnow()
+                    good_cadence = (ephem.julian_date(dt) - star_table[:, DS_LAST]) > star_table[:, DS_CAD]
+                    immediate = (star_table[:,DS_APFoPRI] > IMMEDIATE) & good_cadence
+                    next_exp = (star_table[:,DS_APFPRI] < IMMEDIATE) & (star_table[:,DS_APFPRI] >NEXT_EXP) & good_cadence
 
-            if len(star_table[:,DS_APFPRI][immediate]) > 0:
-                rv = self.end_exposure()
-                rv = self.end_scriptobs(now=True)
-                if rv is False:
-                    APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)
-            if len(star_table:,DS_APFPRI][next_exp]) > 0:
-                rv self.end_scriptobs()
-                if rv is False:
-                    APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)                    
+                    if len(star_table[:,DS_APFPRI][immediate]) > 0:
+                        rv = self.end_exposure()
+                        rv = self.end_scriptobs(now=True)
+                        if rv is False:
+                            APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)
+                    if len(star_table:,DS_APFPRI][next_exp]) > 0:
+                        rv self.end_scriptobs()
+                        if rv is False:
+                            APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)                    
             
 
