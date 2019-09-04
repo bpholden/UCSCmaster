@@ -231,7 +231,7 @@ def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-5
 
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA","Dec", "Vmag", \
-                "APFpri", "APFcad", "APFnshots", "lastobs", "APFmax", \
+                "APFpri", "APFcad", "APFnshots", "lastobs", "texp", \
                 "Close Companion", "APF decker","I2", "owner", \
                 "uth","utm","duration", "Nobs", "Total Obs"
                 ]
@@ -276,71 +276,59 @@ def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-5
         names.append(parse_starname(ls[didx["Star Name"]]))
         
         # Get the RA
-        raval = Coords.getRARadSingle(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
+        raval = Coords.getRARadSingle(ls[didx["RA"]])
         if raval:
             row.append(raval)
+            # 0
         else:
             row.append(-1.)
         # Get the DEC
-        decval = Coords.getDECRadSingle(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
+        decval = Coords.getDECRadSingle(ls[didx["Dec"]])
         if decval:
             row.append(decval)
+            # 1
+            
         else:
             row.append(-3.14)
 
         for coln in ("pmRA", "pmDEC"):
-            row.append(float_or_default(ls[didx[coln]]))
+            # 2 and 3
+            if coln in didx:
+                row.append(float_or_default(ls[didx[coln]]))
+            else:
+                row.append(0.0)
 
         # Vmag
         row.append(float_or_default(ls[didx["Vmag"]],default=15.0))
-        
-        # For now use the old 1e9 count value - these get recalculated 
-        row.append(1200.0)
-        row.append(1.e9)
+        # 4
+
+        row.append(float_or_default(ls[didx["texp"]],default=1200.0))
+        # 5
+        row.append(2.e9)
+        # 6
         # APFpri
         row.append(apfpri)
+        # 7
         for coln in ["APFcad","APFnshots","lastobs"] :
             row.append(float_or_default(ls[didx[coln]]))
-
-        for coln in [ "B-V", "APF Desired Precision" ]:
-            inval = float_or_default(ls[didx[coln]],default=1.0)
-            if inval < 0:
-                inval = 1.
-            if coln is 'B-V' and inval > 2:
-                inval = 1
-            if coln is 'APF Desired Precision' and inval > 10:
-                inval = 10
-            row.append(inval)
+            # 8 9 10
                     
         for coln in ["uth", "utm"]:
             row.append(int_or_default(ls[didx[coln]]))
-                
-        # duration:
+            # 11 12
+        # duration 13
         row.append(float_or_default(ls[didx["duration"]]))
                 
-        # APFmin
-        row.append(float_or_default(ls[didx["APFmin"]],default=MIN_TOTOBS))
-                
-        # APFmax
-        row.append(float_or_default(ls[didx["APFmax"]]))
-
         # Nobs
         row.append(nobs)
+        # 14
                 
-        # Total Obs
+        # Total Obs 15
         if totobs >= 0:
             row.append(totobs)
         else:
             row.append(0)
 
-        if row[DS_BV] > 1.2:
-            i2cnts = ec.getI2_M(row[DS_ERR])
-        else:
-            i2cnts = ec.getI2_K(row[DS_ERR])
-        if i2cnts < 100:
-            i2cnts = 100
-
-        row.append(i2cnts)
                 
         check = checkflag("Close Companion",didx,ls,"\A(y|Y)","")
         if check == "Y" or check == "y" :

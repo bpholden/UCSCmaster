@@ -46,3 +46,22 @@ SLOWDOWN_MIN = 0.4
 SLOWDOWN_MAX = 5.0
 
 PRI_DELTA = 5
+
+# A few constants to make accessing the star table more readable
+TOO_RA     = 0
+TOO_DEC    = 1
+TOO_PMRA   = 2
+TOO_PMDEC  = 3
+TOO_VMAG   = 4
+TOO_EXPT   = 5
+TOO_COUNTS = 6
+TOO_APFPRI = 7
+TOO_CAD    = 8
+TOO_NSHOTS = 9
+TOO_LAST   = 10
+TOO_UTH    = 11
+TOO_UTM    = 12
+TOO_DUR    = 13
+TOO_NOB    = 14
+TOO_TOT    = 15
+
