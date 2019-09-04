@@ -214,6 +214,160 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
 
     return (names, np.array(star_table), flags, stars)
 
+
+
+
+def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="too.dat",outdir=None,config={'I2': 'N', 'decker': 'T', 'owner' : '' },force_download=True):
+    """ parseGoogledex parses google sheets and returns the output as a tuple
+    This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
+    
+    names, star_table, do_flag, stars = parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat")
+    names - a list of stars in the starlist
+    star_table - a numpy array
+    flags - a dictionary of items on whether or not do="y" needs to be set for scriptobs 
+    stars - a list of pyEphem objects 
+
+    """
+
+    # These are the columns we need for scheduling
+    req_cols = ["Star Name", "RA","Dec", "Vmag", \
+                "APFpri", "APFcad", "APFnshots", "lastobs", "APFmax", \
+                "Close Companion", "APF decker","I2", "owner", \
+                "uth","utm","duration", "Nobs", "Total Obs"
+                ]
+
+    
+    # Downloading all the values is going slowly.
+    # Try to only have to load this once a day
+    apflog( "Starting Googledex parse",echo=True)    
+    if not outdir :
+        outdir = os.getcwd()
+    if os.path.exists(os.path.join(outdir,outfn)) and force_download is False:
+        try:
+            f = open(os.path.join(outdir,outfn),'rb')
+            full_codex = pickle.load(f)
+            f.close()
+        except:
+            full_codex = make_local_copy(req_cols,sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
+    else:
+        full_codex = make_local_copy(req_cols,sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
+
+    col_names = full_codex[0]
+    codex = full_codex[1:]
+
+    didx = findColumns(col_names,req_cols)
+    
+    names = []
+    star_table = []
+    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [] }
+    stars = []
+    # Build the star table to return to 
+    for ls in codex:
+        row = []
+        if ls[0] == '':
+            continue
+        apfpri = float_or_default(ls[didx["APFpri"]])
+        nobs = int_or_default(ls[didx["Nobs"]])
+        totobs = int_or_default(ls[didx["Total Obs"]],default=-1)
+
+        if totobs > 0 and nobs >= totobs: continue
+        if apfpri < 0.5: continue
+        # Get the star name
+        names.append(parse_starname(ls[didx["Star Name"]]))
+        
+        # Get the RA
+        raval = Coords.getRARadSingle(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
+        if raval:
+            row.append(raval)
+        else:
+            row.append(-1.)
+        # Get the DEC
+        decval = Coords.getDECRadSingle(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
+        if decval:
+            row.append(decval)
+        else:
+            row.append(-3.14)
+
+        for coln in ("pmRA", "pmDEC"):
+            row.append(float_or_default(ls[didx[coln]]))
+
+        # Vmag
+        row.append(float_or_default(ls[didx["Vmag"]],default=15.0))
+        
+        # For now use the old 1e9 count value - these get recalculated 
+        row.append(1200.0)
+        row.append(1.e9)
+        # APFpri
+        row.append(apfpri)
+        for coln in ["APFcad","APFnshots","lastobs"] :
+            row.append(float_or_default(ls[didx[coln]]))
+
+        for coln in [ "B-V", "APF Desired Precision" ]:
+            inval = float_or_default(ls[didx[coln]],default=1.0)
+            if inval < 0:
+                inval = 1.
+            if coln is 'B-V' and inval > 2:
+                inval = 1
+            if coln is 'APF Desired Precision' and inval > 10:
+                inval = 10
+            row.append(inval)
+                    
+        for coln in ["uth", "utm"]:
+            row.append(int_or_default(ls[didx[coln]]))
+                
+        # duration:
+        row.append(float_or_default(ls[didx["duration"]]))
+                
+        # APFmin
+        row.append(float_or_default(ls[didx["APFmin"]],default=MIN_TOTOBS))
+                
+        # APFmax
+        row.append(float_or_default(ls[didx["APFmax"]]))
+
+        # Nobs
+        row.append(nobs)
+                
+        # Total Obs
+        if totobs >= 0:
+            row.append(totobs)
+        else:
+            row.append(0)
+
+        if row[DS_BV] > 1.2:
+            i2cnts = ec.getI2_M(row[DS_ERR])
+        else:
+            i2cnts = ec.getI2_K(row[DS_ERR])
+        if i2cnts < 100:
+            i2cnts = 100
+
+        row.append(i2cnts)
+                
+        check = checkflag("Close Companion",didx,ls,"\A(y|Y)","")
+        if check == "Y" or check == "y" :
+            flags['do'].append(check)
+        else:
+            flags['do'].append("")
+            
+        flags['decker'].append(checkflag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
+        i2select = checkflag("I2",didx,ls,"\A(n|N)",config["I2"])
+        flags['I2'].append(i2select.upper())
+        tempselect = checkflag("Template",didx,ls,"\A(n|N)",'Y')
+        flags['template'].append(tempselect.upper())
+
+        flags['owner'].append(checkflag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
+
+            
+        star_table.append(row)
+        star = ephem.FixedBody()
+        star.name = ls[0]
+        star._ra = ephem.hours(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]]))
+        star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
+        stars.append(star)
+
+    return (names, np.array(star_table), flags, stars)
+
+
+
 def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
