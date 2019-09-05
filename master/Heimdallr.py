@@ -301,16 +301,16 @@ class Master(threading.Thread):
             The variable OBSBSTAR still overrides
         """
         vals = APFTask.get("master",["OBSBSTAR"])
-        if vals['OBSBSTAR'] == 'True':
+        if vals['OBSBSTAR'] == True:
             self.obsBstar = True
         else:
             self.obsBstar = False
         if haveobserved and self.lastObsSuccess:
             self.obsBstar = False
         try:
-            s=""
+            s=False
             if self.obsBstar:
-                s="True"
+                s=True
             if vals['OBSBSTAR'] != s:
                 APFTask.set(parent,suffix="OBSBSTAR", value=s, wait=False)
         except:
@@ -1021,7 +1021,7 @@ if __name__ == '__main__':
     # 3) Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
         try:
-            APFTask.set(parent, suffix="OBSBSTAR",value="True")
+            APFTask.set(parent, suffix="OBSBSTAR",value=True)
         except:
             apflog("Error: Cannot communicate with apftask",level="error")
 
