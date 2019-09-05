@@ -296,7 +296,7 @@ class Master(threading.Thread):
 
     def checkBstar(self,haveobserved):
         """ Master.obsBstar(haveobserved) 
-            if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_var_3 to
+            if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_obsbstar to
             the current value of obsBstar
             The variable OBSBSTAR still overrides
         """
@@ -411,7 +411,7 @@ class Master(threading.Thread):
 
 
             try:
-                self.obsBstar = bool(ktl.read("apftask", "master_var_3"))
+                self.obsBstar = bool(ktl.read("apftask", "master_obsbstar"))
             except:
                 self.obsBstar = True
 
