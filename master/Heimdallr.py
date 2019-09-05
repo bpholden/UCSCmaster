@@ -300,21 +300,14 @@ class Master(threading.Thread):
             the current value of obsBstar
             The variable OBSBSTAR still overrides
         """
-        vals = APFTask.get("master",["OBSBSTAR"])
-        if vals['OBSBSTAR'] == True:
-            self.obsBstar = True
-        else:
-            self.obsBstar = False
+        self.obsBstar = ktl.read('apftask','MASTER_OBSBSTAR',binary=True)
+        
         if haveobserved and self.lastObsSuccess:
             self.obsBstar = False
-        try:
-            s=False
-            if self.obsBstar:
-                s=True
-            if vals['OBSBSTAR'] != s:
-                APFTask.set(parent,suffix="OBSBSTAR", value=s, wait=False)
-        except Exception, e:
-            apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
+            try:
+                ktl.write('apftask','MASTER_OBSBSTAR',self.obsBstar,binary=True)
+            except Exception, e:
+                apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
             
     def shouldStartList(self):
         """ Master.shouldStartList()
@@ -411,7 +404,7 @@ class Master(threading.Thread):
 
 
             try:
-                self.obsBstar = ktl.read("apftask", "master_obsbstar",binary=True)
+                self.obsBstar = ktl.read("apftask", "MASTER_OBSBSTAR",binary=True)
                 apflog("getTarget(): Setting obsBstar to %s" % (str(self.obsBstar)),echo=True)
 
                 
@@ -987,7 +980,7 @@ if __name__ == '__main__':
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
-        APFLib.write(apf.robot["MASTER_OBSBSTAR"], 'True')        
+        APFLib.write(apf.robot["MASTER_OBSBSTAR"], True,binary=True)        
         apflog("Initialization finished")
         
         stime, s_str, sun_str = calc_focus_start_time()
@@ -1025,7 +1018,7 @@ if __name__ == '__main__':
     # 3) Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
         try:
-            APFTask.set(parent, suffix="OBSBSTAR",value=True)
+            ktl.write('apftask','MASTER_OBSBSTAR',self.obsBstar,binary=True)
         except Exception, e:
             apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
 
