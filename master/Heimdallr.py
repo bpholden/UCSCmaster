@@ -412,7 +412,8 @@ class Master(threading.Thread):
 
             try:
                 self.obsBstar = bool(ktl.read("apftask", "master_obsbstar"))
-            except:
+            except Exception, e:
+                apflog("getTarget(): Cannot change obsBstar: %s" % (e),level='error',echo=True)
                 self.obsBstar = True
 
             if self.obsBstar:
