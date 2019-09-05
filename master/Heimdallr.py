@@ -934,7 +934,7 @@ if __name__ == '__main__':
     apf.initGuidecam()
     
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
-    possible_phases = ["Init", "Focus", "Cal-Pre", "Watching", "Cal-Post", "Focus"]
+    possible_phases = ["Init", "Focus", "Cal-Pre", "Watching", "Cal-Post", "Focus-Post"]
     phase_index = 0
     # If a command line phase was specified, use that.
     if opt.phase != None:
@@ -1200,12 +1200,12 @@ if __name__ == '__main__':
     # Focus the instrument once more
     phase_index += 1
     APFTask.phase(parent, possible_phases[phase_index])
-    apflog("Running Focus Post", echo=True)
+    apflog("Running Focus-Post", echo=True)
     result = apf.focusinstr()
     if not result:
-        apflog("Focus cube post has failed", level='error', echo=True)
+        apflog("Focus-post has failed", level='error', echo=True)
     else:
-        apflog("Focus post has finished successfully.", echo=True)
+        apflog("Focus-post has finished successfully.", echo=True)
 
     # We have done everything we needed to, so leave
     # the telescope in day mode to allow it to start thermalizing to the next night.
