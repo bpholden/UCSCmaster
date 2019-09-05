@@ -411,9 +411,9 @@ class Master(threading.Thread):
 
 
             try:
-                self.obsBstar = bool(ktl.read("apftask", "master_obsbstar"))
+                self.obsBstar = ktl.read("apftask", "master_obsbstar",binary=True)
                 apflog("getTarget(): Setting obsBstar to %s" % (str(self.obsBstar)),echo=True)
-                apflog("getTarget(): Setting obsBstar to %s" % (str(self.obsBstar)),echo=True)
+
                 
             except Exception, e:
                 apflog("getTarget(): Cannot change obsBstar: %s" % (e),level='error',echo=True)
