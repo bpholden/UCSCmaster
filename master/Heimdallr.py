@@ -313,8 +313,8 @@ class Master(threading.Thread):
                 s=True
             if vals['OBSBSTAR'] != s:
                 APFTask.set(parent,suffix="OBSBSTAR", value=s, wait=False)
-        except:
-            apflog("Error: Cannot communicate with apftask",level="error")
+        except Exception, e:
+            apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
             
     def shouldStartList(self):
         """ Master.shouldStartList()
@@ -1022,8 +1022,8 @@ if __name__ == '__main__':
     if 'Cal-Pre' == str(phase).strip():
         try:
             APFTask.set(parent, suffix="OBSBSTAR",value=True)
-        except:
-            apflog("Error: Cannot communicate with apftask",level="error")
+        except Exception, e:
+            apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
 
         if not debug:
             APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
