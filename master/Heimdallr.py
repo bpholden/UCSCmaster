@@ -861,7 +861,7 @@ class Master(threading.Thread):
                 if current_msg['message'] != omsg:
                     APFTask.set(parent, suffix="MESSAGE", value=omsg, wait=False)
                 APFTask.waitFor(self.task, True, timeout=5)
-            if  APF.isOpen()[0] and float(sunel) > sunel_lim:
+            if  APF.isOpen()[0] and float(sunel) > sunel_lim and not rising:
                 omsg = "Waiting for sunset"
                 if current_msg['message'] != omsg:
                     APFTask.set(parent, suffix="MESSAGE", value=omsg, wait=False)
