@@ -1018,7 +1018,7 @@ if __name__ == '__main__':
     # 3) Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
         try:
-            ktl.write('apftask','MASTER_OBSBSTAR',self.obsBstar,binary=True)
+            ktl.write('apftask','MASTER_OBSBSTAR',True,binary=True)
         except Exception, e:
             apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
 
