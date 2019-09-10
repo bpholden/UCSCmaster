@@ -934,13 +934,17 @@ if __name__ == '__main__':
         APFTask.phase(parent, opt.phase)
         phase_index = possible_phases.index(str(opt.phase).strip())
         phase.poll()
+    elif phase.read() != "":
+        # start where the master script left off
+        phase_index = possible_phases.index(str(phase.read()).strip())
+        phase.poll()
         
     # If the phase isn't a valid option, (say the watchdog was run last)
     # then assume we are starting a fresh night and start from setting the observer information.
-    apflog("Phase at start is: %s" % phase, echo=True)
     if str(phase).strip() not in possible_phases:
         apflog("Starting phase is not valid. Phase being set to Init", echo=True)
         APFTask.phase(parent, "Init")
+    apflog("Phase at start is: %s" % phase, echo=True)
 
     # Start the actual operations
     # Goes through 5 steps:
