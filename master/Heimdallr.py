@@ -774,19 +774,24 @@ class Master(threading.Thread):
                     APFTask.set(parent, suffix="MESSAGE", value="Open at sunset", wait=False)                    
                     success = opening(sunel, sunset=True)
                     if success is False:
-                        apflog("Error: Cannot open the dome", level="alert",echo=True)
-                        os._exit()
-                        
-                    rv = APF.evening_star()
-                    if not rv:
-                        apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
+                        if APF.openOK:
+                            apflog("Error: Cannot open the dome", level="alert",echo=True)
+                            os._exit()
+                        else:
+                            # lost permision during opening, happens more often than you think
+                            apflog("Error: No longer have opening permission", level="error",echo=True)
+                            
+                    else:
+                        rv = APF.evening_star()
+                        if not rv:
+                            apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
             
-                    chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
-                    while float(sunel.read()) > SUNEL_STARTLIM and not rising:
-                        outstr = "Sun is setting and sun at elevation of %.3f" % (float(sunel.read()))
-                        apflog(outstr,level='info', echo=True)
-                        result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
-                        APF.DMReset()
+                        chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
+                        while float(sunel.read()) > SUNEL_STARTLIM and not rising:
+                            outstr = "Sun is setting and sun at elevation of %.3f" % (float(sunel.read()))
+                            apflog(outstr,level='info', echo=True)
+                            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
+                            APF.DMReset()
                     
                 elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
                     APFTask.set(parent, suffix="MESSAGE", value="Open at night", wait=False)                    
