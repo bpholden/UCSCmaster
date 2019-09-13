@@ -18,10 +18,11 @@ IMMEDIATE = 30
 NEXT_EXP = 20
 
 class TOO(threading.Thread):
-    def __init__(self,sheetns=""):
+    def __init__(self,sheetns="",test=False):
 
         threading.Thread.__init__(self)
         self.setDaemon(True)
+        self.test = test
         
         self.sheetns = sheetns
         
@@ -36,6 +37,9 @@ class TOO(threading.Thread):
         
 
     def end_exposure(self):
+        if self.test:
+            APF.log("Would have stopped exposure",echo=True)
+            return True
         try:
             self.stop.write(1)
             rv = True
@@ -46,6 +50,11 @@ class TOO(threading.Thread):
 
     def end_scriptobs(self, now=False):
         """ In case during an exposure there is a need to stop the robot and close up."""
+
+        if self.test:
+            APF.log("Would have ended scriptobs",echo=True)
+            return True
+            
         APF.log("Terminating scriptobs",echo=True)
         if now:U
             rv = self.end_exposure()
