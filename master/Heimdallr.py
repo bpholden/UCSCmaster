@@ -593,7 +593,7 @@ class Master(threading.Thread):
             message = apf.message.read()
             mtch = re.search("ERR/UCAM",message)
             if mtch:
-                # uh oho
+                # uh oh
                 apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
                 # reboot warsaw
                 APF.ucam_restart()
