@@ -194,19 +194,7 @@ def set_obs_defaults(opt):
 
     return opt
 
-def getTotalLines(filename):
-    tot = 0
-    with open(filename, 'r') as f:
-        for line in f:
-            if line.strip() == '':
-                continue
-            elif line.strip()[0] == '#':
-                continue
-            else:
-                tot += 1
-    return tot
-
-               
+              
 
 class Master(threading.Thread):
     def __init__(self, apf, opt,totTemps=4):
@@ -309,6 +297,22 @@ class Master(threading.Thread):
             except Exception, e:
                 apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
             
+    def readStarlistFile(filename):
+        tot = 0
+        self.target = dict()
+        self.target["SCRIPTOBS"] = []
+        with open(filename, 'r') as f:
+            for line in f:
+                sline = line.strip()
+                if sline == '':
+                    continue
+                elif sline[0] == '#':
+                    continue
+                else:
+                    tot += 1
+                    self.target["SCRIPTOBS"].append(sline)
+        return tot
+
     def shouldStartList(self):
         """ Master.shouldStartList()
             should we start a fixed observing list or not? true if start time is None or if w/in + 1 hour - 0.5 hours of start time
