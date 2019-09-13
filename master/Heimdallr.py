@@ -165,36 +165,19 @@ def args():
         
     return opt
 
-def getnightcode(lastcode=None):
-    apftask = ktl.Service('apftask')
-    if lastcode == None:
-        lastcode = apftask['MASTER_LAST_OBS_UCB'].read()
-        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
-            print "Existing files detected for run %s. Not incrementing night code." % lastcode
-            return lastcode
-
-    zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
-
-    if 2 not in zloc:
-        ncode = lastcode[0:2] + chr(ord(lastcode[2])+1)   # increment last
-    if 2 in zloc and 1 not in zloc:
-        ncode = lastcode[0] + chr(ord(lastcode[1])+1) + 'a'   # increment middle
-    if 1 in zloc and 2 in zloc:
-        ncode = chr(ord(lastcode[0])+1) + 'aa'   # increment first
-
-    apftask['MASTER_LAST_OBS_UCB'].write(ncode)
-    return ncode
 
 def findObsNum(apf):
 
-    obsNum = int(apf.robot["MASTER_LAST_OBS_UCSC"].read().strip())
+    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
 
-    obsNum += 100 - (obsNum % 100)
+    if last > 20000:
+        last = 10000
+    else:    
+        last += 100 - (last % 100)
+        if last % 1000 > 700:
+            last += 1000 - (last % 1000)
 
-    if obsNum % 10000 > 9700:
-        obsNum += 10000 - (obsNum % 10000)
-
-    return obsNum
+    return last
 
 def set_obs_defaults(opt):
     if opt.name is None or opt.name == "ucsc":
@@ -205,11 +188,6 @@ def set_obs_defaults(opt):
             opt.obsnum = findObsNum(apf)
         else:
             opt.obsnum = int(opt.obsnum)
-    elif opt.name == "ucb":
-        apflog("Figuring out what the observation name should be.",echo=False)
-        opt.owner = 'Howard'
-        opt.name = "ucb-" + getnightcode()
-        opt.obsnum=100
     else:
         if opt.owner == None:
             opt.owner = opt.name
@@ -295,7 +273,7 @@ class Master(threading.Thread):
 
     def checkObsSuccess(self):
         """ Master.checkObsSuccess() 
-            checks the value of scriptobs_line_result to see if the last observation suceeded.
+            checks the value of SCRIPTOBS_LINE_RESULT to see if the last observation suceeded.
         """
         retval = False
         
@@ -305,8 +283,8 @@ class Master(threading.Thread):
 
     def checkObsFinished(self):
         """ Master.checkObsFinished() 
-            checks the value of scriptobs_line to see if we are on the last line of the block
-            checks scriptobs_line_result and scriptobs_observed to see if the last line is done
+            checks the value of SCRIPTOBS_LINE to see if we are on the last line of the block
+            checks SCRIPTOBS_LINE_RESULT and SCRIPTOBS_OBSERVED to see if the last line is done
         """
         retval = False
 
@@ -318,25 +296,18 @@ class Master(threading.Thread):
 
     def checkBstar(self,haveobserved):
         """ Master.obsBstar(haveobserved) 
-            if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_var_3 to
+            if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_obsbstar to
             the current value of obsBstar
             The variable OBSBSTAR still overrides
         """
-        vals = APFTask.get("master",["OBSBSTAR"])
-        if vals['OBSBSTAR'] == 'True':
-            self.obsBstar = True
-        else:
-            self.obsBstar = False
+        self.obsBstar = ktl.read('apftask','MASTER_OBSBSTAR',binary=True)
+        
         if haveobserved and self.lastObsSuccess:
             self.obsBstar = False
-        try:
-            s=""
-            if self.obsBstar:
-                s="True"
-            if vals['OBSBSTAR'] != s:
-                APFTask.set(parent,suffix="OBSBSTAR", value=s, wait=False)
-        except:
-            apflog("Error: Cannot communicate with apftask",level="error")
+            try:
+                ktl.write('apftask','MASTER_OBSBSTAR',self.obsBstar,binary=True)
+            except Exception, e:
+                apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
             
     def shouldStartList(self):
         """ Master.shouldStartList()
@@ -433,8 +404,12 @@ class Master(threading.Thread):
 
 
             try:
-                self.obsBstar = bool(ktl.read("apftask", "master_var_3"))
-            except:
+                self.obsBstar = ktl.read("apftask", "MASTER_OBSBSTAR",binary=True)
+                apflog("getTarget(): Setting obsBstar to %s" % (str(self.obsBstar)),echo=True)
+
+                
+            except Exception, e:
+                apflog("getTarget(): Cannot change obsBstar: %s" % (e),level='error',echo=True)
                 self.obsBstar = True
 
             if self.obsBstar:
@@ -799,19 +774,24 @@ class Master(threading.Thread):
                     APFTask.set(parent, suffix="MESSAGE", value="Open at sunset", wait=False)                    
                     success = opening(sunel, sunset=True)
                     if success is False:
-                        apflog("Error: Cannot open the dome", level="alert",echo=True)
-                        os._exit()
-                        
-                    rv = APF.evening_star()
-                    if not rv:
-                        apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
+                        if APF.openOK:
+                            apflog("Error: Cannot open the dome", level="alert",echo=True)
+                            os._exit()
+                        else:
+                            # lost permision during opening, happens more often than you think
+                            apflog("Error: No longer have opening permission", level="error",echo=True)
+                            
+                    else:
+                        rv = APF.evening_star()
+                        if not rv:
+                            apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
             
-                    chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
-                    while float(sunel.read()) > SUNEL_STARTLIM and not rising:
-                        outstr = "Sun is setting and sun at elevation of %.3f" % (float(sunel.read()))
-                        apflog(outstr,level='info', echo=True)
-                        result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
-                        APF.DMReset()
+                        chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
+                        while float(sunel.read()) > SUNEL_STARTLIM and not rising:
+                            outstr = "Sun is setting and sun at elevation of %.3f" % (float(sunel.read()))
+                            apflog(outstr,level='info', echo=True)
+                            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
+                            APF.DMReset()
                     
                 elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
                     APFTask.set(parent, suffix="MESSAGE", value="Open at night", wait=False)                    
@@ -879,7 +859,7 @@ class Master(threading.Thread):
                 if current_msg['message'] != omsg:
                     APFTask.set(parent, suffix="MESSAGE", value=omsg, wait=False)
                 APFTask.waitFor(self.task, True, timeout=5)
-            if  APF.isOpen()[0] and float(sunel) > sunel_lim:
+            if  APF.isOpen()[0] and float(sunel) > sunel_lim and not rising:
                 omsg = "Waiting for sunset"
                 if current_msg['message'] != omsg:
                     APFTask.set(parent, suffix="MESSAGE", value=omsg, wait=False)
@@ -952,20 +932,24 @@ if __name__ == '__main__':
     apf.initGuidecam()
     
     # All the phase options that this script uses. This allows us to check if we exited out of the script early.
-    possible_phases = ["Init", "Focus", "Cal-Pre", "Watching", "Cal-Post", "Focus"]
+    possible_phases = ["Init", "Focus", "Cal-Pre", "Watching", "Cal-Post", "Focus-Post"]
     phase_index = 0
     # If a command line phase was specified, use that.
     if opt.phase != None:
         APFTask.phase(parent, opt.phase)
         phase_index = possible_phases.index(str(opt.phase).strip())
         phase.poll()
+    elif phase.read() != "":
+        # start where the master script left off
+        phase_index = possible_phases.index(str(phase.read()).strip())
+        phase.poll()
         
     # If the phase isn't a valid option, (say the watchdog was run last)
     # then assume we are starting a fresh night and start from setting the observer information.
-    apflog("Phase at start is: %s" % phase, echo=True)
     if str(phase).strip() not in possible_phases:
         apflog("Starting phase is not valid. Phase being set to Init", echo=True)
         APFTask.phase(parent, "Init")
+    apflog("Phase at start is: %s" % phase, echo=True)
 
     # Start the actual operations
     # Goes through 5 steps:
@@ -1005,7 +989,7 @@ if __name__ == '__main__':
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
         APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
-        APFLib.write(apf.robot["MASTER_OBSBSTAR"], 'True')        
+        APFLib.write(apf.robot["MASTER_OBSBSTAR"], True,binary=True)        
         apflog("Initialization finished")
         
         stime, s_str, sun_str = calc_focus_start_time()
@@ -1043,9 +1027,9 @@ if __name__ == '__main__':
     # 3) Run pre calibrations
     if 'Cal-Pre' == str(phase).strip():
         try:
-            APFTask.set(parent, suffix="OBSBSTAR",value="True")
-        except:
-            apflog("Error: Cannot communicate with apftask",level="error")
+            ktl.write('apftask','MASTER_OBSBSTAR',True,binary=True)
+        except Exception, e:
+            apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
 
         if not debug:
             APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
@@ -1218,12 +1202,12 @@ if __name__ == '__main__':
     # Focus the instrument once more
     phase_index += 1
     APFTask.phase(parent, possible_phases[phase_index])
-    apflog("Running Focus Post", echo=True)
+    apflog("Running Focus-Post", echo=True)
     result = apf.focusinstr()
     if not result:
-        apflog("Focus cube post has failed", level='error', echo=True)
+        apflog("Focus-post has failed", level='error', echo=True)
     else:
-        apflog("Focus post has finished successfully.", echo=True)
+        apflog("Focus-post has finished successfully.", echo=True)
 
     # We have done everything we needed to, so leave
     # the telescope in day mode to allow it to start thermalizing to the next night.

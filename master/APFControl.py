@@ -43,7 +43,7 @@ dmtimer    = ktl.cache('checkapf','DMTIME')
 wx         = ktl.cache('apfmet','M5WIND')
 
 robot      = ktl.Service('apftask')
-vmag       = robot['scriptobs_vmag']
+vmag       = robot['SCRIPTOBS_VMAG']
 
 ucam       = ktl.Service('apfucam')
 apfteq     = ktl.Service('apfteq')
@@ -51,7 +51,7 @@ teqmode    = apfteq['MODE']
 guide      = ktl.Service('apfguide')
 counts     = ktl.cache('apfguide','COUNTS')
 kcountrate     = ktl.cache('apfguide','COUNTRATE')
-thresh     = guide['xpose_thresh']
+thresh     = guide['XPOSE_THRESH']
 elapsed    = ktl.cache('apfucam','ELAPSED')
 motor      = ktl.Service('apfmot')
 decker     = motor['DECKERNAM']
@@ -104,7 +104,7 @@ def countratemon(kcountrate):
      try:
          ctr = float(kcountrate['binary'])
      except:
-         apflog("Cannot read apfguide.countrate",level='warn',echo=True)
+         apflog("Cannot read apfguide.COUNTRATE",level='warn',echo=True)
          return
      APF.countrate *=  (1.0*APF.ncountrate)/(APF.ncountrate+1)
      APF.countrate += ctr/(APF.ncountrate+1)
@@ -292,8 +292,8 @@ class APF:
     dewarfoc   = motor["DEWARFOCRAW"]
 
     eosgcam    = ktl.Service('eosgcam')
-    fits3pre   = eosgcam('fits3pre')
-    save3d     = eosgcam('save3d')
+    fits3pre   = eosgcam('FITS3PRE')
+    save3d     = eosgcam('SAVE3D')
 
     apfmon     = ktl.Service('apfmon')
 
@@ -591,18 +591,18 @@ class APF:
         
         if not result or (dewarfocraw > DEWARMAX or dewarfocraw < DEWARMIN):
             flags = "-b"
-            focusdict = APFTask.get("focusinstr", ["phase"])
+            focusdict = APFTask.get("focusinstr", ["PHASE"])
             instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
             if not instr_perm:
                 self.instr_permit()
-                if len(focusdict['phase']) > 0:
+                if len(focusdict['PHASE']) > 0:
                     flags = " ".join(["-p", focusdict['phase']])
             else:
-                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
-                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["lastfocus"])
+                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["LASTFOCUS"]), level='error', echo=True)
+                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["LASTFOCUS"])
             result = self.focus(flags=flags)
             if not result:
-                apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
+                apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["LASTFOCUS"]), level='error', echo=True)
         self.apfschedule('OWNRHINT').write(owner)        
 
         return result
@@ -1253,7 +1253,7 @@ class APF:
         ripd, running = self.findRobot()
         if running:
             try:
-                APFLib.write(self.robot['scriptobs_control'], "abort")
+                APFLib.write(self.robot['SCRIPTOBS_CONTROL'], "abort")
             except Exception, e:
                 errstr = "Cannot abort scriptobs: %s" % (e)
                 apflog(errstr,level="Warn",echo=True)
