@@ -1169,6 +1169,7 @@ class APF:
                 args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
 
         p = subprocess.Popen(args,stdin=infile, stdout=outfile,stderr = subprocess.PIPE, cwd=robotdir)
+        return p
 
     def DMReset(self):
         try:
