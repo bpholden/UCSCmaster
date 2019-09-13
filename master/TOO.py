@@ -86,7 +86,7 @@ class TOO(threading.Thread):
                 rv = self.event.waitfor("== ExposureBegin")
                 # during an exposure get ToO sheet
                 if rv: 
-                    names, star_table, flags, stars = ParseGoogledex.parseGoogledex(sheetns=self.sheetns,outfn='too.dat',force_download=True)
+                    names, star_table, flags, stars = ParseGoogledex.parseGoogledexTOO(sheetns=self.sheetns,outfn='too.dat',force_download=True)
                     dt = datetime.datetime.utcnow()
                     good_cadence = (ephem.julian_date(dt) - star_table[:, DS_LAST]) > star_table[:, DS_CAD]
                     immediate = (star_table[:,DS_APFoPRI] > IMMEDIATE) & good_cadence
