@@ -604,27 +604,26 @@ class Master(threading.Thread):
                 if not os.path.exists(self.fixedList):
                     apflog("Error: starlist %s does not exist" % (self.fixedList), level="error")
                     self.fixedList=None
-                    return
-                tot = getTotalLines(self.fixedList)
-                apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
+                    self.starttime = None
+                # this reads in the list and appends it to self.target so getTarget will automatically use it
+                tot = self.readStarlistFile(self.fixedList)
+                if tot == 0:
+                    apflog("Error: starlist %s is empty" % (self.fixedList), level="error")
+                    self.fixedList=None
+                    self.starttime = None
+                    self.target=None
+                else:
+                    apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
                 if APF.ldone == tot :
                     self.fixedList = None
                     self.starttime = None
+                    self.target = None
                     if not APF.test:
                         APFTask.set(self.task,suffix="STARLIST",value="")
-                    ripd, running = APF.findRobot()
-                    if running:
-                        APF.killRobot(now=True)
                     apflog("Finished fixed list on line %d, will start dynamic scheduler" % int(APF.ldone), echo=True)
-                    expression="($apftask.SCRIPTOBS_STATUS != 0) and ($apftask.SCRIPTOBS_STATUS != 1) "
-                    if APFTask.waitFor(self.task, True, expression=expression, timeout=30):
-                        apflog("Starting an instance of scriptobs for dynamic observing.", echo=True)
-                        self.scriptobs = APF.startRobot()
                 else:
                     apflog("Found Fixed list %s" % self.fixedList, echo=True)
                     apflog("Starting fixed list on line %d" % int(APF.ldone), echo=True)
-                    APF.observe(str(self.fixedList), skip=True,raster=self.raster)
-                    APFTask.waitFor(self.task, True, timeout=10)
             else:
                 if self.BV is None:
                     apflog("No B-V value at the moment", echo=True)
@@ -632,10 +631,11 @@ class Master(threading.Thread):
                 if self.VMAG is None:
                     apflog("No VMag value at the moment", echo=True)
                     #self.VMAG = None
-                # We wish to observe either a starlist with intelligent ordering, or the dynamic scheduler
+                # We wish to observe with the dynamic scheduler
+            ripd, running = APF.findRobot()
+            if running is False:
                 apflog("Starting an instance of scriptobs for dynamic observing.", echo=True)
                 self.scriptobs = APF.startRobot()
-                            
                 # Don't let the watcher run over the robot starting up
                 APFTask.waitFor(self.task, True, timeout=10)
             
