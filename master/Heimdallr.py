@@ -51,15 +51,6 @@ DMLIM = 1140
 # global
 paused = False
 
-def sunel_startlim():
-    """
-    Returns the start limit for the sun elevation
-
-    Returns:
-        float of the value in degrees
-    """
-    return SUNEL_STARTLIM
-
 def control_watch(keyword,parent):
     if keyword['populated'] == False:
         return
@@ -236,6 +227,8 @@ class Master(threading.Thread):
         
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
+
+
 
     def set_autofocval(self):
         """ Master.set_autofocval()
@@ -658,7 +651,7 @@ class Master(threading.Thread):
                 sunel_lim = SUNEL_ENDLIM
             else:
                 rising = False
-                sunel_lim = sunel_startlim()
+                sunel_lim = SUNEL_STARTLIM
             wind_vel = APF.wvel
             ripd, running = APF.findRobot()
             sunel = APF.sunel
