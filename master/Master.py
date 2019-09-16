@@ -69,9 +69,9 @@ class Master(threading.Thread):
         self.target = None
         
         self.apftask = ktl.Service('apftask')
-        self.lineresult = apftask['SCRIPTOBS_LINE_RESULT']
+        self.lineresult = self.apftask['SCRIPTOBS_LINE_RESULT']
         self.lineresult.monitor()
-        self.observed = apftask['SCRIPTOBS_OBSERVED']
+        self.observed = self.apftask['SCRIPTOBS_OBSERVED']
         self.observed.monitor()
         
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
