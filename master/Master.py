@@ -21,7 +21,7 @@ try:
 except:
     pass
 
-import APFControl as ad
+import APFControl
 from apflog import *
 import UCSCScheduler_V2 as ds
 from x_gaussslit import *
