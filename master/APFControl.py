@@ -584,6 +584,7 @@ class APF:
         lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
         if float(lastfocus_dict["lastfocus"]) > DEWARMAX or float(lastfocus_dict["lastfocus"]) < DEWARMIN:
             lastfocus_dict["lastfocus"] =  lastfocus_dict["nominal"]
+        # this actually runs the instrument focus script
         result = self.focus()
 
         apfmot = ktl.Service('apfmot')
