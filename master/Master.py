@@ -37,11 +37,11 @@ DMLIM = 1140
 FOCUSTIME = 3600.
 
 class Master(threading.Thread):
-    def __init__(self, apf, opt,totTemps=4):
+    def __init__(self, apf, opt,totTemps=4,task='master'):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.APF = apf
-        self.task = 'master'
+        self.task = task
         self.user = opt.name
         self.owner = opt.owner
         self.name = 'Heimdallr'
@@ -737,7 +737,7 @@ if __name__ == "__main__":
     opt.raster = False
     
     apf = APFControl.APF(task=parent,test=True)
-    master = Master(apf,opt)
+    master = Master(apf,opt,task=parent)
     master.start()
     while master.signal:
         try:
