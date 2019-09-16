@@ -208,7 +208,7 @@ class Master(threading.Thread):
                     apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
                     APF.counts.monitor(start=False)
                     APF.counts.monitor(start=True)
-                    APF.counts.callback(ad.countmon)
+                    APF.counts.callback(APFControl.countmon)
                     # yes this happened.
                 if slowdown < SchedulerConsts.SLOWDOWN_MIN:
                     slowdown = SchedulerConsts.SLOWDOWN_MIN
