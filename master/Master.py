@@ -721,6 +721,10 @@ if __name__ == "__main__":
 
     class Test:
         pass
+
+
+    parent = 'example'
+    APFTask.establish(parent, os.getpid())
     
     opt = Test()
     opt.owner = 'public'
@@ -731,7 +735,7 @@ if __name__ == "__main__":
     opt.start = None
     opt.test = True
     opt.raster = False
-    parent = 'example'
+    
     apf = APFControl.APF(task=parent,test=True)
     master = Master(apf,opt)
     master.start()
