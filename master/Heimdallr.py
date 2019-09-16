@@ -299,7 +299,6 @@ if __name__ == '__main__':
 
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
-        APFLib.write(apf.robot["MASTER_VAR_2"], time.time())
         APFLib.write(apf.robot["MASTER_OBSBSTAR"], True,binary=True)        
         apflog("Initialization finished")
         
