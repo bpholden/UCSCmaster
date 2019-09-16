@@ -733,3 +733,19 @@ if __name__ == "__main__":
     opt.raster = False
     parent = 'example'
     apf = APFControl.APF(task=parent,test=True)
+    master = Master(apf,opt)
+    master.start()
+    while master.signal:
+        try:
+            dt = datetnime.now()
+            print(dt)
+            time.sleep(100)
+        except KeyboardInterrupt:
+            apflog("Heimdallr has been killed by user.", echo=True)
+            master.stop()
+            sys.exit()
+        except:
+            apflog("Heimdallr killed by unknown.", echo=True)
+            master.stop()
+            sys.exit()
+            
