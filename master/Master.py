@@ -716,3 +716,20 @@ class Master(threading.Thread):
         self.signal = False
         threading.Thread._Thread__stop(self)
 
+
+if __name__ == "__main__":
+
+    class Test:
+        pass
+    
+    opt = Test()
+    opt.owner = 'public'
+    opt.name = 'apf'
+    opt.windshield = 'auto'
+    opt.fixed = None
+    opt.sheet = 'Bstars'
+    opt.start = None
+    opt.test = True
+    opt.raster = False
+    parent = 'example'
+    apf = APFControl.APF(task=parent,test=True)
