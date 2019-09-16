@@ -737,7 +737,7 @@ if __name__ == "__main__":
     master.start()
     while master.signal:
         try:
-            dt = datetnime.now()
+            dt = datetime.now()
             print(dt)
             time.sleep(100)
         except KeyboardInterrupt:
