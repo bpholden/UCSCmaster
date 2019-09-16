@@ -43,12 +43,6 @@ success = False
 
 parent = 'master'
 
-SUNEL_ENDLIM = -10.0
-SUNEL_STARTLIM = -9.0
-SUNEL_HOR = -3.2
-FOCUSTIME = 3600.
-AVERAGE_INSTRFOC = 8522
-DMLIM = 1140
 # global
 paused = False
 
