@@ -1277,7 +1277,7 @@ class APF:
 
     def ucam_reboot(self,fake=False):
         if fake:
-            apflog("Would have rebooted UCAM host ")
+            apflog("Would have rebooted UCAM host ",echo=True)
             return True
 
         apftask = ktl.Service('apftask')
@@ -1287,8 +1287,12 @@ class APF:
         
         try:
             command.write("Stop")
+            apflog("Stopping UCAM software",echo=True)
+            
             self.combo_ps.waitFor(" == MissingProcesses",timeout=30)
             command.write("Reboot")
+            apflog("Rebooting UCAM host",echo=True)
+
         except:	      
             apflog("UCAM status bad, cannot restart",level='alert')
             return False
@@ -1299,11 +1303,14 @@ class APF:
         try:
             command.write("Run")
             ucamstat.waitFor(" == running",timeout=300)
+            apflog("UCAM software running",echo=True)
+            
         except:
             apflog("UCAM status bad, cannot restart",level='alert')
             return False
             
         nv = self.combo_ps.waitFor(" == Ok",timeout=30)
+        apflog("UCAM software combo_ps keyword OK",echo=True)
         if nv:
             return nv
         else:
@@ -1325,6 +1332,7 @@ class APF:
             return True
         else:
             try:
+                apflog("Stop and restarting UCAM software",echo=True)
                 ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","stop")
                 if self.combo_ps.waitFor(" == MissingProcesses",timeout=30):
                     ktl.write("apftask","UCAMLAUNCHER_UCAM_COMMAND","run")
