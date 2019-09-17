@@ -585,6 +585,11 @@ class APF:
         if float(lastfocus_dict["lastfocus"]) > DEWARMAX or float(lastfocus_dict["lastfocus"]) < DEWARMIN:
             lastfocus_dict["lastfocus"] =  lastfocus_dict["nominal"]
         # this actually runs the instrument focus script
+
+        result = self.ucam_status()
+        if result is False:
+            apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
+            return result
         result = self.focus()
 
         apfmot = ktl.Service('apfmot')
@@ -615,6 +620,7 @@ class APF:
             APFTask.waitFor(self.task, True, timeout=10)
             return True
         if time == 'pre' or 'post':
+            self.instr_permit()
 
             rv = self.enable_cal_inst()
             if rv is False:
