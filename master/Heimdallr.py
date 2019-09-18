@@ -382,9 +382,7 @@ class Master(threading.Thread):
             APFLib.write(APF.ucam["RECORD"], "Yes") # safe / sorry
 
             if APF.nerase != 2:
-                APF.killRobot()
-                rv = APF.ucam_reboot()
-                self.scriptobs = APF.startRobot()
+                APF.nerase.write(2,binary=True)
             
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
