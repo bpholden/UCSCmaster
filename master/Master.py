@@ -228,9 +228,7 @@ class Master(threading.Thread):
             APFLib.write(APF.ucam["RECORD"], "Yes") # safe / sorry
 
             if APF.nerase != 2:
-                APF.killRobot()
-                rv = APF.ucam_reboot()
-                self.scriptobs = APF.startRobot()
+                APF.nerase.write(2,binary=True)
             
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
@@ -239,10 +237,12 @@ class Master(threading.Thread):
                     try:
                         curstr = self.target["SCRIPTOBS"].pop() + '\n'
                         self.scriptobs.stdin.write(curstr)
+                        return
                     except Exception, e:
-                        apflog("Failure in getTarget: %s" % (e),level='error',echo=True)
+                        apflog("Failure in getTarget poping item off stack and writing to stdin: %s" % (e),level='error',echo=True)
+                        APF.killRobot()
                         pass
-                    return
+
             if self.checkObsFinished():
                 apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
             else:
