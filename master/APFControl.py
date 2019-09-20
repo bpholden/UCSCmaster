@@ -788,7 +788,10 @@ class APF:
             apflog("Cannot find star near current position!?",level='error',echo=True)
             return False
         apflog("Targeting telescope on %s" % star[0], echo=True)
-        
+        try:
+            self.vmag.write(star[6])
+        except Exception, e:
+            apflog("Cannot write SCRIPTOBS_VMAG: %s" % (e), level='error',echo=True)
         if self.slew(star):
             if self.run_autoexposure(ind=1):
                 if self.run_centerup():
