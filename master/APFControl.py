@@ -682,7 +682,7 @@ class APF:
             return result
 
 
-    def find_star(self):
+    def findStar(self):
         ra = self.tel['RA'].read()
         dec = self.tel['DEC'].read()
         rah,ram,ras = ra.split(":") 
@@ -783,7 +783,7 @@ class APF:
         return result
 
     def focusTel(self):
-        star = self.find_star()
+        star = self.findStar()
         if not star:
             apflog("Cannot find star near current position!?",level='error',echo=True)
             return False
