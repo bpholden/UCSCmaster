@@ -1069,7 +1069,7 @@ class APF:
             apflog("Slew returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
             return
         # Slew to the specified RA and DEC, set guide camera settings, and centerup( Slewlock )
-        # Focus the telescope?
+        # Focus the telescope - all of this, including finding the star, is done in focusTel
         self.DMReset()
         if self.focusTel():
             return True
