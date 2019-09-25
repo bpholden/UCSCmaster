@@ -400,7 +400,7 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
 
     certificate_path = os.path.dirname(__file__)
     credfn = os.path.join(certificate_path, certificate)
-    outpuffn = os.path.join(certificate_path, "token.pickle")
+    outputfn = os.path.join(certificate_path, "token.pickle")
     creds = generate_creds(credfn,outputfn=outputfn)
     
     service = build('sheets', 'v4', credentials=creds)
