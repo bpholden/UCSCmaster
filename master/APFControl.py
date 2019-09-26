@@ -682,7 +682,7 @@ class APF:
             return result
 
 
-    def find_star(self):
+    def findStar(self):
         ra = self.tel['RA'].read()
         dec = self.tel['DEC'].read()
         rah,ram,ras = ra.split(":") 
@@ -783,12 +783,20 @@ class APF:
         return result
 
     def focusTel(self):
-        star = self.find_star()
+        star = self.findStar()
         if not star:
             apflog("Cannot find star near current position!?",level='error',echo=True)
             return False
         apflog("Targeting telescope on %s" % star[0], echo=True)
-        
+        try:
+            self.vmag.write(star[6])
+        except Exception, e:
+            apflog("Cannot write SCRIPTOBS_VMAG: %s" % (e), level='error',echo=True)
+        try:
+            sline = "%s %s %s pmra=%s pmdec=%s vmag=%s" % (star[0],star[1],star[2],star[4],star[5],star[6])
+            self.line.write(sline)
+        except Exception, e:
+            apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
         if self.slew(star):
             if self.run_autoexposure(ind=1):
                 if self.run_centerup():
@@ -1069,7 +1077,7 @@ class APF:
             apflog("Slew returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
             return
         # Slew to the specified RA and DEC, set guide camera settings, and centerup( Slewlock )
-        # Focus the telescope?
+        # Focus the telescope - all of this, including finding the star, is done in focusTel
         self.DMReset()
         if self.focusTel():
             return True
@@ -1092,7 +1100,7 @@ class APF:
         obs_file = self.ucam["OUTFILE"].read()
         # UCAM Obsnumber
         obs_num = self.ucam["OBSNUM"].read()
-        robot['MASTER_VAR_2'].write(obs_num)
+        robot['MASTER_LAST_OBS_UCSC'].write(obs_num)
         # scriptobs_lines_done
         lines_done = int(self.robot["SCRIPTOBS_LINES_DONE"])
         APFLib.write(self.autofoc, "robot_autofocus_enable")
