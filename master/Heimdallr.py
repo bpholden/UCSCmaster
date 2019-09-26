@@ -166,7 +166,7 @@ def findObsNum(apf):
     return last
 
 def set_obs_defaults(opt):
-    if opt.name is None or opt.name == "ucsc":
+    if opt.name is None or opt.name == "apf":
         opt.owner = 'public'
         opt.name = 'apf'
         if opt.obsnum == None:
