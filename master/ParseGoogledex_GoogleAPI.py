@@ -7,9 +7,12 @@ import ephem
 
 import numpy as np
 
+import gspread
+
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from google.oauth2 import service_account
 
 import ObservedLog
 import Coords
@@ -357,27 +360,15 @@ def make_local_copy(sheetns=["The Googledex"],certificate='UCSC Dynamic Schedule
     return full_codex
 
 
-def generate_creds(credfn='credentials.json',outputfn="token.pickle"):
-    creds = None
-    # The file token.pickle stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists(outputfn):
-        with open(outputfn, 'rb') as token:
-            creds = pickle.load(token)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credfn, SCOPES)
-            creds = flow.run_local_server()
-        # Save the credentials for the next run
-        with open(outputfn, 'wb') as token:
-            pickle.dump(creds, token)
+def generate_creds(credfn='../master/UCSC Dynamic Scheduler-4f4f8d64827e.json',outputfn="token.pickle"):
 
-    return creds
+
+    credentials = service_account.Credentials.from_service_account_file(credfn)
+    scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://spreadsheets.google.com/feeds']
+
+    scoped_credentials = credentials.with_scopes(scope)
+
+    return scoped_credentials
 
 
 def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
@@ -402,17 +393,20 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4
     credfn = os.path.join(certificate_path, certificate)
     outputfn = os.path.join(certificate_path, "token.pickle")
     creds = generate_creds(credfn,outputfn=outputfn)
-    
-    service = build('sheets', 'v4', credentials=creds)
-    apflog("Successfully logged in.", echo=True)
-    sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=sheetn,
-                                range='Class Data!A1:AB').execute()
-    apflog("Loaded Main %s" % (sheetn),echo=True)
-    worksheet_values = result.get('values', [])
-    apflog("Got Values", echo=True)
 
-    return worksheet_values
+    gs = gspread.authorize(creds)
+    
+    apflog("Attempting to Open %s" % (sheetn),echo=True)
+    try:
+        spreadsheet = gs.open(sheetn)
+        apflog("Loaded Main %s" % (sheetn),echo=True)
+        worksheet = spreadsheet.sheet1
+        apflog("Got spreadsheet", echo=True)
+    except:
+        apflog("Cannot Read %s"  % (sheetn), echo=True, level='error')
+        worksheet = None
+    return worksheet
+
 
 
 def findColumns(col_names,req_cols,opt_cols=[]):
