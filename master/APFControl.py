@@ -1100,7 +1100,7 @@ class APF:
         obs_file = self.ucam["OUTFILE"].read()
         # UCAM Obsnumber
         obs_num = self.ucam["OBSNUM"].read()
-        robot['MASTER_VAR_2'].write(obs_num)
+        robot['MASTER_LAST_OBS_UCSC'].write(obs_num)
         # scriptobs_lines_done
         lines_done = int(self.robot["SCRIPTOBS_LINES_DONE"])
         APFLib.write(self.autofoc, "robot_autofocus_enable")
