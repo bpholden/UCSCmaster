@@ -46,9 +46,6 @@ class TOO(threading.Thread):
             rv = self.event.waitFor("== ReadoutEnd",timeout=40)
         return rv
         
-        
-            
-
 
     def end_exposure(self):
         if self.test:
@@ -97,15 +94,16 @@ class TOO(threading.Thread):
         while True:
             rv = self.scriptobs_status.waitfor("== Running",timeout=86400)
             if rv:
-                rv = self.event.waitfor("== ExposureBegin")
+                rv = self.event.waitfor("== ExposureBegin",timeout=86400)
                 # during an exposure get ToO sheet
                 if rv: 
                     names, star_table, flags, stars = ParseGoogledex.parseGoogledexTOO(sheetns=self.sheetns,outfn='too.dat',force_download=True)
                     dt = datetime.datetime.utcnow()
                     good_cadence = (ephem.julian_date(dt) - star_table[:, DS_LAST]) > star_table[:, DS_CAD]
-                    immediate = (star_table[:,DS_APFoPRI] > IMMEDIATE) & good_cadence
+                    immediate = (star_table[:,DS_APFPRI] > IMMEDIATE) & good_cadence
                     next_exp = (star_table[:,DS_APFPRI] < IMMEDIATE) & (star_table[:,DS_APFPRI] >NEXT_EXP) & good_cadence
-
+                    next_line = (star_table[:,DS_APFPRI] <NEXT_EXP) & good_cadence
+                        
                     if len(star_table[:,DS_APFPRI][immediate]) > 0:
                         rv = self.end_exposure()
                         rv = self.end_scriptobs(now=True)
@@ -120,4 +118,4 @@ class TOO(threading.Thread):
                         if rv is False:
                             APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)                    
             
-
+                    if len(star_table:,DS_APFPRI][next_line]) > 0:
