@@ -374,7 +374,7 @@ class Master(threading.Thread):
             rv = self.APF.close(force=force)
             if rv:
                 return
-            if self.APF.power_down_telescope() is False:
+            if self.APF.powerDownTelescope() is False:
                 apflog("Error: Cannot close and power off telescope ", level="alert", echo=True)
                 
             rv = self.APF.disableInst()
@@ -628,7 +628,7 @@ class Master(threading.Thread):
                             apflog("Error: No longer have opening permission", level="error",echo=True)
                             
                     else:
-                        rv = self.APF.evening_star()
+                        rv = self.APF.eveningStar()
                         if not rv:
                             apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
             
@@ -660,11 +660,11 @@ class Master(threading.Thread):
                 chk_done = "$checkapf.MOVE_PERM == true"
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
                 if result:
-                    rv = self.APF.power_down_telescope()
+                    rv = self.APF.powerDownTelescope()
                     if rv:
                         apflog("APF power cycled.", echo=True)
                     else:
-                        apflog("Error: APF power cycle failed.", level="error", echo=True)
+                        apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
                         closing(force=True)
                 elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
                     apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)

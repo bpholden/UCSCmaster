@@ -729,7 +729,7 @@ class APF:
         return result
 
 
-    def run_focustel(self):
+    def runFocustel(self):
         """Runs the telescope focus routine."""
         el = self.tel['EL'].read(binary=True)
         cfspos = self.fspos.read(binary=True)
@@ -761,7 +761,7 @@ class APF:
                 return result
             return True
 
-    def run_autoexposure(self,ind=5):
+    def runAutoexposure(self,ind=5):
         cmdpath = '/usr/local/lick/bin/robot/'
         cmd = os.path.join(cmdpath,'autoexposure')
         istr = "%d" % (ind)
@@ -774,7 +774,7 @@ class APF:
             apflog("autoexposure failed with code %d" % code, echo=True)
         return result
 
-    def run_centerup(self):
+    def runCenterup(self):
         cmdpath = '/usr/local/lick/bin/robot/'
         cmd = os.path.join(cmdpath,'centerup')
         result, code = cmdexec(cmd,cwd=os.path.curdir)
@@ -798,9 +798,9 @@ class APF:
         except Exception, e:
             apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
         if self.slew(star):
-            if self.run_autoexposure(ind=1):
-                if self.run_centerup():
-                    return self.run_focustel()
+            if self.runAutoexposure(ind=1):
+                if self.runCenterup():
+                    return self.runFocustel()
         return False
     
                 
@@ -833,7 +833,7 @@ class APF:
         else:
             return False
 
-    def states_set(self):
+    def statesSet(self):
         # there are three states - but we do not care about ESTOPST, that is will be cleared in openatsunset/openatnight
         if self.dome['ECLOSEST']:
             return True
@@ -842,7 +842,7 @@ class APF:
         return False
 
 
-    def checkhome(self,home=True):
+    def checkHome(self,home=True):
         try:
             homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
         except Exception, e:
@@ -899,7 +899,7 @@ class APF:
                 apflog("Can't open. No move permission.",echo=True)
                 return False
 
-        if self.states_set():
+        if self.statesSet():
             apflog("An unusal emergency state is set.", level="error",echo=True)
             return False
             
@@ -919,7 +919,7 @@ class APF:
             if not result:
                 apflog("Second openup attempt also failed. Exit code %d. Giving up." % code,echo=True)
                 return False
-        rv = self.checkhome()
+        rv = self.checkHome()
         if rv == False:
             return False
         try:
@@ -929,7 +929,7 @@ class APF:
             return False
         return True
 
-    def power_down_telescope(self):
+    def powerDownTelescope(self):
         """Checks that we have the proper permission and dome is closed, then resets telescope power."""
         if self.test: return True
         cmd = "/usr/local/lick/bin/robot/power_down_telescope"
@@ -966,7 +966,7 @@ class APF:
                 servo_failed = True
                 
         if servo_failed:
-            return self.power_down_telescope()
+            return self.powerDownTelescope()
         else:
             return False
         
@@ -1053,7 +1053,7 @@ class APF:
                 apflog("Setting scriptobs_windshield to Enable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
-    def evening_star(self):
+    def eveningStar(self):
         """Aim the APF at the desired target. This calls prep-obs, slewlock, and focus-telescope. A workaround to relying on scriptobs."""
         if self.isOpen()[0] == False:
             apflog("APF is not open. Can't target a star while closed.",level='error',echo=True)
