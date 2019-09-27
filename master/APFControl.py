@@ -955,7 +955,7 @@ class APF:
             return False
 
 
-    def servo_failure(self):
+    def servoFailure(self):
         """checks for amplifier faults"""
         servo_failed = False
         prefixs = ["AZ","EL","FA","FB","FC","TR" ]
@@ -1000,7 +1000,7 @@ class APF:
             if not result:
                 apflog("Closeup failed with exit code %d" % code, echo=True)
                 if attempts == 2:
-                    if self.servo_failure():
+                    if self.servoFailure():
                         apflog("Servo amplifier failure, power cycled telescope",echo=True)
                 if attempts == 3:
                     lstr = "Closeup has failed 3 times consecutively. Human intervention likely required."
