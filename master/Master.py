@@ -83,21 +83,21 @@ class Master(threading.Thread):
         """ Master.set_autofocval()
             tests when the last time the telescope was focused, if more than FOCUSTIME enable focus check
         """
-        APF = self.APF
+
         # check last telescope focus
-        lastfoc = APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
-        current_val = APF.autofoc.read()
-        rising = APF.rising
-        cur_sunel = APF.sunel.read(binary=True)
+        lastfoc = self.APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
+        current_val = self.APF.autofoc.read()
+        rising = self.APF.rising
+        cur_sunel = self.APF.sunel.read(binary=True)
         too_close = rising and (cur_sunel > -20)
         if time.time() - lastfoc > FOCUSTIME:
             if current_val != "robot_autofocus_enable" and not too_close:
-                APF.autofoc.write("robot_autofocus_enable")
+                self.APF.autofoc.write("robot_autofocus_enable")
                 self.focval=1
                 APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
         else:
             if current_val == "robot_autofocus_enable":
-                APF.autofoc.write("robot_autofocus_disable")
+                self.APF.autofoc.write("robot_autofocus_disable")
                 self.focval=0
 
 
@@ -118,8 +118,8 @@ class Master(threading.Thread):
         """
         retval = False
 
-        mtch = re.search("end\Z",APF.line.read())
-        if APF.ldone.read(binary=True) == 0 or mtch:
+        mtch = re.search("end\Z",self.APF.line.read())
+        if self.APF.ldone.read(binary=True) == 0 or mtch:
             retval = True
         return retval
 
@@ -187,36 +187,36 @@ class Master(threading.Thread):
                 apflog("Warning!: Ended up in getTarget() with no V Magnitude value, slowdown can't be computed.", echo=True)
                 return 5
                 
-            if APF.avg_fwhm < 1.0:
-                apflog("Warning!: AVG_FWHM = %4.2f. By Odin's beard that seems low." % APF.avg_fwhm, echo=True)
+            if self.APF.avg_fwhm < 1.0:
+                apflog("Warning!: AVG_FWHM = %4.2f. By Odin's beard that seems low." % self.APF.avg_fwhm, echo=True)
                 return 5
             slowdown = 1
             apflog("Calculating expected counts")
-            apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - APF.ael [%4.2f]" % (self.VMAG, self.BV, APF.ael))
-            exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael, APF.avg_fwhm, self.decker)
+            apflog("self.VMAG [%4.2f] - self.BV [%4.2f] - self.APF.ael [%4.2f]" % (self.VMAG, self.BV, self.APF.ael))
+            exp_cnts_sec = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, self.APF.ael, self.APF.avg_fwhm, self.decker)
             try:
-                if APF.countrate <= 0:
+                if self.APF.countrate <= 0:
                     try:
-                        APF.countrate = APF.ccountrate
+                        self.APF.countrate = self.APF.ccountrate
                     except:
-                        APF.countrate = -1.0
-                if APF.countrate*10 <  APF.ccountrate:
-                    APF.countrate = APF.ccountrate
-                slowdown = exp_cnts_sec / APF.countrate
+                        self.APF.countrate = -1.0
+                if self.APF.countrate*10 <  self.APF.ccountrate:
+                    self.APF.countrate = self.APF.ccountrate
+                slowdown = exp_cnts_sec / self.APF.countrate
                 if slowdown < 0:
                     slowdown = 1
-                    apflog("Countrate non-sensical %g" % (APF.countrate), echo=True, level='warn')
-                    APF.counts.monitor(start=False)
-                    APF.counts.monitor(start=True)
-                    APF.counts.callback(APFControl.countmon)
+                    apflog("Countrate non-sensical %g" % (self.APF.countrate), echo=True, level='warn')
+                    self.APF.counts.monitor(start=False)
+                    self.APF.counts.monitor(start=True)
+                    self.APF.counts.callback(APFControl.countmon)
                     # yes this happened.
                 if slowdown < SchedulerConsts.SLOWDOWN_MIN:
                     slowdown = SchedulerConsts.SLOWDOWN_MIN
-                    apflog("slowdown too low, countrate= %g" % (APF.countrate), echo=True, level='debug')
+                    apflog("slowdown too low, countrate= %g" % (self.APF.countrate), echo=True, level='debug')
                     # yes this happened.
                 if slowdown > SchedulerConsts.SLOWDOWN_MAX:
                     slowdown = SchedulerConsts.SLOWDOWN_MAX
-                    apflog("slowdown too high, countrate= %g" % (APF.countrate), echo=True, level='debug')
+                    apflog("slowdown too high, countrate= %g" % (self.APF.countrate), echo=True, level='debug')
             except ZeroDivisionError:
                 apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                 slowdown = 1
@@ -225,10 +225,10 @@ class Master(threading.Thread):
         
         # This is called when an observation finishes, and selects the next target
         def getTarget():
-            APFLib.write(APF.ucam["RECORD"], "Yes") # safe / sorry
+            APFLib.write(self.APF.ucam["RECORD"], "Yes") # safe / sorry
 
-            if APF.nerase != 2:
-                APF.nerase.write(2,binary=True)
+            if self.APF.nerase != 2:
+                self.APF.nerase.write(2,binary=True)
             
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
@@ -240,7 +240,7 @@ class Master(threading.Thread):
                         return
                     except Exception, e:
                         apflog("Failure in getTarget poping item off stack and writing to stdin: %s" % (e),level='error',echo=True)
-                        APF.killRobot()
+                        self.APF.killRobot()
                         pass
 
             if self.checkObsFinished():
@@ -259,7 +259,7 @@ class Master(threading.Thread):
                 self.obsBstar = True
 
             if self.obsBstar:
-                APF.autofoc.write("robot_autofocus_enable")
+                self.APF.autofoc.write("robot_autofocus_enable")
                 
             if self.scriptobs is None:
                 apflog("Called getTarget, but there is not instance of scriptobs associated with Heimdallr. This is an error condition.", echo=True)
@@ -268,15 +268,15 @@ class Master(threading.Thread):
             # Calculate the slowdown factor.
             slowdown = calcSlowdown()
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
-            APFLib.write(APF.robot["MASTER_SLOWDOWN"], slowdown)
-            apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (APF.countrate, APF.ccountrate))
+            APFLib.write(self.APF.robot["MASTER_SLOWDOWN"], slowdown)
+            apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (self.APF.countrate, self.APF.ccountrate))
 
             # Check for a valid seeing measurment. If there isn't one, use a default
-            if APF.avg_fwhm == 0.:
+            if self.APF.avg_fwhm == 0.:
                 apflog("getTarget(): Warning AVG_FWHM is 0. A default value of 15 will be used in its place.", echo=True)
                 seeing = 15
             else:
-                seeing = float(APF.avg_fwhm)
+                seeing = float(self.APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
             self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval)
@@ -286,10 +286,10 @@ class Master(threading.Thread):
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
                 self.scriptobs.stdin.close()
-                APF.close()
+                self.APF.close()
                 if self.fixedList is None:
-                    APFLib.write(apf.ldone, 0)
-                APF.countrate = -1.0
+                    APFLib.write(self.APF.ldone, 0)
+                self.APF.countrate = -1.0
                 # sleep for a half hour to see if the clouds blow by
                 APFTask.waitfor(self.task, True, timeout=60*30)
                 return
@@ -306,7 +306,7 @@ class Master(threading.Thread):
             istemp = str(self.target['isTemp'])
             
             apflog("getTarget(): V=%.2f  B-V=%.2f Pri=%.2f " % (self.VMAG, self.BV, self.target["PRI"]))
-            apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (APF.avg_fwhm, slowdown, APF.countrate))
+            apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (self.APF.avg_fwhm, slowdown, self.APF.countrate))
 
             apflog("getTarget(): Target= %s Temp=%s" % (self.target["NAME"], istemp))
             apflog("getTarget(): Counts=%.2f  EXPTime=%.2f  Nexp=%d" % (self.target["COUNTS"], self.target["EXP_TIME"], self.target["NEXP"]))
@@ -323,35 +323,35 @@ class Master(threading.Thread):
             if sunset:
                 when = "sunset"
 
-            result = APF.ucam_status()
+            result = self.APF.ucam_status()
             if result is False:
                 apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
                 os._exit()
 
-            result = APF.enable_obs_inst()
+            result = self.APF.enable_obs_inst()
             if result == False:
                 apflog("Cannot enable instrument", level='warn', echo=True)
-                result = APF.enable_obs_inst()
+                result = self.APF.enable_obs_inst()
                 if not result:
                     apflog("Error: cannot enable instrument twice.", level='alert', echo=True)
                     return result
                 
             apflog("Running open at %s as sunel = %4.2f" % (when, float(sunel)),echo=True)
-            (apfopen,what) =APF.isOpen()
+            (apfopen,what) =self.APF.isOpen()
             if apfopen:
-                APF.DMReset()
+                self.APF.DMReset()
             else:
-                APF.DMZero()
+                self.APF.DMZero()
 
-            result = APF.openat(sunset=sunset)
+            result = self.APF.openat(sunset=sunset)
             apflog("openatsunset completed with result %s" % (result), echo=True)
             if result == False:
                 apflog("openatsunset hasn't successfully opened. Current sunel = %4.2f" % ( float(sunel)), level='warn', echo=True)
                 if ( float(sunel) < SUNEL_ENDLIM):
-                    result = APF.openat(sunset=sunset)
+                    result = self.APF.openat(sunset=sunset)
                     if not result:
                         apflog("Error: openatsunset has failed twice.", level='error', echo=True)
-                        APF.close()
+                        self.APF.close()
                         return result
 
                     
@@ -359,7 +359,7 @@ class Master(threading.Thread):
                 setting = True
             else:
                 setting = False
-            APF.DMReset()
+            self.APF.DMReset()
 
             return result
 
@@ -367,17 +367,17 @@ class Master(threading.Thread):
         # closing
         def closing(force=False):
             if running:
-                APF.killRobot(now=True)
+                self.APF.killRobot(now=True)
 
-            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=APF.ucam["OBSNUM"].read())
+            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=self.APF.ucam["OBSNUM"].read())
 
-            rv = APF.close(force=force)
+            rv = self.APF.close(force=force)
             if rv:
                 return
-            if APF.power_down_telescope() is False:
+            if self.APF.power_down_telescope() is False:
                 apflog("Error: Cannot close and power off telescope ", level="alert", echo=True)
                 
-            rv = APF.disable_inst()
+            rv = self.APF.disable_inst()
             
             return
 
@@ -425,20 +425,20 @@ class Master(threading.Thread):
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
-            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=APF.ucam["OBSNUM"].read())
+            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=self.APF.ucam["OBSNUM"].read())
 
-            APF.updateWindshield(self.windshield)
-            ripd, running = APF.findRobot()
+            self.APF.updateWindshield(self.windshield)
+            ripd, running = self.APF.findRobot()
             if running:
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
-            message = APF.message.read()
+            message = self.APF.message.read()
             mtch = re.search("ERR/UCAM",message)
             if mtch:
                 # uh oh
                 apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
                 # reboot warsaw
-                APF.ucam_restart()
+                self.APF.ucam_restart()
             
             apflog("Starting an instance of scriptobs",echo=True)
             if self.fixedList is not None and self.shouldStartList():
@@ -455,17 +455,17 @@ class Master(threading.Thread):
                     self.starttime = None
                     self.target=None
                 else:
-                    apflog("%d total starlist lines and %d lines done." % (tot, APF.ldone)) 
-                if APF.ldone == tot :
+                    apflog("%d total starlist lines and %d lines done." % (tot, self.APF.ldone)) 
+                if self.APF.ldone == tot :
                     self.fixedList = None
                     self.starttime = None
                     self.target = None
-                    if not APF.test:
+                    if not self.APF.test:
                         APFTask.set(self.task,suffix="STARLIST",value="")
-                    apflog("Finished fixed list on line %d, will start dynamic scheduler" % int(APF.ldone), echo=True)
+                    apflog("Finished fixed list on line %d, will start dynamic scheduler" % int(self.APF.ldone), echo=True)
                 else:
                     apflog("Found Fixed list %s" % self.fixedList, echo=True)
-                    apflog("Starting fixed list on line %d" % int(APF.ldone), echo=True)
+                    apflog("Starting fixed list on line %d" % int(self.APF.ldone), echo=True)
             else:
                 if self.BV is None:
                     apflog("No B-V value at the moment", echo=True)
@@ -474,10 +474,10 @@ class Master(threading.Thread):
                     apflog("No VMag value at the moment", echo=True)
                     #self.VMAG = None
                 # We wish to observe with the dynamic scheduler
-            ripd, running = APF.findRobot()
+            ripd, running = self.APF.findRobot()
             if running is False:
                 apflog("Starting an instance of scriptobs for dynamic observing.", echo=True)
-                self.scriptobs = APF.startRobot()
+                self.scriptobs = self.APF.startRobot()
                 # Don't let the watcher run over the robot starting up
                 APFTask.waitFor(self.task, True, timeout=10)
             
@@ -490,7 +490,7 @@ class Master(threading.Thread):
 
         # Actual Watching loop
         apflog("Beginning observing process....", echo=True)
-        APF.DMZero()
+        self.APF.DMZero()
         haveobserved = False
         failstart = 0
         while self.signal:
@@ -501,9 +501,9 @@ class Master(threading.Thread):
             else:
                 rising = False
                 sunel_lim = SUNEL_STARTLIM
-            wind_vel = APF.wvel
-            ripd, running = APF.findRobot()
-            sunel = APF.sunel
+            wind_vel = self.APF.wvel
+            ripd, running = self.APF.findRobot()
+            sunel = self.APF.sunel
             sunel.monitor()
 
 
@@ -512,26 +512,26 @@ class Master(threading.Thread):
             #     APFTask.waitfor(self.task, True, timeout=60)
             
             # Check and close for weather
-            if APF.isOpen()[0] and not APF.openOK:
+            if self.APF.isOpen()[0] and not self.APF.openOK:
                 closetime = datetime.now()
                 APFTask.set(self.task, suffix="MESSAGE", value="Closing for weather", wait=False)
                 apflog("No longer ok to open.", echo=True)
-                apflog("OPREASON: " + APF.checkapf["OPREASON"].read(), echo=True)
-                apflog("WEATHER: " + APF.checkapf['WEATHER'].read(), echo=True)
+                apflog("OPREASON: " + self.APF.checkapf["OPREASON"].read(), echo=True)
+                apflog("WEATHER: " + self.APF.checkapf['WEATHER'].read(), echo=True)
                 closing()
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
-                exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, APF.ael, APF.avg_fwhm,["W"])
+                exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, self.APF.ael, self.APF.avg_fwhm,["W"])
                 try:
-                    slow = exp_cntrate / APF.countrate
+                    slow = exp_cntrate / self.APF.countrate
                     if slow < 0:
                         slow = 5
-                        apflog("Countrate non-sensical %g" % APF.countrate, echo=True)
+                        apflog("Countrate non-sensical %g" % self.APF.countrate, echo=True)
                 except ZeroDivisionError:
                     apflog("No current countrate", echo=True)
                     slow = 5
-                APFTask.set(self.task, suffix="MESSAGE",value="FWHM = %.2f and slowdown %.2f" % (APF.avg_fwhm,slow), wait=False)
+                APFTask.set(self.task, suffix="MESSAGE",value="FWHM = %.2f and slowdown %.2f" % (self.APF.avg_fwhm,slow), wait=False)
                 if slow > 16:
                     # The slowdown is too high, we should close up and wait.
                     APFTask.set(self.task, suffix="MESSAGE",value="Closing for clouds", wait=False)
@@ -540,11 +540,11 @@ class Master(threading.Thread):
                     APFTask.waitfor(self.task, True, timeout=60*30)
                     self.VMAG=None
                     self.BV=None
-                    APF.countrate = 0
+                    self.APF.countrate = 0
 
             
             # If scriptobs is running and waiting for input, give it a target
-            if running == True and float(sunel) < sunel_lim and APF.sop.read().strip() == 'Input':
+            if running == True and float(sunel) < sunel_lim and self.APF.sop.read().strip() == 'Input':
                 if self.fixedList is None or self.shouldStartList() == False:
                     self.lastObsSuccess = self.checkObsSuccess()
                     self.obsBstar = self.checkBstar(haveobserved)
@@ -556,7 +556,7 @@ class Master(threading.Thread):
                     
                     haveobserved = True                    
                 elif self.starttime != None and self.shouldStartList():
-                    APF.killRobot()
+                    self.APF.killRobot()
 
             # check last telescope focus
             if running and  float(sunel) <= sunel_lim:
@@ -568,42 +568,42 @@ class Master(threading.Thread):
                 APFTask.set(self.task, suffix="MESSAGE", value="Last call", wait=False)
                 if self.scriptobs is None:
                     apflog("Robot claims to be running, but no self.scriptobs instance can be found. Instead calling killRobot().", echo=True)
-                    APF.killRobot()
+                    self.APF.killRobot()
                 else:
                     self.scriptobs.stdin.close()
-                    APF.killRobot()
+                    self.APF.killRobot()
             
             # If the sun is rising and scriptobs has stopped, run closeup
             if float(sunel) > sunel_lim and running == False and rising == True:
                 apflog("Closing due to sun elevation. Sunel = % 4.2f" % float(sunel), echo=True)
                 APFTask.set(self.task, suffix="MESSAGE", value="Closing, sun is rising", wait=False)
-                if APF.isOpen()[0]:
+                if self.APF.isOpen()[0]:
                     msg = "APF is open, closing due to sun elevation = %4.2f" % float(sunel)
                     closing()
                 else:
                     msg = "Telescope was already closed when sun got to %4.2f" % float(sunel)
                 
-                if APF.isOpen()[0]:
+                if self.APF.isOpen()[0]:
                     apflog("Error: Closeup did not succeed", level='error', echo=True)
 
                 self.exitMessage = msg
                 self.stop()
 
             # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
-            if APF.openOK and not rising and not APF.isOpen()[0]:
+            if self.APF.openOK and not rising and not self.APF.isOpen()[0]:
                 APFTask.set(self.task, suffix="MESSAGE", value="Powering up for APFTeq", wait=False)                    
-                if APF.clearestop():
+                if self.APF.clearestop():
                     try:
-                        APFLib.write(APF.dome['AZENABLE'], 'enable', timeout=10)
+                        APFLib.write(self.APF.dome['AZENABLE'], 'enable', timeout=10)
                     except:
                         apflog("Error: Cannot enable AZ drive", level="error")
 
-                    APF.setTeqMode('Evening')
+                    self.APF.setTeqMode('Evening')
                     vent_open = "$eosdome.VD4STATE = VENT_OPENED"
                     result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
                     if result:
                         try:
-                            APFLib.write(APF.dome['AZENABLE'], 'disable', timeout=10)
+                            APFLib.write(self.APF.dome['AZENABLE'], 'disable', timeout=10)
                         except:
                             apflog("Error: Cannot disable AZ drive", level="error",echo=True)
 
@@ -615,12 +615,12 @@ class Master(threading.Thread):
                 
             # Open 
 
-            if not APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and APF.openOK:
+            if not self.APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and self.APF.openOK:
                 if float(sunel) > sunel_lim and not rising:
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at sunset", wait=False)                    
                     success = opening(sunel, sunset=True)
                     if success is False:
-                        if APF.openOK:
+                        if self.APF.openOK:
                             apflog("Error: Cannot open the dome", level="alert",echo=True)
                             os._exit()
                         else:
@@ -628,7 +628,7 @@ class Master(threading.Thread):
                             apflog("Error: No longer have opening permission", level="error",echo=True)
                             
                     else:
-                        rv = APF.evening_star()
+                        rv = self.APF.evening_star()
                         if not rv:
                             apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
             
@@ -637,7 +637,7 @@ class Master(threading.Thread):
                             outstr = "Sun is setting and sun at elevation of %.3f" % (float(sunel.read()))
                             apflog(outstr,level='info', echo=True)
                             result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
-                            APF.DMReset()
+                            self.APF.DMReset()
                     
                 elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at night", wait=False)                    
@@ -646,33 +646,33 @@ class Master(threading.Thread):
                     success = True
                 if success == False:
                     apflog("Error: Cannot open the dome", echo=True, level='error')
-                    APF.close()
+                    self.APF.close()
                     os._exit()
 
 
             # Check for servo errors
-            if APF.slew_allowed.read(binary=True) is False and APF.isReadyForObserving()[0]:
+            if self.APF.slew_allowed.read(binary=True) is False and self.APF.isReadyForObserving()[0]:
                 APFTask.set(self.task, suffix="MESSAGE", value="Likely servo failure.", wait=False)                    
                 if running:
-                    APF.killRobot(now=True)
+                    self.APF.killRobot(now=True)
                 
                 apflog("Error: APF is open, and slew_allowed is false. Likely a servo error/amplifier fault.", level="error", echo=True)
                 chk_done = "$checkapf.MOVE_PERM == true"
                 result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
                 if result:
-                    rv = APF.power_down_telescope()
+                    rv = self.APF.power_down_telescope()
                     if rv:
                         apflog("APF power cycled.", echo=True)
                     else:
                         apflog("Error: APF power cycle failed.", level="error", echo=True)
                         closing(force=True)
-                elif result is False and "DomeShutter" in APF.isOpen()[1]:
+                elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
                     apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
 
                     closing(force=True)
                 
             # If we are open and scriptobs isn't running, start it up
-            if APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
+            if self.APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
                 APFTask.set(self.task, suffix="MESSAGE", value="Starting scriptobs", wait=False)
                 rv = checkTelState()
                 if rv is False:
@@ -694,18 +694,18 @@ class Master(threading.Thread):
 
                 
             # Keep an eye on the deadman timer if we are open 
-            if APF.isOpen()[0] and APF.dmtime <= DMLIM:
+            if self.APF.isOpen()[0] and self.APF.dmtime <= DMLIM:
                 APFTask.set(self.task, suffix="MESSAGE", value="Reseting DM timer", wait=False)                    
-                APF.DMReset()
+                self.APF.DMReset()
 #                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
 
             current_msg = APFTask.get("master", ["message"])
-            if not APF.isOpen()[0] and not rising:
+            if not self.APF.isOpen()[0] and not rising:
                 omsg = "Waiting for sunset"
                 if current_msg['message'] != omsg:
                     APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
                 APFTask.waitFor(self.task, True, timeout=5)
-            if  APF.isOpen()[0] and float(sunel) > sunel_lim and not rising:
+            if  self.APF.isOpen()[0] and float(sunel) > sunel_lim and not rising:
                 omsg = "Waiting for sunset"
                 if current_msg['message'] != omsg:
                     APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
