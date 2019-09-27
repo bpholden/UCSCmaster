@@ -489,7 +489,7 @@ class APF:
 
         return
 
-    def instr_permit(self):
+    def instrPermit(self):
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
         userkind = ktl.read("checkapf","USERKIND",binary=True)
         while not instr_perm or userkind != 3:
@@ -501,7 +501,7 @@ class APF:
 
         return True
 
-    def turn_off_lamps(self):
+    def turnOffLamps(self):
         for lamp in ("HALOGEN2","HALOGEN1","THORIUM1","THORIUM2"):
             try:
                 rv = ktl.write("apfmot",lamp,"Off",wait=False)
@@ -513,7 +513,7 @@ class APF:
         return rv
     
 
-    def write_stages(self,stagelist,component,state):
+    def writeStages(self,stagelist,component,state):
         rv = True
         for stage in stagelist:
             curkwd = stage + component
@@ -524,53 +524,53 @@ class APF:
             except:
                 rv = False
 
-    def enable_obs_inst(self):
+    def enableObsInst(self):
 
         rv = True
 
         stagelist = ['CALMIRROR','CALSOURCE','IODINE','GUIDEFOC']
-        rv = self.write_stages(stagelist,'MOE','Off')
-        rv = self.write_stages(stagelist,'MOO','Off')
-        rv = self.write_stages(stagelist,'MOD','Pos')
+        rv = self.writeStages(stagelist,'MOE','Off')
+        rv = self.writeStages(stagelist,'MOO','Off')
+        rv = self.writeStages(stagelist,'MOD','Pos')
         stagelist = ['ADC','DECKER','DEWARFOC']
-        rv = self.write_stages(stagelist,'MOE','On')
-        rv = self.write_stages(stagelist,'MOO','On')
-        rv = self.write_stages(stagelist,'MOD','Pos')
+        rv = self.writeStages(stagelist,'MOE','On')
+        rv = self.writeStages(stagelist,'MOO','On')
+        rv = self.writeStages(stagelist,'MOD','Pos')
 
         return rv
 
-    def enable_cal_inst(self):
+    def enableCalInst(self):
 
         rv = True
         stagelist = ['ADC','CALMIRROR','CALSOURCE','IODINE','GUIDEFOC']
-        rv = self.write_stages(stagelist,'MOE','Off')
-        rv = self.write_stages(stagelist,'MOO','Off')
-        rv = self.write_stages(stagelist,'MOD','Pos')
+        rv = self.writeStages(stagelist,'MOE','Off')
+        rv = self.writeStages(stagelist,'MOO','Off')
+        rv = self.writeStages(stagelist,'MOD','Pos')
         stagelist = ['DECKER','DEWARFOC']
-        rv = self.write_stages(stagelist,'MOE','On')
-        rv = self.write_stages(stagelist,'MOO','On')
-        rv = self.write_stages(stagelist,'MOD','Pos')
+        rv = self.writeStages(stagelist,'MOE','On')
+        rv = self.writeStages(stagelist,'MOO','On')
+        rv = self.writeStages(stagelist,'MOD','Pos')
         return rv
 
        
-    def disable_inst(self):
+    def disableInst(self):
 
         stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE']
-        rv = self.write_stages(stagelist,'MOE','Off')
-        rv = self.write_stages(stagelist,'MOO','Off')        
-        rv = self.write_stages(['DECKER','DEWARFOC'],'MOE','On')
+        rv = self.writeStages(stagelist,'MOE','Off')
+        rv = self.writeStages(stagelist,'MOO','Off')        
+        rv = self.writeStages(['DECKER','DEWARFOC'],'MOE','On')
         return rv
 
-    def turnoff_inst(self):
+    def turnOffInst(self):
 
         stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
-        rv = self.write_stages(stagelist,'MOE','Off')
-        rv = self.write_stages(stagelist,'MOO','Off')        
+        rv = self.writeStages(stagelist,'MOE','Off')
+        rv = self.writeStages(stagelist,'MOO','Off')        
         return rv
     
     def focusinstr(self):
-        self.instr_permit()
-        rv = self.enable_cal_inst()
+        self.instrPermit()
+        rv = self.enableCalInst()
         if rv is False:
             try:
                 ip = checkapf['INSTR_PERM'].read()
@@ -594,7 +594,7 @@ class APF:
             focusdict = APFTask.get("focusinstr", ["PHASE"])
             instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
             if not instr_perm:
-                self.instr_permit()
+                self.instrPermit()
                 if len(focusdict['PHASE']) > 0:
                     flags = " ".join(["-p", focusdict['phase']])
             else:
@@ -615,7 +615,7 @@ class APF:
             return True
         if time == 'pre' or 'post':
 
-            rv = self.enable_cal_inst()
+            rv = self.enableCalInst()
             if rv is False:
                 try:
                     ip = checkapf['INSTR_PERM'].read()
@@ -729,7 +729,7 @@ class APF:
         return result
 
 
-    def run_focustel(self):
+    def runFocustel(self):
         """Runs the telescope focus routine."""
         el = self.tel['EL'].read(binary=True)
         cfspos = self.fspos.read(binary=True)
@@ -761,7 +761,7 @@ class APF:
                 return result
             return True
 
-    def run_autoexposure(self,ind=5):
+    def runAutoexposure(self,ind=5):
         cmdpath = '/usr/local/lick/bin/robot/'
         cmd = os.path.join(cmdpath,'autoexposure')
         istr = "%d" % (ind)
@@ -774,7 +774,7 @@ class APF:
             apflog("autoexposure failed with code %d" % code, echo=True)
         return result
 
-    def run_centerup(self):
+    def runCenterup(self):
         cmdpath = '/usr/local/lick/bin/robot/'
         cmd = os.path.join(cmdpath,'centerup')
         result, code = cmdexec(cmd,cwd=os.path.curdir)
@@ -798,9 +798,9 @@ class APF:
         except Exception, e:
             apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
         if self.slew(star):
-            if self.run_autoexposure(ind=1):
-                if self.run_centerup():
-                    return self.run_focustel()
+            if self.runAutoexposure(ind=1):
+                if self.runCenterup():
+                    return self.runFocustel()
         return False
     
                 
@@ -833,7 +833,7 @@ class APF:
         else:
             return False
 
-    def states_set(self):
+    def statesSet(self):
         # there are three states - but we do not care about ESTOPST, that is will be cleared in openatsunset/openatnight
         if self.dome['ECLOSEST']:
             return True
@@ -842,7 +842,7 @@ class APF:
         return False
 
 
-    def checkhome(self,home=True):
+    def checkHome(self,home=True):
         try:
             homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
         except Exception, e:
@@ -899,7 +899,7 @@ class APF:
                 apflog("Can't open. No move permission.",echo=True)
                 return False
 
-        if self.states_set():
+        if self.statesSet():
             apflog("An unusal emergency state is set.", level="error",echo=True)
             return False
             
@@ -919,7 +919,7 @@ class APF:
             if not result:
                 apflog("Second openup attempt also failed. Exit code %d. Giving up." % code,echo=True)
                 return False
-        rv = self.checkhome()
+        rv = self.checkHome()
         if rv == False:
             return False
         try:
@@ -929,7 +929,7 @@ class APF:
             return False
         return True
 
-    def power_down_telescope(self):
+    def powerDownTelescope(self):
         """Checks that we have the proper permission and dome is closed, then resets telescope power."""
         if self.test: return True
         cmd = "/usr/local/lick/bin/robot/power_down_telescope"
@@ -955,7 +955,7 @@ class APF:
             return False
 
 
-    def servo_failure(self):
+    def servoFailure(self):
         """checks for amplifier faults"""
         servo_failed = False
         prefixs = ["AZ","EL","FA","FB","FC","TR" ]
@@ -966,7 +966,7 @@ class APF:
                 servo_failed = True
                 
         if servo_failed:
-            return self.power_down_telescope()
+            return self.powerDownTelescope()
         else:
             return False
         
@@ -1000,7 +1000,7 @@ class APF:
             if not result:
                 apflog("Closeup failed with exit code %d" % code, echo=True)
                 if attempts == 2:
-                    if self.servo_failure():
+                    if self.servoFailure():
                         apflog("Servo amplifier failure, power cycled telescope",echo=True)
                 if attempts == 3:
                     lstr = "Closeup has failed 3 times consecutively. Human intervention likely required."
@@ -1053,7 +1053,7 @@ class APF:
                 apflog("Setting scriptobs_windshield to Enable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
-    def evening_star(self):
+    def eveningStar(self):
         """Aim the APF at the desired target. This calls prep-obs, slewlock, and focus-telescope. A workaround to relying on scriptobs."""
         if self.isOpen()[0] == False:
             apflog("APF is not open. Can't target a star while closed.",level='error',echo=True)
@@ -1138,46 +1138,6 @@ class APF:
         apflog("checkClouds(): File=%s - Num=%d - LinesDone=%d" % (self.ucam["OUTFILE"].read(), int(self.ucam["OBSNUM"].read()), int(self.robot["SCRIPTOBS_LINES_DONE"].read()) ) )
         return
 
-    def observe(self, observation,skip=False,raster=False):
-        """ Currently: Takes a string which is the filename of a properly formatted star list. """
-
-        if self.test:
-            apflog("Would be taking observation in starlist %s" % observation)
-            APFTask.waitFor(self.task, True, timeout=300)
-            return
-        # Make sure the telescope autofocus is enabled 
-        APFLib.write(self.autofoc, "robot_autofocus_enable")
-        APFLib.write(self.ucam["RECORD"], "Yes")
-        chk_foc = '$apftask.SCRIPTOBS_AUTOFOC == robot_autofocus_enable'
-        result = APFTask.waitFor(self.task, False, chk_foc, timeout=60)
-        if not result:
-            apflog("Error setting scriptobs_autofoc", echo=True)
-            return
-        # Make sure APFTEQ is in night mode for observations
-        if self.teqmode.read() != 'Night':
-            self.setTeqMode('Night')
-        # Check the instrument focus for a reasonable value
-        if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
-            lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
-            apflog("Error: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
-            APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
-            
-        # Check Telescope M2 Focus
-        
-        robotdir = "/usr/local/lick/bin/robot/"
-        infile = open(observation,'r')
-        outfile = open("robot.log", 'a')
-
-        if raster:
-            args = ['/home/holden/src/raster_scan']
-        else:
-            if skip:
-                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip']
-            else:
-                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
-
-        p = subprocess.Popen(args,stdin=infile, stdout=outfile,stderr = subprocess.PIPE, cwd=robotdir)
-
     def DMReset(self):
         try:
             APFLib.write(self.checkapf['ROBOSTATE'], "master operating",timeout=10)
@@ -1205,12 +1165,14 @@ class APF:
         else:
             return rpid, True
 
-    def startRobot(self):
+    def startRobot(self,observation=None,skip=False,raster=False):
         """Start an instance of scriptobs. Returns the result from subprocess.Popen()."""
         # For running in test mode
         if self.test:
-            apflog("Would be taking observation in starlist %s" % observation)
-            APFTask.waitFor(self.task, True, timeout=300)
+            apflog("Would start robot",echo=True)
+            if observation is not None:
+                apflog("Would be taking observation in starlist %s" % observation,echo=True)
+            APFTask.waitFor(self.task, True, timeout=10)
             return
         
         # Make sure the telescope autofocus is enabled 
@@ -1218,7 +1180,7 @@ class APF:
         chk_foc = '$apftask.SCRIPTOBS_AUTOFOC == robot_autofocus_enable'
         result = APFTask.waitFor(self.task, False, chk_foc, timeout=60)
         if not result:
-            apflog("Error setting scriptobs_autofoc", echo=True)
+            apflog("Error setting scriptobs_autofoc", level='error',echo=True)
             return
         # Make sure APFTEQ is in night mode for observations
         if self.teqmode.read() != 'Night':
@@ -1240,8 +1202,16 @@ class APF:
         if not rv:
             return rv
         # Start scriptobs
+
         outfile = open("robot.log", 'a')
-        args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
+        if raster:
+            args = ['/home/holden/src/raster_scan']
+        else:
+            if skip:
+                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip']
+            else:
+                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
+
 
         p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=outfile, stderr=outfile)
         
