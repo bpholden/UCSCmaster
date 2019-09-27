@@ -328,10 +328,10 @@ class Master(threading.Thread):
                 apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
                 os._exit()
 
-            result = self.APF.enable_obs_inst()
+            result = self.APF.enableObsInst()
             if result == False:
                 apflog("Cannot enable instrument", level='warn', echo=True)
-                result = self.APF.enable_obs_inst()
+                result = self.APF.enableObsInst()
                 if not result:
                     apflog("Error: cannot enable instrument twice.", level='alert', echo=True)
                     return result
@@ -377,7 +377,7 @@ class Master(threading.Thread):
             if self.APF.power_down_telescope() is False:
                 apflog("Error: Cannot close and power off telescope ", level="alert", echo=True)
                 
-            rv = self.APF.disable_inst()
+            rv = self.APF.disableInst()
             
             return
 

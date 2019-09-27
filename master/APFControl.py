@@ -489,7 +489,7 @@ class APF:
 
         return
 
-    def instr_permit(self):
+    def instrPermit(self):
         instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
         userkind = ktl.read("checkapf","USERKIND",binary=True)
         while not instr_perm or userkind != 3:
@@ -501,7 +501,7 @@ class APF:
 
         return True
 
-    def turn_off_lamps(self):
+    def turnOffLamps(self):
         for lamp in ("HALOGEN2","HALOGEN1","THORIUM1","THORIUM2"):
             try:
                 rv = ktl.write("apfmot",lamp,"Off",wait=False)
@@ -513,7 +513,7 @@ class APF:
         return rv
     
 
-    def write_stages(self,stagelist,component,state):
+    def writeStages(self,stagelist,component,state):
         rv = True
         for stage in stagelist:
             curkwd = stage + component
@@ -524,53 +524,53 @@ class APF:
             except:
                 rv = False
 
-    def enable_obs_inst(self):
+    def enableObsInst(self):
 
         rv = True
 
         stagelist = ['CALMIRROR','CALSOURCE','IODINE','GUIDEFOC']
-        rv = self.write_stages(stagelist,'MOE','Off')
-        rv = self.write_stages(stagelist,'MOO','Off')
-        rv = self.write_stages(stagelist,'MOD','Pos')
+        rv = self.writeStages(stagelist,'MOE','Off')
+        rv = self.writeStages(stagelist,'MOO','Off')
+        rv = self.writeStages(stagelist,'MOD','Pos')
         stagelist = ['ADC','DECKER','DEWARFOC']
-        rv = self.write_stages(stagelist,'MOE','On')
-        rv = self.write_stages(stagelist,'MOO','On')
-        rv = self.write_stages(stagelist,'MOD','Pos')
+        rv = self.writeStages(stagelist,'MOE','On')
+        rv = self.writeStages(stagelist,'MOO','On')
+        rv = self.writeStages(stagelist,'MOD','Pos')
 
         return rv
 
-    def enable_cal_inst(self):
+    def enableCalInst(self):
 
         rv = True
         stagelist = ['ADC','CALMIRROR','CALSOURCE','IODINE','GUIDEFOC']
-        rv = self.write_stages(stagelist,'MOE','Off')
-        rv = self.write_stages(stagelist,'MOO','Off')
-        rv = self.write_stages(stagelist,'MOD','Pos')
+        rv = self.writeStages(stagelist,'MOE','Off')
+        rv = self.writeStages(stagelist,'MOO','Off')
+        rv = self.writeStages(stagelist,'MOD','Pos')
         stagelist = ['DECKER','DEWARFOC']
-        rv = self.write_stages(stagelist,'MOE','On')
-        rv = self.write_stages(stagelist,'MOO','On')
-        rv = self.write_stages(stagelist,'MOD','Pos')
+        rv = self.writeStages(stagelist,'MOE','On')
+        rv = self.writeStages(stagelist,'MOO','On')
+        rv = self.writeStages(stagelist,'MOD','Pos')
         return rv
 
        
-    def disable_inst(self):
+    def disableInst(self):
 
         stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE']
-        rv = self.write_stages(stagelist,'MOE','Off')
-        rv = self.write_stages(stagelist,'MOO','Off')        
-        rv = self.write_stages(['DECKER','DEWARFOC'],'MOE','On')
+        rv = self.writeStages(stagelist,'MOE','Off')
+        rv = self.writeStages(stagelist,'MOO','Off')        
+        rv = self.writeStages(['DECKER','DEWARFOC'],'MOE','On')
         return rv
 
-    def turnoff_inst(self):
+    def turnOffInst(self):
 
         stagelist = ['ADC','GUIDEFOC','CALMIRROR','CALSOURCE','IODINE','DECKER','DEWARFOC']
-        rv = self.write_stages(stagelist,'MOE','Off')
-        rv = self.write_stages(stagelist,'MOO','Off')        
+        rv = self.writeStages(stagelist,'MOE','Off')
+        rv = self.writeStages(stagelist,'MOO','Off')        
         return rv
     
     def focusinstr(self):
-        self.instr_permit()
-        rv = self.enable_cal_inst()
+        self.instrPermit()
+        rv = self.enableCalInst()
         if rv is False:
             try:
                 ip = checkapf['INSTR_PERM'].read()
@@ -594,7 +594,7 @@ class APF:
             focusdict = APFTask.get("focusinstr", ["PHASE"])
             instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
             if not instr_perm:
-                self.instr_permit()
+                self.instrPermit()
                 if len(focusdict['PHASE']) > 0:
                     flags = " ".join(["-p", focusdict['phase']])
             else:
@@ -615,7 +615,7 @@ class APF:
             return True
         if time == 'pre' or 'post':
 
-            rv = self.enable_cal_inst()
+            rv = self.enableCalInst()
             if rv is False:
                 try:
                     ip = checkapf['INSTR_PERM'].read()

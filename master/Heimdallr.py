@@ -165,7 +165,7 @@ def findObsNum(apf):
 
     return last
 
-def set_obs_defaults(opt):
+def setObsDefaults(opt):
     if opt.name is None or opt.name == "apf":
         opt.owner = 'public'
         opt.name = 'apf'
@@ -278,7 +278,7 @@ if __name__ == '__main__':
         apflog("Setting the task step to 0")
         APFTask.step(parent, 0)
         apflog("Setting Observer Information", echo=True)
-        opt = set_obs_defaults(opt)
+        opt = setObsDefaults(opt)
         apflog("Using %s for name and %s for obs number." % (opt.name, repr(opt.obsnum)), echo=True)
         apf.setObserverInfo(num=opt.obsnum, name=opt.name, owner=opt.owner)
 
@@ -344,7 +344,7 @@ if __name__ == '__main__':
             APFTask.set(parent, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
 
         apflog("Starting calibrate pre script.", level='Info', echo=True)
-        apf.instr_permit()
+        apf.instrPermit()
 
         result = apf.ucam_status()
         if result is False:
@@ -357,11 +357,11 @@ if __name__ == '__main__':
 
         if result == False:
             apflog("Calibrate Pre has failed. Trying again",level='warn',echo=True)
-            apf.instr_permit()
+            apf.instrPermit()
             result = apf.calibrate(script = opt.calibrate, time = 'pre')
             if not result:
                 apflog("Error: Calibrate Pre has failed twice. Observer is exiting.",level='error',echo=True)
-                apf.turn_off_lamps()
+                apf.turnOffLamps()
                 sys.exit(2)
 
         phase_index += 1
@@ -373,7 +373,7 @@ if __name__ == '__main__':
     # 4) Start the main watcher thread
     master = Master(apf,opt)
     if 'Watching' == str(phase).strip():
-        apf.instr_permit()
+        apf.instrPermit()
         apflog("Starting the main watcher." ,echo=True)
         try:
             names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
@@ -493,7 +493,7 @@ if __name__ == '__main__':
     # 5) Take morning calibrations
     phase_index += 1
     APFTask.phase(parent, possible_phases[phase_index])
-    apf.instr_permit()
+    apf.instrPermit()
     result = apf.calibrate(script=opt.calibrate, time='post')
     if not result:
         apflog("Calibrate Post has failed.", level='warn',echo=True)
@@ -529,7 +529,7 @@ if __name__ == '__main__':
         APFTask.set(parent, suffix="MESSAGE",value="Updating last observation number to %s" % (apf.ucam["OBSNUM"].read()),wait=False)
 
 
-    rv = apf.turnoff_inst()
+    rv = apf.turnOffInst()
     APFTask.set(parent, suffix="MESSAGE",value="Turning off the motors",wait=False)
 
     # All Done!
