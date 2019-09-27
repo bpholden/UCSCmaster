@@ -1138,46 +1138,6 @@ class APF:
         apflog("checkClouds(): File=%s - Num=%d - LinesDone=%d" % (self.ucam["OUTFILE"].read(), int(self.ucam["OBSNUM"].read()), int(self.robot["SCRIPTOBS_LINES_DONE"].read()) ) )
         return
 
-    def observe(self, observation,skip=False,raster=False):
-        """ Currently: Takes a string which is the filename of a properly formatted star list. """
-
-        if self.test:
-            apflog("Would be taking observation in starlist %s" % observation)
-            APFTask.waitFor(self.task, True, timeout=300)
-            return
-        # Make sure the telescope autofocus is enabled 
-        APFLib.write(self.autofoc, "robot_autofocus_enable")
-        APFLib.write(self.ucam["RECORD"], "Yes")
-        chk_foc = '$apftask.SCRIPTOBS_AUTOFOC == robot_autofocus_enable'
-        result = APFTask.waitFor(self.task, False, chk_foc, timeout=60)
-        if not result:
-            apflog("Error setting scriptobs_autofoc", echo=True)
-            return
-        # Make sure APFTEQ is in night mode for observations
-        if self.teqmode.read() != 'Night':
-            self.setTeqMode('Night')
-        # Check the instrument focus for a reasonable value
-        if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
-            lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
-            apflog("Error: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
-            APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
-            
-        # Check Telescope M2 Focus
-        
-        robotdir = "/usr/local/lick/bin/robot/"
-        infile = open(observation,'r')
-        outfile = open("robot.log", 'a')
-
-        if raster:
-            args = ['/home/holden/src/raster_scan']
-        else:
-            if skip:
-                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip']
-            else:
-                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
-
-        p = subprocess.Popen(args,stdin=infile, stdout=outfile,stderr = subprocess.PIPE, cwd=robotdir)
-
     def DMReset(self):
         try:
             APFLib.write(self.checkapf['ROBOSTATE'], "master operating",timeout=10)
@@ -1205,12 +1165,14 @@ class APF:
         else:
             return rpid, True
 
-    def startRobot(self):
+    def startRobot(self,observation=None,skip=False,raster=False):
         """Start an instance of scriptobs. Returns the result from subprocess.Popen()."""
         # For running in test mode
         if self.test:
-            apflog("Would be taking observation in starlist %s" % observation)
-            APFTask.waitFor(self.task, True, timeout=300)
+            apflog("Would start robot",echo=True)
+            if observation is not None:
+                apflog("Would be taking observation in starlist %s" % observation,echo=True)
+            APFTask.waitFor(self.task, True, timeout=10)
             return
         
         # Make sure the telescope autofocus is enabled 
@@ -1218,7 +1180,7 @@ class APF:
         chk_foc = '$apftask.SCRIPTOBS_AUTOFOC == robot_autofocus_enable'
         result = APFTask.waitFor(self.task, False, chk_foc, timeout=60)
         if not result:
-            apflog("Error setting scriptobs_autofoc", echo=True)
+            apflog("Error setting scriptobs_autofoc", level='error',echo=True)
             return
         # Make sure APFTEQ is in night mode for observations
         if self.teqmode.read() != 'Night':
@@ -1240,8 +1202,16 @@ class APF:
         if not rv:
             return rv
         # Start scriptobs
+
         outfile = open("robot.log", 'a')
-        args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
+        if raster:
+            args = ['/home/holden/src/raster_scan']
+        else:
+            if skip:
+                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip']
+            else:
+                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
+
 
         p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=outfile, stderr=outfile)
         
