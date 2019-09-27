@@ -118,8 +118,8 @@ class Master(threading.Thread):
         """
         retval = False
 
-        mtch = re.search("end\Z",apf.line.read())
-        if apf.ldone.read(binary=True) == 0 or mtch:
+        mtch = re.search("end\Z",APF.line.read())
+        if APF.ldone.read(binary=True) == 0 or mtch:
             retval = True
         return retval
 
@@ -268,7 +268,7 @@ class Master(threading.Thread):
             # Calculate the slowdown factor.
             slowdown = calcSlowdown()
             apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
-            APFLib.write(apf.robot["MASTER_SLOWDOWN"], slowdown)
+            APFLib.write(APF.robot["MASTER_SLOWDOWN"], slowdown)
             apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (APF.countrate, APF.ccountrate))
 
             # Check for a valid seeing measurment. If there isn't one, use a default
@@ -289,7 +289,7 @@ class Master(threading.Thread):
                 APF.close()
                 if self.fixedList is None:
                     APFLib.write(apf.ldone, 0)
-                apf.countrate = -1.0
+                APF.countrate = -1.0
                 # sleep for a half hour to see if the clouds blow by
                 APFTask.waitfor(self.task, True, timeout=60*30)
                 return
@@ -369,7 +369,7 @@ class Master(threading.Thread):
             if running:
                 APF.killRobot(now=True)
 
-            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=APF.ucam["OBSNUM"].read())
 
             rv = APF.close(force=force)
             if rv:
@@ -425,14 +425,14 @@ class Master(threading.Thread):
         def startScriptobs():
             # Update the last obs file and hitlist if needed
 
-            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=apf.ucam["OBSNUM"].read())
+            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=APF.ucam["OBSNUM"].read())
 
             APF.updateWindshield(self.windshield)
             ripd, running = APF.findRobot()
             if running:
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
-            message = apf.message.read()
+            message = APF.message.read()
             mtch = re.search("ERR/UCAM",message)
             if mtch:
                 # uh oh
@@ -598,7 +598,7 @@ class Master(threading.Thread):
                     except:
                         apflog("Error: Cannot enable AZ drive", level="error")
 
-                    apf.setTeqMode('Evening')
+                    APF.setTeqMode('Evening')
                     vent_open = "$eosdome.VD4STATE = VENT_OPENED"
                     result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
                     if result:
