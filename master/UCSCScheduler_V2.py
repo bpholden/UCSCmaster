@@ -561,6 +561,53 @@ def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx,focval=0):
     res['SCRIPTOBS'].append(scriptobs_line)
     return res
 
+def getTOO(ctime,sheetns=["Bstars"],owner='public',toofn="too.dat"):
+
+    names, star_table, flags, stars = ParseGoogledex.parseGoogledexTOO(sheetns=self.toosheetns,outfn='too.dat',force_download=True)
+    targNum = len(names)
+    available = np.ones(targNum, dtype=bool)
+    totexptimes = np.zeros(targNum, dtype=float)
+    cur_elevations = np.zeros(targNum, dtype=float)
+    scaled_elevations = np.zeros(targNum, dtype=float)
+
+    apf_obs = make_apf_obs(ctime)
+    moon = ephem.Moon()
+    moon.compute(apf_obs)
+    
+    # Distance to stay away from the moon
+    md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
+    minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN
+
+    apflog("getTOO(): Culling stars behind the moon",echo=True)
+    moonDist = np.degrees(np.sqrt((moon.ra - star_table[:,DS_RA])**2 + (moon.dec - star_table[:,DS_DEC])**2))
+    moon_check = (moonDist > minMoonDist)
+    available = available & moon_check
+    
+    apflog("getTOO(): Computing star elevations",echo=True)
+    f = available
+    fstars = [s for s,_ in zip(stars,f) if _ ]
+    apflog("getNext(): Computing exposure times",echo=True)
+    f = available
+    fstars = [s for s,_ in zip(stars,f) if _ ]
+    vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, exptimes[f])
+    available[f] = available[f] & vis
+    
+
+    
+    good_cadence = ((ephem.julian_date(dt) - star_table[:, DS_LAST]) > star_table[:, DS_CAD])
+    available = available & good_cadence
+    immediate = (star_table[:,DS_APFPRI] > PRI_IMMEDIATE) & available
+    if len(immediate) > 0:
+        when = SchedulerConsts.IMMEDIATE
+        
+    next_exp = (star_table[:,DS_APFPRI] < PRI_IMMEDIATE) & (star_table[:,DS_APFPRI] > PRI_NEXT_EXP) & available
+    if len(next_exp) > 0:
+        when = SchedulerConsts.NEXT_EXP
+    next_line = (star_table[:,DS_APFPRI] < PRI_NEXT_EXP) & available
+    if len(next_line) > 0:
+        when = SchedulerConsts.NEXT_LINE
+
+    return target, line
 
 def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0):
     """ Determine the best target for UCSC team to observe for the given input.
