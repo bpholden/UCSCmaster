@@ -182,28 +182,27 @@ class Master(threading.Thread):
 
 
     
-    def checkTOOs(self):
-        names, star_table, flags, stars = ParseGoogledex.parseGoogledexTOO(sheetns=self.toosheetns,outfn='too.dat',force_download=True)
-        dt = datetime.datetime.utcnow()
-        good_cadence = (ephem.julian_date(dt) - star_table[:, DS_LAST]) > star_table[:, DS_CAD]
-        immediate = (star_table[:,DS_APFPRI] > IMMEDIATE) & good_cadence
-        next_exp = (star_table[:,DS_APFPRI] < IMMEDIATE) & (star_table[:,DS_APFPRI] >NEXT_EXP) & good_cadence
-        next_line = (star_table[:,DS_APFPRI] <NEXT_EXP) & good_cadence
-                        
-        if len(star_table[:,DS_APFPRI][immediate]) > 0:
+    def checkTOOs(self,ctime):
+
+        target,when = ds.getTOO(ctime,sheetns=self.toosheetns,toofn='too.dat')
+
+        if when == SchedulerConsts.IMMEDIATE:
             rv = self.endExposure()
-            rv = self.APF.killRobot(now=True)
-            if rv is False:
-                APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)
-        if len(star_table:,DS_APFPRI][next_exp]) > 0:
-            rv = self.waitEndExposure()
-            rv = self.APF.killRobot(now=True)
             if rv is False:
                 # UCAM problem
                 APF.log("Exposure has not ended when it is suppose to, this is a UCAM issue",level='error',echo=True)
-        self.target = ds.makeTOOresult(next)
+            rv = self.APF.killRobot(now=True)
+            if rv is False:
+                APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)
+       elif when == SchedulerConsts.NEXTEXP
+            rv = self.waitEndExposure()
+            rv = self.APF.killRobot(now=True)
+            if rv is False:
+                APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)
+                
+        self.target = target
 
-
+        return
     
     ####
     # run is the main event loop, for historical reasons it has its own functions that are local in scope
