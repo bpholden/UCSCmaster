@@ -168,6 +168,20 @@ class Master(threading.Thread):
         return False
 
 
+    def endExposure(self):
+        if self.debug:
+            APF.log("Would have stopped exposure",echo=True)
+            return True
+        try:
+            self.APF.ucam['WRITE'].write(1)
+            rv = True
+        except:
+            APF.log(str("Cannot communicate with APFUCAM"), level='error', echo=True)
+            rv = False
+        return rv
+
+
+    
     def checkTOOs(self):
         names, star_table, flags, stars = ParseGoogledex.parseGoogledexTOO(sheetns=self.toosheetns,outfn='too.dat',force_download=True)
         dt = datetime.datetime.utcnow()
