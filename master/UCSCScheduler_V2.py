@@ -565,6 +565,8 @@ def getTOO(ctime,sheetns=["Bstars"],owner='public',toofn="too.dat"):
 
     names, star_table, flags, stars = ParseGoogledex.parseGoogledexTOO(sheetns=self.toosheetns,outfn='too.dat',force_download=True)
     targNum = len(names)
+    if targNum <= 0:
+        return None, 0
     available = np.ones(targNum, dtype=bool)
     exptimes = star_table[:,TOO_EXPT] * star_table[:,TOO_NSHOTS]
     cur_elevations = np.zeros(targNum, dtype=float)
