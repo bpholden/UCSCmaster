@@ -579,7 +579,7 @@ def getTOO(ctime,sheetns=["Bstars"],owner='public',toofn="too.dat"):
     minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN
 
     apflog("getTOO(): Culling stars behind the moon",echo=True)
-    moonDist = np.degrees(np.sqrt((moon.ra - star_table[:,DS_RA])**2 + (moon.dec - star_table[:,DS_DEC])**2))
+    moonDist = np.degrees(np.sqrt((moon.ra - star_table[:,TOO_RA])**2 + (moon.dec - star_table[:,TOO_DEC])**2))
     moon_check = (moonDist > minMoonDist)
     available = available & moon_check
     
@@ -592,9 +592,7 @@ def getTOO(ctime,sheetns=["Bstars"],owner='public',toofn="too.dat"):
     vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, exptimes[f])
     available[f] = available[f] & vis
     
-
-    
-    good_cadence = ((ephem.julian_date(dt) - star_table[:, DS_LAST]) > star_table[:, DS_CAD])
+    good_cadence = ((ephem.julian_date(dt) - star_table[:, TOO_LAST]) > star_table[:, TOO_CAD])
     available = available & good_cadence
     if len(available) > 0:
         maxpri = max(star_table[:,TOO_APFPRI][available])
