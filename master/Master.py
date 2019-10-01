@@ -199,8 +199,8 @@ class Master(threading.Thread):
             rv = self.APF.killRobot(now=True)
             if rv is False:
                 APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)
-                
-        self.target = target
+        if when > 0:
+            self.target = target
 
         return
     
