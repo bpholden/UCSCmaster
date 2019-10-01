@@ -596,18 +596,21 @@ def getTOO(ctime,sheetns=["Bstars"],owner='public',toofn="too.dat"):
     
     good_cadence = ((ephem.julian_date(dt) - star_table[:, DS_LAST]) > star_table[:, DS_CAD])
     available = available & good_cadence
-    immediate = (star_table[:,DS_APFPRI] > PRI_IMMEDIATE) & available
-    if len(immediate) > 0:
-        when = SchedulerConsts.IMMEDIATE
+    if len(available) > 0:
+        maxpri = max(star_table[:,TOO_APFPRI][available])
+        sort_i = (final_priorities == maxpri) & available
+                        
+        if maxpri > PRI_IMMEDIATE:
+            when = SchedulerConsts.IMMEDIATE
+        elif maxpri > PRI_NEXT_EXP:
+            when = SchedulerConsts.NEXT_EXP
+        elif len(sort:
+            when = SchedulerConsts.NEXT_LINE
+    else:
+        target = None
+        when = 0
         
-    next_exp = (star_table[:,DS_APFPRI] < PRI_IMMEDIATE) & (star_table[:,DS_APFPRI] > PRI_NEXT_EXP) & available
-    if len(next_exp) > 0:
-        when = SchedulerConsts.NEXT_EXP
-    next_line = (star_table[:,DS_APFPRI] < PRI_NEXT_EXP) & available
-    if len(next_line) > 0:
-        when = SchedulerConsts.NEXT_LINE
-
-    return target, line
+    return target, when
 
 def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0):
     """ Determine the best target for UCSC team to observe for the given input.
