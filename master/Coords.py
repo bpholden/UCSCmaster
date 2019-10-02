@@ -40,10 +40,10 @@ def matchRACoords(str):
         return None,None,None
     
 def getRARadSingle(ra):
-    rv = matchRACoords(ra)
+    rah,ram,ras = matchRACoords(ra)
 
-    if rv[0] is not None:
-        return getRARad(rv)
+    if rah is not None:
+        return getRARad(rah,ram,ras)
     
     try:
         rad = float(ra)
@@ -61,9 +61,9 @@ def matchDECCoords(str):
 
 
 def getDECRadSingle(dec):
-    rv = matchDECCoords(dec)
-    if rv[0] is not None:
-        return getDECRad(mtch.group(1),mtch.group(3),mtch.group(5))
+    decd,decm,decs = matchDECCoords(dec)
+    if decd is not None:
+        return getDECRad(decd,decm,decs)
 
     try:
         rad = float(dec)
