@@ -32,8 +32,8 @@ def getDECRad(deg, mn, sec, neg=False):
         return x
 
 
-def matchRACoords(str):
-    mtch = re.search("(\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",ra)
+def matchRACoords(rastr):
+    mtch = re.search("(\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",rastr)
     if mtch:
         return mtch.group(1),mtch.group(3),mtch.group(5)
     else:
@@ -52,8 +52,8 @@ def getRARadSingle(ra):
         rad = -1
     return rad
 
-def matchDECCoords(str):
-    mtch = re.search("(\-?\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",ra)
+def matchDECCoords(decstr):
+    mtch = re.search("(\-?\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",decstr)
     if mtch:
         return mtch.group(1),mtch.group(3),mtch.group(5)
     else:
