@@ -346,8 +346,8 @@ def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-5
         star_table.append(row)
         star = ephem.FixedBody()
         star.name = ls[0]
-        star._ra = ephem.hours(":".join(matchRACoords(ls[didx['RA']])))
-        star._dec = ephem.degrees(":".join(matchDECCoords(ls[didx['Dec']])))
+        star._ra = ephem.hours(":".join(Coords.matchRACoords(ls[didx['RA']])))
+        star._dec = ephem.degrees(":".join(Coords.matchDECCoords(ls[didx['Dec']])))
         stars.append(star)
 
     return (names, np.array(star_table), flags, stars)
