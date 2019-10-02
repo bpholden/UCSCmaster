@@ -31,11 +31,20 @@ def getDECRad(deg, mn, sec, neg=False):
     else:
         return x
 
-def getRARadSingle(ra):
+
+def matchRACoords(str):
     mtch = re.search("(\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",ra)
     if mtch:
-        return getRARad(mtch.group(1),mtch.group(3),mtch.group(5))
+        return mtch.group(1),mtch.group(3),mtch.group(5)
+    else:
+        return None,None,None
+    
+def getRARadSingle(ra):
+    rv = matchRACoords(ra)
 
+    if rv[0] is not None:
+        return getRARad(rv)
+    
     try:
         rad = float(ra)
         rad *= np.pi/180.0
@@ -43,9 +52,17 @@ def getRARadSingle(ra):
         rad = -1
     return rad
 
-def getDECRadSingle(dec):
-    mtch = re.search("(\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",dec)
+def matchDECCoords(str):
+    mtch = re.search("(\-?\d+)(:|\s)(\d+)(:|\s)(\d+\.?\d*)",ra)
     if mtch:
+        return mtch.group(1),mtch.group(3),mtch.group(5)
+    else:
+        return None,None,None
+
+
+def getDECRadSingle(dec):
+    rv = matchDECCoords(dec)
+    if rv[0] is not None:
         return getDECRad(mtch.group(1),mtch.group(3),mtch.group(5))
 
     try:
