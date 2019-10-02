@@ -208,8 +208,8 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
         star_table.append(row)
         star = ephem.FixedBody()
         star.name = ls[0]
-        star._ra = ephem.hours(":".join(Coords.matchRACoords))
-        star._dec = ephem.degrees(":".join(Coords.matchDECCoords))
+        star._ra = ephem.hours(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]]))
+        star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
         stars.append(star)
 
     return (names, np.array(star_table), flags, stars)
@@ -346,8 +346,8 @@ def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-5
         star_table.append(row)
         star = ephem.FixedBody()
         star.name = ls[0]
-        star._ra = ephem.hours(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]]))
-        star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
+        star._ra = ephem.hours(":".join(matchRACoords(ls[didx['RA']])))
+        star._dec = ephem.degrees(":".join(matchDECCoords(ls[didx['Dec']])))
         stars.append(star)
 
     return (names, np.array(star_table), flags, stars)
