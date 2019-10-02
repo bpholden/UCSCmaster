@@ -575,4 +575,4 @@ def findColumns(col_names,req_cols,opt_cols=[]):
 if __name__ == "__main__":
 
     print(parseGoogledex(sheetns=['Test_regular']))
-    print(parseGoogledexTOO(sheetns=['Test_regular']))
+    print(parseGoogledexTOO(sheetns=['Test_TOO']))
