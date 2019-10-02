@@ -230,7 +230,7 @@ def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-5
     """
 
     # These are the columns we need for scheduling
-    req_cols = ["Star Name", "RA","Dec", "Vmag", \
+    req_cols = ["Star Name", "RA","Dec", "pmRA", "pmDEC","Vmag", \
                 "APFpri", "APFcad", "APFnshots", "lastobs", "texp", \
                 "Close Companion", "APF decker","I2", "owner", \
                 "uth","utm","duration", "Nobs", "Total Obs"
