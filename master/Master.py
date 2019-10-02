@@ -270,7 +270,12 @@ class Master(threading.Thread):
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
                     # just keep going with last block
-                    apflog("getTarget(): Going through remaining target queue.",echo=True)
+                    # this could be a TOO inserted in the list
+                    # or a multi-line exposure sequence
+                    msg = "getTarget(): Going through remaining target queue."
+                    apflog(msg,echo=True)
+                    APFTask.set(self.task, suffix="MESSAGE", value=msg, wait=False)            
+                    
                     try:
                         curstr = self.target["SCRIPTOBS"].pop() + '\n'
                         self.scriptobs.stdin.write(curstr)
