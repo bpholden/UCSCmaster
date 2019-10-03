@@ -10,7 +10,6 @@ import numpy as np
 
 import gspread
 import json
-#from oauth2client.client import SignedJwtAssertionCredentials
 from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
