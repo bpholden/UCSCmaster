@@ -10,7 +10,8 @@ import numpy as np
 
 import gspread
 import json
-from oauth2client.client import SignedJwtAssertionCredentials
+#from oauth2client.client import SignedJwtAssertionCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
 import Coords
@@ -382,10 +383,9 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
     certificate_path = os.path.dirname(__file__)
     
     json_key = json.load(open(os.path.join(certificate_path, certificate)))
-    scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://spreadsheets.google.com/feeds']
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
-    credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)
-
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(certificate_path, certificate), scope)
     try:
         gs = gspread.authorize(credentials)
         apflog("Successfully logged in.", echo=True)
@@ -398,8 +398,8 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
         apflog("Loaded Main %s" % (sheetn),echo=True)
         worksheet = spreadsheet.sheet1
         apflog("Got spreadsheet", echo=True)
-    except:
-        apflog("Cannot Read %s"  % (sheetn), echo=True, level='error')
+    except Exception as e:
+        apflog("Cannot Read %s: %s"  % (sheetn, e), echo=True, level='error')
         worksheet = None
     return worksheet
 
