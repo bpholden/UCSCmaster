@@ -63,11 +63,11 @@ def float_or_default(value,default=0.0):
 
 
 
-def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False):
+def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False):
     """ parseGoogledex parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
-    names, star_table, do_flag, stars = parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat")
+    names, star_table, do_flag, stars = parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="googledex.dat")
     names - a list of stars in the starlist
     star_table - a numpy array
     flags - a dictionary of items on whether or not do="y" needs to be set for scriptobs 
@@ -214,10 +214,10 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
 
     return (names, np.array(star_table), flags, stars)
 
-def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
+def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
-        update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json')
+        update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
 
         filename - where the observations are logged
     """
@@ -338,7 +338,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     
     return obslog.names
 
-def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
+def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
     full_codex = []
     # These are the columns we need for scheduling
     full_codex.append(req_cols)
@@ -361,10 +361,10 @@ def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic
     f.close()
     return full_codex
     
-def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
+def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """ Get the spreadsheet from google
 
-    worksheet = get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json')
+    worksheet = get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
     worksheet - the worksheet object returned by the gspread module
 
     sheetn - name of the google sheet, defaults to "The Googledex"
