@@ -262,6 +262,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                     except:
                         n = 0
                     if jd > pastdate and curowner == v[owncol]:
+                        time.sleep(2)
                         ws.update_cell(i+1, col+1, round(jd, 4) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
 
