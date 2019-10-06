@@ -466,6 +466,9 @@ if __name__ == '__main__':
         except:
             apflog("Error: Updating the online googledex has failed.", level="error")
         logpush(os.path.join(os.getcwd(),"observed_targets"))
+
+    if os.path.exists(os.path.join(os.getcwd(),"googledex.dat")):
+        logpush(os.path.join(os.getcwd(),"googledex.dat"))
         
     if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
         logpush(os.path.join(os.getcwd(),"robot.log"))
