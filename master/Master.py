@@ -668,6 +668,15 @@ class Master(threading.Thread):
                             apflog(outstr,level='info', echo=True)
                             result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
                             self.APF.DMReset()
+                            if self.APF.openOK is False:
+                                closetime = datetime.now()
+                                APFTask.set(self.task, suffix="MESSAGE", value="Closing for weather", wait=False)
+                                apflog("No longer ok to open.", echo=True)
+                                apflog("OPREASON: " + self.APF.checkapf["OPREASON"].read(), echo=True)
+                                apflog("WEATHER: " + self.APF.checkapf['WEATHER'].read(), echo=True)
+                                closing()
+                                break
+                               
                     
                 elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at night", wait=False)                    
