@@ -8,6 +8,7 @@ import atexit
 from datetime import datetime, timedelta
 import os
 import os.path
+import shutil
 import signal
 from select import select
 import re
@@ -379,6 +380,9 @@ if __name__ == '__main__':
             names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
+            # goto backup
+            if os.path.exists("googledex.dat.1"):
+                shutil.copyfile("googledex.dat.1","googledex.dat")
 
         bstr = "%d,%d" % (opt.binning,opt.binning)
         apf.ucam['BINNING'].write(bstr)
