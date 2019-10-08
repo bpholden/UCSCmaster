@@ -388,11 +388,21 @@ class Master(threading.Thread):
             if rv:
                 # it was cleared
                 apflog("slew allowed",level="error",echo=True)
+                # just to be safe
+                chk_done = "$checkapf.MOVE_PERM == true"
+                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+                if result:
+                    ## this is temporary ##
+                    rv = self.APF.homeTelescope()
+                    if rv:
+                        ktl.write('apftask','scriptobs_message','')
+                        return True
+                    else:
+                        return False
+                else:
+                    apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+                    return False
                 
-                
-                ktl.write('apftask','scriptobs_message','')
-                return True
-            
             ripd, running = self.APF.findRobot()
             if running:
                 self.APF.killRobot(now=True)
