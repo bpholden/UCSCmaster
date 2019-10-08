@@ -167,28 +167,6 @@ class Master(threading.Thread):
         return False
 
 
-    def checkServos(self):
-        ripd, running = self.APF.findRobot()
-        if running:
-            self.APF.killRobot(now=True)
-                
-        apflog("Error: APF is open, and slew_allowed is false. Likely a servo error/amplifier fault.", level="error", echo=True)
-        chk_done = "$checkapf.MOVE_PERM == true"
-        result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
-        if result:
-            rv = self.APF.powerDownTelescope()
-            if rv:
-                apflog("APF power cycled.", echo=True)
-                return rv
-            else:
-                apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
-                closing(force=True)
-                return False
-        elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
-            apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
-            closing(force=True)
-            return False
-
     
     ####
     # run is the main event loop, for historical reasons it has its own functions that are local in scope
@@ -403,6 +381,37 @@ class Master(threading.Thread):
             rv = self.APF.disableInst()
             
             return
+
+        def checkServos(self):
+
+            rv = ktl.read('apftask','slew_allowed',binary=True)
+            if rv:
+                # it was cleared
+                apflog("slew allowed",level="error",echo=True)
+                
+                
+                ktl.write('apftask','scriptobs_message','')
+                return True
+            
+            ripd, running = self.APF.findRobot()
+            if running:
+                self.APF.killRobot(now=True)
+
+            chk_done = "$checkapf.MOVE_PERM == true"
+            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+            if result:
+                rv = self.APF.powerDownTelescope()
+                if rv:
+                    apflog("APF power cycled.", echo=True)
+                    return rv
+                else:
+                    apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
+                    closing(force=True)
+                    return False
+            elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
+                apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+                closing(force=True)
+            return False
 
         def checkTelState():
             slewing     = '$eostele.AZSSTATE == Slewing  or  $eostele.ELSSTATE == Slewing'
