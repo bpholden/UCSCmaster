@@ -842,6 +842,15 @@ class APF:
         return False
 
 
+    def homeTelescope(self):
+        rv, rc = cmdexec("/usr/local/lick/bin/robot/slew --home")
+        homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
+        if rc == 0 and homed == 2:
+            return True
+        else:
+            apflog("cannot home telescope" % (e),level='Alert',echo=True)
+            return False
+
     def checkHome(self,home=True):
         try:
             homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
@@ -853,13 +862,7 @@ class APF:
         else:
             if homed == 5 or homed == 6:
                 if home:
-                    rc = subprocess.call(["/usr/local/lick/bin/robot/slew", "--home"])
-                    homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
-                    if rc == 0 and homed == 2:
-                        return True
-                    else:
-                        apflog("cannot home telescope" % (e),level='Alert',echo=True)
-                        return False
+                    self.homeTelescope()
                 else:
                     apflog("Telescope needs to be homed",level='Alert',echo=True)
                     return False
