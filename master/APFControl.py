@@ -844,11 +844,15 @@ class APF:
 
     def homeTelescope(self):
         rv, rc = cmdexec("/usr/local/lick/bin/robot/slew --home")
-        homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
-        if rc == 0 and homed == 2:
-            return True
-        else:
-            apflog("cannot home telescope" % (e),level='Alert',echo=True)
+        try:
+            homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
+            if rc == 0 and homed == 2:
+                return True
+            else:
+                apflog("cannot home telescope" % (e),level='Alert',echo=True)
+                return False
+        except:
+            apflog("cannot home telescope and/or cannot read apfmon keyword" % (e),level='Alert',echo=True)
             return False
 
     def checkHome(self,home=True):
