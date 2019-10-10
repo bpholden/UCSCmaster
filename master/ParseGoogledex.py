@@ -232,6 +232,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
     for sheetn in sheetns:
         ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
         if ws:
+            time.sleep(2)
             vals = ws.get_all_values()
         else:
             next
@@ -267,11 +268,13 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                         ws.update_cell(i+1, nobscol+1, n + 1 )
 
                 except:
+                    time.sleep(2)
                     print (v[0], v[col])
                     ws.update_cell(i+1, col+1, round(jd,4) )
                 try:
                    have_temp = v[tempcol]
                    if taketemp == "Y" and have_temp == "N" and curowner == v[owncol]:
+                       time.sleep(2)
                        ws.update_cell(i+1, tempcol+1, "Y")
                 except:
                     apflog( "Error logging template obs for %s" % (v[0]),echo=True,level='error')
