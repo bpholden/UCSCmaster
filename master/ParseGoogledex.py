@@ -10,7 +10,7 @@ import numpy as np
 
 import gspread
 import json
-from oauth2client.client import SignedJwtAssertionCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
 import Coords
@@ -63,11 +63,11 @@ def float_or_default(value,default=0.0):
 
 
 
-def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False):
+def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False):
     """ parseGoogledex parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
-    names, star_table, do_flag, stars = parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="googledex.dat")
+    names, star_table, do_flag, stars = parseGoogledex(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="googledex.dat")
     names - a list of stars in the starlist
     star_table - a numpy array
     flags - a dictionary of items on whether or not do="y" needs to be set for scriptobs 
@@ -208,12 +208,11 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-5b98d1
         star_table.append(row)
         star = ephem.FixedBody()
         star.name = ls[0]
-        star._ra = ephem.hours(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]]))
-        star._dec = ephem.degrees(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]]))
+        star._ra = ephem.hours(str(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]])))
+        star._dec = ephem.degrees(str(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]])))
         stars.append(star)
 
     return (names, np.array(star_table), flags, stars)
-
 
 
 
@@ -354,10 +353,10 @@ def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-5
 
 
 
-def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
+def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
-        update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-5b98d1283a95.json')
+        update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
 
         filename - where the observations are logged
     """
@@ -372,6 +371,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
     for sheetn in sheetns:
         ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
         if ws:
+            time.sleep(2)
             vals = ws.get_all_values()
         else:
             next
@@ -402,15 +402,18 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                     except:
                         n = 0
                     if jd > pastdate and curowner == v[owncol]:
+                        time.sleep(2)
                         ws.update_cell(i+1, col+1, round(jd, 4) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
 
                 except:
+                    time.sleep(2)
                     print (v[0], v[col])
                     ws.update_cell(i+1, col+1, round(jd,4) )
                 try:
                    have_temp = v[tempcol]
                    if taketemp == "Y" and have_temp == "N" and curowner == v[owncol]:
+                       time.sleep(2)
                        ws.update_cell(i+1, tempcol+1, "Y")
                 except:
                     apflog( "Error logging template obs for %s" % (v[0]),echo=True,level='error')
@@ -478,7 +481,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     
     return obslog.names
 
-def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="./googledex.dat"):
+def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
     full_codex = []
     # These are the columns we need for scheduling
     full_codex.append(req_cols)
@@ -501,10 +504,10 @@ def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic
     f.close()
     return full_codex
     
-def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json'):
+def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """ Get the spreadsheet from google
 
-    worksheet = get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5b98d1283a95.json')
+    worksheet = get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
     worksheet - the worksheet object returned by the gspread module
 
     sheetn - name of the google sheet, defaults to "The Googledex"
@@ -522,10 +525,9 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
     certificate_path = os.path.dirname(__file__)
     
     json_key = json.load(open(os.path.join(certificate_path, certificate)))
-    scope = ['https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://spreadsheets.google.com/feeds']
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
-    credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'], scope)
-
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(certificate_path, certificate), scope)
     try:
         gs = gspread.authorize(credentials)
         apflog("Successfully logged in.", echo=True)
@@ -538,8 +540,8 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-5
         apflog("Loaded Main %s" % (sheetn),echo=True)
         worksheet = spreadsheet.sheet1
         apflog("Got spreadsheet", echo=True)
-    except:
-        apflog("Cannot Read %s"  % (sheetn), echo=True, level='error')
+    except Exception as e:
+        apflog("Cannot Read %s: %s"  % (sheetn, e), echo=True, level='error')
         worksheet = None
     return worksheet
 

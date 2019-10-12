@@ -842,6 +842,19 @@ class APF:
         return False
 
 
+    def homeTelescope(self):
+        rv, rc = cmdexec("/usr/local/lick/bin/robot/slew --home")
+        try:
+            homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
+            if rc == 0 and homed == 2:
+                return True
+            else:
+                apflog("cannot home telescope" % (e),level='Alert',echo=True)
+                return False
+        except:
+            apflog("cannot home telescope and/or cannot read apfmon keyword" % (e),level='Alert',echo=True)
+            return False
+
     def checkHome(self,home=True):
         try:
             homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
@@ -853,13 +866,7 @@ class APF:
         else:
             if homed == 5 or homed == 6:
                 if home:
-                    rc = subprocess.call(["/usr/local/lick/bin/robot/slew", "--home"])
-                    homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
-                    if rc == 0 and homed == 2:
-                        return True
-                    else:
-                        apflog("cannot home telescope" % (e),level='Alert',echo=True)
-                        return False
+                    self.homeTelescope()
                 else:
                     apflog("Telescope needs to be homed",level='Alert',echo=True)
                     return False
@@ -1182,10 +1189,12 @@ class APF:
         if not result:
             apflog("Error setting scriptobs_autofoc", level='error',echo=True)
             return
+        
         # Make sure APFTEQ is in night mode for observations
         if self.teqmode.read() != 'Night':
             self.setTeqMode('Night')
-        # Check the instrument focus for a reasonable value
+
+            # Check the instrument focus for a reasonable value
         if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
             lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
             apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)

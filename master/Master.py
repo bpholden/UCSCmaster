@@ -80,8 +80,8 @@ class Master(threading.Thread):
 
 
 
-    def set_autofocval(self):
-        """ Master.set_autofocval()
+    def setAutofocVal(self):
+        """ Master.setAutofocVal()
             tests when the last time the telescope was focused, if more than FOCUSTIME enable focus check
         """
 
@@ -168,6 +168,7 @@ class Master(threading.Thread):
         return False
 
 
+
     def endExposure(self):
         if self.debug:
             APF.log("Would have stopped exposure",echo=True)
@@ -203,7 +204,7 @@ class Master(threading.Thread):
             self.target = target
 
         return
-    
+
     ####
     # run is the main event loop, for historical reasons it has its own functions that are local in scope
     ####
@@ -323,7 +324,7 @@ class Master(threading.Thread):
             
             self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval)
 
-            self.set_autofocval()
+            self.setAutofocVal()
             if self.target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
@@ -423,6 +424,47 @@ class Master(threading.Thread):
             
             return
 
+        def checkServos(self):
+
+            rv = ktl.read('apftask','slew_allowed',binary=True)
+            if rv:
+                # it was cleared
+                apflog("slew allowed",level="error",echo=True)
+                # just to be safe
+                chk_done = "$checkapf.MOVE_PERM == true"
+                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+                if result:
+                    ## this is temporary ##
+                    rv = self.APF.homeTelescope()
+                    if rv:
+                        ktl.write('apftask','scriptobs_message','')
+                        return True
+                    else:
+                        return False
+                else:
+                    apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+                    return False
+                
+            ripd, running = self.APF.findRobot()
+            if running:
+                self.APF.killRobot(now=True)
+
+            chk_done = "$checkapf.MOVE_PERM == true"
+            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+            if result:
+                rv = self.APF.powerDownTelescope()
+                if rv:
+                    apflog("APF power cycled.", echo=True)
+                    return rv
+                else:
+                    apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
+                    closing(force=True)
+                    return False
+            elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
+                apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+                closing(force=True)
+            return False
+
         def checkTelState():
             slewing     = '$eostele.AZSSTATE == Slewing  or  $eostele.ELSSTATE == Slewing'
             tracking    = '$eostele.AZSSTATE == Tracking and $eostele.ELSSTATE == Tracking'
@@ -481,7 +523,14 @@ class Master(threading.Thread):
                 apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
                 # reboot warsaw
                 self.APF.ucam_restart()
-            
+            mtch = re.search("ERR/WIND",message)
+            if mtch:
+                # uh oh
+                apflog("scriptobs has failed - checking servos",level="error",echo=True)
+                rv = self.checkServos()
+                if rv is False:
+                    return
+                
             apflog("Starting an instance of scriptobs",echo=True)
             if self.fixedList is not None and self.shouldStartList():
                 # We wish to observe a fixed target list, in it's original order
@@ -602,7 +651,7 @@ class Master(threading.Thread):
 
             # check last telescope focus
             if running and  float(sunel) <= sunel_lim:
-                self.set_autofocval()
+                self.setAutofocVal()
                 
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation
@@ -680,6 +729,15 @@ class Master(threading.Thread):
                             apflog(outstr,level='info', echo=True)
                             result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
                             self.APF.DMReset()
+                            if self.APF.openOK is False:
+                                closetime = datetime.now()
+                                APFTask.set(self.task, suffix="MESSAGE", value="Closing for weather", wait=False)
+                                apflog("No longer ok to open.", echo=True)
+                                apflog("OPREASON: " + self.APF.checkapf["OPREASON"].read(), echo=True)
+                                apflog("WEATHER: " + self.APF.checkapf['WEATHER'].read(), echo=True)
+                                closing()
+                                break
+                               
                     
                 elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at night", wait=False)                    
@@ -694,24 +752,7 @@ class Master(threading.Thread):
 
             # Check for servo errors
             if self.APF.slew_allowed.read(binary=True) is False and self.APF.isReadyForObserving()[0]:
-                APFTask.set(self.task, suffix="MESSAGE", value="Likely servo failure.", wait=False)                    
-                if running:
-                    self.APF.killRobot(now=True)
-                
-                apflog("Error: APF is open, and slew_allowed is false. Likely a servo error/amplifier fault.", level="error", echo=True)
-                chk_done = "$checkapf.MOVE_PERM == true"
-                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
-                if result:
-                    rv = self.APF.powerDownTelescope()
-                    if rv:
-                        apflog("APF power cycled.", echo=True)
-                    else:
-                        apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
-                        closing(force=True)
-                elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
-                    apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
-
-                    closing(force=True)
+                rv = self.checkServos()
                 
             # If we are open and scriptobs isn't running, start it up
             if self.APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
