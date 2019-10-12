@@ -216,7 +216,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d
 
 
 
-def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-5b98d1283a95.json',outfn="too.dat",outdir=None,config={'I2': 'N', 'decker': 'T', 'owner' : '' },force_download=True):
+def parseGoogledexTOO(sheetns=["TOO_test"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="too.dat",outdir=None,config={'I2': 'N', 'decker': 'T', 'owner' : '' },force_download=True):
     """ parseGoogledex parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
