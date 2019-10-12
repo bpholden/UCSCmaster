@@ -1189,10 +1189,12 @@ class APF:
         if not result:
             apflog("Error setting scriptobs_autofoc", level='error',echo=True)
             return
+        
         # Make sure APFTEQ is in night mode for observations
         if self.teqmode.read() != 'Night':
             self.setTeqMode('Night')
-        # Check the instrument focus for a reasonable value
+
+            # Check the instrument focus for a reasonable value
         if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
             lastfit_dewarfoc = ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True)
             apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
