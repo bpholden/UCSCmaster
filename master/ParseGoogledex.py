@@ -227,7 +227,15 @@ def update_googledex_lastobs(filename,localdex="googledex.dat",sheetns=["2018B"]
         return
     if ctime is None:
         ctime = datetime.utcfromtimestamp(int(time.time()))
-    
+
+    if localdex is not None:
+        gnames, gstar_table, gflags, gstars = parseGoogledex(sheetns=[],certificate=certificate,outfn=localdex)
+        for nm in obslog.names:
+            if gnames.count(nm) > 0:
+                gind = gnames.index(nm)
+                obslog.lastobs = gstar_table[gind,DS_LAST]
+            else:
+                obslog.lastobs = None
 
     for sheetn in sheetns:
         ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
