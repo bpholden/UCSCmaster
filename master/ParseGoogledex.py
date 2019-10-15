@@ -258,12 +258,15 @@ def update_googledex_lastobs(filename,localdex="googledex.dat",sheetns=["2018B"]
                 otime = obslog.times[nameidx]
                 taketemp = obslog.temps[nameidx]
                 curowner = obslog.owners[nameidx]
-                if isinstance(otime,float):
-                    t = datetime.utcfromtimestamp(otime)
+                if localdex is not None and obslog.lastobs[nameidx] is not None:
+                    jd = obslog.lastobs[nameidx]
                 else:
-                    hr, mn = otime
-                    t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
-                jd = float(ephem.julian_date(t))
+                    if isinstance(otime,float):
+                        t = datetime.utcfromtimestamp(otime)
+                    else:
+                        hr, mn = otime
+                        t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
+                    jd = float(ephem.julian_date(t))
                 try:
                     pastdate = float(v[col])
                     try:
