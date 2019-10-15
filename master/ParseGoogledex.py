@@ -14,7 +14,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
 import Coords
-from SchedulerConsts import MIN_TOTOBS, DS_BV, DS_ERR
+from SchedulerConsts import MIN_TOTOBS, DS_BV, DS_ERR, DS_LAST
 import ExposureCalculations as ec
 
 try:
