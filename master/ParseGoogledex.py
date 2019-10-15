@@ -214,7 +214,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d
 
     return (names, np.array(star_table), flags, stars)
 
-def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
+def update_googledex_lastobs(filename,localdex="googledex.dat",sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
         update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
