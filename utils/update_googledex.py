@@ -7,14 +7,14 @@ sys.path.append("../master")
 import ParseGoogledex 
 
 if __name__ == "__main__":
-    if len(sys.argv) <= 1:
-        print "needs a filename"
+    if len(sys.argv) <= 2:
+        print "needs a filename and a list of sheet names"
         sys.exit()
     fn = sys.argv[1]
     if len(sys.argv) >= 3:
         sheetnl = sys.argv[2]
     else:
-        sheetnl = "The Googledex"
+        sheetnl = "Bstars"
 
     sheetns = sheetnl.split(",")
     for sheetn in sheetns:
