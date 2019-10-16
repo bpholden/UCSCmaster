@@ -1,6 +1,8 @@
 #!/usr/bin/env  /opt/kroot/bin/kpython
 
 import sys
+import time
+
 sys.path.append("../master")
 import ParseGoogledex 
 
@@ -15,4 +17,6 @@ if __name__ == "__main__":
         sheetnl = "The Googledex"
 
     sheetns = sheetnl.split(",")
-    ParseGoogledex.update_googledex_lastobs(fn,sheetns=sheetns)
+    for sheetn in sheetns:
+        time.sleep(10)
+        ParseGoogledex.update_googledex_lastobs(fn,sheetns=[sheetn])
