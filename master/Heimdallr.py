@@ -302,11 +302,8 @@ if __name__ == '__main__':
         if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
             logpush(os.path.join(os.getcwd(),"robot.log"))
             
-        if master.nighttargetlog:
-            try:
-                logpush(master.nighttargetlogname)
-            except:
-                apflog("cannot roll %s" % (master.nighttargetlogname))
+        if os.path.exists(os.path.join(os.getcwd(),"googledex.dat")):
+            logpush(os.path.join(os.getcwd(),"googledex.dat"))
 
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
