@@ -26,7 +26,6 @@ from apflog import *
 import UCSCScheduler_V2 as ds
 from x_gaussslit import *
 import ExposureCalculations
-import ParseGoogledex
 import SchedulerConsts
 
 SUNEL_ENDLIM = -10.0
@@ -784,7 +783,7 @@ if __name__ == "__main__":
         try:
             dt = datetime.now()
             print(dt)
-            time.sleep(100)
+            APFTask.wait(parent,True,timeout=100)
         except KeyboardInterrupt:
             apflog("Heimdallr has been killed by user.", echo=True)
             master.stop()
