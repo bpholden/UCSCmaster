@@ -7,7 +7,8 @@ import re
 from datetime import datetime, timedelta
 
 import numpy as np
-import ephem
+import skyfield
+
 from ExposureCalculations import getI2_M, getI2_K, getEXPMeter, getEXPMeter_Rate, getEXPTime
 import ParseGoogledex
 import ObservedLog
@@ -296,19 +297,15 @@ def compute_datetime(ctime):
 
 def make_apf_obs(dt,horizon=str(TARGET_ELEVATION_MIN)):
     # Generate a pyephem observer for the APF
-    apf_obs = ephem.Observer()
-    apf_obs.lat  = '37:20:33.1'
-    apf_obs.long = '-121:38:17.7'
-    apf_obs.elevation = 1274
-    # Minimum observation to observe things at
-    apf_obs.horizon = horizon
-    apf_obs.date = dt
+
+    apf_obs = skyfield.api.Topos('37.342528 N','121.63825 W')
+    
 
     return apf_obs
 
 def compute_sunset_n_rise(dt,horizon='0'):
     # computes time in seconds before sunset
-    apf_obs = make_apf_obs(dt,horizon=horizon)
+    apf_obs = make_apf_obs()
     sunset = apf_obs.next_setting(ephem.Sun())
     sunset -= ephem.Date(dt)
     sunset *= 86400.0 # convert to seconds
