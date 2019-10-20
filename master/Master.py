@@ -137,6 +137,49 @@ class Master(threading.Thread):
                 ktl.write('apftask','MASTER_OBSBSTAR',self.obsBstar,binary=True)
             except Exception, e:
                 apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
+
+    def checkServos(self):
+
+        rv = ktl.read('apftask','slew_allowed',binary=True)
+        if rv:
+            # it was cleared
+            apflog("slew allowed",level="error",echo=True)
+            # just to be safe
+            chk_done = "$checkapf.MOVE_PERM == true"
+            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+            if result:
+                ## this is temporary ##
+                rv = self.APF.homeTelescope()
+                if rv:
+                    ktl.write('apftask','scriptobs_message','')
+                    return True
+                else:
+                    return False
+            else:
+                apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+                return False
+                
+        ripd, running = self.APF.findRobot()
+        if running:
+            self.APF.killRobot(now=True)
+
+        chk_done = "$checkapf.MOVE_PERM == true"
+        result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+        if result:
+            rv = self.APF.powerDownTelescope()
+            if rv:
+                apflog("APF power cycled.", echo=True)
+                return rv
+            else:
+                apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
+                closing(force=True)
+                return False
+        elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
+            apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+            closing(force=True)
+            return False
+
+                
             
     def readStarlistFile(filename):
         tot = 0
@@ -381,46 +424,6 @@ class Master(threading.Thread):
             
             return
 
-        def checkServos(self):
-
-            rv = ktl.read('apftask','slew_allowed',binary=True)
-            if rv:
-                # it was cleared
-                apflog("slew allowed",level="error",echo=True)
-                # just to be safe
-                chk_done = "$checkapf.MOVE_PERM == true"
-                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
-                if result:
-                    ## this is temporary ##
-                    rv = self.APF.homeTelescope()
-                    if rv:
-                        ktl.write('apftask','scriptobs_message','')
-                        return True
-                    else:
-                        return False
-                else:
-                    apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
-                    return False
-                
-            ripd, running = self.APF.findRobot()
-            if running:
-                self.APF.killRobot(now=True)
-
-            chk_done = "$checkapf.MOVE_PERM == true"
-            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
-            if result:
-                rv = self.APF.powerDownTelescope()
-                if rv:
-                    apflog("APF power cycled.", echo=True)
-                    return rv
-                else:
-                    apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
-                    closing(force=True)
-                    return False
-            elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
-                apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
-                closing(force=True)
-            return False
 
         def checkTelState():
             slewing     = '$eostele.AZSSTATE == Slewing  or  $eostele.ELSSTATE == Slewing'
