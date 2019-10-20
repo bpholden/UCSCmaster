@@ -261,6 +261,7 @@ if __name__ == '__main__':
         apflog("Starting phase is not valid. Phase being set to Init", echo=True)
         APFTask.phase(parent, "Init")
     apflog("Phase at start is: %s" % phase, echo=True)
+    APFLib.write(apf.robot["SCRIPTOBS_MESSAGE"], '')
 
     # Start the actual operations
     # Goes through 5 steps:
