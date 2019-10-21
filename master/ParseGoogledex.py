@@ -312,7 +312,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     starNameIdx = codex_cols.index("Star Name")
     lastObsIdx = codex_cols.index("lastobs")
     try:
-        nObsIdx = codex_cols.index("nObsIdx")
+        nObsIdx = codex_cols.index("Nobs")
     except:
         nObsIdx = -1
     
