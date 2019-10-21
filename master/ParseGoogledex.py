@@ -43,6 +43,10 @@ def parse_starname(starname):
     while m:
         ostarname = re.sub("\s+","_",ostarname)
         m = re.search("\s+",ostarname)
+    m = re.search("\+",ostarname)
+    while m:
+        ostarname = re.sub("\+","p",ostarname)
+
         
     return ostarname
 
