@@ -307,7 +307,6 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
         apflog("googledex file corrupt, so can't be updated",echo=True)
         return obslog.names
 
-
     codex_cols = full_codex[0]
 
     starNameIdx = codex_cols.index("Star Name")
