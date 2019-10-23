@@ -464,25 +464,22 @@ class Master(threading.Thread):
                     rv = False
             
             return rv
-        
-        # starts an instance of scriptobs 
-        def startScriptobs():
-            # Update the last obs file and hitlist if needed
 
-            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=self.APF.ucam["OBSNUM"].read())
 
-            self.APF.updateWindshield(self.windshield)
-            ripd, running = self.APF.findRobot()
-            if running:
-                apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
-                return
+        def checkScriptobsMessages():
             message = self.APF.message.read()
             mtch = re.search("ERR/UCAM",message)
             if mtch:
                 # uh oh
                 apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
                 # reboot warsaw
-                self.APF.ucam_restart()
+                rv = self.APF.ucam_restart()
+                if rv :
+                    self.APF.message.write("")
+                    return True
+                else:
+                    return False
+                
             mtch = re.search("ERR/WIND",message)
             if mtch:
                 # uh oh
