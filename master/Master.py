@@ -715,7 +715,7 @@ class Master(threading.Thread):
                 rv = self.checkServos()
                 
             # If we are open and scriptobs isn't running, start it up
-            if self.APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
+            if self.APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim and self.APF.openOK:
                 APFTask.set(self.task, suffix="MESSAGE", value="Starting scriptobs", wait=False)
                 rv = checkTelState()
                 if rv is False:
