@@ -486,8 +486,29 @@ class Master(threading.Thread):
                 apflog("scriptobs has failed - checking servos",level="error",echo=True)
                 rv = self.checkServos()
                 if rv is False:
-                    return
-                
+                    return False
+        
+        # starts an instance of scriptobs 
+        def startScriptobs():
+            # Update the last obs file and hitlist if needed
+
+            APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=self.APF.ucam["OBSNUM"].read())
+
+            self.APF.updateWindshield(self.windshield)
+            ripd, running = self.APF.findRobot()
+            if running:
+                apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
+                return
+            rv = self.checkScriptobsMessages()
+            if rv is False:
+                return
+
+            expr = "$checkapf.MOVE_PERM = True and $checkapf.INSTR_PERM = True"
+            perms = APFTask.waitFor(self.task,True,expression=expr,timeout=1200)
+            if perms is False:
+                apflog("Cannot start an instance of scriptobs because do not have permission",echo=True,level='error')
+                return
+            
             apflog("Starting an instance of scriptobs",echo=True)
             if self.fixedList is not None and self.shouldStartList():
                 # We wish to observe a fixed target list, in it's original order
