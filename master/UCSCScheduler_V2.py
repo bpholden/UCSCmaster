@@ -822,7 +822,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     apflog(cstr,echo=True)
 
     res =  makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx,focval=focval)
-    if do_templates and flags['template'][idx] == 'N':
+    if do_templates and flags['template'][idx] == 'N' and flags['I2'][idx] == 'Y':
         bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
         if enoughTime(star_table,stars,idx,row,apf_obs,dt):
