@@ -14,8 +14,8 @@ import APF
 import ParseGoogledex
 from SchedulerConsts import * 
 
-IMMEDIATE = 30
-NEXT_EXP = 20
+IMMEDIATE = 300
+NEXT_EXP = 200
 
 class TOO(threading.Thread):
     def __init__(self,sheetns="",test=False):
