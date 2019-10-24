@@ -18,6 +18,7 @@ import matplotlib
 matplotlib.use('Agg')
 import pylab as pl
 
+parent = 'focusinstr'
 
 apfmot = ktl.Service('apfmot')
 dewfoc = apfmot['DEWARFOCRAW']
@@ -108,11 +109,18 @@ def focusloop():
     for foc in focsteps:
         apflog("Setting dewar focus to %d" % foc)
         dewfoc.write(foc)
-        time.sleep(2)
-        while abs(dewfoc.binary - foc) > 10:
-            time.sleep(2)
-        apflog("Actual dewar focus value %d" % dewfoc.binary)
-        APFTask.set('focusinstr','MESSAGE',"Actual dewar focus value %d" % dewfoc.binary)
+        lfoc = foc - 10
+        hfoc = foc + 10
+        expr='apfmot.DEWARFOCRAW > %.0f & apfmot.DEWARFOCRAW > %.0f' % (lfoc,hfoc)
+        success = APFTask.waitFor(parent,True,expression=expr,timeout=60)
+        if success:
+            apflog("Actual dewar focus value %d" % dewfoc.binary)
+            APFTask.set('focusinstr','MESSAGE',"Actual dewar focus value %d" % dewfoc.binary)
+            return []
+        else:
+            apflog("Deware focus move failed, Actual dewar focus value %d" % dewfoc.binary,level='error')
+            APFTask.set('focusinstr','MESSAGE',"Dewar focus move failed. Actual dewar focus value %d" % dewfoc.binary)
+            
         fname = os.path.join(ucam('OUTDIR').read(), ucam('OUTFILE').read() + ucam('OBSNUM').read() + '.fits')
         imfiles.append(fname)
         exposure('Focus', tharexp, readwait=False)
@@ -174,13 +182,15 @@ Max peak counts = %4.0f ADU\n
 
 if __name__ == '__main__':
     
-    APFTask.establish('focusinstr',os.getpid())
+    APFTask.establish(parent,os.getpid())
     try:
         waitwrite(ucam['AUTOSHUT'], True)
         APFTask.set('focusinstr','PHASE','Configuring instrument for pinhole ThAr Focus')
         stagesetup(focuspos)
         APFTask.set('focusinstr','PHASE','Focus loop')
         focimages = focusloop()
+        if len(focimages) == 0:
+            sys.exit()
         APFTask.set('focusinstr','PHASE','Finding Best Focus Value')
         bestfoc = findfoc(focimages)
         if abs(bestfoc - normfoc) < 2500:

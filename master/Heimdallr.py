@@ -261,6 +261,7 @@ if __name__ == '__main__':
         apflog("Starting phase is not valid. Phase being set to Init", echo=True)
         APFTask.phase(parent, "Init")
     apflog("Phase at start is: %s" % phase, echo=True)
+    APFLib.write(apf.robot["SCRIPTOBS_MESSAGE"], '')
 
     # Start the actual operations
     # Goes through 5 steps:
@@ -296,6 +297,14 @@ if __name__ == '__main__':
             if not debug:
                 APFTask.set(parent, "STARLIST", "")
         
+        if os.path.exists(os.path.join(os.getcwd(),"googledex.dat")):
+            logpush(os.path.join(os.getcwd(),"googledex.dat"))
+        
+        if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
+            logpush(os.path.join(os.getcwd(),"robot.log"))
+            
+        if os.path.exists(os.path.join(os.getcwd(),"googledex.dat")):
+            logpush(os.path.join(os.getcwd(),"googledex.dat"))
 
         apflog("Setting SCRIPTOBS_LINES_DONE to 0")
         APFLib.write(apf.robot["SCRIPTOBS_LINES_DONE"], 0)
@@ -466,9 +475,12 @@ if __name__ == '__main__':
     if os.path.exists(os.path.join(os.getcwd(),"observed_targets")):
         try:
             apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-            ParseGoogledex.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn)
-        except:
-            apflog("Error: Updating the online googledex has failed.", level="error")
+            for sn in master.sheetn:
+                n = ParseGoogledex.update_googledex_lastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=[sn])
+                APFTask.wait(parent,True,timeout=n)
+
+        except Exception as e:
+            apflog("Error: Updating the online googledex has failed: %s" % (e), level="error")
         logpush(os.path.join(os.getcwd(),"observed_targets"))
 
     if os.path.exists(os.path.join(os.getcwd(),"googledex.dat")):

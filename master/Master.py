@@ -26,7 +26,6 @@ from apflog import *
 import UCSCScheduler_V2 as ds
 from x_gaussslit import *
 import ExposureCalculations
-import ParseGoogledex
 import SchedulerConsts
 
 SUNEL_ENDLIM = -10.0
@@ -139,6 +138,49 @@ class Master(threading.Thread):
                 ktl.write('apftask','MASTER_OBSBSTAR',self.obsBstar,binary=True)
             except Exception, e:
                 apflog("Error: Cannot communicate with apftask: %s" % (e),level="error")
+
+    def checkServos(self):
+
+        rv = ktl.read('apftask','slew_allowed',binary=True)
+        if rv:
+            # it was cleared
+            apflog("slew allowed",level="error",echo=True)
+            # just to be safe
+            chk_done = "$checkapf.MOVE_PERM == true"
+            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+            if result:
+                ## this is temporary ##
+                rv = self.APF.homeTelescope()
+                if rv:
+                    ktl.write('apftask','scriptobs_message','')
+                    return True
+                else:
+                    return False
+            else:
+                apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+                return False
+                
+        ripd, running = self.APF.findRobot()
+        if running:
+            self.APF.killRobot(now=True)
+
+        chk_done = "$checkapf.MOVE_PERM == true"
+        result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
+        if result:
+            rv = self.APF.powerDownTelescope()
+            if rv:
+                apflog("APF power cycled.", echo=True)
+                return rv
+            else:
+                apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
+                closing(force=True)
+                return False
+        elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
+            apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
+            closing(force=True)
+            return False
+
+                
             
     def readStarlistFile(filename):
         tot = 0
@@ -424,46 +466,6 @@ class Master(threading.Thread):
             
             return
 
-        def checkServos(self):
-
-            rv = ktl.read('apftask','slew_allowed',binary=True)
-            if rv:
-                # it was cleared
-                apflog("slew allowed",level="error",echo=True)
-                # just to be safe
-                chk_done = "$checkapf.MOVE_PERM == true"
-                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
-                if result:
-                    ## this is temporary ##
-                    rv = self.APF.homeTelescope()
-                    if rv:
-                        ktl.write('apftask','scriptobs_message','')
-                        return True
-                    else:
-                        return False
-                else:
-                    apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
-                    return False
-                
-            ripd, running = self.APF.findRobot()
-            if running:
-                self.APF.killRobot(now=True)
-
-            chk_done = "$checkapf.MOVE_PERM == true"
-            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
-            if result:
-                rv = self.APF.powerDownTelescope()
-                if rv:
-                    apflog("APF power cycled.", echo=True)
-                    return rv
-                else:
-                    apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
-                    closing(force=True)
-                    return False
-            elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
-                apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
-                closing(force=True)
-            return False
 
         def checkTelState():
             slewing     = '$eostele.AZSSTATE == Slewing  or  $eostele.ELSSTATE == Slewing'
@@ -504,6 +506,29 @@ class Master(threading.Thread):
                     rv = False
             
             return rv
+
+
+        def checkScriptobsMessages():
+            message = self.APF.message.read()
+            mtch = re.search("ERR/UCAM",message)
+            if mtch:
+                # uh oh
+                apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
+                # reboot warsaw
+                rv = self.APF.ucam_restart()
+                if rv :
+                    self.APF.message.write("")
+                    return True
+                else:
+                    return False
+                
+            mtch = re.search("ERR/WIND",message)
+            if mtch:
+                # uh oh
+                apflog("scriptobs has failed - checking servos",level="error",echo=True)
+                rv = self.checkServos()
+                if rv is False:
+                    return False
         
         # starts an instance of scriptobs 
         def startScriptobs():
@@ -516,21 +541,16 @@ class Master(threading.Thread):
             if running:
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
-            message = self.APF.message.read()
-            mtch = re.search("ERR/UCAM",message)
-            if mtch:
-                # uh oh
-                apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
-                # reboot warsaw
-                self.APF.ucam_restart()
-            mtch = re.search("ERR/WIND",message)
-            if mtch:
-                # uh oh
-                apflog("scriptobs has failed - checking servos",level="error",echo=True)
-                rv = self.checkServos()
-                if rv is False:
-                    return
-                
+            rv = self.checkScriptobsMessages()
+            if rv is False:
+                return
+
+            expr = "$checkapf.MOVE_PERM = True and $checkapf.INSTR_PERM = True"
+            perms = APFTask.waitFor(self.task,True,expression=expr,timeout=1200)
+            if perms is False:
+                apflog("Cannot start an instance of scriptobs because do not have permission",echo=True,level='error')
+                return
+            
             apflog("Starting an instance of scriptobs",echo=True)
             if self.fixedList is not None and self.shouldStartList():
                 # We wish to observe a fixed target list, in it's original order
@@ -755,7 +775,7 @@ class Master(threading.Thread):
                 rv = self.checkServos()
                 
             # If we are open and scriptobs isn't running, start it up
-            if self.APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim:
+            if self.APF.isReadyForObserving()[0] and not running and float(sunel) <= sunel_lim and self.APF.openOK:
                 APFTask.set(self.task, suffix="MESSAGE", value="Starting scriptobs", wait=False)
                 rv = checkTelState()
                 if rv is False:
@@ -826,7 +846,7 @@ if __name__ == "__main__":
         try:
             dt = datetime.now()
             print(dt)
-            time.sleep(100)
+            APFTask.wait(parent,True,timeout=100)
         except KeyboardInterrupt:
             apflog("Heimdallr has been killed by user.", echo=True)
             master.stop()

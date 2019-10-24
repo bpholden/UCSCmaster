@@ -35,7 +35,7 @@ def checkflag(key,didx,line,regexp,default):
 
 def parse_starname(starname):
 
-    ostarname = starname
+    ostarname = starname.strip()
     m= re.search("HD\s+\d+",starname)
     if m:
         ostarname = re.sub("HD\s+","HD",starname)
@@ -43,6 +43,10 @@ def parse_starname(starname):
     while m:
         ostarname = re.sub("\s+","_",ostarname)
         m = re.search("\s+",ostarname)
+    m = re.search("\+",ostarname)
+    while m:
+        ostarname = re.sub("\+","p",ostarname)
+
         
     return ostarname
 
@@ -359,6 +363,8 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
         update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
 
         filename - where the observations are logged
+
+        returns the number of cells updated
     """
 #    names, times, temps, owners = ObservedLog.getObserved(filename)
     obslog = ObservedLog.ObservedLog(filename)
@@ -367,11 +373,10 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
     if ctime is None:
         ctime = datetime.utcfromtimestamp(int(time.time()))
     
-
+    nupdates = 0
     for sheetn in sheetns:
         ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
         if ws:
-            time.sleep(2)
             vals = ws.get_all_values()
         else:
             next
@@ -402,24 +407,23 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                     except:
                         n = 0
                     if jd > pastdate and curowner == v[owncol]:
-                        time.sleep(2)
                         ws.update_cell(i+1, col+1, round(jd, 4) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
-
+                        nupdates += 2
                 except:
-                    time.sleep(2)
                     print (v[0], v[col])
                     ws.update_cell(i+1, col+1, round(jd,4) )
+                    nupdates += 1
                 try:
                    have_temp = v[tempcol]
                    if taketemp == "Y" and have_temp == "N" and curowner == v[owncol]:
-                       time.sleep(2)
                        ws.update_cell(i+1, tempcol+1, "Y")
+                       nupdates += 1
                 except:
                     apflog( "Error logging template obs for %s" % (v[0]),echo=True,level='error')
                 apflog( "Updated %s in %s" % (v[0],sheetn),echo=True)
 
-    return
+    return nupdates
 
 def update_local_googledex(intime,googledex_file="googledex.dat", observed_file="observed_targets"):
     """
@@ -442,13 +446,12 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
         apflog("googledex file corrupt, so can't be updated",echo=True)
         return obslog.names
 
-
     codex_cols = full_codex[0]
 
     starNameIdx = codex_cols.index("Star Name")
     lastObsIdx = codex_cols.index("lastobs")
     try:
-        nObsIdx = codex_cols.index("nObsIdx")
+        nObsIdx = codex_cols.index("Nobs")
     except:
         nObsIdx = -1
     
@@ -472,7 +475,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
             apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
             row[lastObsIdx] = str(jd)
             if nObsIdx > 0:
-                row[nObsIdx] = row[nObsIdx] + 1
+                row[nObsIdx] = int(row[nObsIdx]) + 1
             full_codex[i] = row
 
     with open(googledex_file, 'wb') as f:
