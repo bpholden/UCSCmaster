@@ -660,7 +660,6 @@ class Master(threading.Thread):
                 self.stop()
                 
             # Open 
-
             if not self.APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and self.APF.openOK:
                 if float(sunel) > sunel_lim and not rising:
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at sunset", wait=False)                    
