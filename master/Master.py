@@ -305,7 +305,7 @@ class Master(threading.Thread):
                         self.scriptobs.stdin.write(curstr)
                         return
                     except Exception, e:
-                        apflog("Failure in getTarget poping item off stack and writing to stdin: %s" % (e),level='error',echo=True)
+                        apflog("Failure in getTarget popping item off stack and writing to stdin: %s" % (e),level='error',echo=True)
                         self.APF.killRobot()
                         pass
 
