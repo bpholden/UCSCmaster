@@ -600,9 +600,9 @@ def getTOO(ctime,sheetns=["Bstars"],owner='public',toofn="too.dat"):
         maxpri = max(star_table[:,TOO_APFPRI][available])
         sort_i = (final_priorities == maxpri) & available
                         
-        if maxpri > PRI_IMMEDIATE:
+        if maxpri > SchedulerConsts.IMMEDIATE:
             when = SchedulerConsts.IMMEDIATE
-        elif maxpri > PRI_NEXT_EXP:
+        elif maxpri > SchedulerConsts.NEXT_EXP:
             when = SchedulerConsts.NEXT_EXP
         elif len(sort:
             when = SchedulerConsts.NEXT_LINE

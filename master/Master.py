@@ -244,7 +244,8 @@ class Master(threading.Thread):
                 APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)
         if when > 0:
             self.target = target
-
+            
+        self.checkTOOs = False
         return
 
     ####
@@ -664,10 +665,11 @@ class Master(threading.Thread):
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
                     APFTask.waitfor(self.task, True, timeout=15)
-                    
+                    self.checkTOOs = True
                     haveobserved = True                    
                 elif self.starttime != None and self.shouldStartList():
                     self.APF.killRobot()
+            elif  running == True and float(sunel) < sunel_lim and self.APF.sop.read().strip() == 'Observing' and self.checkTOOs:
 
             # check last telescope focus
             if running and  float(sunel) <= sunel_lim:
