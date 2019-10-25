@@ -793,7 +793,7 @@ class APF:
         except Exception, e:
             apflog("Cannot write SCRIPTOBS_VMAG: %s" % (e), level='error',echo=True)
         try:
-            sline = "%s %s %s pmra=%s pmdec=%s vmag=%s" % (star[0],star[1],star[2],star[4],star[5],star[6])
+            sline = "%s %s %s pmra=%s pmdec=%s vmag=%s # end" % (star[0],star[1],star[2],star[4],star[5],star[6])
             self.line.write(sline)
         except Exception, e:
             apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
