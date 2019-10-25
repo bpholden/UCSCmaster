@@ -99,8 +99,31 @@ class Master(threading.Thread):
             if current_val == "robot_autofocus_enable":
                 self.APF.autofoc.write("robot_autofocus_disable")
                 self.focval=0
+        return
 
-
+    def checkScriptobsMessages():
+        message = self.APF.message.read()
+        mtch = re.search("ERR/UCAM",message)
+        if mtch:
+            # uh oh
+            apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
+            # reboot warsaw
+            rv = self.APF.ucam_restart()
+            if rv :
+                self.APF.message.write("")
+                return True
+            else:
+                return False
+                
+        mtch = re.search("ERR/WIND",message)
+        if mtch:
+            # uh oh
+            apflog("scriptobs has failed - checking servos",level="error",echo=True)
+            rv = self.checkServos()
+            if rv is False:
+                return False
+        return True
+        
     def checkObsSuccess(self):
         """ Master.checkObsSuccess() 
             checks the value of SCRIPTOBS_LINE_RESULT to see if the last observation suceeded.
@@ -325,7 +348,7 @@ class Master(threading.Thread):
                         self.scriptobs.stdin.write(curstr)
                         return
                     except Exception, e:
-                        apflog("Failure in getTarget poping item off stack and writing to stdin: %s" % (e),level='error',echo=True)
+                        apflog("Failure in getTarget popping item off stack and writing to stdin: %s" % (e),level='error',echo=True)
                         self.APF.killRobot()
                         pass
 
@@ -509,28 +532,6 @@ class Master(threading.Thread):
             return rv
 
 
-        def checkScriptobsMessages():
-            message = self.APF.message.read()
-            mtch = re.search("ERR/UCAM",message)
-            if mtch:
-                # uh oh
-                apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
-                # reboot warsaw
-                rv = self.APF.ucam_restart()
-                if rv :
-                    self.APF.message.write("")
-                    return True
-                else:
-                    return False
-                
-            mtch = re.search("ERR/WIND",message)
-            if mtch:
-                # uh oh
-                apflog("scriptobs has failed - checking servos",level="error",echo=True)
-                rv = self.checkServos()
-                if rv is False:
-                    return False
-        
         # starts an instance of scriptobs 
         def startScriptobs():
             # Update the last obs file and hitlist if needed
@@ -542,9 +543,9 @@ class Master(threading.Thread):
             if running:
                 apflog("Scriptobs is already running yet startScriptobs was called",level="warn",echo=True)
                 return
-            rv = self.checkScriptobsMessages()
-            if rv is False:
-                return
+#            rv = self.checkScriptobsMessages()
+#            if rv is False:
+#                return
 
             expr = "$checkapf.MOVE_PERM = True and $checkapf.INSTR_PERM = True"
             perms = APFTask.waitFor(self.task,True,expression=expr,timeout=1200)
@@ -701,33 +702,8 @@ class Master(threading.Thread):
 
                 self.exitMessage = msg
                 self.stop()
-
-            # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
-            if self.APF.openOK and not rising and not self.APF.isOpen()[0]:
-                APFTask.set(self.task, suffix="MESSAGE", value="Powering up for APFTeq", wait=False)                    
-                if self.APF.clearestop():
-                    try:
-                        APFLib.write(self.APF.dome['AZENABLE'], 'enable', timeout=10)
-                    except:
-                        apflog("Error: Cannot enable AZ drive", level="error")
-
-                    self.APF.setTeqMode('Evening')
-                    vent_open = "$eosdome.VD4STATE = VENT_OPENED"
-                    result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
-                    if result:
-                        try:
-                            APFLib.write(self.APF.dome['AZENABLE'], 'disable', timeout=10)
-                        except:
-                            apflog("Error: Cannot disable AZ drive", level="error",echo=True)
-
-                    else:
-                        apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='error',echo=True)
-                else:
-                    apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds", level="error")
-                    APFTask.waitFor(self.task, True, timeout=600)
                 
             # Open 
-
             if not self.APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and self.APF.openOK:
                 if float(sunel) > sunel_lim and not rising:
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at sunset", wait=False)                    
@@ -770,6 +746,32 @@ class Master(threading.Thread):
                     apflog("Error: Cannot open the dome", echo=True, level='error')
                     self.APF.close()
                     os._exit()
+
+            # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
+            if self.APF.openOK and not rising and not self.APF.isOpen()[0]:
+                APFTask.set(self.task, suffix="MESSAGE", value="Powering up for APFTeq", wait=False)                    
+                if self.APF.clearestop():
+                    try:
+                        APFLib.write(self.APF.dome['AZENABLE'], 'enable', timeout=10)
+                    except:
+                        apflog("Error: Cannot enable AZ drive", level="error")
+
+                    self.APF.setTeqMode('Evening')
+                    vent_open = "$eosdome.VD4STATE = VENT_OPENED"
+                    result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
+                    if result:
+                        try:
+                            APFLib.write(self.APF.dome['AZENABLE'], 'disable', timeout=10)
+                        except:
+                            apflog("Error: Cannot disable AZ drive", level="error",echo=True)
+
+                    else:
+                        apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='error',echo=True)
+                else:
+                    apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds", level="error")
+                    APFTask.waitFor(self.task, True, timeout=600)
+                
+
 
 
             # Check for servo errors
