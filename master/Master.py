@@ -657,30 +657,6 @@ class Master(threading.Thread):
 
                 self.exitMessage = msg
                 self.stop()
-
-            # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
-            if self.APF.openOK and not rising and not self.APF.isOpen()[0]:
-                APFTask.set(self.task, suffix="MESSAGE", value="Powering up for APFTeq", wait=False)                    
-                if self.APF.clearestop():
-                    try:
-                        APFLib.write(self.APF.dome['AZENABLE'], 'enable', timeout=10)
-                    except:
-                        apflog("Error: Cannot enable AZ drive", level="error")
-
-                    self.APF.setTeqMode('Evening')
-                    vent_open = "$eosdome.VD4STATE = VENT_OPENED"
-                    result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
-                    if result:
-                        try:
-                            APFLib.write(self.APF.dome['AZENABLE'], 'disable', timeout=10)
-                        except:
-                            apflog("Error: Cannot disable AZ drive", level="error",echo=True)
-
-                    else:
-                        apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='error',echo=True)
-                else:
-                    apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds", level="error")
-                    APFTask.waitFor(self.task, True, timeout=600)
                 
             # Open 
 
@@ -726,6 +702,32 @@ class Master(threading.Thread):
                     apflog("Error: Cannot open the dome", echo=True, level='error')
                     self.APF.close()
                     os._exit()
+
+            # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
+            if self.APF.openOK and not rising and not self.APF.isOpen()[0]:
+                APFTask.set(self.task, suffix="MESSAGE", value="Powering up for APFTeq", wait=False)                    
+                if self.APF.clearestop():
+                    try:
+                        APFLib.write(self.APF.dome['AZENABLE'], 'enable', timeout=10)
+                    except:
+                        apflog("Error: Cannot enable AZ drive", level="error")
+
+                    self.APF.setTeqMode('Evening')
+                    vent_open = "$eosdome.VD4STATE = VENT_OPENED"
+                    result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
+                    if result:
+                        try:
+                            APFLib.write(self.APF.dome['AZENABLE'], 'disable', timeout=10)
+                        except:
+                            apflog("Error: Cannot disable AZ drive", level="error",echo=True)
+
+                    else:
+                        apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='error',echo=True)
+                else:
+                    apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds", level="error")
+                    APFTask.waitFor(self.task, True, timeout=600)
+                
+
 
 
             # Check for servo errors
