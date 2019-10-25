@@ -462,7 +462,6 @@ class Master(threading.Thread):
                         apflog("Error: openatsunset has failed twice.", level='error', echo=True)
                         self.APF.close()
                         return result
-
                     
             if datetime.now().strftime("%p") == 'PM':
                 setting = True
@@ -671,7 +670,9 @@ class Master(threading.Thread):
                 elif self.starttime != None and self.shouldStartList():
                     self.APF.killRobot()
             elif  running == True and float(sunel) < sunel_lim and self.APF.sop.read().strip() == 'Observing' and self.checkTOOs:
+                self.checkTOOs()
 
+                
             # check last telescope focus
             if running and  float(sunel) <= sunel_lim:
                 self.setAutofocVal()
