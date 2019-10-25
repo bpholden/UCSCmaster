@@ -462,9 +462,10 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
 
     return times, exps
 
-def template_conditions(moon, seeing, slowdown):
+def templateConditions(moon, seeing, slowdown):
 
     if seeing < 15 and slowdown < 0.5:
+        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon.alt),echo=True)
         if moon.phase < 50 and float(moon.alt) < 0:
             return True
         elif moon.phase < 25 and float(moon.alt) < 0.7:
@@ -640,7 +641,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     moon = ephem.Moon()
     moon.compute(apf_obs)
 
-    do_templates = template and template_conditions(moon, seeing, slowdown)
+    do_templates = template and templateConditions(moon, seeing, slowdown)
 
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
