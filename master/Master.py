@@ -100,6 +100,28 @@ class Master(threading.Thread):
                 self.focval=0
 
 
+        def checkScriptobsMessages():
+            message = self.APF.message.read()
+            mtch = re.search("ERR/UCAM",message)
+            if mtch:
+                # uh oh
+                apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
+                # reboot warsaw
+                rv = self.APF.ucam_restart()
+                if rv :
+                    self.APF.message.write("")
+                    return True
+                else:
+                    return False
+                
+            mtch = re.search("ERR/WIND",message)
+            if mtch:
+                # uh oh
+                apflog("scriptobs has failed - checking servos",level="error",echo=True)
+                rv = self.checkServos()
+                if rv is False:
+                    return False
+        
     def checkObsSuccess(self):
         """ Master.checkObsSuccess() 
             checks the value of SCRIPTOBS_LINE_RESULT to see if the last observation suceeded.
@@ -466,28 +488,6 @@ class Master(threading.Thread):
             return rv
 
 
-        def checkScriptobsMessages():
-            message = self.APF.message.read()
-            mtch = re.search("ERR/UCAM",message)
-            if mtch:
-                # uh oh
-                apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
-                # reboot warsaw
-                rv = self.APF.ucam_restart()
-                if rv :
-                    self.APF.message.write("")
-                    return True
-                else:
-                    return False
-                
-            mtch = re.search("ERR/WIND",message)
-            if mtch:
-                # uh oh
-                apflog("scriptobs has failed - checking servos",level="error",echo=True)
-                rv = self.checkServos()
-                if rv is False:
-                    return False
-        
         # starts an instance of scriptobs 
         def startScriptobs():
             # Update the last obs file and hitlist if needed
