@@ -98,29 +98,30 @@ class Master(threading.Thread):
             if current_val == "robot_autofocus_enable":
                 self.APF.autofoc.write("robot_autofocus_disable")
                 self.focval=0
+        return
 
-
-        def checkScriptobsMessages():
-            message = self.APF.message.read()
-            mtch = re.search("ERR/UCAM",message)
-            if mtch:
-                # uh oh
-                apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
-                # reboot warsaw
-                rv = self.APF.ucam_restart()
-                if rv :
-                    self.APF.message.write("")
-                    return True
-                else:
-                    return False
+    def checkScriptobsMessages():
+        message = self.APF.message.read()
+        mtch = re.search("ERR/UCAM",message)
+        if mtch:
+            # uh oh
+            apflog("scriptobs has failed post UCAM recovery",level="error",echo=True)
+            # reboot warsaw
+            rv = self.APF.ucam_restart()
+            if rv :
+                self.APF.message.write("")
+                return True
+            else:
+                return False
                 
-            mtch = re.search("ERR/WIND",message)
-            if mtch:
-                # uh oh
-                apflog("scriptobs has failed - checking servos",level="error",echo=True)
-                rv = self.checkServos()
-                if rv is False:
-                    return False
+        mtch = re.search("ERR/WIND",message)
+        if mtch:
+            # uh oh
+            apflog("scriptobs has failed - checking servos",level="error",echo=True)
+            rv = self.checkServos()
+            if rv is False:
+                return False
+        return True
         
     def checkObsSuccess(self):
         """ Master.checkObsSuccess() 
