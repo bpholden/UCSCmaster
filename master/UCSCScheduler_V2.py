@@ -499,11 +499,11 @@ def makeTempRow(star_table,ind,bstar=False):
         row.append(2)
     else:
         if star_table[ind, DS_VMAG] > 10:
-            row.append(9)
-        elif star_table[ind, DS_VMAG] < 8:
-            row.append(5)
-        else:
             row.append(7)
+        elif star_table[ind, DS_VMAG] < 8:
+            row.append(3)
+        else:
+            row.append(5)
     return row
 
 def enoughTime(star_table,stars,idx,row,apf_obs,dt):
