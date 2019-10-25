@@ -465,7 +465,7 @@ def format_time(total, i2counts, nexp, mintime, maxtime, hitthemall=False):
 def templateConditions(moon, seeing, slowdown):
 
     if seeing < 15 and slowdown < 0.5:
-        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon.alt),echo=True)
+        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon.alt),echo=True,level='debug')
         if moon.phase < 50 and float(moon.alt) < 0:
             return True
         elif moon.phase < 25 and float(moon.alt) < 0.7:
