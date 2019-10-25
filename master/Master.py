@@ -287,6 +287,7 @@ class Master(threading.Thread):
                 apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                 slowdown = 1
 
+            ktl.write('apftask','MASTER_SLOWDOWN',slowdown,binary=True)
             return slowdown
         
         # This is called when an observation finishes, and selects the next target
