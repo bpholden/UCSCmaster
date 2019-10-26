@@ -248,10 +248,11 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
     
         for i, v in enumerate(vals):
             # Did we observe this target tonight?
-            if parse_starname(v[0]) in obslog.names:
+            local_name = parse_starname(v[0])
+            if local_name in obslog.names:
                 # We observed this target, so update the cell in the worksheet
                 # update_cell(row, col, val) - col and row are 1 indexed
-                nameidx = obslog.names.index(v[0])
+                nameidx = obslog.names.index(local_name)
                 otime = obslog.times[nameidx]
                 taketemp = obslog.temps[nameidx]
                 curowner = obslog.owners[nameidx]
