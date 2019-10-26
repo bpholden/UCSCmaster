@@ -34,6 +34,7 @@ SUNEL_HOR = -3.2
 AVERAGE_INSTRFOC = 8522
 DMLIM = 1140
 FOCUSTIME = 3600.
+MINTOODIFF = 1200.
 
 class Master(threading.Thread):
     def __init__(self, apf, opt,totTemps=4,task='master'):
@@ -77,6 +78,8 @@ class Master(threading.Thread):
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
 
+        self.lastTOOcheck = 0
+        self.doCheckTOOs = True
 
 
     def setAutofocVal(self):
@@ -246,7 +249,13 @@ class Master(threading.Thread):
             rv = False
         return rv
 
+    def shouldCheckTOOs(self):
 
+        diff = time.time() - self.lastTOOcheck
+        if self.doCheckTOOs and diff > MINTOODIFF:
+            return True
+        else:
+            return False
     
     def checkTOOs(self,ctime):
 
@@ -267,8 +276,9 @@ class Master(threading.Thread):
                 APF.log("Cannot abort scriptobs which means all kinds of bad things are happening",level='error',echo=True)
         if when > 0:
             self.target = target
-            
-        self.checkTOOs = False
+
+        self.lastTOOcheck = time.time()
+        self.doCheckTOOs = False
         return
 
     ####
@@ -665,11 +675,11 @@ class Master(threading.Thread):
                     apflog("Scriptobs phase is input ( dynamic scheduler ), calling getTarget.")
                     getTarget()
                     APFTask.waitfor(self.task, True, timeout=15)
-                    self.checkTOOs = True
+                    self.doCheckTOOs = True
                     haveobserved = True                    
                 elif self.starttime != None and self.shouldStartList():
                     self.APF.killRobot()
-            elif  running == True and float(sunel) < sunel_lim and self.APF.sop.read().strip() == 'Observing' and self.checkTOOs:
+            elif  running == True and float(sunel) < sunel_lim and self.APF.sop.read().strip() == 'Observing' and self.shouldCheckTOOs():
                 self.checkTOOs()
 
                 
