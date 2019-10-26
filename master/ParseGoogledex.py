@@ -248,7 +248,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
     
         for i, v in enumerate(vals):
             # Did we observe this target tonight?
-            if v[0] in obslog.names:
+            if parse_starname(v[0]) in obslog.names:
                 # We observed this target, so update the cell in the worksheet
                 # update_cell(row, col, val) - col and row are 1 indexed
                 nameidx = obslog.names.index(v[0])
@@ -318,7 +318,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     
     for i in range(1, len(full_codex)):
         row = full_codex[i]
-        if row[starNameIdx] in obslog.names:
+        if parse_starname(row[starNameIdx]) in obslog.names:
             # We have observed this star, so lets update the last obs field
             obstime = obslog.times[obslog.names.index(row[starNameIdx])]
             if isinstance(obstime,float):
