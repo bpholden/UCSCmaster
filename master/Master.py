@@ -667,7 +667,7 @@ class Master(threading.Thread):
                     if success is False:
                         if self.APF.openOK:
                             apflog("Error: Cannot open the dome", level="alert",echo=True)
-                            os._exit()
+                            os._exit(0)
                         else:
                             # lost permision during opening, happens more often than you think
                             apflog("Error: No longer have opening permission", level="error",echo=True)
@@ -699,9 +699,11 @@ class Master(threading.Thread):
                 else:
                     success = True
                 if success == False:
-                    apflog("Error: Cannot open the dome", echo=True, level='error')
                     self.APF.close()
-                    os._exit()
+                    if self.APF.openOK:
+                        apflog("Error: Cannot open the dome", echo=True, level='error')
+                    else:
+                        apflog("Error: Lost permission during opening", echo=True)
 
             # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
             if self.APF.openOK and not rising and not self.APF.isOpen()[0]:
