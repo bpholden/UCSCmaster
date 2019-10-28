@@ -125,7 +125,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < 0.5: continue
         # Get the star name
-        names.append(parse_starname(ls[didx["Star Name"]]))
+        names.append(parseStarname(ls[didx["Star Name"]]))
         
         # Get the RA
         raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
@@ -248,7 +248,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
     
         for i, v in enumerate(vals):
             # Did we observe this target tonight?
-            local_name = parse_starname(v[0])
+            local_name = parseStarname(v[0])
             if local_name in obslog.names:
                 # We observed this target, so update the cell in the worksheet
                 # update_cell(row, col, val) - col and row are 1 indexed
@@ -319,7 +319,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     
     for i in range(1, len(full_codex)):
         row = full_codex[i]
-        if parse_starname(row[starNameIdx]) in obslog.names:
+        if parseStarname(row[starNameIdx]) in obslog.names:
             # We have observed this star, so lets update the last obs field
             obstime = obslog.times[obslog.names.index(row[starNameIdx])]
             if isinstance(obstime,float):
