@@ -275,7 +275,8 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
                 except:
                     print (v[0], v[col])
                     ws.update_cell(i+1, col+1, round(jd,4) )
-                    nupdates += 1
+                    ws.update_cell(i+1, nobscol+1, 1 )
+                    nupdates += 2
                 try:
                    have_temp = v[tempcol]
                    if taketemp == "Y" and have_temp == "N" and curowner == v[owncol]:
