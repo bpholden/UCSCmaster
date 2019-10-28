@@ -71,8 +71,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
                 "texp", "I2", "expcount", "decker","Close Companion", "APFnshots", \
                 "owner", \
                 "APFpri", "APFcad", "lastobs", "APFmax", "B-V", \
-                "uth","utm","duration", "Template", \
-                "Nobs", "Total Obs"
+                "uth","utm","duration", "Template", "Nobs", "Total Obs"
                 ]
 
     
@@ -134,12 +133,15 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         row.append(float_or_default(ls[didx["Vmag"]],default=15.0))
         row.append(float_or_default(ls[didx["texp"]],default=1200))
         row.append(float_or_default(ls[didx["expcount"]],default=1e9))
-        # APFpri
-        row.append(apfpri)
+        row.append(int_or_default(ls[didx["APFnshots"]],default=1))
 
+
+        # scheduler specific
+        row.append(apfpri)
         row.append(float_or_default(ls[didx["APFcad"]],default=0.7))
-        row.append(int_or_default(ls[didx["APFnshots"]],default=1200))
         row.append(float_or_default(ls[didx["lastobs"]],default=0))
+        # APFmax
+        row.append(float_or_default(ls[didx["APFmax"]]))
 
         inval = float_or_default(ls[didx["B-V"]],default=0.7)
         if inval < 0:
@@ -154,10 +156,6 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         # duration:
         row.append(float_or_default(ls[didx["duration"]]))
                 
-                
-        # APFmax
-        row.append(float_or_default(ls[didx["APFmax"]]))
-
         # Nobs
         row.append(nobs)
                 
