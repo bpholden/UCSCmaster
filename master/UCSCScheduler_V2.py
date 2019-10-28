@@ -55,16 +55,6 @@ def computePriorities(star_table,available,cur_dt,flags):
         new_pri = star_table[:, DS_APFPRI]
     return new_pri
 
-def float_keyval(instr):
-    try:
-        key,val = instr.split('=')
-    except:
-        return None
-    try:
-        retval = float(val)
-    except:
-        return None
-    return retval
 
 def parseStarlist(starlist):
     """ Parse a scriptobs-compatible starlist for the scheduler.
