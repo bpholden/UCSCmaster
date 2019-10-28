@@ -182,10 +182,10 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focv
     return ret
 
 
-def calculate_ucsc_exposure_time(vmag, i2counts, elevation, seeing, bmv, deckers):
-    """ calculate_ucsc_exposure_time uses the recipe from Burt et al. (2015) to compute the exposure time for a target.
+def calculateUCSCExposureTime(vmag, i2counts, elevation, seeing, bmv, deckers):
+    """ calculateUCSCExposureTime uses the recipe from Burt et al. (2015) to compute the exposure time for a target.
 
-    exp_time, exp_counts, i2counts = calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W")
+    exp_time, exp_counts, i2counts = calculateUCSCExposureTime(vmag, precision, elevation, seeing, bmv, decker="W")
     vmag - numpy array of V magnitudes (Johnson filter, Vega mags)
     i2counts - the required number of median Iodine cell counts, this is calculated from the precision and color of the star, this, in effect, sets the exposure time.
     elevation - elevation of the star above the horizon at the start of the exposure
@@ -673,7 +673,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         fstars = [s for s,_ in zip(stars,f) if _ ]
 
         apflog("getNext(): Computing exposure times",echo=True)
-        exp_times, exp_counts, i2counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
+        exp_times, exp_counts, i2counts = calculateUCSCExposureTime( star_table[f,DS_VMAG], \
                                             star_table[f,DS_I2CNTS], star_elevations[np.array(vis)], seeing, \
                                             star_table[f,DS_BV], deckers[f])
 

@@ -40,7 +40,7 @@ if __name__ == "__main__":
     mstars_inds = np.where(star_table[:, ds.DS_BV] > 1.2)
     i2counts[mstars_inds] = ds.getI2_M(precision[mstars_inds])
 
-    exp_times, exp_counts, i2cnts = ds.calculate_ucsc_exposure_time(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV],deckers)
+    exp_times, exp_counts, i2cnts = ds.calculateUCSCExposureTime(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV],deckers)
     exp_times *= options.slowdown
 
     totexptimes += ds.computeMaxTimes(exp_times,star_table[:, ds.DS_MAX])
