@@ -233,7 +233,7 @@ def computeDatetime(ctime):
     return dt
 
 
-def make_apf_obs(dt,horizon=str(TARGET_ELEVATION_MIN)):
+def makeAPFObs(dt,horizon=str(TARGET_ELEVATION_MIN)):
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
     apf_obs.lat  = '37:20:33.1'
@@ -247,7 +247,7 @@ def make_apf_obs(dt,horizon=str(TARGET_ELEVATION_MIN)):
 
 def compute_sunset_n_rise(dt,horizon='0'):
     # computes time in seconds before sunset
-    apf_obs = make_apf_obs(dt,horizon=horizon)
+    apf_obs = makeAPFObs(dt,horizon=horizon)
     sunset = apf_obs.next_setting(ephem.Sun())
     sunset -= ephem.Date(dt)
     sunset *= 86400.0 # convert to seconds
@@ -279,7 +279,7 @@ def smartList(starlist, ctime, seeing, slowdown,outdir = None):
         outdir = os.getcwd()
     observed, times, temps = ObservedLog.getObserved(os.path.join(outdir, "observed_targets"))
 
-    apf_obs = make_apf_obs(dt)
+    apf_obs = makeAPFObs(dt)
     # APF latitude in radians
     apf_lat = apf_obs.lat
 
@@ -570,7 +570,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # timedelta = now - uth,utm : minus current JD?
     ###
 
-    apf_obs = make_apf_obs(dt)
+    apf_obs = makeAPFObs(dt)
     # APF latitude in radians
     apf_lat = (37 + 20/60. + 33.1/3600.) * np.pi/180.
 
