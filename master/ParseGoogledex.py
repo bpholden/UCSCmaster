@@ -33,7 +33,7 @@ def checkflag(key,didx,line,regexp,default):
         return default
 
 
-def parse_starname(starname):
+def parseStarname(starname):
 
     ostarname = starname.strip()
     m= re.search("HD\s+\d+",starname)
