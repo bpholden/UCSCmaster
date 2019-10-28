@@ -219,16 +219,8 @@ def calculateUCSCExposureTime(vmag, i2counts, elevation, seeing, bmv, deckers):
 
     return exp_time, exp_counts, i2counts
 
-def calc_elevations(stars, observer):
-    els = []
-    for s in stars:
-        observer.date = ephem.Date(observer.date)
-        s.compute(observer)
-        cur_el = np.degrees(s.alt)
-        els.append(cur_el)
-    return np.array(els)
 
-def compute_datetime(ctime):
+def computeDatetime(ctime):
     if type(ctime) == float:
         dt = datetime.utcfromtimestamp(int(ctime))
     elif type(ctime) == datetime:
@@ -281,7 +273,7 @@ def smartList(starlist, ctime, seeing, slowdown,outdir = None):
         but those that rise above 85 degrees will be regected to avoid slewing through the zenith. """
     # Convert the unix timestamp into a python datetime
 
-    dt = compute_datetime(ctime)
+    dt = computeDatetime(ctime)
 
     if not outdir:
         outdir = os.getcwd()
@@ -517,7 +509,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     if not outdir:
         outdir = os.getcwd()
 
-    dt = compute_datetime(ctime)
+    dt = computeDatetime(ctime)
 
     confg = dict()
     confg['I2'] = 'Y'
