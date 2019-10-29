@@ -518,6 +518,8 @@ class Master(threading.Thread):
                     self.fixedList=None
                     self.starttime = None
                 # this reads in the list and appends it to self.target so getTarget will automatically use it
+                print(self.fixedList)
+                print(self.readStarlistFile)
                 tot = self.readStarlistFile()
                 if tot == 0:
                     apflog("Error: starlist %s is empty" % (self.fixedList), level="error")
