@@ -764,9 +764,9 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
         if enoughTime(star_table,stars,idx,row,apf_obs,dt):
-            bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
-            line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
-            bfinline = makeScriptobsLine(bnamefin,browfin,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
+            bline = makeScriptobsLine(bname,brow,'N',dt,decker="N",I2="Y", owner='public',focval=2)
+            line  = makeScriptobsLine(sn[idx],row,flags['do'][idx],dt,decker="N",I2="N", owner=flags['owner'][idx])
+            bfinline = makeScriptobsLine(bnamefin,browfin,'N',dt,decker="N",I2="Y", owner='public',focval=2)
             res['SCRIPTOBS'] = []
             res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
             res['SCRIPTOBS'].append(line + " # temp=Y")
