@@ -204,11 +204,13 @@ class Master(threading.Thread):
 
                 
             
-    def readStarlistFile(filename):
+    def readStarlistFile():
         tot = 0
+        if self.fixedList is None:
+            return 0
         self.target = dict()
         self.target["SCRIPTOBS"] = []
-        with open(filename, 'r') as f:
+        with open(self.fixedList, 'r') as f:
             for line in f:
                 sline = line.strip()
                 if sline == '':
@@ -518,7 +520,7 @@ class Master(threading.Thread):
                     self.fixedList=None
                     self.starttime = None
                 # this reads in the list and appends it to self.target so getTarget will automatically use it
-                tot = self.readStarlistFile(self.fixedList)
+                tot = self.readStarlistFile()
                 if tot == 0:
                     apflog("Error: starlist %s is empty" % (self.fixedList), level="error")
                     self.fixedList=None
