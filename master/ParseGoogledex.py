@@ -353,7 +353,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
 def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
     full_codex = []
     # These are the columns we need for scheduling
-    hdr_cols = [for rc in req_cols]
+    hdr_cols = [rc for rc in req_cols]
     hdr_cols.append("Sheetname")
     full_codex.append(hdr_cols)
         
