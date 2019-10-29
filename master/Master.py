@@ -526,7 +526,9 @@ class Master(threading.Thread):
                     self.starttime = None
                     self.target=None
                 else:
-                    apflog("%d total starlist lines and %d lines done." % (tot, self.APF.ldone)) 
+                    apflog("%d total starlist lines and %d lines done." % (tot, self.APF.ldone))
+                    self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
+
                 if self.APF.ldone == tot :
                     self.fixedList = None
                     self.starttime = None
