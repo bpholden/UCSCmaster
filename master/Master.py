@@ -527,7 +527,7 @@ class Master(threading.Thread):
                     self.target=None
                 else:
                     apflog("%d total starlist lines and %d lines done." % (tot, self.APF.ldone))
-                    self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
+
 
                 if self.APF.ldone == tot :
                     self.fixedList = None
@@ -553,7 +553,9 @@ class Master(threading.Thread):
                 self.scriptobs = self.APF.startRobot()
                 # Don't let the watcher run over the robot starting up
                 APFTask.waitFor(self.task, True, timeout=10)
-            
+
+            if self.fixedList is not None:
+                self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')                
             return
 
        
