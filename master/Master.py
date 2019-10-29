@@ -77,24 +77,6 @@ class Master(threading.Thread):
         self.nighttargetlog = None
 
 
-    def readStarlistFile():
-        tot = 0
-        if self.fixedList is None:
-            return 0
-        self.target = dict()
-        self.target["SCRIPTOBS"] = []
-        with open(self.fixedList, 'r') as f:
-            for line in f:
-                sline = line.strip()
-                if sline == '':
-                    continue
-                elif sline[0] == '#':
-                    continue
-                else:
-                    tot += 1
-                    self.target["SCRIPTOBS"].append(sline)
-        return tot
-
 
     def setAutofocVal(self):
         """ Master.setAutofocVal()
@@ -488,6 +470,24 @@ class Master(threading.Thread):
             
             return rv
 
+        def readStarlistFile():
+            tot = 0
+            if self.fixedList is None:
+                return 0
+            self.target = dict()
+            self.target["SCRIPTOBS"] = []
+            with open(self.fixedList, 'r') as f:
+                for line in f:
+                    sline = line.strip()
+                    if sline == '':
+                        continue
+                    elif sline[0] == '#':
+                        continue
+                    else:
+                        tot += 1
+                        self.target["SCRIPTOBS"].append(sline)
+            return tot
+
 
         # starts an instance of scriptobs 
         def startScriptobs():
@@ -518,9 +518,8 @@ class Master(threading.Thread):
                     self.fixedList=None
                     self.starttime = None
                 # this reads in the list and appends it to self.target so getTarget will automatically use it
-                print(self.fixedList)
-                print(self.readStarlistFile)
-                tot = self.readStarlistFile()
+
+                tot = readStarlistFile()
                 if tot == 0:
                     apflog("Error: starlist %s is empty" % (self.fixedList), level="error")
                     self.fixedList=None
