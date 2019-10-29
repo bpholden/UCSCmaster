@@ -77,6 +77,24 @@ class Master(threading.Thread):
         self.nighttargetlog = None
 
 
+    def readStarlistFile():
+        tot = 0
+        if self.fixedList is None:
+            return 0
+        self.target = dict()
+        self.target["SCRIPTOBS"] = []
+        with open(self.fixedList, 'r') as f:
+            for line in f:
+                sline = line.strip()
+                if sline == '':
+                    continue
+                elif sline[0] == '#':
+                    continue
+                else:
+                    tot += 1
+                    self.target["SCRIPTOBS"].append(sline)
+        return tot
+
 
     def setAutofocVal(self):
         """ Master.setAutofocVal()
@@ -201,26 +219,6 @@ class Master(threading.Thread):
             apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
             closing(force=True)
             return False
-
-                
-            
-    def readStarlistFile():
-        tot = 0
-        if self.fixedList is None:
-            return 0
-        self.target = dict()
-        self.target["SCRIPTOBS"] = []
-        with open(self.fixedList, 'r') as f:
-            for line in f:
-                sline = line.strip()
-                if sline == '':
-                    continue
-                elif sline[0] == '#':
-                    continue
-                else:
-                    tot += 1
-                    self.target["SCRIPTOBS"].append(sline)
-        return tot
 
     def shouldStartList(self):
         """ Master.shouldStartList()
