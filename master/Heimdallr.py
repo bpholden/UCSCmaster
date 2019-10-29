@@ -132,6 +132,7 @@ def args():
 
     parser.add_argument('--sheet',default="Bstars,A003_PRobertson_2019B,A006_PDalba_2019B,A007_HIsaacson_2019B,A009_MKosiarek_2019B,A011_SKane_2019B,A012_SKane_2019B,A015_AHoward_2019B,A013_ASiemion_2019B,A000_BWelsh_2019B,A001_ICzekala_2019B,A002_ICzekala_2019B,A004_PRobertson_2019B,A007_HIsaacson_2019B,A008_BHolden_2019B,A014_SVogt_2019B,A015_TBrandt_2019B",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='public',help="Optional name for file owners")    
+    parser.add_argument('--ftable',default=None,help="Table of fractions of the night")    
     
     opt = parser.parse_args()
 
@@ -182,6 +183,27 @@ def setObsDefaults(opt):
     return opt
 
 
+def readFracTable(table_name):
+    sheetns = []
+    fracs = []
+    if table_name is not None and os.path.exists(table_name):
+        with open(table_name, 'r') as f:
+            for line in f:
+                sline = line.strip()
+                if sline == '':
+                    continue
+                elif sline[0] == '#':
+                    continue
+                else:
+                    sheetn, strfrac = line.split()
+                    sheetns.append(sheetn)
+                    try:
+                        frac = float(strfrac)
+                    else:
+                        frac = 0
+                        apflog("Sheet %s has a fraction of %s which is not a float" %(sheetn,frac),level='error',echo=True)
+                    fracs.append(frac)
+    return sheetns, fracs
 
 if __name__ == '__main__':
 
