@@ -486,6 +486,7 @@ class Master(threading.Thread):
                     else:
                         tot += 1
                         self.target["SCRIPTOBS"].append(sline)
+            self.target["SCRIPTOBS"].reverse()
             return tot
 
 
@@ -555,7 +556,8 @@ class Master(threading.Thread):
                 APFTask.waitFor(self.task, True, timeout=10)
 
             if self.fixedList is not None:
-                self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')                
+                while len(self.target["SCRIPTOBS"]) > 0:
+                    self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')                
             return
 
        
