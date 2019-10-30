@@ -288,7 +288,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
 
     return nupdates
 
-def update_local_googledex(intime,googledex_file="googledex.dat", observed_file="observed_targets"):
+def update_local_googledex(intime,googledex_file="googledex.dat", observed_file="observed_targets", frac_table=None):
     """
         Update the local copy of the googledex with the last observed star time.
         update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
