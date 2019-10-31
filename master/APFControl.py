@@ -30,9 +30,6 @@ DEWARMIN = 8400
 #ScriptDir = '@LROOT@/bin/robot/'
 ScriptDir = '/usr/local/lick/bin/robot/'
 
-deckscale = {'M': 1.0, 'W':1.0, 'N': 3.0, 'B': 0.5, 'S':2.0, 'P':1.0}
-
-
 # Aquire the ktl services and associated keywords
 tel        = ktl.Service('eostele')
 sunelServ  = tel('SUNEL')
