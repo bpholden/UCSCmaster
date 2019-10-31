@@ -199,7 +199,7 @@ def readFracTable(table_name):
                     sheetns.append(sheetn)
                     try:
                         frac = float(strfrac)
-                    else:
+                    except:
                         frac = 0
                         apflog("Sheet %s has a fraction of %s which is not a float" %(sheetn,frac),level='error',echo=True)
                     fracs.append(frac)
