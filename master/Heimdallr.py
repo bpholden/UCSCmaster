@@ -103,7 +103,11 @@ def calc_focus_start_time():
     udt = datetime.utcnow()
     dt = datetime.now()    
     time_to_sunset = ds.compute_sunset(udt)
-    start_time = time_to_sunset - 3.25*3600.
+    if time_to_sunset > 36000:
+        # the sun has already set
+        start_time = -1.
+    else:
+        start_time = time_to_sunset - 3.25*3600.
     t_delta = timedelta(0,start_time)
     sun_delta = timedelta(0,time_to_sunset)
     start_dt = dt + t_delta
