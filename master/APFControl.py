@@ -1233,9 +1233,10 @@ class APF:
             if not ucam['EVENT_STR'].read() == "ControllerReady":
                 apflog("Waiting for current exposure to finish.")
                 ucam['EVENT_STR'].waitfor(" = ReadoutBegin", timeout=1200)
-        apflog("Killing Robot.")
+
         ripd, running = self.findRobot()
         if running:
+            apflog("Killing Robot %s" % (str(ripd)))
             try:
                 APFLib.write(self.robot['SCRIPTOBS_CONTROL'], "abort")
             except Exception, e:
