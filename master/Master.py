@@ -557,7 +557,8 @@ class Master(threading.Thread):
 
             if self.fixedList is not None:
                 while len(self.target["SCRIPTOBS"]) > 0:
-                    self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')                
+                    self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
+                self.fixedList = None
             return
 
        
@@ -633,7 +634,19 @@ class Master(threading.Thread):
                     
                     haveobserved = True                    
                 elif self.starttime != None and self.shouldStartList():
-                    self.APF.killRobot()
+                    apflog("Observing a fixed list", echo=True)
+                    tot = readStarlistFile()
+                    if tot == 0:
+                        apflog("Error: starlist %s is empty" % (self.fixedList), level="error")
+                        self.fixedList=None
+                        self.starttime = None
+                        self.target=None
+                    else:
+                        apflog("%d total starlist lines and %d lines done." % (tot, self.APF.ldone))
+                        while len(self.target["SCRIPTOBS"]) > 0:
+                            self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
+                        self.fixedList = None
+
 
             # check last telescope focus
             if running and  float(sunel) <= sunel_lim:
