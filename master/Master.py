@@ -518,7 +518,7 @@ class Master(threading.Thread):
                     apflog("Error: starlist %s does not exist" % (self.fixedList), level="error")
                     self.fixedList=None
                     self.starttime = None
-                # this reads in the list and appends it to self.target so getTarget will automatically use it
+                # this reads in the list and appends it to self.target 
 
                 tot = readStarlistFile()
                 if tot == 0:
@@ -528,7 +528,6 @@ class Master(threading.Thread):
                     self.target=None
                 else:
                     apflog("%d total starlist lines and %d lines done." % (tot, self.APF.ldone))
-
 
                 if self.APF.ldone == tot :
                     self.fixedList = None
