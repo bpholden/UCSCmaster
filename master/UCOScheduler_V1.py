@@ -72,12 +72,7 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focv
     # V Mag
     ret += 'vmag=' + str(row[DS_VMAG]) + ' '
     # T Exp
-    if row[DS_EXPT] > MAX_EXPTIME:
-        ret += 'texp=%d ' % (int(MAX_EXPTIME))
-    elif row[DS_EXPT] <= MIN_EXPTIME:
-        ret += 'texp=%d ' % (int(MIN_EXPTIME))
-    else:
-        ret += 'texp=' + str(int(row[DS_EXPT])) + ' '
+    ret += 'texp=' + str(int(row[DS_EXPT])) + ' '
     # I2
     ret += 'I2=%s ' % (I2)
     # lamp
@@ -419,7 +414,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         apflog("getNext(): Computing exposure times",echo=True)
         exp_times = star_table[available,DS_NSHOTS] * star_table[available,DS_EXPTIME]
         exp_counts = star_table[available,DS_COUNTS]
-        exp_times = exp_times * slowdown
+        exp_times = exp_times 
         totexptimes[available] += exp_times
         
         # Is the exposure time too long?
