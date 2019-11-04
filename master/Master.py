@@ -76,7 +76,7 @@ class Master(threading.Thread):
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
 
-
+    
 
     def setAutofocVal(self):
         """ Master.setAutofocVal()
@@ -583,7 +583,7 @@ class Master(threading.Thread):
             sunel = self.APF.sunel
             sunel.monitor()
 
-
+            apflog("sunel = %.2f running = %s, phase = %s" % ( float(sunel),str(running), self.APF.sop.read().strip(),echo=True,level='debug')
             # if paused:
             #     apflog("Pausing because of apftask request",level='warn',echo=True)
             #     APFTask.waitfor(self.task, True, timeout=60)
@@ -622,6 +622,7 @@ class Master(threading.Thread):
             
             # If scriptobs is running and waiting for input, give it a target
             if running == True and float(sunel) < sunel_lim and self.APF.sop.read().strip() == 'Input':
+                apflog("Entering target section",echo=True)
                 if self.fixedList is None or self.shouldStartList() == False:
                     self.lastObsSuccess = self.checkObsSuccess()
                     self.obsBstar = self.checkBstar(haveobserved)
@@ -633,7 +634,7 @@ class Master(threading.Thread):
                     
                     haveobserved = True                    
                 elif self.starttime != None and self.shouldStartList():
-                    apflog("Observing a fixed list", echo=True)
+                    apflog("Observing a fixed list called %s" % (self.fixedList), echo=True)
                     tot = readStarlistFile()
                     if tot == 0:
                         apflog("Error: starlist %s is empty" % (self.fixedList), level="error")
