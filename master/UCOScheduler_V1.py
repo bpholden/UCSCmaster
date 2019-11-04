@@ -349,6 +349,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     apflog("getNext(): Parsed the Googledex...",echo=True)
 
     # Note which of these are B-Stars for later.
+#    bstars = star_table[:,DS_BSTAR] == True
     bstars = np.array([ True if 'HR' in n else False for n in sn ], dtype=bool)
 
     apflog("getNext(): Finding B stars",echo=True)
