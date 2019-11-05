@@ -69,9 +69,10 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                 "texp", "I2", "expcount", "decker","Close Companion", "APFnshots", \
-                "owner", \
-                "APFpri", "APFcad", "lastobs", "APFmax", "B-V", \
-                "uth","utm","duration", "Template", "Nobs", "Total Obs"
+                "owner", "mode", "Bstar", "pair_star",\
+                "APFpri", "APFcad", "lastobs", "B-V", \
+                "uth","utm","duration", \
+                "Template", "Nobs", "Total Obs", 
                 ]
 
     
