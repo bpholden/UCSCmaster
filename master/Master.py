@@ -584,7 +584,7 @@ class Master(threading.Thread):
             sunel = self.APF.sunel
             sunel.monitor()
 
-            apflog("sunel = %.2f running = %s, phase = %s" % ( float(sunel),str(running), self.APF.sop.read().strip(),echo=True,level='debug')
+            apflog("sunel = %.2f running = %s, phase = %s" % ( float(sunel),str(running), self.APF.sop.read().strip()),echo=True,level='debug')
             # if paused:
             #     apflog("Pausing because of apftask request",level='warn',echo=True)
             #     APFTask.waitfor(self.task, True, timeout=60)
