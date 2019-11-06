@@ -50,7 +50,99 @@ def parseStarname(starname):
         
     return ostarname
 
+def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
+    full_codex = []
+    # These are the columns we need for scheduling
+    full_codex.append(req_cols)
+        
+    for sheetn in sheetns:
+        worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
+        if worksheet:
+            cur_codex = worksheet.get_all_values()
+            didx = findColumns(cur_codex[0],req_cols)
+            
+            for row in cur_codex[1:]:
+                nrow = []
+                for c in req_cols:
+                    nrow.append(row[didx[c]])
+                full_codex.append(nrow)
+        
+
+    f = open(outfn,'wb')
+    pickle.dump(full_codex, f)
+    f.close()
+    return full_codex
     
+
+def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
+    """ Get the spreadsheet from google
+
+    worksheet = get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
+    worksheet - the worksheet object returned by the gspread module
+
+    sheetn - name of the google sheet, defaults to "The Googledex"
+    certificate - certificate used to control access to the google sheet
+    
+    """
+    # this downloads the googledex from the Google Drive
+    # the certificate must be available
+    # these certificates are generated through the Google Developer Interface
+    # the developer must select the correct API for access
+
+    # the certificate has an email associated with it, that email must
+    # have the document shared with it to allow access 
+
+    certificate_path = os.path.dirname(__file__)
+    
+    json_key = json.load(open(os.path.join(certificate_path, certificate)))
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(certificate_path, certificate), scope)
+    try:
+        gs = gspread.authorize(credentials)
+        apflog("Successfully logged in.", echo=True)
+    except:
+        apflog("Cannot log into Google API.", echo=True,level='error')
+        return None
+    apflog("Attempting to Open %s" % (sheetn),echo=True)
+    try:
+        spreadsheet = gs.open(sheetn)
+        apflog("Loaded Main %s" % (sheetn),echo=True)
+        worksheet = spreadsheet.sheet1
+        apflog("Got spreadsheet", echo=True)
+    except Exception as e:
+        apflog("Cannot Read %s: %s"  % (sheetn, e), echo=True, level='error')
+        worksheet = None
+    return worksheet
+
+
+def findColumns(col_names,req_cols,opt_cols=[]):
+    """ findColumns finds the indices for the column names in the list of required columns
+    indices = findColumns(col_names, req_cols)
+    
+    indices - a list of indices, each index maps to where in col_names the column is found and in the order of req_cols
+    col_names - list of column names to be searched
+    req_cols - list of names that should be in the first list
+    """
+    idx = []
+    didx = dict()
+
+    for r in req_cols:
+        if r in col_names:
+            didx[r] = col_names.index(r)
+        else:
+            apflog("%s Not found in column names from google spreadsheet" % (r) , level="Warn",echo=True)
+
+    for r in opt_cols:
+        if r in col_names:
+            didx[r] = col_names.index(r)
+            
+    # hack to handle an error
+    if req_cols[0] == "Star Name" and req_cols[0] not in didx.keys():
+        didx[req_cols[0]] = 0
+        apflog("Pasting 'Star Name' into column 0 of google spreadsheet" , level="Warn",echo=True)
+
+    return didx
 
 
 def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False):
@@ -193,3 +285,65 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         stars.append(star)
 
     return (names, np.array(star_table), flags, stars)
+
+
+def update_local_googledex(intime,googledex_file="googledex.dat", observed_file="observed_targets"):
+    """
+        Update the local copy of the googledex with the last observed star time.
+        update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
+
+        opens googledex_file and inputs date of last observation from observed_file
+        in principle can use timestamps as well as scriptobs uth and utm values
+    """
+    # names, times, temps = ObservedLog.getObserved(observed_file)
+    obslog = ObservedLog.ObservedLog(observed_file)
+    try:
+        g = open(googledex_file, 'rb')
+        full_codex = pickle.load(g)
+        g.close()
+    except IOError:
+        apflog("googledex file did not exist, so can't be updated",echo=True)
+        return obslog.names
+    except EOFError:
+        apflog("googledex file corrupt, so can't be updated",echo=True)
+        return obslog.names
+
+
+    codex_cols = full_codex[0]
+
+    starNameIdx = codex_cols.index("Star Name")
+    lastObsIdx = codex_cols.index("lastobs")
+    try:
+        nObsIdx = codex_cols.index("nObsIdx")
+    except:
+        nObsIdx = -1
+    
+    for i in range(1, len(full_codex)):
+        row = full_codex[i]
+        if row[starNameIdx] in obslog.names:
+            # We have observed this star, so lets update the last obs field
+            obstime = obslog.times[obslog.names.index(row[starNameIdx])]
+            if isinstance(obstime,float):
+                t = datetime.utcfromtimestamp(obstime)
+            else:
+                hr, min = obstime
+                if type(intime) != datetime:
+                    ctime = datetime.now()
+                    td = timedelta(0,3600.*7)
+                    intime = ctime + td
+                t = datetime(intime.year, intime.month, intime.day, hr, min)
+
+
+            jd = round(float(ephem.julian_date(t)), 4) 
+            apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
+            row[lastObsIdx] = str(jd)
+            if nObsIdx > 0:
+                row[nObsIdx] = row[nObsIdx] + 1
+            full_codex[i] = row
+
+    with open(googledex_file, 'wb') as f:
+        pickle.dump(full_codex, f)
+    f.close()
+    
+    return obslog.names
+
