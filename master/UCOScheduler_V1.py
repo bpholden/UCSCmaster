@@ -354,12 +354,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     
     apflog("getNext(): Parsed the Googledex...",echo=True)
 
-    # Note which of these are B-Stars for later.
-#    bstars = star_table[:,DS_BSTAR] == True
-    bstars = np.array([ True if 'HR' in n else False for n in sn ], dtype=bool)
 
     apflog("getNext(): Finding B stars",echo=True)
-
+    # Note which of these are B-Stars for later.
+    bstars = (bstar == 'Y')|(bstar == 'y')
 
     # Distance to stay away from the moon
     md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
@@ -406,7 +404,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         # Available and not a BStar
 
         apflog("getNext(): Culling B stars",echo=True)
-        available = np.logical_and(available, np.logical_not(bstars))
+        available = available & np.logical_not(bstars)
 
         # has the star been observed - commented out as redundant with cadence
         if len(last_objs_attempted)>0:
