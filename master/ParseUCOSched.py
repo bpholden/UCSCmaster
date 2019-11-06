@@ -68,8 +68,9 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                 "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
-                "texp", "I2", "expcount", "decker","Close Companion", "APFnshots", \
-                "owner", "mode", "Bstar", "pair_star",\
+                "texp", "I2", "expcount","decker","Close Companion", "APFnshots", \
+                "owner", "mode", \
+                "Bstar", "obsblock",\
                 "APFpri", "APFcad", "lastobs", "B-V", \
                 "uth","utm","duration", \
                 "Template", "Nobs", "Total Obs", 
@@ -98,7 +99,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     
     names = []
     star_table = []
-    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [] }
+    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "instrument" : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -179,6 +180,11 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         flags['template'].append(tempselect.upper())
 
         flags['owner'].append(checkflag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
+        flags['mode'].append(checkflag("mode",didx,ls,"\A(A|a|b|B|o|O)",config["mode"]).upper())
+        flags['obsblock'].append(checkflag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
+        flags['Bstar'].append(checkflag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
+        
+#        flags['Bstar'].append(checkflag("instrument",didx,ls,"\A(\w)",config["instrument"]))
 
             
         star_table.append(row)
