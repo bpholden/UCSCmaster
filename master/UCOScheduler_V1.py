@@ -275,6 +275,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     config['Bstar']='N'
     config['owner']=owner
 
+    
 
     apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
@@ -419,7 +420,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         apflog("getNext(): Computing exposure times",echo=True)
         exp_times = star_table[available,DS_NSHOTS] * star_table[available,DS_EXPTIME]
         exp_counts = star_table[available,DS_COUNTS]
-        exp_times = exp_times 
+
         totexptimes[available] += exp_times
         
         # Is the exposure time too long?
