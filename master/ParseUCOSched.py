@@ -131,7 +131,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         for coln in ("pmRA", "pmDEC"):
             row.append(float_or_default(ls[didx[coln]]))
 
-        # Vmag
+
         row.append(float_or_default(ls[didx["Vmag"]],default=15.0))
         row.append(float_or_default(ls[didx["texp"]],default=1200))
         row.append(float_or_default(ls[didx["expcount"]],default=1e9))
@@ -142,8 +142,6 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         row.append(apfpri)
         row.append(float_or_default(ls[didx["APFcad"]],default=0.7))
         row.append(float_or_default(ls[didx["lastobs"]],default=0))
-        # APFmax
-        row.append(float_or_default(ls[didx["APFmax"]]))
 
         inval = float_or_default(ls[didx["B-V"]],default=0.7)
         if inval < 0:
