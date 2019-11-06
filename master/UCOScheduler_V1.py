@@ -267,9 +267,13 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     dt = compute_datetime(ctime)
 
-    confg = dict()
-    confg['I2'] = 'Y'
-    confg['decker']='W'
+    config = dict()
+    config['I2'] = 'Y'
+    config['decker']='W'
+    config['mode']=''
+    config['obsblock']=''
+    config['Bstar']='N'
+    config['owner']=owner
 
 
     apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
@@ -340,10 +344,12 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # Note -- RA and Dec are returned in Radians
 
     apflog("getNext(): Parsing the Googledex...",echo=True)
-    config={'I2': 'Y', 'decker': 'W', 'owner' : owner}
-    sn, star_table, flags, stars = ParseGoogledex.parseGoogledex(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
+    sn, star_table, flags, stars = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
     sn = np.array(sn)
     deckers = np.array(flags['decker'])
+    bstar = np.array(flags['Bstar'])
+    mode = np.array(flags['mode'])
+    obsblock = np.array(flags['obsblock'])
     targNum = len(sn)
     
     apflog("getNext(): Parsed the Googledex...",echo=True)
