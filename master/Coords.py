@@ -2,6 +2,12 @@ import numpy as np
 
 def getRARad(hr, mn, sec):
     try:
+        if hr < 0 or hr > 23:
+            return None
+        if mn < 0 or mn >= 59:
+            return None
+        if sec < 0 or sec >= 60:
+            return None
         ra_hours = float(hr) + float(mn)/60. + float(sec)/3600.
         return ra_hours * 15 * np.pi/180.0
     except:
@@ -12,6 +18,12 @@ def getDECRad(deg, mn, sec, neg=False):
         deg = float(deg)
         mn = float(mn)
         sec = float(sec)
+        if deg < -40 or deg > 90:
+            return None
+        if mn < 0 or mn >= 59:
+            return None
+        if sec < 0 or sec >= 60:
+            return None
     except:
         return None
     if deg < 0:
