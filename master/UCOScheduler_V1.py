@@ -274,7 +274,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     config['obsblock']=''
     config['Bstar']='N'
     config['owner']=owner
-
+    config['inst']='levy'
     
 
     apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
