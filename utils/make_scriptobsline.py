@@ -61,5 +61,5 @@ if __name__ == "__main__":
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
 
-        ret = ds.makeScriptobsLine(allnames[i],star_table[i,:], flags['do'][i], datetime.datetime.utcfromtimestamp(int(time.time())),decker=flags['decker'][i],owber=flags['owner'][i])
+        ret = ds.makeScriptobsLine(allnames[i],star_table[i,:], flags['do'][i], datetime.datetime.utcfromtimestamp(int(time.time())),decker=flags['decker'][i],owner=flags['owner'][i])
         print(ret)
