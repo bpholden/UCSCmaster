@@ -33,6 +33,7 @@ if __name__ == "__main__":
     el += options.el
     fwhm = np.array(options.fwhm)
     i2counts = np.zeros_like(star_table[:, ds.DS_BV])
+    totexptimes = np.zeros_like(star_table[:, ds.DS_BV])
     deckers = np.array(flags['decker'])
     
     precision = star_table[:, ds.DS_ERR]
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     shorter = (star_table[:,ds.DS_MAX] < ds.MAX_EXPTIME)&(star_table[:,ds.DS_MAX] >0)
     mxtime[shorter] = star_table[:,ds.DS_MAX][shorter]
 
-    etimes, nobs = ds.format_time(totexptimes,i2cnts,star_table[:,ds.DS_NSHOTS],star_table[:, DS_MIN], mxtime)
+    etimes, nobs = ds.format_time(totexptimes,i2cnts,star_table[:,ds.DS_NSHOTS],star_table[:, ds.DS_MIN], mxtime)
 
     exp_counts, nobs = ds.format_expmeter(exp_counts,nobs,totexptimes)
     fin_pre = precision
