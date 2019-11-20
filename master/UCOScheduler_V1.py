@@ -348,7 +348,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     sn, star_table, flags, stars = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
     sn = np.array(sn)
     deckers = np.array(flags['decker'])
-    bstar = np.array(flags['Bstar'])
+    bstar_array = np.array(flags['Bstar'])
     mode = np.array(flags['mode'])
     obsblock = np.array(flags['obsblock'])
     targNum = len(sn)
@@ -358,7 +358,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     apflog("getNext(): Finding B stars",echo=True)
     # Note which of these are B-Stars for later.
-    bstars = (bstar == 'Y')|(bstar == 'y')
+    bstars = (bstar_array == 'Y')|(bstar_array == 'y')
 
     # Distance to stay away from the moon
     md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
