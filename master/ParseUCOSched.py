@@ -74,6 +74,8 @@ def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic
         worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
         if worksheet:
             cur_codex = worksheet.get_all_values()
+            if len(cur_codex) <= 0:
+                continue
             didx = findColumns(cur_codex[0],req_cols)
             
             for row in cur_codex[1:]:
