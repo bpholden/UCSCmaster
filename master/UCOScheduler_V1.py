@@ -232,7 +232,7 @@ def findBstars(snames,star_table,idx, bstars):
     return snames[near_idx],row,snames[end_idx],finrow
 
 
-def makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx,focval=0):
+def makeResult(stars,star_table,flags,totexptimes,sn,dt,idx,focval=0):
     res = dict()
 
     res['RA']     = stars[idx].a_ra
@@ -493,7 +493,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table[idx, DS_LAST]) / star_table[idx, DS_CAD]), ephem.julian_date(dt), star_table[idx, DS_LAST], star_table[idx, DS_CAD])
     apflog(cstr,echo=True)
 
-    res =  makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx,focval=focval)
+    res =  makeResult(stars,star_table,flags,totexptimes,sn,dt,idx,focval=focval)
     if do_templates and flags['template'][idx] == 'N' and flags['I2'][idx] == 'Y':
         bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
