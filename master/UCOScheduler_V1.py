@@ -418,8 +418,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
 
         apflog("getNext(): Computing exposure times",echo=True)
-        exp_times = star_table[available,DS_NSHOTS] * star_table[available,DS_EXPT]
-        exp_counts = star_table[available,DS_COUNTS]
+        exp_times = star_table[:,DS_NSHOTS] * star_table[:,DS_EXPT]
+        exp_counts = star_table[:,DS_COUNTS]
 
         totexptimes[available] += exp_times
         
