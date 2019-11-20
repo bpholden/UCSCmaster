@@ -443,7 +443,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     final_priorities = computePriorities(star_table,available,dt,flags)
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
-    good_cadence = np.where(cadence_check >  1.0, True, False)
+    good_cadence = cadence_check >  1.0
     good_cadence_available = available & good_cadence
 
     if any(good_cadence_available):
