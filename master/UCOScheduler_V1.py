@@ -430,8 +430,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,available) if _ ]
         vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, totexptimes[available])
-        
-        available = available & vis
+        currently_available = available
+        currently_available[available] = currently_available[available] & vis
         
 
     # Now just sort by priority, then cadence. Return top target
