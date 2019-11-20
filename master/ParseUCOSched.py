@@ -75,6 +75,8 @@ def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic
         if worksheet:
             cur_codex = worksheet.get_all_values()
             if len(cur_codex) <= 0:
+                apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
+
                 continue
             didx = findColumns(cur_codex[0],req_cols)
             
