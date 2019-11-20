@@ -289,9 +289,6 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         flags['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
         flags['Bstar'].append(checkFlag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
         
-#        flags['Bstar'].append(checkflag("instrument",didx,ls,"\A(\w)",config["instrument"]))
-
-            
         star_table.append(row)
         star = ephem.FixedBody()
         star.name = ls[0]
