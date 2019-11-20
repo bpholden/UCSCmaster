@@ -50,6 +50,21 @@ def parseStarname(starname):
         
     return ostarname
 
+
+def int_or_default(value,default=0):
+    try:
+        attr = int(value)
+    except:
+        attr = default
+    return attr
+
+def float_or_default(value,default=0.0):
+    try:
+        rv = float(value)
+    except:
+        rv = default
+    return rv
+
 def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
     full_codex = []
     # These are the columns we need for scheduling
