@@ -513,7 +513,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 if __name__ == '__main__':
 
 #    sheetn=["2018B"]
-    sheetn="Bstars_test,A004_PRobertson_test,A014_SVogt_2019B_test"
+    sheetn="Bstars_test,A004_PRobertson_test,A014_SVogt_test"
 
     # For some test input what would the best target be?
     otfn = "observed_targets"
