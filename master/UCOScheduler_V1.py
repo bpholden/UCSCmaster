@@ -398,7 +398,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         star_table[available, DS_COUNTS] = 1e9
         star_table[available, DS_EXPT] = 900
         star_table[available, DS_NSHOTS] = 2
-        totexptimes[available] = 400
+        totexptimes[available] = 1800
 
     # Just need a normal star for observing
     else:
