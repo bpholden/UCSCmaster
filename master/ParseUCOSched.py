@@ -272,22 +272,22 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         else:
             row.append(0)
 
-        check = checkflag("Close Companion",didx,ls,"\A(y|Y)","")
+        check = checkFlag("Close Companion",didx,ls,"\A(y|Y)","")
         if check == "Y" or check == "y" :
             flags['do'].append(check)
         else:
             flags['do'].append("")
             
-        flags['decker'].append(checkflag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
-        i2select = checkflag("I2",didx,ls,"\A(n|N)",config["I2"])
+        flags['decker'].append(checkFlag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
+        i2select = checkFlag("I2",didx,ls,"\A(n|N)",config["I2"])
         flags['I2'].append(i2select.upper())
-        tempselect = checkflag("Template",didx,ls,"\A(n|N)",'Y')
+        tempselect = checkFlag("Template",didx,ls,"\A(n|N)",'Y')
         flags['template'].append(tempselect.upper())
 
-        flags['owner'].append(checkflag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
-        flags['mode'].append(checkflag("mode",didx,ls,"\A(A|a|b|B|o|O)",config["mode"]).upper())
-        flags['obsblock'].append(checkflag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
-        flags['Bstar'].append(checkflag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
+        flags['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
+        flags['mode'].append(checkFlag("mode",didx,ls,"\A(A|a|b|B|o|O)",config["mode"]).upper())
+        flags['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
+        flags['Bstar'].append(checkFlag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
         
 #        flags['Bstar'].append(checkflag("instrument",didx,ls,"\A(\w)",config["instrument"]))
 
