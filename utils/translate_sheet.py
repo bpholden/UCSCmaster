@@ -98,7 +98,7 @@ if __name__ == "__main__":
         i2cnts[are_m] = getI2_M(star_table[:,sc.DS_ERR][are_m])
         i2cnts[are_k] = getI2_K(star_table[:,sc.DS_ERR][are_k])
 
-        outdict['expcount'] = getEXPMeter(i2cnts,star_table[:,sc.DS_BV])
+        outdict['expcount'] = "%.2g" % (getEXPMeter(i2cnts,star_table[:,sc.DS_BV]))
         
         outtable = Table(outdict)
         outfn = sheetn + ".csv"
