@@ -207,7 +207,25 @@ def readFracTable(table_name):
                         frac = 0
                         apflog("Sheet %s has a fraction of %s which is not a float" %(sheetn,frac),level='error',echo=True)
                     fracs.append(frac)
+    else:
+        sheetns= None
+        fracs = None
+        
     return sheetns, fracs
+
+def makeFracTable(table_name):
+
+    sheetns, frac = readFracTable(table_name)
+    frac_table = []
+    for i in range(0,len(frac)):
+        row = []
+        row.append(sheetns[i])
+        row.append(fracs[i])
+        row.append(tot[i])
+        row.append(0.)
+        frac_table.append(row)
+        
+    return np.asarray(frac_table)
 
 if __name__ == '__main__':
 
