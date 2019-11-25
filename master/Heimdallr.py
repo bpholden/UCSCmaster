@@ -98,7 +98,7 @@ def get_start_time(hr,mn):
     st = datetime(ct.year, ct.month, ct.day+1, hr, mn)
     return float(st.strftime("%s"))
 
-def calc_focus_start_time():
+def calcFocusStartTime():
     # computes time 3.25 hours before sunset
     udt = datetime.utcnow()
     dt = datetime.now()    
@@ -355,7 +355,7 @@ if __name__ == '__main__':
         APFLib.write(apf.robot["MASTER_OBSBSTAR"], True,binary=True)        
         apflog("Initialization finished")
         
-        stime, s_str, sun_str = calc_focus_start_time()
+        stime, s_str, sun_str = calcFocusStartTime()
         waitstr = "Will now wait %.1f seconds before starting focusinstr" % (stime)
         apflog(waitstr, echo=True)
         APFTask.set(parent, suffix="MESSAGE", value=waitstr, wait=False)
