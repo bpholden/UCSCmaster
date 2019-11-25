@@ -25,10 +25,10 @@ import Visible
 last_objs_attempted = []
 
 
-def computePriorities(star_table,available,cur_dt,flags):
+def computePriorities(star_table,available,cur_dt,flags,frac_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
+    new_pri = np.zeros_like(star_table[:, DS_APFPRI])
     if any(star_table[available, DS_DUR] > 0):
-        new_pri = np.zeros_like(star_table[:, DS_APFPRI])
         new_pri[available] += star_table[available,DS_APFPRI]
         delta_pri = np.zeros_like(new_pri[available])
         timedependent, = np.where(star_table[available, DS_DUR] > 0)
@@ -38,8 +38,16 @@ def computePriorities(star_table,available,cur_dt,flags):
             if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
                 delta_pri[tdinx] += PRI_DELTA
         new_pri[available] += delta_pri
+    elif frac_table is not None:
+        new_pri[available] += star_table[available,DS_APFPRI]
+        too_much = frac_table[:,DS_FT_CUR]  > frac_table[:,DS_FT_TOT]
+        done_sheets = frac_table[too_much,DS_FT_NAMES]
+        for sn in done_sheets:
+            bad = star_table[:, DS_SHEETN] == sn
+            new_pri[bad] = 0
+        
     else:
-        new_pri = star_table[:, DS_APFPRI]
+        new_pri += star_table[:, DS_APFPRI]
     return new_pri
 
 
