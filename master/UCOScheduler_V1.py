@@ -440,7 +440,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, totexptimes[available])
         currently_available = available
         currently_available[available] = currently_available[available] & vis
-        
+
+        if slowdown > SLOWDOWN_THRESH:
+            bright_enough = star_table[:,DS_VMAG] < SLOWDOWN_VMAG_LIM
+            available = available & bright_enough
 
     # Now just sort by priority, then cadence. Return top target
     if len(sn[available]) < 1:
