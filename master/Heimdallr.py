@@ -187,46 +187,6 @@ def setObsDefaults(opt):
     return opt
 
 
-def readFracTable(table_name):
-    sheetns = []
-    fracs = []
-    if table_name is not None and os.path.exists(table_name):
-        with open(table_name, 'r') as f:
-            for line in f:
-                sline = line.strip()
-                if sline == '':
-                    continue
-                elif sline[0] == '#':
-                    continue
-                else:
-                    sheetn, strfrac = line.split()
-                    sheetns.append(sheetn)
-                    try:
-                        frac = float(strfrac)
-                    except:
-                        frac = 0
-                        apflog("Sheet %s has a fraction of %s which is not a float" %(sheetn,frac),level='error',echo=True)
-                    fracs.append(frac)
-    else:
-        sheetns= None
-        fracs = None
-        
-    return sheetns, fracs
-
-def makeFracTable(table_name):
-
-    sheetns, frac = readFracTable(table_name)
-    frac_table = []
-    for i in range(0,len(frac)):
-        row = []
-        row.append(sheetns[i])
-        row.append(fracs[i])
-        row.append(tot[i])
-        row.append(0.)
-        frac_table.append(row)
-        
-    return np.asarray(frac_table)
-
 if __name__ == '__main__':
 
     apflog("Starting Heimdallr...")

@@ -51,6 +51,52 @@ def computePriorities(star_table,available,cur_dt,flags,frac_table=None):
     return new_pri
 
 
+def readFracTable(table_name):
+    sheetns = []
+    fracs = []
+    if table_name is not None and os.path.exists(table_name):
+        with open(table_name, 'r') as f:
+            for line in f:
+                sline = line.strip()
+                if sline == '':
+                    continue
+                elif sline[0] == '#':
+                    continue
+                else:
+                    sheetn, strfrac = line.split()
+                    sheetns.append(sheetn)
+                    try:
+                        frac = float(strfrac)
+                    except:
+                        frac = 0
+                        apflog("Sheet %s has a fraction of %s which is not a float" %(sheetn,frac),level='error',echo=True)
+                    fracs.append(frac)
+    else:
+        sheetns= None
+        fracs = None
+        
+    return sheetns, fracs
+
+def makeFracTable(table_name,outfn='frac_table'):
+
+    sheetns, frac = readFracTable(table_name)
+    if os.path.exists(outfn):
+        frac_table = np.genfromtext(outfn,dtype=[('sheetn','S24'),('frac','f8'),('tot','f8'),('cur','f8')])
+        return frac_table
+    frac_table = []
+
+    sunset,sunrise = compute_sunset_n_rise(dt,horizon='-10')
+    tot = sunrise - sunset
+    for i in range(0,len(frac)):
+        row = []
+        row.append(sheetns[i])
+        row.append(fracs[i])
+        row.append(tot*fracs[i])
+        row.append(0.)
+        frac_table.append(row)
+        
+    return np.asarray(frac_table)
+
 
 def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focval=0):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
