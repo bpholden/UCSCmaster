@@ -93,7 +93,7 @@ def shutdown():
         print status
         os._exit(0)
 
-def get_start_time(hr,mn):
+def getStartTime(hr,mn):
     ct = datetime.now()
     st = datetime(ct.year, ct.month, ct.day+1, hr, mn)
     return float(st.strftime("%s"))
@@ -146,7 +146,7 @@ def args():
         if mtch:
             hr = int(mtch.group(1))
             mn = int(mtch.group(2))
-            opt.start = get_start_time(hr,mn)
+            opt.start = getStartTime(hr,mn)
         else:
             print "Start time %s does not match required format hours:minutes where both the hours and the minutes are integers"
             sys.exit()
