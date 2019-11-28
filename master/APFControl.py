@@ -595,11 +595,11 @@ class APF:
                 if len(focusdict['PHASE']) > 0:
                     flags = " ".join(["-p", focusdict['phase']])
             else:
-                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["LASTFOCUS"]), level='error', echo=True)
-                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["LASTFOCUS"])
+                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
+                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["lastfocus"])
             result = self.focus(flags=flags)
             if not result:
-                apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["LASTFOCUS"]), level='error', echo=True)
+                apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
         self.apfschedule('OWNRHINT').write(owner)        
 
         return result
