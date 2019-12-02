@@ -476,6 +476,7 @@ class APF:
         self.ucam('OUTFILE').write(name)
         self.ucam('OUTDIR').write('/data/apf/')
         self.ucam('OBSNUM').write(str(num))
+        self.robot['UCAMLAUNCHER_UCAM_PCC'].write(0)
 
         apflog("Updated science camera parameters:")
         apflog("Observer = %s" % self.ucam('OBSERVER').read(),echo=True)
