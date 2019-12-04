@@ -164,7 +164,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     return didx
 
 
-def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False):
+def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'raoff' : None, 'decoff' : None },force_download=False):
     """ parseUCOSched parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
@@ -180,7 +180,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                     "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                     "texp", "I2", "expcount","decker","Close Companion", "APFnshots", \
-                    "owner", "mode", \
+                    "owner", "mode", "raoff", "decoff", \
                     "Bstar", "obsblock",\
                     "APFpri", "APFcad", "lastobs", "B-V", \
                     "uth","utm","duration", \
@@ -210,7 +210,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     
     names = []
     star_table = []
-    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "instrument" : [] }
+    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "instrument" : [], "raoff" : [], "decoff" : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -292,9 +292,12 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         flags['template'].append(tempselect.upper())
 
         flags['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
-        flags['mode'].append(checkFlag("mode",didx,ls,"\A(A|a|b|B|o|O)",config["mode"]).upper())
+        flags['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
         flags['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
         flags['Bstar'].append(checkFlag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
+
+        flags['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
+        flags['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
         
         star_table.append(row)
         star = ephem.FixedBody()
