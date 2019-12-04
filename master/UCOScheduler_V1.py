@@ -98,7 +98,7 @@ def makeFracTable(table_name,outfn='frac_table'):
     return np.asarray(frac_table)
 
 
-def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focval=0):
+def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='public',focval=0,mode='',raoff=None,decoff=None):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y")
     name - name of star, first column in line
@@ -154,6 +154,17 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focv
     if owner != '':
         ret += ' owner=' + str(owner)
 
+    if mode != '':
+        if mode == 'B':
+            m='blank=Y'
+        elif mode == 'O':
+            m='guide=Y'
+        ret += ' ' + str(m)
+
+
+    if raoff is not None and decoff is not None and mode != '':
+        ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
+        
     return ret
 
 def calc_elevations(stars, observer):
