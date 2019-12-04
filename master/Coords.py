@@ -2,6 +2,9 @@ import numpy as np
 
 def getRARad(hr, mn, sec):
     try:
+        hr = int(hr)
+        mn = int(mn)
+        sec = float(sec)
         if hr < 0 or hr > 23:
             return None
         if mn < 0 or mn >= 59:
@@ -15,8 +18,8 @@ def getRARad(hr, mn, sec):
 
 def getDECRad(deg, mn, sec, neg=False):
     try:
-        deg = float(deg)
-        mn = float(mn)
+        deg = int(deg)
+        mn = int(mn)
         sec = float(sec)
         if deg < -40 or deg > 90:
             return None
