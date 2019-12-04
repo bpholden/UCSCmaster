@@ -16,7 +16,7 @@ if __name__ == "__main__":
     req_cols = ["Star Name","APFpri", "RA hr", "RA min", "RA sec", \
                     "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
                     "texp", "APFnshots", "expcount","I2", "decker","Close Companion",  \
-                    "owner", "mode", "Bstar", "obsblock",\
+                    "owner", "mode", "raoff", "decoff", "Bstar", "obsblock",\
                     "APFcad", "lastobs", "B-V", \
                     "uth","utm","duration", \
                     "Nobs", "Total Obs", "Template",
@@ -56,6 +56,8 @@ if __name__ == "__main__":
 
         outdict["mode"] = np.zeros_like(np.asarray(flags["do"]))
         outdict["obsblock"] = np.zeros_like(np.asarray(flags["do"]))                                  
+        outdict["raoff"] = np.zeros_like(np.asarray(flags["do"]))                                  
+        outdict["decoff"] = np.zeros_like(np.asarray(flags["do"]))                                  
 
         bstars = ['Y' if 'HR' in n else 'N' for n in names]
         outdict['Bstar'] = np.asarray(bstars)
