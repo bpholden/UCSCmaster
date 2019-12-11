@@ -271,8 +271,8 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         row.append(float_or_default(ls[didx["Vmag"]],default=15.0))
         row.append(float_or_default(ls[didx["texp"]],default=1200))
         expcount = float_or_default(ls[didx["expcount"]],default=1e9)
-        if expcount > 3e9
-            expcount = 3e9
+        if expcount > 2e9:
+            expcount = 2e9
         row.append(expcount)
         row.append(int_or_default(ls[didx["APFnshots"]],default=1))
 
