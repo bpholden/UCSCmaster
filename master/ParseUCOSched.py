@@ -164,6 +164,31 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     return didx
 
 
+def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="frac_table",outdir=None):
+    
+    apflog( "Starting Googledex parse",echo=True)    
+    if not outdir :
+        outdir = os.getcwd()
+    if os.path.exists(os.path.join(outdir,outfn)):
+        return None
+
+    sheetns = []
+    frac = []
+    worksheet = get_spreadsheet(sheetn=sheet_table_name,certificate=certificate)
+    if worksheet:
+        cur_codex = worksheet.get_all_values()
+        if len(cur_codex) <= 0:
+            apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
+            return None
+        for row in cur_codex:
+            sheetns.append(row[0])
+            frac.append(row[1])
+
+        twod = [ [sheetns[i],frac[i]] for i in range(0,len(fracs))]
+        np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
+            
+    return sheetns,frac
+
 def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'raoff' : None, 'decoff' : None },force_download=False):
     """ parseUCOSched parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
