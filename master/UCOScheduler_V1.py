@@ -586,6 +586,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
 if __name__ == '__main__':
 
+
+    sheet_tablen='2019B_frac'
+    frac_table = makeFracTable(sheet_tablen,'frac_table',datetime.now())
+    
 #    sheetn=["2018B"]
     sheetn="Bstars_test,A004_PRobertson_test,A014_SVogt_test"
 
