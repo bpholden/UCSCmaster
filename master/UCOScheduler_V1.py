@@ -77,17 +77,25 @@ def readFracTable(table_name):
         
     return sheetns, fracs
 
-def makeFracTable(table_name,outfn='frac_table'):
+def makeFracTable(sheet_table_name,table_name,dt,outfn='hour_table',outdir=None):
 
-    sheetns, frac = readFracTable(table_name)
-    if os.path.exists(outfn):
+    if not outdir :
+        outdir = os.getcwd()
+        
+    if os.path.exists(os.path.join(outdir,outfn)):
         frac_table = np.genfromtext(outfn,dtype=[('sheetn','S24'),('frac','f8'),('tot','f8'),('cur','f8')])
         return frac_table
+
+    if os.path.exists(os.path.join(outdir,table_name)):
+        sheetns, fracs = readFracTable(table_name)
+    else:
+        sheetns, fracs = ParseUCOSched.parseFracTable(sheet_table_name=sheet_table_name,outfn=table_name,outdir=outdir)
+        
     frac_table = []
 
     sunset,sunrise = compute_sunset_n_rise(dt,horizon='-10')
     tot = sunrise - sunset
-    for i in range(0,len(frac)):
+    for i in range(0,len(fracs)):
         row = []
         row.append(sheetns[i])
         row.append(fracs[i])
