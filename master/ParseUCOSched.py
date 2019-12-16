@@ -182,7 +182,9 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             return None
         for row in cur_codex:
             sheetns.append(row[0])
-            frac.append(row[1])
+            frac.append(float_or_default(row[1]))
+            
+                                
 
         twod = [ [sheetns[i],frac[i]] for i in range(0,len(frac))]
         np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
