@@ -240,7 +240,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
         if ws:
             vals = ws.get_all_values()
         else:
-            next
+            continue
         col = vals[0].index("lastobs") 
         nobscol = vals[0].index("Nobs")
         tempcol = vals[0].index("Template")
