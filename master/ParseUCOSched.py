@@ -83,7 +83,10 @@ def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic
             for row in cur_codex[1:]:
                 nrow = []
                 for c in req_cols:
-                    nrow.append(row[didx[c]])
+                    if c in didx.keys():
+                        nrow.append(row[didx[c]])
+                    else:
+                        nrow.append(None)
                 full_codex.append(nrow)
         
 
