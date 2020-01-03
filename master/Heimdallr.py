@@ -195,7 +195,9 @@ if __name__ == '__main__':
 
     # Register the atexit function after parsing the command line arguments
     # This prevents printing the help followed by exited/failure message
-    atexit.register (shutdown)
+    atexit.register(shutdown)
+    signal.signal(signal.SIGINT,  shutdown)
+    signal.signal(signal.SIGTERM, shutdown)
 
     # Log the Command line arguments
     apflog("Command Line Args:")
