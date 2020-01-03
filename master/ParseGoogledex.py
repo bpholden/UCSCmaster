@@ -12,6 +12,7 @@ import gspread
 import json
 from oauth2client.service_account import ServiceAccountCredentials
 
+import APFTask
 import ObservedLog
 import Coords
 from SchedulerConsts import MIN_TOTOBS, DS_BV, DS_ERR
@@ -237,6 +238,7 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
     nupdates = 0
     for sheetn in sheetns:
         ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
+        
         if ws:
             vals = ws.get_all_values()
         else:
@@ -369,7 +371,9 @@ def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic
                     nrow.append(row[didx[c]])
                 nrow.append(sheetn)
                 full_codex.append(nrow)
-        
+
+            wait_time = len(nrow)/10
+            APFTask.waitfor('master',True,timeout=wait_time)        
 
     f = open(outfn,'wb')
     pickle.dump(full_codex, f)
