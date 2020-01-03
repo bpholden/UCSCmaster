@@ -222,8 +222,7 @@ if __name__ == '__main__':
         apflog("Attempting to establish apftask as %s" % parent)
         APFTask.establish(parent, os.getpid())
     except Exception as e:
-        print e
-        apflog("Task is already running with name %s." % parent, echo=True)
+        apflog("Cannot establish as name %s: %s." % (parent,e), echo=True)
         sys.exit("Couldn't establish APFTask %s" % parent)
     else:
         # Set up monitoring of the current master phase
