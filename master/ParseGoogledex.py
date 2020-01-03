@@ -413,7 +413,7 @@ def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4
     try:
         spreadsheet = gs.open(sheetn)
         apflog("Loaded Main %s" % (sheetn),echo=True)
-        worksheet = spreadsheet.sheet1
+        worksheet = spreadsheet.get_worksheet(0)
         apflog("Got spreadsheet", echo=True)
     except Exception as e:
         apflog("Cannot Read %s: %s"  % (sheetn, e), echo=True, level='error')
