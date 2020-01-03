@@ -13,7 +13,6 @@ if __name__ == "__main__":
     sheetns = sys.argv[1].split(",")
     if os.path.exists("googledex.dat"):
         os.unlink("googledex.dat")
-    APFTask.establish('example',os.getpid())
+
     ParseGoogledex.parseGoogledex(sheetns=sheetns)
-    status ='Exited/Success'
-    APFTask.set(parent, 'STATUS', status)
+

@@ -12,7 +12,6 @@ import gspread
 import json
 from oauth2client.service_account import ServiceAccountCredentials
 
-import APFTask
 import ObservedLog
 import Coords
 from SchedulerConsts import MIN_TOTOBS, DS_BV, DS_ERR
@@ -373,7 +372,7 @@ def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic
                 full_codex.append(nrow)
 
             wait_time = len(nrow)/10
-            APFTask.waitfor('master',True,timeout=wait_time)        
+            time.sleep(wait_time)
 
     f = open(outfn,'wb')
     pickle.dump(full_codex, f)
