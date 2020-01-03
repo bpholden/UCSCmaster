@@ -235,9 +235,9 @@ if __name__ == '__main__':
     APFTask.set(parent, "TRIPWIRE", "TASK_ABORT")
 
     control = apftask[parent + '_CONTROL']
-    cw = functools.partial(control_watch, parent=parent)
-    control.monitor()
+    cw = functools.partial(controlWatch, parent=parent)
     control.callback(cw)
+    control.monitor(wait=False)
 
     apflog("Master initiallizing APF monitors.", echo=True)
 
