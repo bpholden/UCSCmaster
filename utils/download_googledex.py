@@ -15,4 +15,5 @@ if __name__ == "__main__":
         os.unlink("googledex.dat")
     APFTask.establish('example',os.getpid())
     ParseGoogledex.parseGoogledex(sheetns=sheetns)
-
+    status ='Exited/Success'
+    APFTask.set(parent, 'STATUS', status)
