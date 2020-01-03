@@ -47,7 +47,7 @@ parent = 'master'
 # global
 paused = False
 
-def control_watch(keyword,parent):
+def controlWatch(keyword,parent):
     if keyword['populated'] == False:
         return
     try:
