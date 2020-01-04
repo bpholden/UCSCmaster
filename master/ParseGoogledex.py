@@ -246,6 +246,8 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
         nobscol = vals[0].index("Nobs")
         tempcol = vals[0].index("Template")
         owncol = vals[0].index("owner")
+        wait_time = len(vals)/10
+        time.sleep(wait_time)
     
         for i, v in enumerate(vals):
             # Did we observe this target tonight?
