@@ -540,9 +540,6 @@ class Master(threading.Thread):
                     apflog("Found Fixed list %s" % self.fixedList, echo=True)
                     apflog("Starting fixed list on line %d" % int(self.APF.ldone), echo=True)
 
-                    while len(self.target["SCRIPTOBS"]) > 0:
-                        self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
-                    self.fixedList = None
                     
             else:
                 if self.BV is None:
@@ -559,6 +556,13 @@ class Master(threading.Thread):
                 # Don't let the watcher run over the robot starting up
                 APFTask.waitFor(self.task, True, timeout=10)
 
+
+            if self.fixedList is not None and self.shouldStartList():
+                while len(self.target["SCRIPTOBS"]) > 0:
+                        self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
+                self.fixedList = None
+
+                
             return
 
        
