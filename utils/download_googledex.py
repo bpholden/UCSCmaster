@@ -3,7 +3,6 @@ import sys
 import os
 sys.path.append("../master")
 
-import APFTask
 import ParseGoogledex
 
 if __name__ == "__main__":
