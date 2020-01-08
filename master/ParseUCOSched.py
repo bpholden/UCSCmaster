@@ -65,7 +65,7 @@ def float_or_default(value,default=0.0):
         rv = default
     return rv
 
-def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
+def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
     full_codex = []
     # These are the columns we need for scheduling
     full_codex.append(req_cols)
@@ -229,9 +229,9 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
             full_codex = pickle.load(f)
             f.close()
         except:
-            full_codex = make_local_copy(req_cols,sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
+            full_codex = makeLocalCopy(req_cols,sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
     else:
-        full_codex = make_local_copy(req_cols,sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
+        full_codex = makeLocalCopy(req_cols,sheetns=sheetns,certificate=certificate,outfn=os.path.join(outdir,outfn))
 
     col_names = full_codex[0]
     codex = full_codex[1:]
