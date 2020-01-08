@@ -218,10 +218,10 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d
 
     return (names, np.array(star_table), flags, stars)
 
-def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
+def updateGoogledexLastobs(filename, sheetns=["2018B"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
-        update_googledex_lastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
+        updateGoogledexLastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
 
         filename - where the observations are logged
 
@@ -291,10 +291,10 @@ def update_googledex_lastobs(filename, sheetns=["2018B"],ctime=None,certificate=
 
     return nupdates
 
-def update_local_googledex(intime,googledex_file="googledex.dat", observed_file="observed_targets", frac_table=None):
+def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="observed_targets", frac_table=None):
     """
         Update the local copy of the googledex with the last observed star time.
-        update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
+        updateLocalGoogledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
 
         opens googledex_file and inputs date of last observation from observed_file
         in principle can use timestamps as well as scriptobs uth and utm values
@@ -353,7 +353,7 @@ def update_local_googledex(intime,googledex_file="googledex.dat", observed_file=
     
     return obslog.names
 
-def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
+def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
     full_codex = []
     # These are the columns we need for scheduling
     hdr_cols = [rc for rc in req_cols]
