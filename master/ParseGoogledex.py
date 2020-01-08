@@ -373,7 +373,7 @@ def make_local_copy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic
                 nrow.append(sheetn)
                 full_codex.append(nrow)
 
-            wait_time = len(nrow)/10
+            wait_time = len(nrow)
             time.sleep(wait_time)
 
     f = open(outfn,'wb')
