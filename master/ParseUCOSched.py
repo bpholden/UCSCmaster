@@ -169,7 +169,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
 
 def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="frac_table",outdir=None):
     
-    apflog( "Starting Googledex parse",echo=True)    
+    apflog( "Starting parse of %s" % (sheet_table_name),echo=True)    
     if not outdir :
         outdir = os.getcwd()
     if os.path.exists(os.path.join(outdir,outfn)):
