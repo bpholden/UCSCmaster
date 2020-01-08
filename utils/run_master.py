@@ -87,7 +87,7 @@ def findAPFObsName():
 
     return fn
 
-def findAPFObsNum():
+def findAPFObsNum(last):
 
     last += 100 - (last % 100)
     if last % 1000 > 700:
