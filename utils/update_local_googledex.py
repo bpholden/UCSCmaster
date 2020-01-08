@@ -15,4 +15,4 @@ if __name__ == "__main__":
         gdfn = sys.argv[2]
 
     dt = datetime.datetime.now()
-    ParseGoogledex.update_local_googledex(dt,googledex_file=gdfn,observed_file=obfn)
+    ParseGoogledex.updateLocalGoogledex(dt,googledex_file=gdfn,observed_file=obfn)
