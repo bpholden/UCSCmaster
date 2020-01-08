@@ -109,13 +109,12 @@ def findUCSCObsNum():
     return last
 
 
-def findUCBObsNum(lastcode=None):
-    apftask = ktl.Service('apftask')
-    if lastcode == None:
-        lastcode = apftask['MASTER_LAST_OBS_UCB'].read()
-        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
-            apflog.apflog( "Existing files detected for run %s. Not incrementing night code." % lastcode,echo=True)
-            return lastcode
+def findUCBObsNum(lastcode):
+
+
+    if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
+        apflog.apflog( "Existing files detected for run %s. Not incrementing night code." % lastcode,echo=True)
+        return lastcode
 
     zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
 
