@@ -183,7 +183,7 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
         cur_codex = worksheet.get_all_values()
         if len(cur_codex) <= 0:
             apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
-            return None
+            return None, None
         for row in cur_codex:
             sheetns.append(row[0])
             frac.append(float_or_default(row[1]))
