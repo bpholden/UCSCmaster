@@ -158,9 +158,7 @@ def args():
     return opt
 
 
-def findObsNum(apf):
-
-    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
+def findObsNum(last):
 
     last += 100 - (last % 100)
     if last % 1000 > 700:
@@ -176,7 +174,8 @@ def setObsDefaults(opt):
         opt.name = 'apf'
         if opt.obsnum == None:
             apflog("Figuring out what the observation number should be.",echo=False)
-            opt.obsnum = findObsNum(apf)
+            opt.obsnum = findObsNum(int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
+
         else:
             opt.obsnum = int(opt.obsnum)
     else:
