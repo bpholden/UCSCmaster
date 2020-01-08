@@ -177,6 +177,7 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
 
     sheetns = []
     frac = []
+    twod = []
     worksheet = get_spreadsheet(sheetn=sheet_table_name,certificate=certificate)
     if worksheet:
         cur_codex = worksheet.get_all_values()
@@ -186,10 +187,8 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
         for row in cur_codex:
             sheetns.append(row[0])
             frac.append(float_or_default(row[1]))
-            
-                                
+            twod.append([row[0],row[1]])
 
-        twod = [ [sheetns[i],frac[i]] for i in range(0,len(frac))]
         np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
             
     return sheetns,frac
