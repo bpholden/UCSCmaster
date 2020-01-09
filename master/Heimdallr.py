@@ -174,8 +174,7 @@ def setObsDefaults(opt):
         opt.name = 'apf'
         if opt.obsnum == None:
             apflog("Figuring out what the observation number should be.",echo=False)
-            opt.obsnum = findObsNum(int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
-
+            opt.obsnum = findObsNum(int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True)))
         else:
             opt.obsnum = int(opt.obsnum)
     else:
