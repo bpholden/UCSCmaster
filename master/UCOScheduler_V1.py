@@ -77,7 +77,7 @@ def readFracTable(table_name):
         
     return sheetns, fracs
 
-def makeFracTable(sheet_table_name,table_name,dt,outfn='hour_table',outdir=None):
+def makeFracTable(sheet_table_name,dt,outfn='frac_table',outdir=None):
 
     if not outdir :
         outdir = os.getcwd()
@@ -86,10 +86,7 @@ def makeFracTable(sheet_table_name,table_name,dt,outfn='hour_table',outdir=None)
         frac_table = np.genfromtext(outfn,dtype=[('sheetn','S24'),('frac','f8'),('tot','f8'),('cur','f8')])
         return frac_table
 
-    if os.path.exists(os.path.join(outdir,table_name)):
-        sheetns, fracs = readFracTable(table_name)
-    else:
-        sheetns, fracs = ParseUCOSched.parseFracTable(sheet_table_name=sheet_table_name,outfn=table_name,outdir=outdir)
+    sheetns, fracs = ParseUCOSched.parseFracTable(sheet_table_name=sheet_table_name)
         
     frac_table = []
 
@@ -103,8 +100,12 @@ def makeFracTable(sheet_table_name,table_name,dt,outfn='hour_table',outdir=None)
         row.append(0.)
         frac_table.append(row)
         
-    return np.asarray(frac_table)
-
+    hour_table= np.asarray(frac_table,names=['sheetn','frac','tot','cur'])
+    try:
+        np.savetxt(os.path.join(outdir,outfn), hour_table,mt="%s",delimiter=" ")
+    except:
+        apflog("Cannot write table %s" % (os.path.join(outdir,outfn)),level='error',echo=True)
+    return hour_table
 
 def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='public',focval=0,mode='',raoff=None,decoff=None):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
@@ -591,7 +592,7 @@ if __name__ == '__main__':
 
 
     sheet_tablen='2019B_frac'
-    frac_table = makeFracTable(sheet_tablen,'frac_table',datetime.now())
+    hour_table = makeFracTable(sheet_tablen,datetime.now())
     
 #    sheetn=["2018B"]
     sheetn="Bstars_test,A004_PRobertson_test,A014_SVogt_test"
