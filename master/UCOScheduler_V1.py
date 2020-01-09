@@ -90,7 +90,7 @@ def makeFracTable(sheet_table_name,dt,outfn='frac_table',outdir=None):
         
     frac_table = []
 
-    sunset,sunrise = compute_sunset_n_rise(dt,horizon='-10')
+    sunset,sunrise = compute_sunset_n_rise(dt,horizon='-9')
     tot = sunrise - sunset
     for i in range(0,len(fracs)):
         row = []
