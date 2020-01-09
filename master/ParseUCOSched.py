@@ -167,13 +167,24 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     return didx
 
 
-def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="frac_table",outdir=None):
+def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn=None):
     
     apflog( "Starting parse of %s" % (sheet_table_name),echo=True)    
     if not outdir :
         outdir = os.getcwd()
-    if os.path.exists(os.path.join(outdir,outfn)):
-        return None
+    if outfn is not None and os.path.exists(os.path.join(outdir,outfn)):
+        sheetns=[]
+        frac=[]
+        with open(os.path.join(outdir,outfn)) as fp:
+            lines = fp.readlines()
+            for ln in lines:
+                row = ln.strip().split()
+                sheetns.append(row[0])
+                try:
+                    frac.append(float(row[0]))
+                except:
+                    frac.append(0)
+        return sheetns,frac
 
     sheetns = []
     frac = []
@@ -189,7 +200,8 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             frac.append(float_or_default(row[1]))
             twod.append([row[0],row[1]])
 
-        np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
+        if outfn is not None:
+            np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
             
     return sheetns,frac
 
