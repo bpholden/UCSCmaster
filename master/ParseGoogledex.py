@@ -246,7 +246,7 @@ def updateGoogledexLastobs(filename, sheetns=["2018B"],ctime=None,certificate='U
         nobscol = vals[0].index("Nobs")
         tempcol = vals[0].index("Template")
         owncol = vals[0].index("owner")
-        wait_time = len(vals)/10
+        wait_time = len(vals)
         time.sleep(wait_time)
     
         for i, v in enumerate(vals):
@@ -375,6 +375,8 @@ def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
 
             wait_time = len(nrow)
             time.sleep(wait_time)
+        else:
+            time.sleep(10)
 
     f = open(outfn,'wb')
     pickle.dump(full_codex, f)
