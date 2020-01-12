@@ -236,7 +236,7 @@ def updateGoogledexLastobs(filename, sheetns=["2018B"],ctime=None,certificate='U
     
     nupdates = 0
     for sheetn in sheetns:
-        ws = get_spreadsheet(sheetn=sheetn,certificate=certificate)
+        ws = getSpreadsheet(sheetn=sheetn,certificate=certificate)
         
         if ws:
             vals = ws.get_all_values()
@@ -361,7 +361,7 @@ def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
     full_codex.append(hdr_cols)
         
     for sheetn in sheetns:
-        worksheet = get_spreadsheet(sheetn=sheetn,certificate=certificate)
+        worksheet = getSpreadsheet(sheetn=sheetn,certificate=certificate)
         if worksheet:
             cur_codex = worksheet.get_all_values()
             didx = findColumns(cur_codex[0],req_cols)
@@ -381,10 +381,10 @@ def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
     f.close()
     return full_codex
     
-def get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
+def getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """ Get the spreadsheet from google
 
-    worksheet = get_spreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
+    worksheet = getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
     worksheet - the worksheet object returned by the gspread module
 
     sheetn - name of the google sheet, defaults to "The Googledex"
