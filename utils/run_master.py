@@ -174,8 +174,6 @@ def config_kwds(config,test=False):
         writeem('checkapf','OBSLOCAT',obs)
         writeem('apfucam','OBSERVER',config['observer'])
         writeem('apfschedule','ACTIVE_RUN',primary_run(schedule))
-
-
         writeem('apfschedule','OWNRHINT',ownr)
 
         if config['name'] == 'ucsc':
