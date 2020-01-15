@@ -7,6 +7,9 @@ import sys
 import time
 import ephem
 import numpy as np
+import astropy
+import astropy.table
+import astropy.io.ascii
 
 import gspread
 import json
