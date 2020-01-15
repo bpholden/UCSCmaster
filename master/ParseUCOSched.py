@@ -92,10 +92,10 @@ def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
                         nrow.append(None)
                 full_codex.append(nrow)
         
-
     f = open(outfn,'wb')
     pickle.dump(full_codex, f)
     f.close()
+                
     return full_codex
     
 
@@ -234,7 +234,6 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
-    apflog( "Starting Googledex parse",echo=True)    
     if not outdir :
         outdir = os.getcwd()
     if os.path.exists(os.path.join(outdir,outfn)) and force_download is False:
