@@ -338,7 +338,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         flags['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
         flags['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
         flags['Bstar'].append(checkFlag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
-        flags['inst'].append(checkFlag("inst",didx,ls,"(levy|darts)",config['inst').lower())
+        flags['inst'].append(checkFlag("inst",didx,ls,"(levy|darts)",config['inst']).lower())
 
         flags['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
         flags['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
