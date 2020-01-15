@@ -331,6 +331,40 @@ def makeResult(stars,star_table,flags,totexptimes,sn,dt,idx,focval=0):
     res['SCRIPTOBS'].append(scriptobs_line)
     return res
 
+def lastAttempted():
+    global last_objs_attempted
+    try:
+        lastline = ktl.read("apftask","SCRIPTOBS_LINE")
+        if not bstar:             # otherwise from previous night
+            lastobj = lastline.split()[0]
+        else:
+            lastobj = None
+
+    except:
+        lastobj = None
+
+    if lastobj:
+        if lastobj not in observed and lastobj not in last_objs_attempted:
+            last_objs_attempted.append(lastobj)
+            
+            apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
+
+
+        else:
+            last_objs_attempted = []
+            # we had a succes so we are zeroing this out
+
+    return last_objs_attempted
+
+def behindMoon(moon,ras,decs):
+    md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
+    minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN
+    moonDist = np.degrees(np.sqrt((moon.ra - ras)**2 + (moon.dec - decs)**2))
+
+    apflog("getNext(): Culling stars behind the moon",echo=True)
+    moon_check = moonDist > minMoonDist
+
+    return moon_check
 
 def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst=''):
     """ Determine the best target for UCSC team to observe for the given input.
@@ -377,31 +411,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     # List of targets already observed
 
-    global last_objs_attempted
-    try:
-        lastline = ktl.read("apftask","SCRIPTOBS_LINE")
-        if not bstar:             # otherwise from previous night
-            lastobj = lastline.split()[0]
-        else:
-            lastobj = None
-
-    except:
-        lastobj = None
-
-    if lastobj:
-        if lastobj not in observed and lastobj not in last_objs_attempted:
-            last_objs_attempted.append(lastobj)
-            
-            apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
-
-            if len(last_objs_attempted) > 5:
-                apflog( "getNext(): 5 failed acquisition attempts",echo=True)
-                last_objs_attempted = []
-                return None
-        else:
-            last_objs_attempted = []
-            # we had a succes so we are zeroing this out
-
+    last_objs_attempted = lastAttempted()
+    if len(last_objs_attempted) > 5:
+        apflog( "getNext(): 5 failed acquisition attempts",echo=True)
+        last_objs_attempted = []
             
     ###
     # Need to update the googledex with the lastObserved date for observed targets
@@ -440,10 +453,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     bstars = (bstar_array == 'Y')|(bstar_array == 'y')
 
     # Distance to stay away from the moon
-    md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
-    minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN
 
-    moonDist = np.degrees(np.sqrt((moon.ra - star_table[:,DS_RA])**2 + (moon.dec - star_table[:,DS_DEC])**2))
 
     available = np.ones(targNum, dtype=bool)
     totexptimes = np.zeros(targNum, dtype=float)
@@ -451,9 +461,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     scaled_elevations = np.zeros(targNum, dtype=float)
 
     # Is the target behind the moon?
-
-    apflog("getNext(): Culling stars behind the moon",echo=True)
-    moon_check = moonDist > minMoonDist
+    moon_check = behindMoon(moon,star_table[:,DS_RA],star_table[:,DS_DEC])
     available = available & moon_check
 
     #    totobs_check = (star_table[:,DS_NOB] < star_table[:,DS_TOT]) | (star_table[:,DS_TOT] <= 0)
