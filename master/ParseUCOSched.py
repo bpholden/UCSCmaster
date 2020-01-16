@@ -296,7 +296,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
 
         # scheduler specific
-        row.append(apfpri)
+        row.append(apfpri) # APFpri
         row.append(float_or_default(ls[didx["APFcad"]],default=0.7))
         row.append(float_or_default(ls[didx["lastobs"]],default=0))
 
