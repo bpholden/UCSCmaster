@@ -134,10 +134,10 @@ def makeScriptobsLine(idx, row, decker="W",I2="Y",owner='public',focval=0):
     # Epoch
     ret += '2000 '
     # Proper motion RA and DEC
-    ret += 'pmra=' + str(star_table['pmra'][idx]) + ' '
-    ret += 'pmdec=' + str(star_table['pmdec'][idx]) + ' '
+    ret += 'pmra=' + str(star_table['pmRA'][idx]) + ' '
+    ret += 'pmdec=' + str(star_table['pmDEC'][idx]) + ' '
     # V Mag
-    ret += 'vmag=' + str(star_table['vmag'][idx]) + ' '
+    ret += 'vmag=' + str(star_table['Vmag'][idx]) + ' '
     # T Exp
     ret += 'texp=' + str(int(star_table['texp'][idx])) + ' '
     # I2
@@ -264,9 +264,9 @@ def makeTempRow(star_table,ind,bstar=False):
 
     row.append(star_table['ra'][ind])
     row.append( star_table['dec'][ind])
-    row.append(star_table['pmra'][ind])
-    row.append(star_table['pmdec'][ind])
-    row.append(star_table['vmag'][ind])
+    row.append(star_table['pmRA'][ind])
+    row.append(star_table['pmDEC'][ind])
+    row.append(star_table['Vmag'][ind])
     row.append(1200)
     row.append(1e9)
     row.append( star_table['APFpri'][ind])
@@ -274,9 +274,9 @@ def makeTempRow(star_table,ind,bstar=False):
     if bstar:
         row.append(2)
     else:
-        if star_table['vmag'][ind] > 10:
+        if star_table['Vmag'][ind] > 10:
             row.append(9)
-        elif star_table['vmag'][ind] < 8:
+        elif star_table['Vmag'][ind] < 8:
             row.append(5)
         else:
             row.append(7)
@@ -314,9 +314,9 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
 
     res['RA']     = stars[idx].a_ra
     res['DEC']    = stars[idx].a_dec
-    res['PM_RA']  = star_table['pmra'][idx]
-    res['PM_DEC'] = star_table['pmdec'][idx]
-    res['VMAG']   = star_table['vmag'][idx]
+    res['PM_RA']  = star_table['pmRA'][idx]
+    res['PM_DEC'] = star_table['pmDEC'][idx]
+    res['VMAG']   = star_table['Vmag'][idx]
     res['BV']     = star_table['BmV'][idx]
     res['COUNTS'] = star_table['expcount'][idx]
     res['EXP_TIME'] = star_table['texp'][idx]
@@ -519,7 +519,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         currently_available[available] = currently_available[available] & vis
 
         if slowdown > SLOWDOWN_THRESH:
-            bright_enough = star_table['vmag'] < SLOWDOWN_VMAG_LIM
+            bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
             available = available & bright_enough
 
     # Now just sort by priority, then cadence. Return top target
