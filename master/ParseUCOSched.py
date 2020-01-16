@@ -228,7 +228,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
                     "Bstar", "obsblock",\
                     "APFpri", "APFcad", "lastobs", "B-V", \
                     "uth","utm","duration", \
-                    "Template", "Nobs", "Total Obs", 
+                    "Template", "Nobs", "Total Obs"
                     ]
     
     
