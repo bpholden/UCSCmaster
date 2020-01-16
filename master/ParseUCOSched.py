@@ -351,7 +351,9 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         star._dec = ephem.degrees(str(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]])))
         stars.append(star)
 
-    return (names, np.array(star_table), flags, stars)
+    star_table =  astropy.table.Table(star_table,names=['name','ra','dec','pmRA','pmDec','Vmag','texp','expcount','APFnshots','APFpri','APFcad','lastobs','BmV','uth','utm','duration','nobs','totobs'])
+    star_table = astropy.table.hstack([star_table,astropy.table.Table(flags)])
+    return (star_table, stars)
 
 
 def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="observed_targets"):
