@@ -251,8 +251,8 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
     didx = findColumns(col_names,req_cols)
     
-    names = []
-    star_table = []
+    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDec' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [])
+    
     flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "inst" : [], "raoff" : [], "decoff" : [] }
     stars = []
     # Build the star table to return to 
@@ -268,59 +268,59 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         if apfpri < 0.5: continue
         # Get the star name
         #        names.append(parseStarname(ls[didx["Star Name"]]))
-        row.append(parseStarname(ls[didx["Star Name"]]))
+        star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
         # Get the RA
         raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval:
-            row.append(raval)
+            star_table['ra'].append(raval)
         else:
-            row.append(-1.)
+            star_table['ra'].append(-1.)
         # Get the DEC
         decval = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
         if decval:
-            row.append(decval)
+            star_table['dec'].append(decval)
         else:
-            row.append(-3.14)
+            star_table['dec'].append(-3.14)
 
         for coln in ("pmRA", "pmDEC"):
-            row.append(float_or_default(ls[didx[coln]]))
+            star_table[coln].append(float_or_default(ls[didx[coln]]))
 
 
-        row.append(float_or_default(ls[didx["Vmag"]],default=15.0))
-        row.append(float_or_default(ls[didx["texp"]],default=1200))
+        star_table['Vmag'].append(float_or_default(ls[didx["Vmag"]],default=15.0))
+        star_table['texp'].append(float_or_default(ls[didx["texp"]],default=1200))
         expcount = float_or_default(ls[didx["expcount"]],default=1e9)
         if expcount > 3e9:
             expcount = 3e9
-        row.append(expcount)
-        row.append(int_or_default(ls[didx["APFnshots"]],default=1))
+        star_table['expcount'].append(expcount)
+        star_table['APFnshots'].append(int_or_default(ls[didx["APFnshots"]],default=1))
 
 
         # scheduler specific
-        row.append(apfpri) # APFpri
-        row.append(float_or_default(ls[didx["APFcad"]],default=0.7))
-        row.append(float_or_default(ls[didx["lastobs"]],default=0))
+        star_table['APFpri'].append(apfpri)
+        star_table['APFcad'].append(float_or_default(ls[didx["APFcad"]],default=0.7))
+        star_table["lastobs"]].append(float_or_default(ls[didx["lastobs"]],default=0))
 
         inval = float_or_default(ls[didx["B-V"]],default=0.7)
         if inval < 0:
             inval = 1.
         if coln is 'B-V' and inval > 2:
             inval = 1
-        row.append(inval)
+        star_table['BmV'].append(inval)
                     
         for coln in ["uth", "utm"]:
-            row.append(int_or_default(ls[didx[coln]]))
+            star_table[coln].append(int_or_default(ls[didx[coln]]))
                 
         # duration:
-        row.append(float_or_default(ls[didx["duration"]]))
+        star_table['duration'].append(float_or_default(ls[didx["duration"]]))
                 
         # Nobs
-        row.append(nobs)
+        star_table['nobs'].append(nobs)
                 
         # Total Obs
         if totobs >= 0:
-            row.append(totobs)
+            star_table['totobs'].append(totobs)
         else:
-            row.append(0)
+            star_table['totobs'].append(0)
 
         check = checkFlag("Close Companion",didx,ls,"\A(y|Y)","")
         if check == "Y" or check == "y" :
