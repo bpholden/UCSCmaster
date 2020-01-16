@@ -251,9 +251,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
     didx = findColumns(col_names,req_cols)
     
-    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDec' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [])
-    
-    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "inst" : [], "raoff" : [], "decoff" : [] }
+    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDec' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "inst" : [], "raoff" : [], "decoff" : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -324,24 +322,24 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
         check = checkFlag("Close Companion",didx,ls,"\A(y|Y)","")
         if check == "Y" or check == "y" :
-            flags['do'].append(check)
+            star_table['do'].append(check)
         else:
-            flags['do'].append("")
+            star_table['do'].append("")
             
-        flags['decker'].append(checkFlag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
+        star_table['decker'].append(checkFlag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
         i2select = checkFlag("I2",didx,ls,"\A(n|N)",config["I2"])
-        flags['I2'].append(i2select.upper())
+        star_table['I2'].append(i2select.upper())
         tempselect = checkFlag("Template",didx,ls,"\A(n|N)",'Y')
-        flags['template'].append(tempselect.upper())
+        star_table['template'].append(tempselect.upper())
 
-        flags['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
-        flags['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
-        flags['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
-        flags['Bstar'].append(checkFlag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
-        flags['inst'].append(checkFlag("inst",didx,ls,"(levy|darts)",config['inst']).lower())
+        star_table['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
+        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
+        star_table['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
+        star_table['Bstar'].append(checkFlag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
+        star_table['inst'].append(checkFlag("inst",didx,ls,"(levy|darts)",config['inst']).lower())
 
-        flags['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
-        flags['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
+        star_table['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
+        star_table['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
         
         star_table.append(row)
         star = ephem.FixedBody()
@@ -350,8 +348,8 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         star._dec = ephem.degrees(str(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]])))
         stars.append(star)
 
-    star_table =  astropy.table.Table(star_table,names=['name','ra','dec','pmRA','pmDec','Vmag','texp','expcount','APFnshots','APFpri','APFcad','lastobs','BmV','uth','utm','duration','nobs','totobs'])
-    star_table = astropy.table.hstack([star_table,astropy.table.Table(flags)])
+
+    star_table = astropy.table.Table(star_table)
     return (star_table, stars)
 
 
