@@ -364,7 +364,7 @@ def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="o
         opens googledex_file and inputs date of last observation from observed_file
         in principle can use timestamps as well as scriptobs uth and utm values
     """
-    # names, times, temps = ObservedLog.getObserved(observed_file)
+    # name, times, temps = ObservedLog.getObserved(observed_file)
     obslog = ObservedLog.ObservedLog(observed_file)
     try:
         g = open(googledex_file, 'rb')
