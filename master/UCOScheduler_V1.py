@@ -27,27 +27,30 @@ last_objs_attempted = []
 
 def computePriorities(star_table,available,cur_dt,flags,frac_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
-    new_pri = np.zeros_like(star_table[:, DS_APFPRI])
-    if any(star_table[available, DS_DUR] > 0):
-        new_pri[available] += star_table[available,DS_APFPRI]
+    new_pri = np.zeros_like(star_table['APFpri'])
+    if any(star_table['duration'][available] > 0):
+        new_pri[available] += star_table['APFpri'][available]
         delta_pri = np.zeros_like(new_pri[available])
-        timedependent, = np.where(star_table[available, DS_DUR] > 0)
+        timedependent, = np.where(star_table['duration'][available]> 0)
         for tdinx in timedependent:
-            sdt = datetime(cur_dt.year,cur_dt.month,cur_dt.day,int(star_table[:, DS_UTH][available][tdinx]),int(star_table[:, DS_UTM][available][tdinx]),0)
-            durdelt = timedelta(0,star_table[:, DS_DUR][available][tdinx],0)
+            sdt = datetime(cur_dt.year,cur_dt.month,cur_dt.day,
+                               int(star_table['uth'][available][tdinx]),
+                               int(star_table['utm'][available][tdinx]),0)
+            
+            durdelt = timedelta(0,star_table['duration'][available][tdinx],0)
             if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
                 delta_pri[tdinx] += PRI_DELTA
         new_pri[available] += delta_pri
     elif frac_table is not None:
-        new_pri[available] += star_table[available,DS_APFPRI]
+        new_pri[available] += star_table[available,'APFpri']
         too_much = frac_table[:,DS_FT_CUR]  > frac_table[:,DS_FT_TOT]
         done_sheets = frac_table[too_much,DS_FT_NAMES]
         for sn in done_sheets:
-            bad = star_table[:, DS_SHEETN] == sn
+            bad = star_table['sheetn'] == sn
             new_pri[bad] = 0
         
     else:
-        new_pri += star_table[:, DS_APFPRI]
+        new_pri += star_table[:, 'APFpri']
     return new_pri
 
 
@@ -109,12 +112,11 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
         apflog("Cannot write table %s: %s" % (os.path.join(outdir,outfn),e),level='error',echo=True)
     return hour_table
 
-def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='public',focval=0,mode='',raoff=None,decoff=None):
+def makeScriptobsLine(idx, row, decker="W",I2="Y",owner='public',focval=0):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
-    line = makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y")
-    name - name of star, first column in line
-    row - star_table row for star that begins with name, cotains all of the data needed for the line except
-    do_flag - a string for whether or not scriptob needs to do a pointing check before slewing to the target
+    line = makeScriptobsLine(idx, row, t, decker="W",I2="Y")
+    idx - row of the star
+    star_table -contains all of the data needed for the line except
     t - a datetime object, this is used to fill in the uth and utm fields,
     decker - one character field for the decker, defaults to "W"
     I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
@@ -122,22 +124,22 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='public',fo
 
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
-    ret = name + ' '
+    ret = star_table['name'][idx] + ' '
     # Add the RA as three elements, HR, MIN, SEC
-    rastr = Coords.getCoordStr(np.degrees(row[DS_RA]), isRA=True)
+    rastr = Coords.getCoordStr(np.degrees(star_table['ra'][idx]), isRA=True)
     ret += rastr + ' '
     # Add the DEC as three elements, DEG, MIN, SEC
-    decstr = Coords.getCoordStr(np.degrees(row[DS_DEC]))
+    decstr = Coords.getCoordStr(np.degrees(star_table['dec'][idx]))
     ret += decstr + ' '
     # Epoch
     ret += '2000 '
     # Proper motion RA and DEC
-    ret += 'pmra=' + str(row[DS_PMRA]) + ' '
-    ret += 'pmdec=' + str(row[DS_PMDEC]) + ' '
+    ret += 'pmra=' + str(star_table['pmra'][idx]) + ' '
+    ret += 'pmdec=' + str(star_table['pmdec'][idx]) + ' '
     # V Mag
-    ret += 'vmag=' + str(row[DS_VMAG]) + ' '
+    ret += 'vmag=' + str(star_table['vmag'][idx]) + ' '
     # T Exp
-    ret += 'texp=' + str(int(row[DS_EXPT])) + ' '
+    ret += 'texp=' + str(int(star_table['texp'][idx])) + ' '
     # I2
     ret += 'I2=%s ' % (I2)
     # lamp
@@ -146,26 +148,26 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='public',fo
     ret += 'uth=' + str(t.hour) + ' '
     ret += 'utm=' + str(t.minute) + ' '
     # Exp Count
-    if row[DS_COUNTS] > 3e9:
+    if star_table['expcount'][idx] > 3e9:
         ret += 'expcount=%.3g' % (3e9) + ' '
     else:
-        ret += 'expcount=%.3g' % (row[DS_COUNTS]) + ' '
+        ret += 'expcount=%.3g' % (star_table['expcount'][idx]) + ' '
     # Decker
     ret += 'decker=%s ' % (decker)
     # do flag
-    if do_flag:
+    if star_table['do'][idx]:
         ret += 'do=Y '
     else:
         ret += 'do= '
     # Count
-    ret += 'count=' + str(int(row[DS_NSHOTS]))
+    ret += 'count=' + str(int(star_table['APFnshots'][idx]))
 
     ret += ' foc=' + str(int(focval))
 
     if owner != '':
         ret += ' owner=' + str(owner)
 
-    if mode != '':
+    if star_table['mode'][idx] != '':
         if mode == 'B':
             m='blank=Y'
         elif mode == 'O':
@@ -173,7 +175,7 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='public',fo
         ret += ' ' + str(m)
 
 
-    if raoff is not None and decoff is not None and mode != '':
+    if star_table['raoff'][idx] is not None and star_table['decoff'][idx] is not None and mode != '':
         ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
         
     return ret
@@ -260,29 +262,29 @@ def makeTempRow(star_table,ind,bstar=False):
 
     row = []
 
-    row.append(star_table[ind, DS_RA])
-    row.append( star_table[ind, DS_DEC])
-    row.append(star_table[ind, DS_PMRA])
-    row.append(star_table[ind, DS_PMDEC])
-    row.append(star_table[ind, DS_VMAG])
+    row.append(star_table['ra'][ind])
+    row.append( star_table['dec'][ind])
+    row.append(star_table['pmra'][ind])
+    row.append(star_table['pmdec'][ind])
+    row.append(star_table['vmag'][ind])
     row.append(1200)
     row.append(1e9)
-    row.append( star_table[ind, DS_APFPRI])
+    row.append( star_table['APFpri'][ind])
     row.append(0)
     if bstar:
         row.append(2)
     else:
-        if star_table[ind, DS_VMAG] > 10:
+        if star_table['vmag'][ind] > 10:
             row.append(9)
-        elif star_table[ind, DS_VMAG] < 8:
+        elif star_table['vmag'][ind] < 8:
             row.append(5)
         else:
             row.append(7)
     return row
 
-def enoughTime(star_table,stars,idx,row,apf_obs,dt):
-    tot_time = row[DS_NSHOTS]*row[DS_EXPT]
-    tot_time += 210 + (2*40 + 40*(row[DS_NSHOTS]-1)) # two B star exposures + three 70 second acquisitions and the actual observation readout times
+def enoughTime(star_table,stars,idx,apf_obs,dt):
+    tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
+    tot_time += 210 + (2*40 + 40*(star_table['APFnshots'][idx]-1)) # two B star exposures + three 70 second acquisitions and the actual observation readout times
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
     time_left_before_sunrise = compute_sunrise(dt,horizon='-9')
 
@@ -297,37 +299,41 @@ def enoughTime(star_table,stars,idx,row,apf_obs,dt):
         return False
         
     
-def findBstars(snames,star_table,idx, bstars):
+def findBstars(star_table,idx, bstars):
 
-    near_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],star_table[idx,DS_RA],star_table[idx,DS_DEC])
-    row = makeTempRow(star_table[bstars],near_idx,bstar=True)
+    near_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],star_table['ra'][idx],star_table['dec'][idx])
     
-    end_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],(star_table[idx,DS_RA]+45*np.pi/180.),star_table[idx,DS_DEC])
-    finrow = makeTempRow(star_table[bstars],end_idx,bstar=True)
+    end_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],(star_table['ra'][idx]+45*np.pi/180.),star_table['dec'][idx])
+
     
-    return snames[near_idx],row,snames[end_idx],finrow
+    return near_idx,end_idx
 
 
-def makeResult(stars,star_table,flags,totexptimes,sn,dt,idx,focval=0):
+def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res = dict()
 
     res['RA']     = stars[idx].a_ra
     res['DEC']    = stars[idx].a_dec
-    res['PM_RA']  = star_table[idx, DS_PMRA]
-    res['PM_DEC'] = star_table[idx, DS_PMDEC]
-    res['VMAG']   = star_table[idx, DS_VMAG]
-    res['BV']     = star_table[idx, DS_BV]
-    res['COUNTS'] = star_table[idx, DS_COUNTS]
-    res['EXP_TIME'] = star_table[idx, DS_EXPT]
-    res['NEXP'] = star_table[idx, DS_NSHOTS]
+    res['PM_RA']  = star_table['pmra'][idx]
+    res['PM_DEC'] = star_table['pmdec'][idx]
+    res['VMAG']   = star_table['vmag'][idx]
+    res['BV']     = star_table['BmV'][idx]
+    res['COUNTS'] = star_table['expcount'][idx]
+    res['EXP_TIME'] = star_table['texp'][idx]
+    res['NEXP'] = star_table['APFnshots'][idx]
     res['TOTEXP_TIME'] = totexptimes[idx]
-    res['NAME']   = sn[idx]
-    res['PRI']    = star_table[idx, DS_APFPRI]
-    res['DECKER'] = flags['decker'][idx]
+    res['NAME']   = star_table['name'][idx]
+    res['PRI']    = star_table['APFpri'][idx]
+    res['DECKER'] = star_table['decker'][idx]
     res['isTemp'] =    False
-    res['owner'] =    flags['owner'][idx]
+    res['owner'] =    star_table['owner'][idx]
     res['SCRIPTOBS'] = []
-    scriptobs_line = makeScriptobsLine(sn[idx], star_table[idx,:], flags['do'][idx], dt, decker=flags['decker'][idx], I2=flags['I2'][idx], owner=flags['owner'][idx],focval=focval) + " # end"
+    scriptobs_line = makeScriptobsLine(idx, star_table, dt,
+                                           decker==star_table['decker'][idx],
+                                           owner=star_table['owner'][idx],
+                                           I2=star_table['I2'][idx],
+                                           focval=focval)
+    scriptobs_line = scriptobs_line + " # end"
     res['SCRIPTOBS'].append(scriptobs_line)
     return res
 
@@ -437,20 +443,15 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # Note -- RA and Dec are returned in Radians
 
     apflog("getNext(): Parsing the Googledex...",echo=True)
-    sn, star_table, flags, stars = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
-    sn = np.array(sn)
-    deckers = np.array(flags['decker'])
-    bstar_array = np.array(flags['Bstar'])
-    mode = np.array(flags['mode'])
-    obsblock = np.array(flags['obsblock'])
-    targNum = len(sn)
+    star_table, stars = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
+    targNum = len(stars)
     
     apflog("getNext(): Parsed the Googledex...",echo=True)
 
 
     apflog("getNext(): Finding B stars",echo=True)
     # Note which of these are B-Stars for later.
-    bstars = (bstar_array == 'Y')|(bstar_array == 'y')
+    bstars = (star_table['Bstar'] == 'Y')|(star_table['Bstar'] == 'y')
 
     # Distance to stay away from the moon
 
@@ -461,7 +462,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     scaled_elevations = np.zeros(targNum, dtype=float)
 
     # Is the target behind the moon?
-    moon_check = behindMoon(moon,star_table[:,DS_RA],star_table[:,DS_DEC])
+    moon_check = behindMoon(moon,star_table['ra'],star_table['dec'])
     available = available & moon_check
 
     #    totobs_check = (star_table[:,DS_NOB] < star_table[:,DS_TOT]) | (star_table[:,DS_TOT] <= 0)
@@ -482,10 +483,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
 
-        star_table[available, DS_COUNTS] = 1e9
-        star_table[available, DS_EXPT] = 900
-        star_table[available, DS_NSHOTS] = 2
-        totexptimes[available] = star_table[available, DS_EXPT] * star_table[available, DS_NSHOTS]
+        totexptimes[available] = star_table['texp'][available] * star_table['APFnshots'][available]
 
     # Just need a normal star for observing
     else:
@@ -497,7 +495,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         # has the star been observed - commented out as redundant with cadence
         if len(last_objs_attempted)>0:
             for n in last_objs_attempted:
-                attempted = (sn == n)
+                attempted = (star_table['name'] == n)
                 available = available & np.logical_not(attempted) # Available and not observed
 
         # Calculate the exposure time for the target
@@ -505,8 +503,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
 
         apflog("getNext(): Computing exposure times",echo=True)
-        exp_counts = star_table[:,DS_COUNTS]
-        totexptimes[available] += star_table[available,DS_NSHOTS] * star_table[available,DS_EXPT]
+        exp_counts = star_table['expcount']
+        totexptimes[available] += star_table['APFnshots'][available] * star_table['texp'][available]
         
         # Is the exposure time too long?
         apflog("getNext(): Removing really long exposures",echo=True)
@@ -521,18 +519,18 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         currently_available[available] = currently_available[available] & vis
 
         if slowdown > SLOWDOWN_THRESH:
-            bright_enough = star_table[:,DS_VMAG] < SLOWDOWN_VMAG_LIM
+            bright_enough = star_table['vmag'] < SLOWDOWN_VMAG_LIM
             available = available & bright_enough
 
     # Now just sort by priority, then cadence. Return top target
-    if len(sn[available]) < 1:
+    if len(star_table['name'][available]) < 1:
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
 
     final_priorities = computePriorities(star_table,available,dt,flags)
 
-    cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
+    cadence_check = (ephem.julian_date(dt) - star_table[:, 'lastobs']) / star_table[:, 'APFcad']
     good_cadence = cadence_check >  1.0
     good_cadence_available = available & good_cadence
 
@@ -551,7 +549,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
-    starstr = "getNext(): star table available: %s" % (sn[sort_i])
+    starstr = "getNext(): star table available: %s" % (star_table['name'][sort_i])
     apflog(starstr,echo=True)
 
     starstr = "getNext(): star table available priorities: %s" % (final_priorities[sort_i])
@@ -565,12 +563,12 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         cstr= "getNext(): cadence check: %s" % (cadence_check[sort_i][sort_j][0])
         apflog(cstr,echo=True)
 
-    t_n = sn[sort_i][sort_j][0]
+    t_n = star_table['name'][sort_i][sort_j][0]
 
     elstr= "getNext(): star elevations %s" % (cur_elevations[sort_i][sort_j])
     apflog(elstr,echo=True)
 
-    t_n = sn[sort_i][sort_j][0]
+    t_n = star_table['name'][sort_i][sort_j][0]
 
     apflog("getNext(): selected target %s" % (t_n) )
 
@@ -578,23 +576,23 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     idx = idx[0]
 
     stars[idx].compute(apf_obs)
-    cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table[idx, DS_LAST]) / star_table[idx, DS_CAD]), ephem.julian_date(dt), star_table[idx, DS_LAST], star_table[idx, DS_CAD])
+    cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table['lastobs'][idx]) / star_table['APFcad'][idx]), ephem.julian_date(dt), star_table['lastobs'][idx], star_table['APFcad'][idx])
     apflog(cstr,echo=True)
 
-    res =  makeResult(stars,star_table,flags,totexptimes,sn,dt,idx,focval=focval)
+    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval)
     if do_templates and flags['template'][idx] == 'N' and flags['I2'][idx] == 'Y':
-        bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
+        bidx,bfinidx = findBstars(star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
-        if enoughTime(star_table,stars,idx,row,apf_obs,dt):
-            bline = makeScriptobsLine(bname,brow,'',dt,decker="N",I2="Y", owner='public',focval=2)
-            line  = makeScriptobsLine(sn[idx],row,flags['do'][idx],dt,decker="N",I2="N", owner=flags['owner'][idx])
-            bfinline = makeScriptobsLine(bnamefin,browfin,'',dt,decker="N",I2="Y", owner='public',focval=2)
+        if enoughTime(star_table,stars,idx,apf_obs,dt):
+            bline = makeScriptobsLine(bidx,star_table,dt,decker="N",I2="Y", owner='public',focval=2)
+            line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=flags['owner'][idx])
+            bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y", owner='public',focval=2)
             res['SCRIPTOBS'] = []
             res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
             res['SCRIPTOBS'].append(line + " # temp=Y")
             res['SCRIPTOBS'].append(bline + " # temp=Y")
             res['isTemp'] = True
-            apflog("Attempting template observation of %s" % (sn[idx]),echo=True)
+            apflog("Attempting template observation of %s" % (star_table['name'][idx]),echo=True)
 
     return res
 
