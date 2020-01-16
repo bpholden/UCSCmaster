@@ -296,7 +296,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         # scheduler specific
         star_table['APFpri'].append(apfpri)
         star_table['APFcad'].append(float_or_default(ls[didx["APFcad"]],default=0.7))
-        star_table["lastobs"]].append(float_or_default(ls[didx["lastobs"]],default=0))
+        star_table["lastobs"].append(float_or_default(ls[didx["lastobs"]],default=0))
 
         inval = float_or_default(ls[didx["B-V"]],default=0.7)
         if inval < 0:
