@@ -112,7 +112,7 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
         apflog("Cannot write table %s: %s" % (os.path.join(outdir,outfn),e),level='error',echo=True)
     return hour_table
 
-def makeScriptobsLine(idx, row, decker="W",I2="Y",owner='public',focval=0):
+def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(idx, row, t, decker="W",I2="Y")
     idx - row of the star
