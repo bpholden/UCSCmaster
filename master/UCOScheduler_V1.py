@@ -465,9 +465,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     moon_check = behindMoon(moon,star_table['ra'],star_table['dec'])
     available = available & moon_check
 
-    #    totobs_check = (star_table[:,DS_NOB] < star_table[:,DS_TOT]) | (star_table[:,DS_TOT] <= 0)
-    #    available = available & totobs_check
-
     # We just need a B star, so restrict our math to those
     if bstar:
         
