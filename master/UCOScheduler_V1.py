@@ -42,7 +42,7 @@ def computePriorities(star_table,available,cur_dt,frac_table=None):
                 delta_pri[tdinx] += PRI_DELTA
         new_pri[available] += delta_pri
     elif frac_table is not None:
-        new_pri[available] += star_table[available,'APFpri']
+        new_pri[available] += star_table['APFpri'][available]
         too_much = frac_table[:,DS_FT_CUR]  > frac_table[:,DS_FT_TOT]
         done_sheets = frac_table[too_much,DS_FT_NAMES]
         for sn in done_sheets:
@@ -50,7 +50,7 @@ def computePriorities(star_table,available,cur_dt,frac_table=None):
             new_pri[bad] = 0
         
     else:
-        new_pri += star_table[:, 'APFpri']
+        new_pri += star_table['APFpri']
     return new_pri
 
 
@@ -530,7 +530,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     final_priorities = computePriorities(star_table,available,dt)
 
-    cadence_check = (ephem.julian_date(dt) - star_table[:, 'lastobs']) / star_table[:, 'APFcad']
+    cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) / star_table['APFcad']
     good_cadence = cadence_check >  1.0
     good_cadence_available = available & good_cadence
 
