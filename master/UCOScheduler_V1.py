@@ -569,7 +569,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     apflog("getNext(): selected target %s" % (t_n) )
 
-    idx, = np.where(sn == t_n)
+    idx, = np.where(star_table['name'] == t_n)
     idx = idx[0]
 
     stars[idx].compute(apf_obs)
