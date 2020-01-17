@@ -328,11 +328,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['isTemp'] =    False
     res['owner'] =    star_table['owner'][idx]
     res['SCRIPTOBS'] = []
-    scriptobs_line = makeScriptobsLine(idx, star_table, dt,
-                                           decker=star_table['decker'][idx],
-                                           owner=star_table['owner'][idx],
-                                           I2=star_table['I2'][idx],
-                                           focval=focval)
+    scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=star_table['decker'][idx], owner=star_table['owner'][idx], I2=star_table['I2'][idx], focval=focval)
     scriptobs_line = scriptobs_line + " # end"
     res['SCRIPTOBS'].append(scriptobs_line)
     return res
