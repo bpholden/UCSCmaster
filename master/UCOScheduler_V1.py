@@ -45,8 +45,8 @@ def computePriorities(star_table,available,cur_dt,frac_table=None):
         new_pri[available] += star_table['APFpri'][available]
         too_much = frac_table[:,DS_FT_CUR]  > frac_table[:,DS_FT_TOT]
         done_sheets = frac_table[too_much,DS_FT_NAMES]
-        for sn in done_sheets:
-            bad = star_table['sheetn'] == sn
+        for sheetn in done_sheets:
+            bad = star_table['sheetn'] == sheetn
             new_pri[bad] = 0
         
     else:
