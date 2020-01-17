@@ -25,7 +25,7 @@ import Visible
 last_objs_attempted = []
 
 
-def computePriorities(star_table,available,cur_dt,flags,frac_table=None):
+def computePriorities(star_table,available,cur_dt,frac_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     new_pri = np.zeros_like(star_table['APFpri'])
     if any(star_table['duration'][available] > 0):
@@ -528,7 +528,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         return None
 
 
-    final_priorities = computePriorities(star_table,available,dt,flags)
+    final_priorities = computePriorities(star_table,available,dt)
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, 'lastobs']) / star_table[:, 'APFcad']
     good_cadence = cadence_check >  1.0
@@ -580,7 +580,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     apflog(cstr,echo=True)
 
     res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval)
-    if do_templates and flags['template'][idx] == 'N' and flags['I2'][idx] == 'Y':
+    if do_templates and star_table['template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
         if enoughTime(star_table,stars,idx,apf_obs,dt):
