@@ -542,19 +542,11 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
-    starstr = "getNext(): star table available: %s" % (star_table['name'][sort_i])
-    apflog(starstr,echo=True)
-
-    starstr = "getNext(): star table available priorities: %s" % (final_priorities[sort_i])
-    apflog(starstr,echo=True)
-
     if bstar:
         sort_j = cur_elevations[sort_i].argsort()[::-1]
         focval=2
     else:
         sort_j = scaled_elevations[sort_i].argsort()[::-1]
-        cstr= "getNext(): cadence check: %s" % (cadence_check[sort_i][sort_j][0])
-        apflog(cstr,echo=True)
 
     t_n = star_table['name'][sort_i][sort_j][0]
 
