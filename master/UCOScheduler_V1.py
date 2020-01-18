@@ -112,6 +112,25 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
         apflog("Cannot write table %s: %s" % (os.path.join(outdir,outfn),e),level='error',echo=True)
     return hour_table
 
+def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
+
+    if not outdir :
+        outdir = os.getcwd()
+
+    outfn = os.path.join(outdir,outfn)
+    if os.path.exists(outfn):
+        rank_table = astropy.io.ascii(frac_fn,format='ascii')
+    else:
+        sheetns, fracs = ParseUCOSched.parseRankTable(sheet_table_name=sheet_table_name)
+        
+        rank_table= astropy.table.Table([sheetns,ranks],names=['sheetn','rank'])
+        try:
+            rank_table.write(outfn,format='ascii')
+        except Exception as e:
+            apflog("Cannot write table %s: %s" % (outfn,e),level='error',echo=True)
+            
+    return rank_table
+
 def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(idx, row, t, decker="W",I2="Y")
@@ -586,6 +605,9 @@ if __name__ == '__main__':
 
     sheet_tablen='2019B_frac'
     hour_table = makeFracTable(sheet_tablen,datetime.now())
+    
+    rank_tablen='2019B_ranks'
+    hour_table = makeRankTable(rank_tablen)
     
 #    sheetn=["2018B"]
     sheetn="Bstars_test,A004_PRobertson_test,A014_SVogt_test"
