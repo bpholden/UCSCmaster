@@ -107,7 +107,7 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
         
     hour_table= np.rec.fromrecords(frac_table,names=['sheetn','frac','tot','cur'])
     try:
-        np.savetxt(os.path.join(outdir,outfn), hour_table,fmt="%s",delimiter=" ")
+        np.savetxt(outfn, hour_table,fmt="%s",delimiter=" ")
     except Exception as e:
         apflog("Cannot write table %s: %s" % (os.path.join(outdir,outfn),e),level='error',echo=True)
     return hour_table
