@@ -287,8 +287,8 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         star_table['Vmag'].append(float_or_default(ls[didx["Vmag"]],default=15.0))
         star_table['texp'].append(float_or_default(ls[didx["texp"]],default=1200))
         expcount = float_or_default(ls[didx["expcount"]],default=1e9)
-        if expcount > 3e9:
-            expcount = 3e9
+        if expcount > EXPLIM:
+            expcount = EXPLIM
         star_table['expcount'].append(expcount)
         star_table['APFnshots'].append(int_or_default(ls[didx["APFnshots"]],default=1))
 
