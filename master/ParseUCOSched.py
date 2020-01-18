@@ -208,6 +208,29 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             
     return sheetns,frac
 
+def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
+    
+    apflog( "Starting parse of %s" % (sheet_table_name),echo=True)    
+
+    sheetns = []
+    frac = []
+
+    worksheet = getSpreadsheet(sheetn=sheet_table_name,certificate=certificate)
+    if worksheet:
+        cur_codex = worksheet.get_all_values()
+        if len(cur_codex) <= 0:
+            apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
+            return None, None
+        for row in cur_codex:
+            sheetns.append(row[0])
+            rank.append(float_or_default(row[1]))
+
+
+        if outfn is not None:
+            np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
+            
+    return sheetns,frac
+
 def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False):
     """ parseUCOSched parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
