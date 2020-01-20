@@ -77,6 +77,9 @@ def controlWatch(keyword,parent):
         return
 
 
+def signalShutdown(signal,frame):
+    shutdown()
+    
 def shutdown():
     if success == True:
         status = 'Exited/Success'
@@ -193,9 +196,9 @@ if __name__ == '__main__':
 
     # Register the atexit function after parsing the command line arguments
     # This prevents printing the help followed by exited/failure message
-    atexit.register(shutdown)
-    signal.signal(signal.SIGINT,  shutdown)
-    signal.signal(signal.SIGTERM, shutdown)
+    atexit.register(shutdown,success)
+    signal.signal(signal.SIGINT,  signalShutdown)
+    signal.signal(signal.SIGTERM, signalShutdown)
 
     # Log the Command line arguments
     apflog("Command Line Args:")
