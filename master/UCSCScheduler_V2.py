@@ -643,7 +643,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
 
-        star_table[available, DS_COUNTS] = 1e9
+        star_table[available, DS_COUNTS] = 2e9
         star_table[available, DS_EXPT] = 900
         star_table[available, DS_NSHOTS] = 2
         totexptimes[available] = 400

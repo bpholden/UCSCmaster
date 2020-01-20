@@ -7,6 +7,9 @@ import sys
 import time
 import ephem
 import numpy as np
+import astropy
+import astropy.table
+import astropy.io.ascii
 
 import gspread
 import json
@@ -89,10 +92,10 @@ def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
                         nrow.append(None)
                 full_codex.append(nrow)
         
-
     f = open(outfn,'wb')
     pickle.dump(full_codex, f)
     f.close()
+                
     return full_codex
     
 
@@ -225,13 +228,12 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
                     "Bstar", "obsblock",\
                     "APFpri", "APFcad", "lastobs", "B-V", \
                     "uth","utm","duration", \
-                    "Template", "Nobs", "Total Obs", 
+                    "Template", "Nobs", "Total Obs"
                     ]
     
     
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
-    apflog( "Starting Googledex parse",echo=True)    
     if not outdir :
         outdir = os.getcwd()
     if os.path.exists(os.path.join(outdir,outfn)) and force_download is False:
@@ -249,9 +251,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
     didx = findColumns(col_names,req_cols)
     
-    names = []
-    star_table = []
-    flags = { "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "instrument" : [], "raoff" : [], "decoff" : [] }
+    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "inst" : [], "raoff" : [], "decoff" : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -265,89 +265,92 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < 0.5: continue
         # Get the star name
-        names.append(parseStarname(ls[didx["Star Name"]]))
-        
+        #        names.append(parseStarname(ls[didx["Star Name"]]))
+        star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
         # Get the RA
         raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval:
-            row.append(raval)
+            star_table['ra'].append(raval)
         else:
-            row.append(-1.)
+            star_table['ra'].append(-1.)
         # Get the DEC
         decval = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
         if decval:
-            row.append(decval)
+            star_table['dec'].append(decval)
         else:
-            row.append(-3.14)
+            star_table['dec'].append(-3.14)
 
         for coln in ("pmRA", "pmDEC"):
-            row.append(float_or_default(ls[didx[coln]]))
+            star_table[coln].append(float_or_default(ls[didx[coln]]))
 
 
-        row.append(float_or_default(ls[didx["Vmag"]],default=15.0))
-        row.append(float_or_default(ls[didx["texp"]],default=1200))
+        star_table['Vmag'].append(float_or_default(ls[didx["Vmag"]],default=15.0))
+        star_table['texp'].append(float_or_default(ls[didx["texp"]],default=1200))
         expcount = float_or_default(ls[didx["expcount"]],default=1e9)
-        if expcount > 2e9:
-            expcount = 2e9
-        row.append(expcount)
-        row.append(int_or_default(ls[didx["APFnshots"]],default=1))
+        if expcount > 3e9:
+            expcount = 3e9
+        star_table['expcount'].append(expcount)
+        star_table['APFnshots'].append(int_or_default(ls[didx["APFnshots"]],default=1))
 
 
         # scheduler specific
-        row.append(apfpri)
-        row.append(float_or_default(ls[didx["APFcad"]],default=0.7))
-        row.append(float_or_default(ls[didx["lastobs"]],default=0))
+        star_table['APFpri'].append(apfpri)
+        star_table['APFcad'].append(float_or_default(ls[didx["APFcad"]],default=0.7))
+        star_table["lastobs"].append(float_or_default(ls[didx["lastobs"]],default=0))
 
         inval = float_or_default(ls[didx["B-V"]],default=0.7)
         if inval < 0:
             inval = 1.
         if coln is 'B-V' and inval > 2:
             inval = 1
-        row.append(inval)
+        star_table['BmV'].append(inval)
                     
         for coln in ["uth", "utm"]:
-            row.append(int_or_default(ls[didx[coln]]))
+            star_table[coln].append(int_or_default(ls[didx[coln]]))
                 
         # duration:
-        row.append(float_or_default(ls[didx["duration"]]))
+        star_table['duration'].append(float_or_default(ls[didx["duration"]]))
                 
         # Nobs
-        row.append(nobs)
+        star_table['nobs'].append(nobs)
                 
         # Total Obs
         if totobs >= 0:
-            row.append(totobs)
+            star_table['totobs'].append(totobs)
         else:
-            row.append(0)
+            star_table['totobs'].append(0)
 
         check = checkFlag("Close Companion",didx,ls,"\A(y|Y)","")
         if check == "Y" or check == "y" :
-            flags['do'].append(check)
+            star_table['do'].append(check)
         else:
-            flags['do'].append("")
+            star_table['do'].append("")
             
-        flags['decker'].append(checkFlag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
+        star_table['decker'].append(checkFlag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
         i2select = checkFlag("I2",didx,ls,"\A(n|N)",config["I2"])
-        flags['I2'].append(i2select.upper())
+        star_table['I2'].append(i2select.upper())
         tempselect = checkFlag("Template",didx,ls,"\A(n|N)",'Y')
-        flags['template'].append(tempselect.upper())
+        star_table['template'].append(tempselect.upper())
 
-        flags['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
-        flags['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
-        flags['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
-        flags['Bstar'].append(checkFlag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
+        star_table['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
+        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
+        star_table['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
+        star_table['Bstar'].append(checkFlag("Bstar",didx,ls,"\A(Y|y)",config["Bstar"]).upper())
+        star_table['inst'].append(checkFlag("inst",didx,ls,"(levy|darts)",config['inst']).lower())
 
-        flags['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
-        flags['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
+        star_table['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
+        star_table['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
         
-        star_table.append(row)
+
         star = ephem.FixedBody()
         star.name = ls[0]
         star._ra = ephem.hours(str(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]])))
         star._dec = ephem.degrees(str(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]])))
         stars.append(star)
 
-    return (names, np.array(star_table), flags, stars)
+
+    star_table = astropy.table.Table(star_table)
+    return (star_table, stars)
 
 
 def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="observed_targets"):
@@ -358,7 +361,7 @@ def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="o
         opens googledex_file and inputs date of last observation from observed_file
         in principle can use timestamps as well as scriptobs uth and utm values
     """
-    # names, times, temps = ObservedLog.getObserved(observed_file)
+    # name, times, temps = ObservedLog.getObserved(observed_file)
     obslog = ObservedLog.ObservedLog(observed_file)
     try:
         g = open(googledex_file, 'rb')
