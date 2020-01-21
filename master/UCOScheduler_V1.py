@@ -387,7 +387,7 @@ def behindMoon(moon,ras,decs):
 
     return moon_check
 
-def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst=''):
+def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table'):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -539,8 +539,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
-
-    final_priorities = computePriorities(star_table,available,dt)
+    
+    final_priorities = computePriorities(star_table,available,dt,makeRankTable(rank_sheetn))
 
     cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) / star_table['APFcad']
     good_cadence = cadence_check >  1.0
