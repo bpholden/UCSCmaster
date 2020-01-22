@@ -25,7 +25,7 @@ import Visible
 last_objs_attempted = []
 
 
-def computePriorities(star_table,available,cur_dt,frac_table=None):
+def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     new_pri = np.zeros_like(star_table['APFpri'])
     if any(star_table['duration'][available] > 0):
@@ -48,7 +48,12 @@ def computePriorities(star_table,available,cur_dt,frac_table=None):
         for sheetn in done_sheets:
             bad = star_table['sheetn'] == sheetn
             new_pri[bad] = 0
-        
+
+    elif rank_table is not None:
+        new_pri += star_table['APFpri'][available]
+        for sheetn in rank_table['sheetn']:
+            cur = star_table['sheetn'] == sheetn
+            new_pri[cur] += rank_table['rank'][rank_table['sheetn'] == sheetn]
     else:
         new_pri += star_table['APFpri']
     return new_pri
