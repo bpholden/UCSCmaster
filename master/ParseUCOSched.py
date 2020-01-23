@@ -82,7 +82,7 @@ def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
 
                 continue
             didx = findColumns(cur_codex[0],req_cols)
-            
+            cur_codex[0].append('sheetn')
             for row in cur_codex[1:]:
                 nrow = []
                 for c in req_cols:
@@ -90,6 +90,7 @@ def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
                         nrow.append(row[didx[c]])
                     else:
                         nrow.append(None)
+                nrow.append(sheetn)
                 full_codex.append(nrow)
         
     f = open(outfn,'wb')
@@ -170,7 +171,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     return didx
 
 
-def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn=None):
+def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn=None,outdir=None):
     
     apflog( "Starting parse of %s" % (sheet_table_name),echo=True)    
     if not outdir :
@@ -245,7 +246,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
                     "Bstar", "obsblock",\
                     "APFpri", "APFcad", "lastobs", "B-V", \
                     "uth","utm","duration", \
-                    "Template", "Nobs", "Total Obs"
+                    "Template", "Nobs", "Total Obs",'sheetn'
                     ]
     
     
@@ -268,7 +269,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
     didx = findColumns(col_names,req_cols)
     
-    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "inst" : [], "raoff" : [], "decoff" : [] }
+    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "inst" : [], "raoff" : [], "decoff" : [], 'sheetn' : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -358,7 +359,8 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         star_table['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
         star_table['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
         
-
+        star_table['sheetn'].append(checkFlag("sheetn",didx,ls,".*",'Bstars')
+        
         star = ephem.FixedBody()
         star.name = ls[0]
         star._ra = ephem.hours(str(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]])))
