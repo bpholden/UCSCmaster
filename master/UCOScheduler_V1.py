@@ -110,6 +110,11 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
             frow.append(fracs[i])
             frac_table.append(frow)
         frac_table = astropy.table.Table(rows=frac_table,names=['sheetn','frac'])
+        try:
+            frac_table.write(frac_fn,format='ascii')
+        except Exception as e:
+            apflog("Cannot write table %s: %s" % (frac_fn,e),level='error',echo=True)
+
 
     hour_table= astropy.table.Table(frac_table,names=['sheetn','frac'])
 
@@ -119,12 +124,6 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
     hour_table['tot'] =tot*hour_table['frac']
     hour_table['cur'] =0.0*hour_table['frac']
 
-    try:
-        frac_table.write(frac_fn,format='ascii')
-    except Exception as e:
-        apflog("Cannot write table %s: %s" % (frac_fn,e),level='error',echo=True)
-
-    outfn = os.path.join(outdir,outfn)
     try:
         hour_table.write(outfn,format='ascii')
     except Exception as e:
