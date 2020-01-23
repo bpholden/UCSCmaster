@@ -220,7 +220,7 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
         if len(cur_codex) <= 0:
             apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
             return None, None
-        for row in cur_codex:
+        for row in cur_codex[1:]:
             sheetns.append(row[0])
             rank.append(float_or_default(row[1]))
             
