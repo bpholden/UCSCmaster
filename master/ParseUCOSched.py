@@ -203,8 +203,6 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             frac.append(float_or_default(row[1]))
             twod.append([row[0],row[1]])
 
-        if outfn is not None:
-            np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
             
     return sheetns,frac
 
@@ -224,10 +222,6 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
         for row in cur_codex:
             sheetns.append(row[0])
             rank.append(float_or_default(row[1]))
-
-
-        if outfn is not None:
-            np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
             
     return sheetns,rank
 
