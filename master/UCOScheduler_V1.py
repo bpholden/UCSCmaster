@@ -94,9 +94,7 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
 
     frac_fn = os.path.join(outdir,frac_fn)
     if os.path.exists(frac_fn):
-        frac_table = np.genfromtxt(frac_fn,dtype=[('sheetn','S24'),('frac','f8')])
-        sheetns = list(frac_table['sheetn'])
-        fracs = list(frac_table['frac'])
+        frac_table = astropy.table.Table.read(frac_fn,format='ascii')
     else:
         sheetns, fracs = ParseUCOSched.parseFracTable(sheet_table_name=sheet_table_name,outfn=frac_fn)
         
@@ -114,9 +112,15 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
         
     hour_table= np.rec.fromrecords(frac_table,names=['sheetn','frac','tot','cur'])
     try:
-        np.savetxt(outfn, hour_table,fmt="%s",delimiter=" ")
+        frac_table.write(frac_fn,format='ascii')
     except Exception as e:
-        apflog("Cannot write table %s: %s" % (os.path.join(outdir,outfn),e),level='error',echo=True)
+        apflog("Cannot write table %s: %s" % (frac_fn,e),level='error',echo=True)
+
+    outfn = os.path.join(outdir,outfn)
+    try:
+        hour_table.write(outfn,format='ascii')
+    except Exception as e:
+        apflog("Cannot write table %s: %s" % (outfn,e),level='error',echo=True)
     return hour_table
 
 def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
@@ -126,7 +130,7 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
 
     outfn = os.path.join(outdir,outfn)
     if os.path.exists(outfn):
-        rank_table = astropy.io.ascii(frac_fn,format='ascii')
+        rank_table = astropy.table.Table.read(outfn,format='ascii')
     else:
         sheetns, fracs = ParseUCOSched.parseRankTable(sheet_table_name=sheet_table_name)
         
