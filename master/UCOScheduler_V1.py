@@ -132,7 +132,7 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
     if os.path.exists(outfn):
         rank_table = astropy.table.Table.read(outfn,format='ascii')
     else:
-        sheetns, fracs = ParseUCOSched.parseRankTable(sheet_table_name=sheet_table_name)
+        sheetns, ranks = ParseUCOSched.parseRankTable(sheet_table_name=sheet_table_name)
         
         rank_table= astropy.table.Table([sheetns,ranks],names=['sheetn','rank'])
         try:
