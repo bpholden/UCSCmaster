@@ -551,7 +551,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         return None
 
     
-    final_priorities = computePriorities(star_table,available,dt,makeRankTable(rank_sheetn))
+    final_priorities = computePriorities(star_table,available,dt,rank_table=makeRankTable(rank_sheetn))
 
     cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) / star_table['APFcad']
     good_cadence = cadence_check >  1.0
