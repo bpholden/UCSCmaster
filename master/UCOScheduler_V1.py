@@ -97,20 +97,22 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
         frac_table = astropy.table.Table.read(frac_fn,format='ascii')
     else:
         sheetns, fracs = ParseUCOSched.parseFracTable(sheet_table_name=sheet_table_name,outfn=frac_fn)
-        
-    frac_table = []
+        frac_table = []
+        for i in range(0,len(fracs)):
+            frow = []
+            frow.append(sheetns[i])
+            frow.append(fracs[i])
+            frac_table.append(frow)
+        frac_table = astropy.table.Table(rows=frac_table,names=['sheetn','frac'])
+
+    hour_table= astropy.table.Table(frac_table,names=['sheetn','frac'])
 
     sunset,sunrise = compute_sunset_n_rise(dt,horizon='-9')
     tot = sunrise - sunset
-    for i in range(0,len(fracs)):
-        row = []
-        row.append(sheetns[i])
-        row.append(fracs[i])
-        row.append(tot*fracs[i])
-        row.append(0.)
-        frac_table.append(row)
-        
-    hour_table= np.rec.fromrecords(frac_table,names=['sheetn','frac','tot','cur'])
+
+    hour_table['tot'] =tot*hour_table['frac']
+    hour_table['cur'] =0.0*hour_table['frac']
+
     try:
         frac_table.write(frac_fn,format='ascii')
     except Exception as e:
