@@ -92,6 +92,12 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
     if not outdir :
         outdir = os.getcwd()
 
+    outfn = os.path.join(outdir,outfn)
+
+    if os.path.exists(outfn):
+        hour_table =  astropy.table.Table.read(outfn,format='ascii')
+        return hour_table
+
     frac_fn = os.path.join(outdir,frac_fn)
     if os.path.exists(frac_fn):
         frac_table = astropy.table.Table.read(frac_fn,format='ascii')
