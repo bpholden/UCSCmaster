@@ -52,7 +52,7 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
             new_pri[bad] = 0
 
     elif rank_table is not None:
-        new_pri += star_table['APFpri'][available]
+        new_pri += star_table['APFpri']
         for sheetn in rank_table['sheetn']:
             cur = star_table['sheetn'] == sheetn
             new_pri[cur] += rank_table['rank'][rank_table['sheetn'] == sheetn]
