@@ -213,7 +213,7 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
     apflog( "Starting parse of %s" % (sheet_table_name),echo=True)    
 
     sheetns = []
-    frac = []
+    rank = []
 
     worksheet = getSpreadsheet(sheetn=sheet_table_name,certificate=certificate)
     if worksheet:
@@ -229,7 +229,7 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
         if outfn is not None:
             np.savetxt(os.path.join(outdir,outfn),twod,fmt="%s",delimiter=" ")
             
-    return sheetns,frac
+    return sheetns,rank
 
 def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False):
     """ parseUCOSched parses google sheets and returns the output as a tuple
