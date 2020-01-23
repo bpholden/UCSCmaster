@@ -476,7 +476,7 @@ def findBstars(snames,star_table,idx, bstars):
     near_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],star_table[idx,DS_RA],star_table[idx,DS_DEC])
     row = makeTempRow(star_table[bstars],near_idx,bstar=True)
     
-    end_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],(star_table[idx,DS_RA]+45*np.pi/180.),star_table[idx,DS_DEC])
+    end_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],(star_table[idx,DS_RA]+15*np.pi/180.),star_table[idx,DS_DEC])
     finrow = makeTempRow(star_table[bstars],end_idx,bstar=True)
     
     return snames[near_idx],row,snames[end_idx],finrow

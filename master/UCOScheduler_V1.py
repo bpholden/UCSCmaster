@@ -340,7 +340,7 @@ def findBstars(star_table,idx, bstars):
 
     near_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],star_table['ra'][idx],star_table['dec'][idx])
     
-    end_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],(star_table['ra'][idx]+45*np.pi/180.),star_table['dec'][idx])
+    end_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],(star_table['ra'][idx]+15*np.pi/180.),star_table['dec'][idx])
 
     
     return near_idx,end_idx
