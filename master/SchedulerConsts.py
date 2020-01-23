@@ -55,4 +55,4 @@ DS_FT_FRAC = 1
 DS_FT_TOT = 2
 DS_FT_CUR = 3
 
-EXPLIM = 2e9
+EXP_LIM = 2e9

@@ -17,7 +17,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
 import Coords
-from SchedulerConsts import MIN_TOTOBS, DS_BV, DS_ERR
+from SchedulerConsts import MIN_TOTOBS, DS_BV, DS_ERR, EXP_LIM
 import ExposureCalculations as ec
 
 try:
@@ -310,8 +310,8 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         star_table['Vmag'].append(float_or_default(ls[didx["Vmag"]],default=15.0))
         star_table['texp'].append(float_or_default(ls[didx["texp"]],default=1200))
         expcount = float_or_default(ls[didx["expcount"]],default=1e9)
-        if expcount > EXPLIM:
-            expcount = EXPLIM
+        if expcount > EXP_LIM:
+            expcount = EXP_LIM
         star_table['expcount'].append(expcount)
         star_table['APFnshots'].append(int_or_default(ls[didx["APFnshots"]],default=1))
 
