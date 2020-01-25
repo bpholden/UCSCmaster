@@ -608,7 +608,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         if enoughTime(star_table,stars,idx,apf_obs,dt):
             bline = makeScriptobsLine(bidx,star_table,dt,decker="N",I2="Y", owner='public',focval=2)
             line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=star_table['owner'][idx])
-            bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y", owner='public',focval=2)
+            bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y", owner=flags['owner'][idx],focval=2)
             res['SCRIPTOBS'] = []
             res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
             res['SCRIPTOBS'].append(line + " # temp=Y")
