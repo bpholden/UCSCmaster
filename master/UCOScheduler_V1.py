@@ -118,7 +118,7 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
 
     hour_table= astropy.table.Table(frac_table,names=['sheetn','frac'])
 
-    sunset,sunrise = compute_sunset_n_rise(dt,horizon='-9')
+    sunset,sunrise = computeSunsetRise(dt,horizon='-9')
     tot = sunrise - sunset
 
     hour_table['tot'] =tot*hour_table['frac']
@@ -226,7 +226,7 @@ def calc_elevations(stars, observer):
         els.append(cur_el)
     return np.array(els)
 
-def compute_datetime(ctime):
+def computeDatetime(ctime):
     if type(ctime) == float:
         dt = datetime.utcfromtimestamp(int(ctime))
     elif type(ctime) == datetime:
@@ -251,7 +251,7 @@ def makeAPFObs(dt,horizon=str(TARGET_ELEVATION_MIN)):
 
     return apf_obs
 
-def compute_sunset_n_rise(dt,horizon='0'):
+def computeSunsetRise(dt,horizon='0'):
     # computes time in seconds before sunset
     apf_obs = makeAPFObs(dt,horizon=horizon)
     sunset = apf_obs.next_setting(ephem.Sun())
@@ -263,13 +263,13 @@ def compute_sunset_n_rise(dt,horizon='0'):
     sunrise *= 86400.0 # convert to seconds
     return sunset, sunrise
 
-def compute_sunset(dt,horizon='0'):
+def computeSunset(dt,horizon='0'):
 
-    sunset, sunrise = compute_sunset_n_rise(dt,horizon=horizon)
+    sunset, sunrise = computeSunsetRise(dt,horizon=horizon)
     return sunset
     
-def compute_sunrise(dt,horizon='0'):
-    sunset, sunrise = compute_sunset_n_rise(dt,horizon=horizon)
+def computeSunrise(dt,horizon='0'):
+    sunset, sunrise = computeSunsetRise(dt,horizon=horizon)
     return sunrise
 
 
@@ -323,7 +323,7 @@ def enoughTime(star_table,stars,idx,apf_obs,dt):
     tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
     tot_time += 210 + (2*40 + 40*(star_table['APFnshots'][idx]-1)) # two B star exposures + three 70 second acquisitions and the actual observation readout times
     vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
-    time_left_before_sunrise = compute_sunrise(dt,horizon='-9')
+    time_left_before_sunrise = computeSunrise(dt,horizon='-9')
 
     try:
         apflog( "enoughTime(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
@@ -414,7 +414,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     if not outdir:
         outdir = os.getcwd()
 
-    dt = compute_datetime(ctime)
+    dt = computeDatetime(ctime)
 
     config = dict()
     config['I2'] = 'Y'
