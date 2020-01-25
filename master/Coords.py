@@ -23,9 +23,9 @@ def getDECRad(deg, mn, sec, neg=False):
         sec = float(sec)
         if deg < -40 or deg > 90:
             return None
-        if mn < 0 or mn >= 59:
+        if mn >= 59:
             return None
-        if sec < 0 or sec >= 60:
+        if sec >= 60:
             return None
     except:
         return None
