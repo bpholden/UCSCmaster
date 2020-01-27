@@ -300,7 +300,7 @@ def makeTempRow(star_table,ind,bstar=False):
     row = []
 
     row.append(star_table['ra'][ind])
-    row.append( star_table['dec'][ind])
+    row.append(star_table['dec'][ind])
     row.append(star_table['pmRA'][ind])
     row.append(star_table['pmDEC'][ind])
     row.append(star_table['Vmag'][ind])
