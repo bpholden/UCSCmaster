@@ -89,6 +89,7 @@ def shutdown():
 
     try:
         APFTask.set(parent, 'STATUS', status)
+        sys.exit()
     except:   
         print 'Exited/Failure'
         os._exit(1)
@@ -152,7 +153,8 @@ def args():
             opt.start = getStartTime(hr,mn)
         else:
             print "Start time %s does not match required format hours:minutes where both the hours and the minutes are integers"
-            sys.exit()
+            shutdown()
+
 
     if opt.sheet != None:
         opt.sheet = opt.sheet.split(",")
@@ -196,7 +198,7 @@ if __name__ == '__main__':
 
     # Register the atexit function after parsing the command line arguments
     # This prevents printing the help followed by exited/failure message
-    atexit.register(shutdown,success)
+    atexit.register(shutdown)
     signal.signal(signal.SIGINT,  signalShutdown)
     signal.signal(signal.SIGTERM, signalShutdown)
 
@@ -224,7 +226,7 @@ if __name__ == '__main__':
         APFTask.establish(parent, os.getpid())
     except Exception as e:
         apflog("Cannot establish as name %s: %s." % (parent,e), echo=True)
-        sys.exit("Couldn't establish APFTask %s" % parent)
+        shutdown()
     else:
         # Set up monitoring of the current master phase
         phase = apftask("%s_PHASE" % parent)
@@ -295,7 +297,7 @@ if __name__ == '__main__':
             if not os.path.exists(opt.fixed):
                 errmsg = "starlist %s does not exist" % (opt.fixed)
                 apflog(errmsg, level="error", echo=True)
-                sys.exit(errmsg)
+                shutdown()
             if not debug:
                 APFTask.set(parent, "STARLIST", opt.fixed)
         else:
@@ -337,7 +339,7 @@ if __name__ == '__main__':
         result = apf.ucam_status()
         if result is False:
             apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
-            sys.exit()
+            shutdown()
             
         result = apf.focusinstr()
         
@@ -364,7 +366,7 @@ if __name__ == '__main__':
         result = apf.ucam_status()
         if result is False:
             apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
-            sys.exit()
+            shutdown()
         
         result = apf.calibrate(script = opt.calibrate, time = 'pre')
         if not debug:
@@ -457,11 +459,11 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             apflog("Heimdallr has been killed by user.", echo=True)
             master.stop()
-            sys.exit()
+            shutdown()
         except:
             apflog("Heimdallr killed by unknown.", echo=True)
             master.stop()
-            sys.exit()
+            shutdown()
 
     # Check if the master left us an exit message.
     # If so, something strange likely happened so log it.
@@ -560,6 +562,6 @@ if __name__ == '__main__':
     APFTask.phase(parent, "Finished")
 
     success = True
-    sys.exit()
+    shutdown()
 
 
