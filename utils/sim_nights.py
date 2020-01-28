@@ -14,10 +14,10 @@ import ephem
 import numpy as np
 
 import NightSim as ns
-import UCSCScheduler_V2 as ds
+import UCOScheduler_V1 as ds
 import ExposureCalculations as ec
 import Generate_Errors as ge
-import ParseGoogledex
+import ParseUCOSched
 
 def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab,owner):
     actel,actaz = ns.compute_el(curtime,star,apf_obs)
@@ -160,7 +160,7 @@ def prep_master(outdir,mastername):
 
 def parse_args():
     parser = optparse.OptionParser()
-    parser.add_option("-g","--googledex",dest="googledex",default="The Googledex")
+    parser.add_option("-s","--sheetns",dest="sheetns",default="Bstars")
     parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
     parser.add_option("-f","--file",dest="datefile",default="")
     parser.add_option("-s","--seed",dest="seed",default=None)
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     
     for datestr in datelist:
 
-        allnames, star_table, do_flag, stars  = ParseGoogledex.parseGoogledex(sheetns=options.googledex,outfn=os.path.join(options.outdir,options.infile))
+        allnames, star_table, do_flag, stars  = ParseUCOSChed.parseUCOSched(sheetns=options.sheetns,outfn=os.path.join(options.outdir,options.infile))
     
         fwhms = ns.gen_seeing()
         slowdowns = ns.gen_clouds()
