@@ -256,13 +256,13 @@ class APF:
     altwx      = apfmet('M3WIND')
     temp       = apfmet('M5OUTEMP')
 
-    robot      = ktl.Service('apftask')
-    vmag       = robot['SCRIPTOBS_VMAG']
-    ldone      = robot['SCRIPTOBS_LINES_DONE']
-    line      = robot['SCRIPTOBS_LINE']
-    sop        = robot['SCRIPTOBS_PHASE']
-    message    = robot['SCRIPTOBS_MESSAGE']  
-    autofoc    = robot["SCRIPTOBS_AUTOFOC"]
+    robot        = ktl.Service('apftask')
+    vmag         = robot['SCRIPTOBS_VMAG']
+    ldone        = robot['SCRIPTOBS_LINES_DONE']
+    line         = robot['SCRIPTOBS_LINE']
+    sop          = robot['SCRIPTOBS_PHASE']
+    message      = robot['SCRIPTOBS_MESSAGE']  
+    autofoc      = robot["SCRIPTOBS_AUTOFOC"]
     slew_allowed = robot['SLEW_ALLOWED']
 
     ucam       = ktl.Service('apfucam')
