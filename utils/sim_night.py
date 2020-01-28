@@ -11,11 +11,11 @@ from datetime import datetime
 import re
 import os
 
-import UCSCScheduler_V2 as ds
+import UCOScheduler_V1 as ds
 import ExposureCalculations as ec
 import Generate_Errors as ge
 import NightSim as ns
-import ParseGoogledex
+import ParseUCOSched
 
 def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
     actel,actaz = ns.compute_el(curtime,star,apf_obs)
@@ -94,7 +94,7 @@ outfp.write(hdrstr)
 if options.fixed != "":
     allnames, star_table, lines, stars = ds.parseStarlist(options.fixed)
 else:
-    allnames, star_table, flag, stars  = ParseGoogledex.parseGoogledex(sheetns=options.googledex,outfn=os.path.join(outdir,options.infile))
+    allnames, star_table, flag, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex,outfn=os.path.join(outdir,options.infile))
 
 fwhms = ns.gen_seeing(val=0.1) # good conditions
 slowdowns = ns.gen_clouds(val=0.1) # good conditions
@@ -141,6 +141,6 @@ while observing:
         
 print ("sun rose")
 fn = "observed_targets"
-ParseGoogledex.updateLocalGoogledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
+ParseUCOSched.updateLocalUCOSched(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
 
 outfp.close()
