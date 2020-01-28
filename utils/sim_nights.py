@@ -160,10 +160,10 @@ def prep_master(outdir,mastername):
 
 def parse_args():
     parser = optparse.OptionParser()
-    parser.add_option("-s","--sheetns",dest="sheetns",default="Bstars")
+    parser.add_option("--sheetns",dest="sheetns",default="Bstars")
     parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
     parser.add_option("-f","--file",dest="datefile",default="")
-    parser.add_option("-s","--seed",dest="seed",default=None)
+    parser.add_option("--seed",dest="seed",default=None)
     parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
     parser.add_option("-o","--outdir",dest="outdir",default=".")        
     parser.add_option("-d","--double",dest="double",default=False,action="store_true")
