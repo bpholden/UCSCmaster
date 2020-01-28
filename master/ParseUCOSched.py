@@ -226,7 +226,7 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
             
     return sheetns,rank
 
-def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False):
+def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5):
     """ parseUCOSched parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
@@ -281,7 +281,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         totobs = int_or_default(ls[didx["Total Obs"]],default=-1)
 
         if totobs > 0 and nobs >= totobs: continue
-        if apfpri < 0.5: continue
+        if apfpri < prilim: continue
         # Get the star name
         #        names.append(parseStarname(ls[didx["Star Name"]]))
         star_table['name'].append(parseStarname(ls[didx["Star Name"]]))

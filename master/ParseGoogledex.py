@@ -67,7 +67,7 @@ def float_or_default(value,default=0.0):
 
 
 
-def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False):
+def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="googledex.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '' },force_download=False,prilim=0.5):
     """ parseGoogledex parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
@@ -123,7 +123,7 @@ def parseGoogledex(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d
         totobs = int_or_default(ls[didx["Total Obs"]],default=-1)
 
         if totobs > 0 and nobs >= totobs: continue
-        if apfpri < 0.5: continue
+        if apfpri < prilim: continue
         # Get the star name
         names.append(parseStarname(ls[didx["Star Name"]]))
         
