@@ -796,9 +796,7 @@ class APF:
         except Exception, e:
             apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
         if self.slew(star):
-            if self.runAutoexposure(ind=1):
-                if self.runCenterup():
-                    return self.runFocustel()
+            return self.runFocustel()
         return False
     
                 
