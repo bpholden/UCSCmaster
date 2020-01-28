@@ -264,6 +264,7 @@ class APF:
     message      = robot['SCRIPTOBS_MESSAGE']  
     autofoc      = robot["SCRIPTOBS_AUTOFOC"]
     slew_allowed = robot['SLEW_ALLOWED']
+    observed     = robot['SCRIPTOBS_OBSERVED']
 
     ucam       = ktl.Service('apfucam')
     user       = ucam['OUTFILE']
