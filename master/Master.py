@@ -625,7 +625,7 @@ class Master(threading.Thread):
 
             
             # If scriptobs is running and waiting for input, give it a target
-            if running == True and float(sunel) < sunel_lim and self.APF.sop.read().strip() == 'Input':
+            if (running == True) and (float(sunel) < sunel_lim) and (self.APF.sop.read().strip() == "Input"):
                 apflog("Entering target section",echo=True)
                 if self.fixedList is None or self.shouldStartList() == False:
                     self.lastObsSuccess = self.checkObsSuccess()

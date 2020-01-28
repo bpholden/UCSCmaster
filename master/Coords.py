@@ -21,7 +21,7 @@ def getDECRad(deg, mn, sec, neg=False):
         deg = int(deg)
         mn = int(mn)
         sec = float(sec)
-        if deg < -40 or deg > 90:
+        if deg < -60 or deg > 90:
             return None
         if mn >= 59:
             return None
