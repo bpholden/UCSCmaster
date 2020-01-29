@@ -112,7 +112,7 @@ while observing:
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime.datetime(), lastfwhm, lastslow)
     else:
-        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp)
+        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp,sheetns=options.googledex.split(","))
     if result:
         if bstar:
             bstar = False
