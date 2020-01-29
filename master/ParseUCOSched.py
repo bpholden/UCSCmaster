@@ -82,15 +82,18 @@ def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
 
                 continue
             didx = findColumns(cur_codex[0],req_cols)
-            cur_codex[0].append('sheetn')
+
             for row in cur_codex[1:]:
                 nrow = []
                 for c in req_cols:
                     if c in didx.keys():
                         nrow.append(row[didx[c]])
                     else:
-                        nrow.append(None)
-                nrow.append(sheetn)
+                        if c is 'sheetn':
+                            nrow.append(sheetn)
+                        else:
+                            nrow.append(None)
+
                 full_codex.append(nrow)
         
     f = open(outfn,'wb')
