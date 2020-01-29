@@ -363,9 +363,9 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['PRI']    = star_table['APFpri'][idx]
     res['DECKER'] = star_table['decker'][idx]
     res['isTemp'] =    False
-    res['owner'] =    star_table['owner'][idx]
+    res['owner'] =    star_table['sheetn'][idx]
     res['SCRIPTOBS'] = []
-    scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=res['decker'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
+    scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
     scriptobs_line = scriptobs_line + " # end"
     res['SCRIPTOBS'].append(scriptobs_line)
     return res
@@ -606,9 +606,9 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         bidx,bfinidx = findBstars(star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
         if enoughTime(star_table,stars,idx,apf_obs,dt):
-            bline = makeScriptobsLine(bidx,star_table,dt,decker="N",I2="Y", owner='public',focval=2)
-            line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=star_table['owner'][idx])
-            bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y", owner=flags['owner'][idx],focval=2)
+            bline = makeScriptobsLine(bidx,star_table,dt,decker="N",I2="Y", owner=res['owner'],focval=2)
+            line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=res['owner'])
+            bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y",owner=res['owner'],focval=2)
             res['SCRIPTOBS'] = []
             res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
             res['SCRIPTOBS'].append(line + " # temp=Y")
