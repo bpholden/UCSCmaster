@@ -621,14 +621,14 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 if __name__ == '__main__':
 
 
-    rank_tablen='2019B_ranks'
+    rank_tablen='2020A_ranks'
     rank_table = makeRankTable(rank_tablen)
     
     sheet_tablen='2019B_frac'
     hour_table = makeFracTable(sheet_tablen,datetime.now())
     
 #    sheetn=["2018B"]
-    sheetn="Bstars_test,A004_PRobertson_test,A014_SVogt_test"
+    sheetn="Bstars_test,2020A_A000,2020A_A001"
 
     # For some test input what would the best target be?
     otfn = "observed_targets"
