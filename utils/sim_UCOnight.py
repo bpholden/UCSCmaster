@@ -86,8 +86,10 @@ except Exception as e:
 
 hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
 outfp.write(hdrstr)
-        
-allnames, star_table, flag, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex,outfn=os.path.join(outdir,options.infile))
+
+sheetns = options.googledex.split(",")
+
+star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=os.path.join(outdir,options.infile))
 
 fwhms = ns.gen_seeing(val=0.1) # good conditions
 slowdowns = ns.gen_clouds(val=0.1) # good conditions
