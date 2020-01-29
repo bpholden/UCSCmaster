@@ -121,7 +121,8 @@ while observing:
         if tempcount == 2:
             doTemp=False # two per night
         curtime += 70./86400 # acquisition time
-        idx = allnames.index(result['NAME'])
+        (idx,) = np.where(star_table['name'] == result['NAME'])
+        idx = idx[0]
         for i in range(0,int(result['NEXP'])):
             (curtime,lastfwhm,lastslow) = compute_simulation(result,curtime,stars[idx],apf_obs,slowdowns,fwhms,outfp)
         ot = open(otfn,"a+")
