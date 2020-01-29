@@ -269,7 +269,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
     didx = findColumns(col_names,req_cols)
     
-    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [], "inst" : [], "raoff" : [], "decoff" : [], 'sheetn' : [] }
+    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [],  "raoff" : [], "decoff" : [], 'sheetn' : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
