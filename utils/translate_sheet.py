@@ -18,7 +18,7 @@ if __name__ == "__main__":
                     "texp", "APFnshots", "expcount","I2", "decker","Close Companion",  \
                     "APFcad", "lastobs", "Nobs", "Total Obs", "Template", "owner",\
                     "uth","utm","duration", \
-                     "mode", "raoff", "decoff", "Bstar", "obsblock",
+                     "mode", "raoff", "decoff", "obsblock",
                     ]
     
 
