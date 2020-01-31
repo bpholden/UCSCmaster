@@ -14,12 +14,11 @@ from ExposureCalculations import getI2_M, getI2_K, getEXPMeter
 if __name__ == "__main__":
 
     req_cols = ["Star Name","APFpri", "RA hr", "RA min", "RA sec", \
-                    "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag",  "B-V",\
+                    "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", "B-V", \
                     "texp", "APFnshots", "expcount","I2", "decker","Close Companion",  \
-                    "APFcad", "lastobs", \
-                    "Nobs", "Total Obs", "Template", "owner", \
+                    "APFcad", "lastobs", "Nobs", "Total Obs", "Template", "owner",\
                     "uth","utm","duration", \
-                    "mode", "raoff", "decoff", "obsblock",\
+                     "mode", "raoff", "decoff", "Bstar", "obsblock",
                     ]
     
 
