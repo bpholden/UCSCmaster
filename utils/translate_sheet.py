@@ -98,6 +98,12 @@ if __name__ == "__main__":
         i2cnts[are_k] = getI2_K(star_table[:,sc.DS_ERR][are_k])
 
         outdict['expcount'] =  (getEXPMeter(i2cnts,star_table[:,sc.DS_BV]))
+
+        big = outdict['expcount']>1e7
+        small = outdict['expcount']<1e7
+        
+        outdict['expcount'][big] = np.around(outdict['expcount'][big]/1e7)*1e7
+        outdict['expcount'][small] = np.around(outdict['expcount'][small]/1e6)*1e6        
         
         outtable = Table(outdict)
         outfn = sheetn + ".csv"
