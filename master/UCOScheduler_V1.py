@@ -149,7 +149,7 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
             
     return rank_table
 
-def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0):
+def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0, coverid=''):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(idx, row, t, decker="W",I2="Y")
     idx - row of the star
@@ -204,6 +204,9 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     if owner != '':
         ret += ' owner=' + str(owner)
 
+    if coverid != '':
+        ret += ' coverid=' + str(coverid)
+        
     if star_table['mode'][idx] != '':
         if mode == 'B':
             m='blank=Y'
