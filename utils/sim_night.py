@@ -91,10 +91,7 @@ except Exception as e:
 hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
 outfp.write(hdrstr)
         
-if options.fixed != "":
-    allnames, star_table, lines, stars = ds.parseStarlist(options.fixed)
-else:
-    allnames, star_table, flag, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex.split(","),outfn=os.path.join(outdir,options.infile))
+star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex.split(","),outfn=os.path.join(outdir,options.infile))
 
 fwhms = ns.gen_seeing(val=0.1) # good conditions
 slowdowns = ns.gen_clouds(val=0.1) # good conditions
@@ -115,7 +112,7 @@ while observing:
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime.datetime(), lastfwhm, lastslow)
     else:
-        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp)
+        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp,sheetns=options.googledex.split(","))
     if result:
         if bstar:
             bstar = False
@@ -124,7 +121,8 @@ while observing:
         if tempcount == 2:
             doTemp=False # two per night
         curtime += 70./86400 # acquisition time
-        idx = allnames.index(result['NAME'])
+        (idx,) = np.where(star_table['name'] == result['NAME'])
+        idx = idx[0]
         for i in range(0,int(result['NEXP'])):
             (curtime,lastfwhm,lastslow) = compute_simulation(result,curtime,stars[idx],apf_obs,slowdowns,fwhms,outfp)
         ot = open(otfn,"a+")
@@ -141,6 +139,6 @@ while observing:
         
 print ("sun rose")
 fn = "observed_targets"
-ParseUCOSched.updateLocalUCOSched(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
+ParseUCOSched.updateLocalGoogledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
 
 outfp.close()
