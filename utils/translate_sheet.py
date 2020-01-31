@@ -30,7 +30,7 @@ if __name__ == "__main__":
     for sheetn in sheetns:
         if os.path.exists("googledex.dat"):
             os.unlink("googledex.dat")
-        names, star_table, flags, stars = ParseGoogledex.parseGoogledex(sheetns=[sheetn])
+        names, star_table, flags, stars = ParseGoogledex.parseGoogledex(sheetns=[sheetn],prilim=-100)
 
         # translate - make a table
 
