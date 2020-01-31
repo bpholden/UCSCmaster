@@ -44,6 +44,8 @@ if __name__ == "__main__":
         outdict["APFpri"] = star_table[:,sc.DS_APFPRI]
         outdict["APFcad"] = star_table[:,sc.DS_CAD]
         outdict["APFnshots"] = star_table[:,sc.DS_NSHOTS]
+        low = outdict["APFnshots"] <= 0
+        outdict["APFnshots"][low] = 1
         outdict["B-V"] = star_table[:,sc.DS_BV]
 
         outdict["decker"] = np.asarray(flags["decker"])
