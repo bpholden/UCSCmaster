@@ -14,12 +14,12 @@ from ExposureCalculations import getI2_M, getI2_K, getEXPMeter
 if __name__ == "__main__":
 
     req_cols = ["Star Name","APFpri", "RA hr", "RA min", "RA sec", \
-                    "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
+                    "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag",  "B-V",\
                     "texp", "APFnshots", "expcount","I2", "decker","Close Companion",  \
-                    "owner", "mode", "raoff", "decoff", "Bstar", "obsblock",\
-                    "APFcad", "lastobs", "B-V", \
+                    "APFcad", "lastobs", \
+                    "Nobs", "Total Obs", "Template", "owner", \
                     "uth","utm","duration", \
-                    "Nobs", "Total Obs", "Template",
+                    "mode", "raoff", "decoff", "obsblock",\
                     ]
     
 
@@ -45,30 +45,28 @@ if __name__ == "__main__":
         outdict["APFpri"] = star_table[:,sc.DS_APFPRI]
         outdict["APFcad"] = star_table[:,sc.DS_CAD]
         outdict["APFnshots"] = star_table[:,sc.DS_NSHOTS]
-        outdict["lastobs"] = star_table[:,sc.DS_LAST]
         outdict["B-V"] = star_table[:,sc.DS_BV]
+
+        outdict["decker"] = np.asarray(flags["decker"])
+        outdict["I2"] = np.asarray(flags["I2"])
+        outdict["Close Companion"] = np.asarray(flags["do"])
+
+        outdict["lastobs"] = star_table[:,sc.DS_LAST]
+        outdict["Nobs"] = star_table[:,sc.DS_NOB]
+        outdict["Total Obs"] = star_table[:,sc.DS_TOT]
+    
+        outdict["owner"] = np.asarray(flags["owner"])
+        outdict["Template"] = np.asarray(flags["template"])
 
         outdict["uth"] = star_table[:,sc.DS_UTH]
         outdict["utm"] = star_table[:,sc.DS_UTM]
         outdict["duration"] = star_table[:,sc.DS_DUR]
-        outdict["Nobs"] = star_table[:,sc.DS_NOB]
-        outdict["Total Obs"] = star_table[:,sc.DS_TOT]
-
         outdict["mode"] = np.zeros_like(np.asarray(flags["do"]))
         outdict["obsblock"] = np.zeros_like(np.asarray(flags["do"]))                                  
         outdict["raoff"] = np.zeros_like(np.asarray(flags["do"]))                                  
         outdict["decoff"] = np.zeros_like(np.asarray(flags["do"]))                                  
 
-        bstars = ['Y' if 'HR' in n else 'N' for n in names]
-        outdict['Bstar'] = np.asarray(bstars)
 
-    
-        outdict["decker"] = np.asarray(flags["decker"])
-        outdict["I2"] = np.asarray(flags["I2"])
-        outdict["Close Companion"] = np.asarray(flags["do"])
-        outdict["owner"] = np.asarray(flags["owner"])
-        outdict["Template"] = np.asarray(flags["template"])
-        
         rah = []
         ram = []
         ras = []
@@ -84,13 +82,6 @@ if __name__ == "__main__":
             decd.append(cdecd)
             decm.append(cdecm)
             decs.append(cdecs)
-        outdict['RA hr'] = np.asarray(rah)
-        outdict['RA min'] = np.asarray(ram)
-        outdict['RA sec'] = np.asarray(ras)
-        outdict['Dec deg'] = np.asarray(decd)
-        outdict['Dec min'] = np.asarray(decm)
-        outdict['Dec sec'] = np.asarray(decs)        
-
         outdict["texp"] = star_table[:,sc.DS_EXPT]
 
         are_m = outdict['B-V'] > 1.2
