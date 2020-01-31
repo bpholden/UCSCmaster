@@ -81,6 +81,13 @@ if __name__ == "__main__":
             decd.append(cdecd)
             decm.append(cdecm)
             decs.append(cdecs)
+        outdict['RA hr'] = np.asarray(rah)
+        outdict['RA min'] = np.asarray(ram)
+        outdict['RA sec'] = np.asarray(ras)
+        outdict['Dec deg'] = np.asarray(decd)
+        outdict['Dec min'] = np.asarray(decm)
+        outdict['Dec sec'] = np.asarray(decs)        
+
         outdict["texp"] = star_table[:,sc.DS_EXPT]
 
         are_m = outdict['B-V'] > 1.2
