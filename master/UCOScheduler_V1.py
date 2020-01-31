@@ -367,6 +367,8 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['DECKER'] = star_table['decker'][idx]
     res['isTemp'] =    False
     res['owner'] =    star_table['sheetn'][idx]
+    if str(star_table['Bstar'][idx]).upper() == 'Y':
+        res['owner'] = 'public'
     res['SCRIPTOBS'] = []
     scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
     scriptobs_line = scriptobs_line + " # end"
