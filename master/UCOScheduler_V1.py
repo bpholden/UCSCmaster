@@ -149,7 +149,7 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
             
     return rank_table
 
-def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0):
+def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0, coverid=''):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(idx, row, t, decker="W",I2="Y")
     idx - row of the star
@@ -161,7 +161,7 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
 
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
-    ret = star_table['name'][idx] + ' '
+    ret = str(star_table['name'][idx]) + ' '
     # Add the RA as three elements, HR, MIN, SEC
     rastr = Coords.getCoordStr(np.degrees(star_table['ra'][idx]), isRA=True)
     ret += rastr + ' '
@@ -204,6 +204,9 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     if owner != '':
         ret += ' owner=' + str(owner)
 
+    if coverid != '':
+        ret += ' coverid=' + str(coverid)
+        
     if star_table['mode'][idx] != '':
         if mode == 'B':
             m='blank=Y'
@@ -215,7 +218,7 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     if star_table['raoff'][idx] is not None and star_table['decoff'][idx] is not None and mode != '':
         ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
         
-    return ret
+    return str(ret)
 
 def calc_elevations(stars, observer):
     els = []
@@ -364,6 +367,8 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['DECKER'] = star_table['decker'][idx]
     res['isTemp'] =    False
     res['owner'] =    star_table['sheetn'][idx]
+    if str(star_table['Bstar'][idx]).upper() == 'Y':
+        res['owner'] = 'public'
     res['SCRIPTOBS'] = []
     scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
     scriptobs_line = scriptobs_line + " # end"
@@ -373,13 +378,17 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
 def lastAttempted(bstar):
     global last_objs_attempted
     try:
-        lastline = ktl.read("apftask","SCRIPTOBS_LINE")
-        if not bstar:             # otherwise from previous night
-            lastobj = lastline.split()[0]
-        else:
-            lastobj = None
-
+        lastresult = ktl.read("apftask","SCRIPTOBS_LINE_RESULT",binary=True)
     except:
+        return []
+
+    if lastresult == 2:
+        try:
+            lastline = ktl.read("apftask","SCRIPTOBS_LINE")
+            lastobj = lastline.split()[0]
+        except:
+            lastobj = None
+    else:
         lastobj = None
 
     if lastobj:

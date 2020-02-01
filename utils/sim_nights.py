@@ -80,7 +80,7 @@ def gen_datelist(startstr,endstr,double=False):
     start = datetime.strptime(startstr,"%Y/%m/%d")
     end  = datetime.strptime(endstr,"%Y/%m/%d")
 
-    rng = [2,3,4]
+    rng = [1,2,3]
 
     cur = start
     while cur < end:
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     
     for datestr in datelist:
 
-        allnames, star_table, do_flag, stars  = ParseUCOSChed.parseUCOSched(sheetns=options.sheetns,outfn=os.path.join(options.outdir,options.infile))
+        star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.sheetns.split(","),outfn=os.path.join(options.outdir,options.infile))
     
         fwhms = ns.gen_seeing()
         slowdowns = ns.gen_clouds()
@@ -232,7 +232,9 @@ if __name__ == "__main__":
                     bstar = False
                 
                 curtime += 70./86400 # acquisition time
-                idx = allnames.index(result['NAME'])                
+                (idx,) = np.where(star_table['name'] == result['NAME'])
+                idx = idx[0]
+
                 for i in range(0,int(result['NEXP'])):
                     (curtime,lastfwhm,lastslow,outstr) = compute_simulation(curtime,result,stars[idx],apf_obs,slowdowns,fwhms,star_table[idx],result['owner'])
                     sim_results(outstr,star_strs,star_dates)
