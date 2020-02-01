@@ -378,13 +378,17 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
 def lastAttempted():
     global last_objs_attempted
     try:
-        lastline = ktl.read("apftask","SCRIPTOBS_LINE")
-        if not bstar:             # otherwise from previous night
-            lastobj = lastline.split()[0]
-        else:
-            lastobj = None
-
+        lastresult = ktl.read("apftask","SCRIPTOBS_LINE_RESULT",binary=True)
     except:
+        return []
+
+    if lastresult == 2:
+        try:
+            lastline = ktl.read("apftask","SCRIPTOBS_LINE")
+            lastobj = lastline.split()[0]
+        except:
+            lastobj = None
+    else:
         lastobj = None
 
     if lastobj:
