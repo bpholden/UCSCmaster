@@ -370,7 +370,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['SCRIPTOBS'].append(scriptobs_line)
     return res
 
-def lastAttempted():
+def lastAttempted(bstar):
     global last_objs_attempted
     try:
         lastline = ktl.read("apftask","SCRIPTOBS_LINE")
@@ -450,7 +450,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     # List of targets already observed
 
-    last_objs_attempted = lastAttempted()
+    last_objs_attempted = lastAttempted(bstar)
     if len(last_objs_attempted) > 5:
         apflog( "getNext(): 5 failed acquisition attempts",echo=True)
         last_objs_attempted = []
