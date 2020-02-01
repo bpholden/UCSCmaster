@@ -55,6 +55,7 @@ class Master(threading.Thread):
         self.lastObsFinished = True
         self.fixedList = opt.fixed
         self.sheetn = opt.sheet
+        self.rank_tablen = opt.rank_tablen
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
         self.starttime = opt.start
@@ -327,7 +328,7 @@ class Master(threading.Thread):
                 seeing = float(self.APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval)
+            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen)
 
             self.setAutofocVal()
             if self.target is None:
