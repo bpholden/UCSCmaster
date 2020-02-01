@@ -138,7 +138,8 @@ def args():
     parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
     parser.add_argument('--raster', action='store_true', default=False, help="If a fixed starlist is given, use it for a raster scan.")
 
-    parser.add_argument('--sheet',default="Bstars,A003_PRobertson_2019B,A006_PDalba_2019B,A007_HIsaacson_2019B,A009_MKosiarek_2019B,A011_SKane_2019B,A012_SKane_2019B,A015_AHoward_2019B,A013_ASiemion_2019B,A000_BWelsh_2019B,A001_ICzekala_2019B,A002_ICzekala_2019B,A004_PRobertson_2019B,A007_HIsaacson_2019B,A008_BHolden_2019B,A014_SVogt_2019B,A015_TBrandt_2019B",help="Optional name for a Google spreadsheet")
+    parser.add_argument('--rank_table', default='2020A_ranks', help="Optional name for table of sheet ranks")
+    parser.add_argument('--sheet',default="Bstars",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='public',help="Optional name for file owners")    
     parser.add_argument('--ftable',default=None,help="Table of fractions of the night")    
     
