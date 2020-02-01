@@ -637,7 +637,7 @@ if __name__ == '__main__':
     hour_table = makeFracTable(sheet_tablen,datetime.now())
     
 #    sheetn=["2018B"]
-    sheetn="Bstars_test,2020A_A000,2020A_A001"
+    sheetn="Bstars,2020A_A000,2020A_A001"
 
     # For some test input what would the best target be?
     otfn = "observed_targets"
