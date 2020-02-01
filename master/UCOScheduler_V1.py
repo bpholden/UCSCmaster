@@ -161,7 +161,7 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
 
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
-    ret = star_table['name'][idx] + ' '
+    ret = str(star_table['name'][idx]) + ' '
     # Add the RA as three elements, HR, MIN, SEC
     rastr = Coords.getCoordStr(np.degrees(star_table['ra'][idx]), isRA=True)
     ret += rastr + ' '
@@ -218,7 +218,7 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     if star_table['raoff'][idx] is not None and star_table['decoff'][idx] is not None and mode != '':
         ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
         
-    return ret
+    return str(ret)
 
 def calc_elevations(stars, observer):
     els = []
