@@ -55,7 +55,7 @@ class Master(threading.Thread):
         self.lastObsFinished = True
         self.fixedList = opt.fixed
         self.sheetn = opt.sheet
-        self.rank_tablen = opt.rank_tablen
+        self.rank_tablen = opt.rank_table
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
         self.starttime = opt.start
