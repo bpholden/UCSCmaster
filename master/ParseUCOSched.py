@@ -505,7 +505,7 @@ def updateGoogledexLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='U
                     nupdates += 2
                 try:
                    have_temp = v[tempcol]
-                   if taketemp == "Y" and have_temp == "N" and curowner == v[owncol]:
+                   if taketemp == "Y" and have_temp == "N" and curowner == sheetn:
                        ws.update_cell(i+1, tempcol+1, "Y")
                        nupdates += 1
                 except:
