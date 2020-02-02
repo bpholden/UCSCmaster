@@ -494,7 +494,7 @@ def updateGoogledexLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='U
                         n = int(v[nobscol])
                     except:
                         n = 0
-                    if jd > pastdate and curowner == v[owncol]:
+                    if jd > pastdate and curowner == sheetn:
                         ws.update_cell(i+1, col+1, round(jd, 4) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
                         nupdates += 2
