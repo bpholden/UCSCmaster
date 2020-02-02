@@ -468,7 +468,7 @@ def updateGoogledexLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='U
         col = vals[0].index("lastobs") 
         nobscol = vals[0].index("Nobs")
         tempcol = vals[0].index("Template")
-        owncol = vals[0].index("owner")
+
         wait_time = len(vals)
         time.sleep(wait_time)
     
