@@ -34,7 +34,7 @@ from apflog import *
 import UCSCScheduler_V2 as ds
 from x_gaussslit import *
 import ExposureCalculations
-import ParseGoogledex
+import ParseUCOSched
 import SchedulerConsts
 from Master import Master
 
@@ -394,7 +394,8 @@ if __name__ == '__main__':
         apf.instrPermit()
         apflog("Starting the main watcher." ,echo=True)
         try:
-            names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
+            rank_table = makeRankTable(opt.rank_table)
+            star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet)
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
             # goto backup
