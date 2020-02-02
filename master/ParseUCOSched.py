@@ -498,6 +498,7 @@ def updateGoogledexLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='U
                         ws.update_cell(i+1, col+1, round(jd, 4) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
                         nupdates += 2
+                        apflog( "Updated %s to %.4f and %d in %s" % (v[0],round(jd, 4),n+1,sheetn),echo=True)
                 except:
                     print (v[0], v[col])
                     ws.update_cell(i+1, col+1, round(jd,4) )
@@ -508,9 +509,9 @@ def updateGoogledexLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='U
                    if taketemp == "Y" and have_temp == "N" and curowner == sheetn:
                        ws.update_cell(i+1, tempcol+1, "Y")
                        nupdates += 1
+                       apflog( "Updated %s to having a template in %s" % (v[0],sheetn),echo=True)                       
                 except:
                     apflog( "Error logging template obs for %s" % (v[0]),echo=True,level='error')
-                apflog( "Updated %s in %s" % (v[0],sheetn),echo=True)
 
     return nupdates
 
