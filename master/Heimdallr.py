@@ -485,7 +485,7 @@ if __name__ == '__main__':
         try:
             apflog("Updating the online googledex with the observed times", level='Info', echo=True)
             for sn in master.sheetn:
-                n = ParseGoogledex.updateGoogledexLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=[sn])
+                n = ParseUCOSChed.updateGoogledexLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=[sn])
                 APFTask.wait(parent,True,timeout=n)
 
         except Exception as e:
