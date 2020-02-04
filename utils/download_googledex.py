@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append("../master")
 
-import ParseGoogledex
+import ParseUCOSched
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
@@ -13,5 +13,5 @@ if __name__ == "__main__":
     if os.path.exists("googledex.dat"):
         os.unlink("googledex.dat")
 
-    ParseGoogledex.parseGoogledex(sheetns=sheetns)
+    ParseUCOSched.parseUCOSched(sheetns=sheetns)
 
