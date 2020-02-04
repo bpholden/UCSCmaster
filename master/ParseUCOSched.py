@@ -441,3 +441,77 @@ def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="o
     
     return obslog.names
 
+def updateGoogledexLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
+    """
+        Update the online googledex lastobs column assuming things in filename have been observed.
+        updateGoogledexLastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
+
+        filename - where the observations are logged
+
+        returns the number of cells updated
+    """
+#    names, times, temps, owners = ObservedLog.getObserved(filename)
+    obslog = ObservedLog.ObservedLog(filename)
+    if len(obslog.names) == 0:
+        return
+    if ctime is None:
+        ctime = datetime.utcfromtimestamp(int(time.time()))
+    
+    nupdates = 0
+    for sheetn in sheetns:
+        ws = getSpreadsheet(sheetn=sheetn,certificate=certificate)
+        
+        if ws:
+            vals = ws.get_all_values()
+        else:
+            continue
+        col = vals[0].index("lastobs") 
+        nobscol = vals[0].index("Nobs")
+        tempcol = vals[0].index("Template")
+
+        wait_time = len(vals)
+        time.sleep(wait_time)
+    
+        for i, v in enumerate(vals):
+            # Did we observe this target tonight?
+            local_name = parseStarname(v[0])
+            if local_name in obslog.names:
+                # We observed this target, so update the cell in the worksheet
+                # update_cell(row, col, val) - col and row are 1 indexed
+                nameidx = obslog.names.index(local_name)
+                otime = obslog.times[nameidx]
+                taketemp = obslog.temps[nameidx]
+                curowner = obslog.owners[nameidx]
+                if isinstance(otime,float):
+                    t = datetime.utcfromtimestamp(otime)
+                else:
+                    hr, mn = otime
+                    t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
+                jd = float(ephem.julian_date(t))
+                try:
+                    pastdate = float(v[col])
+                    try:
+                        n = int(v[nobscol])
+                    except:
+                        n = 0
+                    if jd > pastdate and curowner == sheetn:
+                        ws.update_cell(i+1, col+1, round(jd, 4) )
+                        ws.update_cell(i+1, nobscol+1, n + 1 )
+                        nupdates += 2
+                        apflog( "Updated %s to %.4f and %d in %s" % (v[0],round(jd, 4),n+1,sheetn),echo=True)
+                except:
+                    print (v[0], v[col])
+                    ws.update_cell(i+1, col+1, round(jd,4) )
+                    ws.update_cell(i+1, nobscol+1, 1 )
+                    nupdates += 2
+                try:
+                   have_temp = v[tempcol]
+                   if taketemp == "Y" and have_temp == "N" and curowner == sheetn:
+                       ws.update_cell(i+1, tempcol+1, "Y")
+                       nupdates += 1
+                       apflog( "Updated %s to having a template in %s" % (v[0],sheetn),echo=True)                       
+                except:
+                    apflog( "Error logging template obs for %s" % (v[0]),echo=True,level='error')
+
+    return nupdates
+

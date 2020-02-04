@@ -23,7 +23,7 @@ except:
 
 import APFControl
 from apflog import *
-import UCSCScheduler_V2 as ds
+import UCOScheduler_V1 as ds
 from x_gaussslit import *
 import ExposureCalculations
 import SchedulerConsts
@@ -55,6 +55,7 @@ class Master(threading.Thread):
         self.lastObsFinished = True
         self.fixedList = opt.fixed
         self.sheetn = opt.sheet
+        self.rank_tablen = opt.rank_table
         self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
         self.targetlog = None
         self.starttime = opt.start
@@ -327,7 +328,7 @@ class Master(threading.Thread):
                 seeing = float(self.APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
             
-            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval)
+            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen)
 
             self.setAutofocVal()
             if self.target is None:
@@ -821,6 +822,7 @@ if __name__ == "__main__":
     opt.windshield = 'auto'
     opt.fixed = None
     opt.sheet = 'Bstars'
+    opt.rank_tablen = '2020A_ranks'
     opt.start = None
     opt.test = True
     opt.raster = False

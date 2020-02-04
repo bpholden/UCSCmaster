@@ -4,7 +4,7 @@ import sys
 import time
 
 sys.path.append("../master")
-import ParseGoogledex 
+import ParseUCOSched
 
 if __name__ == "__main__":
     if len(sys.argv) <= 2:
@@ -18,6 +18,6 @@ if __name__ == "__main__":
 
     sheetns = sheetnl.split(",")
     for sheetn in sheetns:
-        n= ParseGoogledex.updateGoogledexLastobs(fn,sheetns=[sheetn])
+        n= ParseUCOSched.updateGoogledexLastobs(fn,sheetns=[sheetn])
         if n > 0:
             time.sleep(n)

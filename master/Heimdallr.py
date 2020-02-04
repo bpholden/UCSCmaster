@@ -34,7 +34,7 @@ from apflog import *
 import UCSCScheduler_V2 as ds
 from x_gaussslit import *
 import ExposureCalculations
-import ParseGoogledex
+import ParseUCOSched
 import SchedulerConsts
 from Master import Master
 
@@ -138,7 +138,8 @@ def args():
     parser.add_argument('-s', '--start', default=None, type=str, help="When specified with a fixed starlist, this option starts that list at that time.")
     parser.add_argument('--raster', action='store_true', default=False, help="If a fixed starlist is given, use it for a raster scan.")
 
-    parser.add_argument('--sheet',default="Bstars,A003_PRobertson_2019B,A006_PDalba_2019B,A007_HIsaacson_2019B,A009_MKosiarek_2019B,A011_SKane_2019B,A012_SKane_2019B,A015_AHoward_2019B,A013_ASiemion_2019B,A000_BWelsh_2019B,A001_ICzekala_2019B,A002_ICzekala_2019B,A004_PRobertson_2019B,A007_HIsaacson_2019B,A008_BHolden_2019B,A014_SVogt_2019B,A015_TBrandt_2019B",help="Optional name for a Google spreadsheet")
+    parser.add_argument('--rank_table', default='2020A_ranks', help="Optional name for table of sheet ranks")
+    parser.add_argument('--sheet',default="Bstars",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='public',help="Optional name for file owners")    
     parser.add_argument('--ftable',default=None,help="Table of fractions of the night")    
     
@@ -393,7 +394,8 @@ if __name__ == '__main__':
         apf.instrPermit()
         apflog("Starting the main watcher." ,echo=True)
         try:
-            names,star_table,do_flags,stars = ParseGoogledex.parseGoogledex(sheetns=opt.sheet)
+            sheetns, ranks = ParseUCOSched.parseRankTable(sheet_table_name=opt.rank_table)
+            star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet)
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
             # goto backup
@@ -483,7 +485,7 @@ if __name__ == '__main__':
         try:
             apflog("Updating the online googledex with the observed times", level='Info', echo=True)
             for sn in master.sheetn:
-                n = ParseGoogledex.updateGoogledexLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=[sn])
+                n = ParseUCOSched.updateGoogledexLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=[sn])
                 APFTask.wait(parent,True,timeout=n)
 
         except Exception as e:

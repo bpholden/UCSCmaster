@@ -375,7 +375,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['SCRIPTOBS'].append(scriptobs_line)
     return res
 
-def lastAttempted():
+def lastAttempted(observed):
     global last_objs_attempted
     try:
         lastresult = ktl.read("apftask","SCRIPTOBS_LINE_RESULT",binary=True)
@@ -459,7 +459,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     # List of targets already observed
 
-    last_objs_attempted = lastAttempted()
+    last_objs_attempted = lastAttempted(observed)
     if len(last_objs_attempted) > 5:
         apflog( "getNext(): 5 failed acquisition attempts",echo=True)
         last_objs_attempted = []
@@ -637,7 +637,7 @@ if __name__ == '__main__':
     hour_table = makeFracTable(sheet_tablen,datetime.now())
     
 #    sheetn=["2018B"]
-    sheetn="Bstars_test,2020A_A000,2020A_A001"
+    sheetn="Bstars,2020A_A000,2020A_A001"
 
     # For some test input what would the best target be?
     otfn = "observed_targets"
