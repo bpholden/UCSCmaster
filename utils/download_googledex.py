@@ -10,8 +10,23 @@ if __name__ == "__main__":
         print ("needs a sheet list")
         sys.exit()
     sheetns = sys.argv[1].split(",")
-    if os.path.exists("googledex.dat"):
-        os.unlink("googledex.dat")
+    outdir = "."
+    outfn = "googledex.dat"
+    if os.path.exists(os.path.join(outdir,outfn)):
+        os.unlink(os.path.join(outdir,outfn))
 
-    ParseUCOSched.parseUCOSched(sheetns=sheetns)
+
+    config = dict()
+    config['I2'] = 'Y'
+    config['decker']='W'
+    config['mode']=''
+    config['obsblock']=''
+    config['Bstar']='N'
+    config['owner']='public'
+    config['inst']='levy'
+    config['raoff'] = None
+    config['decoff'] = None 
+
+        
+    ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
 
