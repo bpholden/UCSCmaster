@@ -547,7 +547,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         
         # Is the exposure time too long?
         apflog("getNext(): Removing really long exposures",echo=True)
-        time_check = totexptimes < TARGET_EXPOSURE_TIME_MAX
+        time_check = totexptimes <= TARGET_EXPOSURE_TIME_MAX
 
         available = available & time_check
 
