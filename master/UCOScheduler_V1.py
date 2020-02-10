@@ -557,7 +557,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         currently_available = available
         currently_available[available] = currently_available[available] & vis
 
-        if slowdown > SLOWDOWN_THRESH:
+        if slowdown > SLOWDOWN_THRESH or seeing > SEEING_THRESH:
             bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
             available = available & bright_enough
 
