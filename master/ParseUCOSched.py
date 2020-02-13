@@ -145,6 +145,7 @@ def getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f
             apflog("Got spreadsheet", echo=True)
         except Exception as e:
             apflog("Cannot Read %s: %s"  % (sheetn, e), echo=True, level='error')
+            time.sleep(1)
     return worksheet
 
 
