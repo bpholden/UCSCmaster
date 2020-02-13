@@ -134,14 +134,17 @@ def getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f
         apflog("Cannot log into Google API.", echo=True,level='error')
         return None
     apflog("Attempting to Open %s" % (sheetn),echo=True)
-    try:
-        spreadsheet = gs.open(sheetn)
-        apflog("Loaded Main %s" % (sheetn),echo=True)
-        worksheet = spreadsheet.sheet1
-        apflog("Got spreadsheet", echo=True)
-    except Exception as e:
-        apflog("Cannot Read %s: %s"  % (sheetn, e), echo=True, level='error')
-        worksheet = None
+    worksheet = None
+    tries = 0
+    while worksheet is None and tries < 3:
+        tries = tries + 1
+        try:
+            spreadsheet = gs.open(sheetn)
+            apflog("Loaded Main %s" % (sheetn),echo=True)
+            worksheet = spreadsheet.sheet1
+            apflog("Got spreadsheet", echo=True)
+        except Exception as e:
+            apflog("Cannot Read %s: %s"  % (sheetn, e), echo=True, level='error')
     return worksheet
 
 
