@@ -633,11 +633,9 @@ if __name__ == '__main__':
     rank_tablen='2020A_ranks'
     rank_table = makeRankTable(rank_tablen)
     
-    sheet_tablen='2019B_frac'
-    hour_table = makeFracTable(sheet_tablen,datetime.now())
     
 #    sheetn=["2018B"]
-    sheetn="Bstars,2020A_A000,2020A_A001"
+    sheetn="Bstars,2020A_A000,2020A_A011,2020A_A012"
 
     # For some test input what would the best target be?
     otfn = "observed_targets"
