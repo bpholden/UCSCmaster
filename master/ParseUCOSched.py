@@ -237,11 +237,19 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     """ parseUCOSched parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
-    names, star_table, do_flag, stars = parseUCOSched(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat")
-    names - a list of stars in the starlist
-    star_table - a numpy array
-    flags - a dictionary of items on whether or not do="y" needs to be set for scriptobs 
+    star_table, stars = parseUCOSched(sheetns=["Bstars"],certificate='cert.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5)
+
+    star_table - an astropy table
     stars - a list of pyEphem objects 
+
+    Inputs:
+    sheetns - list of google sheet names
+    certificate - json file for authenticating to access google sheets
+    outfn - output file name, will read this in if it already exists instead of downloading sheets if force_download is False
+    outdir - output directory for outfn, defaults to ./
+    config - default values for a number of flags
+    force_download - force the google sheets to be downloaded even if outfn already exists
+    prilim - limit on priority values, values below this are tossed
 
     """
 
