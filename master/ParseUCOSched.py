@@ -26,6 +26,16 @@ except:
     from fake_apflog import *
 
 def checkFlag(key,didx,line,regexp,default):
+    """ checkFlag(key, dict_ind, line, regexp, default)
+    
+    - key : the dictionary of indices
+    - didx : dictionary of indices so that keys can be used instead of indices for the line
+    - line : a list of entries 
+    - regexp : if the regexp is matched, that value is returned
+    - default : value if the regexp fails
+
+    """
+    
     try:
         match = re.search(regexp,line[didx[key]])
         if match:
@@ -37,7 +47,11 @@ def checkFlag(key,didx,line,regexp,default):
 
 
 def parseStarname(starname):
+    """parseStarname(starname)
 
+    starname - input value which should be the name of the a star, duh
+    returns the starname value, doing some clean up to meet requirements (no spaces, trim trialing spaces, etc.) 
+    """
     ostarname = starname.strip()
     m= re.search("HD\s+\d+",starname)
     if m:
@@ -55,6 +69,10 @@ def parseStarname(starname):
 
 
 def int_or_default(value,default=0):
+    """
+    int_or_default(value,default=0)
+    returns the input value as an integer, and a failure to cast returns default
+    """
     try:
         attr = int(value)
     except:
@@ -62,6 +80,10 @@ def int_or_default(value,default=0):
     return attr
 
 def float_or_default(value,default=0.0):
+    """
+    float_or_default(value,default=0.0)
+    returns the input value as an float, and a failure to cast returns default
+    """
     try:
         rv = float(value)
     except:
@@ -114,7 +136,18 @@ def getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f
             time.sleep(1)
     return worksheet
 
-def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
+def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
+    """retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
+
+    returns the "codex", a list of lists containing all of the columns
+    in the req_cols list, source of the data are the Google sheets named
+    in sheetns, needs a certificate to authenticate.
+
+    - req_cols : a list of column names in the sheets that are required
+    for the final list of lists
+    - sheetns : sheets to download from
+    - certificate : the thing that allows authentication
+    """
     full_codex = []
     # These are the columns we need for scheduling
     full_codex.append(req_cols)
@@ -147,10 +180,13 @@ def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
     
 
 def findColumns(col_names,req_cols,opt_cols=[]):
-    """ findColumns finds the indices for the column names in the list of required columns
-    indices = findColumns(col_names, req_cols)
-    
-    indices - a list of indices, each index maps to where in col_names the column is found and in the order of req_cols
+    """findColumns finds the indices for the column names in the list of
+
+    required columns indices = findColumns(col_names, req_cols)
+
+    indices - a dictionary of indices, each index maps to where in
+    col_names the column is found and in the order of req_cols
+
     col_names - list of column names to be searched
     req_cols - list of names that should be in the first list
     """
@@ -233,6 +269,13 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
 
 def initStarTable(col_list):
 
+    """
+    star_table = initStarTable(column_list)
+    star_table - a Astropy Table object that has the columns needed, most are in column_list
+
+
+    """
+    
 # star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [],  "raoff" : [], "decoff" : [], 'sheetn' : [] }
 
     star_table = dict()
