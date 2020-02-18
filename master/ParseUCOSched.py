@@ -304,7 +304,7 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
                     'sheetn' \
                     ]
 
-    retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
+    full_codex = retrieveCodex(req_cols,sheetns=sheetns,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
 
     col_names = full_codex[0]
     codex = full_codex[1:]
