@@ -501,8 +501,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # Distance to stay away from the moon
 
 
-    available = np.ones(targNum, dtype=bool)
     totexptimes = np.zeros(targNum, dtype=float)
+    totexptimes = star_table['texp'] * star_table['APFnshots']
+    
+    available = np.ones(targNum, dtype=bool)
     cur_elevations = np.zeros(targNum, dtype=float)
     scaled_elevations = np.zeros(targNum, dtype=float)
 
@@ -525,7 +527,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
 
-        totexptimes[available] = star_table['texp'][available] * star_table['APFnshots'][available]
 
     # Just need a normal star for observing
     else:
@@ -546,7 +547,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
         apflog("getNext(): Computing exposure times",echo=True)
         exp_counts = star_table['expcount']
-        totexptimes[available] += star_table['APFnshots'][available] * star_table['texp'][available]
         
         # Is the exposure time too long?
         apflog("getNext(): Removing really long exposures",echo=True)
