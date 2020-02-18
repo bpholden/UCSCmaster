@@ -430,6 +430,19 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
 
     return star_table
 
+def genStars(star_table):
+    stars = []
+    for i in range(0,len(star_table['name'])):
+        star = ephem.FixedBody()
+        star.name = star_table['name'][i]
+        star._ra = ephem.hours(str(":".join([star_table["RA hr"][i], star_table["RA min"][i], star_table["RA sec"][i]])))
+        star._dec = ephem.degrees(str(":".join([star_table["Dec deg"][i], star_table["Dec min"][i], star_table["Dec sec"][i]])))
+        stars.append(star)
+        
+    return stars
+
+
+
 def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5):
     """ parseUCOSched parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
@@ -466,15 +479,8 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     else:
         star_table = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
 
-    stars = []
-    for i in range(0,len(star_table['name'])):
-        star = ephem.FixedBody()
-        star.name = star_table['name'][i]
-        star._ra = ephem.hours(str(":".join([star_table["RA hr"][i], star_table["RA min"][i], star_table["RA sec"][i]])))
-        star._dec = ephem.degrees(str(":".join([star_table["Dec deg"][i], star_table["Dec min"][i], star_table["Dec sec"][i]])))
-        stars.append(star)
-
-            
+    stars = genStars(star_table)
+    
     star_table = astropy.table.Table(star_table)
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
     
@@ -499,7 +505,7 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",outfn='parsesc
     if os.path.exists(outfn):
         star_table = astropy.io.ascii.read(outfn)
     else:
-        return obslog.names
+        return obslog.names, None
 
 
     for name in obslog.names:
@@ -529,7 +535,7 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",outfn='parsesc
 
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
     
-    return obslog.names
+    return obslog.names, star_table
 
 def updateGoogledexLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """
