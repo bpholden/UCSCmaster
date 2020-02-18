@@ -481,7 +481,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
 
-    apflog("getNext(): Parsing the Googledex...",echo=True)
+    apflog("getNext(): Parsing the star list",echo=True)
     star_table, stars = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
     targNum = len(stars)
     
