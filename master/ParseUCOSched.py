@@ -377,12 +377,6 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
         else:
             star_table['Bstar'].append("N")
             star_table['sheetn'].append(csheetn)
-            
-        star = ephem.FixedBody()
-        star.name = ls[0]
-        star._ra = ephem.hours(str(":".join([ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]]])))
-        star._dec = ephem.degrees(str(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]])))
-        stars.append(star)
 
     badkeylist = []
     for k in star_table.keys():
@@ -390,6 +384,53 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
             badkeylist.append(k)
     for k in badkeylist:
         del star_table[k]  
+
+    return star_table
+
+def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5):
+    """ parseUCOSched parses google sheets and returns the output as a tuple
+    This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
+    
+    star_table, stars = parseUCOSched(sheetns=["Bstars"],certificate='cert.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5)
+
+    star_table - an astropy table
+    stars - a list of pyEphem objects 
+
+    Inputs:
+    sheetns - list of google sheet names
+    certificate - json file for authenticating to access google sheets
+    outfn - output file name, will read this in if it already exists instead of downloading sheets if force_download is False
+    outdir - output directory for outfn, defaults to ./
+    config - default values for a number of flags
+    force_download - force the google sheets to be downloaded even if outfn already exists
+    prilim - limit on priority values, values below this are tossed
+
+    """
+
+    
+    
+    # Downloading all the values is going slowly.
+    # Try to only have to load this once a day
+    if not outdir :
+        outdir = os.getcwd()
+    outfn = os.path.join(outdir,outfn)
+    if os.path.exists(outfn) and force_download is False:
+        try:
+            star_table = astropy.io.ascii.read(finfn)
+        except:
+            star_table  = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
+
+    else:
+        star_table = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
+
+    stars = []
+    for i in range(0,len(star_table['name'])):
+        star = ephem.FixedBody()
+        star.name = star_table['name'][i]
+        star._ra = ephem.hours(str(":".join([star_table["RA hr"][i], star_table["RA min"][i], star_table["RA sec"][i]])))
+        star._dec = ephem.degrees(str(":".join([star_table["Dec deg"][i], star_table["Dec min"][i], star_table["Dec sec"][i]])))
+        stars.append(star)
+
             
     star_table = astropy.table.Table(star_table)
     astropy.io.ascii.write(star_table,finfn, format='ecsv', overwrite=True)
