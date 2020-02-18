@@ -517,10 +517,10 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",outfn='parsesc
 
 
         jd = round(float(ephem.julian_date(t)), 4) 
-        apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
+        apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][star_table['name'] == name], str(jd)),echo=True)
         
-        star_table['lastobs'][star_table['name'] == row[starNameIdx]] = jd
-        star_table['nobs'][star_table['name'] == row[starNameIdx]] += 1
+        star_table['lastobs'][star_table['name'] == name] = jd
+        star_table['nobs'][star_table['name'] == name] += 1
                 
 
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
