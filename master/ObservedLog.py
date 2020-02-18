@@ -33,10 +33,13 @@ class ObservedLog():
     def read_observed_log(self):
         """ read_observed_log parses a file to find the object names and times
         ObservedLog.read_observed_log(filename)
+
+        The following attributes in the object are filled:
+
         names - list of names, must be first column of file called filename
         times - times either as a timestamp in second column or a (hour,minute) tuple from a scriptobs line
         temps - a list of template observations
-
+        owners - a list of owners
         """
 
         try:
