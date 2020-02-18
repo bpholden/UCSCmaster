@@ -138,7 +138,4 @@ while observing:
         
         
 print ("sun rose")
-fn = "observed_targets"
-ParseUCOSched.updateLocalGoogledex(curtime,outfn=options.infile, observed_file=fn, outdir=outdir)
-
 outfp.close()
