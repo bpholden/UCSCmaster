@@ -459,7 +459,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     outfn = os.path.join(outdir,outfn)
     if os.path.exists(outfn) and force_download is False:
         try:
-            star_table = astropy.io.ascii.read(finfn)
+            star_table = astropy.io.ascii.read(outfn)
         except:
             star_table  = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
 
@@ -476,12 +476,12 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
             
     star_table = astropy.table.Table(star_table)
-    astropy.io.ascii.write(star_table,finfn, format='ecsv', overwrite=True)
+    astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
     
     return (star_table, stars)
 
 
-def updateLocalGoogledex(intime, observed_file="observed_targets",finfn='parsesched.dat',outdir=None):
+def updateLocalGoogledex(intime, observed_file="observed_targets",outfn='parsesched.dat',outdir=None):
     """
         Update the local copy of the googledex with the last observed star time.
         update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
@@ -495,9 +495,9 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",finfn='parsesc
     
     obslog = ObservedLog.ObservedLog(os.path.join(outdir,observed_file))
 
-    finfn = os.path.join(outdir,finfn)
-    if os.path.exists(finfn):
-        star_table = astropy.io.ascii.read(finfn)
+    outfn = os.path.join(outdir,outfn)
+    if os.path.exists(outfn):
+        star_table = astropy.io.ascii.read(outfn)
     else:
         return obslog.names
 
@@ -523,7 +523,7 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",finfn='parsesc
         star_table['nobs'][star_table['name'] == row[starNameIdx]] += 1
                 
 
-    astropy.io.ascii.write(star_table,finfn, format='ecsv', overwrite=True)
+    astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
     
     return obslog.names
 
