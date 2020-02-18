@@ -68,40 +68,6 @@ def float_or_default(value,default=0.0):
         rv = default
     return rv
 
-def makeLocalCopy(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="./googledex.dat"):
-    full_codex = []
-    # These are the columns we need for scheduling
-    full_codex.append(req_cols)
-        
-    for sheetn in sheetns:
-        worksheet = getSpreadsheet(sheetn=sheetn,certificate=certificate)
-        if worksheet:
-            cur_codex = worksheet.get_all_values()
-            if len(cur_codex) <= 0:
-                apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
-
-                continue
-            didx = findColumns(cur_codex[0],req_cols)
-
-            for row in cur_codex[1:]:
-                nrow = []
-                for c in req_cols:
-                    if c in didx.keys():
-                        nrow.append(row[didx[c]])
-                    else:
-                        if c is 'sheetn':
-                            nrow.append(sheetn)
-                        else:
-                            nrow.append(None)
-
-                full_codex.append(nrow)
-        
-    f = open(outfn,'wb')
-    pickle.dump(full_codex, f)
-    f.close()
-                
-    return full_codex
-    
 
 def getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     """ Get the spreadsheet from google
