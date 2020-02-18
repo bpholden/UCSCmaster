@@ -454,7 +454,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         else:
             ptime = datetime.utcfromtimestamp(int(time.time()))
 
-    observed = ParseUCOSched.updateLocalGoogledex(ptime,finfn=os.path.join(outdir,outfn),
+    observed = ParseUCOSched.updateLocalGoogledex(ptime,outfn=os.path.join(outdir,outfn),
                                                       observed_file=os.path.join(outdir,"observed_targets"))
 
     # List of targets already observed
