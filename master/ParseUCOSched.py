@@ -2,7 +2,7 @@ from __future__ import print_function
 from datetime import datetime, timedelta
 import os
 import re
-import pickle
+
 import sys
 import time
 import ephem
