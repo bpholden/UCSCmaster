@@ -438,15 +438,15 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     return (star_table, stars)
 
 
-def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="observed_targets",finfn='parsesched.dat',outdir=None):
+def updateLocalGoogledex(intime, observed_file="observed_targets",finfn='parsesched.dat',outdir=None):
     """
         Update the local copy of the googledex with the last observed star time.
         update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
 
-        opens googledex_file and inputs date of last observation from observed_file
+    opens googledex_file and inputs date of last observation from observed_file
         in principle can use timestamps as well as scriptobs uth and utm values
     """
-    # name, times, temps = ObservedLog.getObserved(observed_file)
+
     if not outdir :
         outdir = os.getcwd()
     
