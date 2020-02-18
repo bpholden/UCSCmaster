@@ -521,9 +521,8 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",outfn='parsesc
 
         selection = (star_table['name'] == name) & (star_table['sheetn'] == owner)
         
-        apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][selection], jd),echo=True)
-
         if jd > star_table['lastobs'][selection]:
+            apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][selection], jd),echo=True)
             star_table['lastobs'][selection] = jd
             star_table['nobs'][selection] += 1
                 
