@@ -451,63 +451,34 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",finfn='parsesc
         outdir = os.getcwd()
     
     obslog = ObservedLog.ObservedLog(os.path.join(outdir,observed_file))
-    googledex_file = os.path.join(outdir,googledex_file)
-    try:
-        g = open(googledex_file, 'rb')
-        full_codex = pickle.load(g)
-        g.close()
-    except IOError:
-        apflog("googledex file %s did not exist, so can't be updated" % (googledex_file),echo=True)
-        return obslog.names
-    except EOFError:
-        apflog("googledex file %s corrupt, so can't be updated"  % (googledex_file),echo=True)
-        return obslog.names
 
     finfn = os.path.join(outdir,finfn)
     if os.path.exists(finfn):
         star_table = astropy.io.ascii.read(finfn)
     else:
-        star_table = None
-
-    codex_cols = full_codex[0]
-
-    starNameIdx = codex_cols.index("Star Name")
-    lastObsIdx = codex_cols.index("lastobs")
-    try:
-        nObsIdx = codex_cols.index("nObsIdx")
-    except:
-        nObsIdx = -1
-    
-    for i in range(1, len(full_codex)):
-        row = full_codex[i]
-        if row[starNameIdx] in obslog.names:
-            # We have observed this star, so lets update the last obs field
-            obstime = obslog.times[obslog.names.index(row[starNameIdx])]
-            if isinstance(obstime,float):
-                t = datetime.utcfromtimestamp(obstime)
-            else:
-                hr, min = obstime
-                if type(intime) != datetime:
-                    ctime = datetime.now()
-                    td = timedelta(0,3600.*7)
-                    intime = ctime + td
-                t = datetime(intime.year, intime.month, intime.day, hr, min)
+        return obslog.names
 
 
-            jd = round(float(ephem.julian_date(t)), 4) 
-            apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
-            if star_table is not None:
-                star_table['lastobs'][star_table['name'] == row[starNameIdx]] = jd
-                star_table['nobs'][star_table['name'] == row[starNameIdx]] += 1
+    for name in obslog.names:
+        index = obslog.names.index(name)
+        obstime = obslog.times[index]
+        if isinstance(obstime,float):
+            t = datetime.utcfromtimestamp(obstime)
+        else:
+            hr, min = obstime
+            if type(intime) != datetime:
+                ctime = datetime.now()
+                td = timedelta(0,3600.*7)
+                intime = ctime + td
+            t = datetime(intime.year, intime.month, intime.day, hr, min)
+
+
+        jd = round(float(ephem.julian_date(t)), 4) 
+        apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
+        
+        star_table['lastobs'][star_table['name'] == row[starNameIdx]] = jd
+        star_table['nobs'][star_table['name'] == row[starNameIdx]] += 1
                 
-            row[lastObsIdx] = str(jd)
-            if nObsIdx > 0:
-                row[nObsIdx] = row[nObsIdx] + 1
-            full_codex[i] = row
-
-    with open(googledex_file, 'wb') as f:
-        pickle.dump(full_codex, f)
-    f.close()
 
     astropy.io.ascii.write(star_table,finfn, format='ecsv', overwrite=True)
     
