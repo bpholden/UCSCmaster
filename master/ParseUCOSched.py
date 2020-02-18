@@ -505,6 +505,7 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",outfn='parsesc
     for name in obslog.names:
         index = obslog.names.index(name)
         obstime = obslog.times[index]
+        owner = obslog.owners[index]        
         if isinstance(obstime,float):
             t = datetime.utcfromtimestamp(obstime)
         else:
@@ -516,11 +517,14 @@ def updateLocalGoogledex(intime, observed_file="observed_targets",outfn='parsesc
             t = datetime(intime.year, intime.month, intime.day, hr, min)
 
 
-        jd = round(float(ephem.julian_date(t)), 4) 
-        apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][star_table['name'] == name], jd),echo=True)
+        jd = round(float(ephem.julian_date(t)), 4)
+
+        selection = (star_table['name'] == name) & (star_table['sheetn'] == owner)
         
-        star_table['lastobs'][star_table['name'] == name] = jd
-        star_table['nobs'][star_table['name'] == name] += 1
+        apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][selection], jd),echo=True)
+        
+        star_table['lastobs'][selection] = jd
+        star_table['nobs'][selection] += 1
                 
 
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
