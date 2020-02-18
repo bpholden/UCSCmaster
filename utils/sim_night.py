@@ -91,7 +91,7 @@ except Exception as e:
 hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
 outfp.write(hdrstr)
         
-star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex.split(","),outfn=os.path.join(outdir,options.infile))
+star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex.split(","),outfn=options.infile,outdir=outdir)
 
 fwhms = ns.gen_seeing(val=0.1) # good conditions
 slowdowns = ns.gen_clouds(val=0.1) # good conditions
@@ -112,7 +112,7 @@ while observing:
     if options.smartlist and options.fixed != "":
         result = ds.smartList(options.fixed, curtime.datetime(), lastfwhm, lastslow)
     else:
-        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp,sheetns=options.googledex.split(","))
+        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=options.infile,template=doTemp,sheetns=options.googledex.split(","),outdir=outdir)
     if result:
         if bstar:
             bstar = False
