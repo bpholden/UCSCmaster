@@ -357,7 +357,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['PM_RA']  = star_table['pmRA'][idx]
     res['PM_DEC'] = star_table['pmDEC'][idx]
     res['VMAG']   = star_table['Vmag'][idx]
-    res['BV']     = star_table['BmV'][idx]
+    res['BV']     = star_table['B-V'][idx]
     res['COUNTS'] = star_table['expcount'][idx]
     res['EXP_TIME'] = star_table['texp'][idx]
     res['NEXP'] = star_table['APFnshots'][idx]
@@ -611,7 +611,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     apflog(cstr,echo=True)
 
     res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval)
-    if do_templates and star_table['template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
+    if do_templates and star_table['Template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
         if enoughTime(star_table,stars,idx,apf_obs,dt):

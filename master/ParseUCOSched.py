@@ -233,7 +233,25 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
             
     return sheetns,rank
 
-def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5):
+
+def initStarTable(col_list):
+
+# star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [],  "raoff" : [], "decoff" : [], 'sheetn' : [] }
+
+    star_table = dict()
+    for col in col_list:
+        star_table[col] = []
+    star_table['name'] = []
+    star_table['do'] = []
+    star_table['nobs'] = []
+    star_table['totobs'] = []
+    star_table['ra'] = []
+    star_table['dec'] = []
+
+
+    return star_table
+
+def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5,finfn='parsesched.dat'):
     """ parseUCOSched parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
     
@@ -283,8 +301,8 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     codex = full_codex[1:]
 
     didx = findColumns(col_names,req_cols)
+    star_table = initStarTable(req_cols)
     
-    star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [],  "raoff" : [], "decoff" : [], 'sheetn' : [] }
     stars = []
     # Build the star table to return to 
     for ls in codex:
@@ -304,14 +322,26 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval:
             star_table['ra'].append(raval)
+            star_table['RA hr'].append(ls[didx["RA hr"]])
+            star_table['RA min'].append(ls[didx["RA min"]])
+            star_table['RA sec'].append(ls[didx["RA sec"]])
         else:
             star_table['ra'].append(-1.)
+            star_table['RA hr'].append(ls[didx["RA hr"]])
+            star_table['RA min'].append(ls[didx["RA min"]])
+            star_table['RA sec'].append(ls[didx["RA sec"]])
         # Get the DEC
         decval = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
         if decval:
             star_table['dec'].append(decval)
+            star_table['Dec deg'].append(ls[didx["Dec deg"]])
+            star_table['Dec min'].append(ls[didx["Dec min"]])
+            star_table['Dec sec'].append(ls[didx["Dec sec"]])
         else:
             star_table['dec'].append(-3.14)
+            star_table['Dec deg'].append(ls[didx["Dec deg"]])
+            star_table['Dec min'].append(ls[didx["Dec min"]])
+            star_table['Dec sec'].append(ls[didx["Dec sec"]])
 
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(float_or_default(ls[didx[coln]]))
@@ -336,7 +366,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
             inval = 1.
         if coln is 'B-V' and inval > 2:
             inval = 1
-        star_table['BmV'].append(inval)
+        star_table['B-V'].append(inval)
                     
         for coln in ["uth", "utm"]:
             star_table[coln].append(int_or_default(ls[didx[coln]]))
@@ -363,7 +393,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         i2select = checkFlag("I2",didx,ls,"\A(n|N)",config["I2"])
         star_table['I2'].append(i2select.upper())
         tempselect = checkFlag("Template",didx,ls,"\A(n|N)",'Y')
-        star_table['template'].append(tempselect.upper())
+        star_table['Template'].append(tempselect.upper())
 
         star_table['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
         star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
@@ -388,12 +418,20 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         star._dec = ephem.degrees(str(":".join([ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]]])))
         stars.append(star)
 
-
+    badkeylist = []
+    for k in star_table.keys():
+        if len(star_table[k]) == 0:
+            badkeylist.append(k)
+    for k in badkeylist:
+        del star_table[k]  
+            
     star_table = astropy.table.Table(star_table)
+    astropy.io.ascii.write(star_table,finfn, format='ecsv', overwrite=True)
+    
     return (star_table, stars)
 
 
-def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="observed_targets"):
+def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="observed_targets",finfn='parsesched.dat',outdir=None):
     """
         Update the local copy of the googledex with the last observed star time.
         update_local_googledex(time,googledex_file="googledex.dat", observed_file="observed_targets")
@@ -402,18 +440,27 @@ def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="o
         in principle can use timestamps as well as scriptobs uth and utm values
     """
     # name, times, temps = ObservedLog.getObserved(observed_file)
-    obslog = ObservedLog.ObservedLog(observed_file)
+    if not outdir :
+        outdir = os.getcwd()
+    
+    obslog = ObservedLog.ObservedLog(os.path.join(outdir,observed_file))
+    googledex_file = os.path.join(outdir,googledex_file)
     try:
         g = open(googledex_file, 'rb')
         full_codex = pickle.load(g)
         g.close()
     except IOError:
-        apflog("googledex file did not exist, so can't be updated",echo=True)
+        apflog("googledex file %s did not exist, so can't be updated" % (googledex_file),echo=True)
         return obslog.names
     except EOFError:
-        apflog("googledex file corrupt, so can't be updated",echo=True)
+        apflog("googledex file %s corrupt, so can't be updated"  % (googledex_file),echo=True)
         return obslog.names
 
+    finfn = os.path.join(outdir,finfn)
+    if os.path.exists(finfn):
+        star_table = astropy.io.ascii.read(finfn)
+    else:
+        star_table = None
 
     codex_cols = full_codex[0]
 
@@ -442,6 +489,10 @@ def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="o
 
             jd = round(float(ephem.julian_date(t)), 4) 
             apflog( "Updating local googledex star %s from time %s to %s" % (row[starNameIdx], row[lastObsIdx], str(jd)),echo=True)
+            if star_table is not None:
+                star_table['lastobs'][star_table['name'] == row[starNameIdx]] = jd
+                star_table['nobs'][star_table['name'] == row[starNameIdx]] += 1
+                
             row[lastObsIdx] = str(jd)
             if nObsIdx > 0:
                 row[nObsIdx] = row[nObsIdx] + 1
@@ -450,6 +501,8 @@ def updateLocalGoogledex(intime,googledex_file="googledex.dat", observed_file="o
     with open(googledex_file, 'wb') as f:
         pickle.dump(full_codex, f)
     f.close()
+
+    astropy.io.ascii.write(star_table,finfn, format='ecsv', overwrite=True)
     
     return obslog.names
 
