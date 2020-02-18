@@ -452,8 +452,19 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
             ptime = dt
         else:
             ptime = datetime.utcfromtimestamp(int(time.time()))
-    observed = ParseUCOSched.updateLocalGoogledex(ptime,outfn=outfn,observed_file="observed_targets")
+            
+    apflog("getNext(): Updating star list with previous observations",echo=True)
+    observed, star_table = ParseUCOSched.updateLocalGoogledex(ptime,outfn=outfn,observed_file="observed_targets")
 
+    # Parse the Googledex
+    # Note -- RA and Dec are returned in Radians
+
+    if star_table is None:
+        apflog("getNext(): Parsing the star list",echo=True)
+        star_table, stars = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
+    else:
+        stars = ParseUCOSched.genStars(star_table)
+    targNum = len(stars)
     # List of targets already observed
 
     last_objs_attempted = lastAttempted(observed)
