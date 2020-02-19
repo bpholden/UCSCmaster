@@ -604,7 +604,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     apflog("getNext(): selected target %s" % (t_n) )
 
     idx, = np.where(star_table['name'] == t_n)
-    idx = idx[0]
+    idx = idx[star_table['APFpri'][idx].argmax()]
 
     stars[idx].compute(apf_obs)
     cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table['lastobs'][idx]) / star_table['APFcad'][idx]), ephem.julian_date(dt), star_table['lastobs'][idx], star_table['APFcad'][idx])
