@@ -33,11 +33,11 @@ ScriptDir = '/usr/local/lick/bin/robot/'
 # Aquire the ktl services and associated keywords
 tel        = ktl.Service('eostele')
 sunelServ  = tel('SUNEL')
-apfmet     = ktl.Service('apfmet')
+apfmet     = ktl.Service('met3apf')
 checkapf   = ktl.Service('checkapf')
 ok2open    = ktl.cache('checkapf','OPEN_OK')
 dmtimer    = ktl.cache('checkapf','DMTIME')
-wx         = ktl.cache('apfmet','M5WIND')
+wx         = ktl.cache('met3apf','M5WIND')
 
 robot      = ktl.Service('apftask')
 vmag       = robot['SCRIPTOBS_VMAG']
@@ -250,7 +250,7 @@ class APF:
     mv_perm    = checkapf('MOVE_PERM')
     chk_close  = checkapf('CHK_CLOSE')
 
-    apfmet     = ktl.Service('apfmet')
+    apfmet     = ktl.Service('met3apf')
     wx         = apfmet('M5WIND')
     down       = apfmet('M5DOWN')
     altwx      = apfmet('M3WIND')
