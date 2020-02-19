@@ -452,8 +452,20 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
             ptime = dt
         else:
             ptime = datetime.utcfromtimestamp(int(time.time()))
-    observed = ParseUCOSched.updateLocalGoogledex(ptime,outfn=outfn,observed_file="observed_targets")
+            
+    apflog("getNext(): Updating star list with previous observations",echo=True)
+    observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,observed_file="observed_targets")
 
+    # Parse the Googledex
+    # Note -- RA and Dec are returned in Radians
+
+    if star_table is None:
+        apflog("getNext(): Parsing the star list",echo=True)
+        star_table, stars = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
+    else:
+        stars = ParseUCOSched.genStars(star_table)
+    targNum = len(stars)
+    
     # List of targets already observed
 
     last_objs_attempted = lastAttempted(observed)
@@ -478,12 +490,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
     do_templates = template and templateConditions(moon, seeing, slowdown)
 
-    # Parse the Googledex
-    # Note -- RA and Dec are returned in Radians
-
-    apflog("getNext(): Parsing the Googledex...",echo=True)
-    star_table, stars = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
-    targNum = len(stars)
     
     apflog("getNext(): Parsed the Googledex...",echo=True)
 
@@ -495,8 +501,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # Distance to stay away from the moon
 
 
-    available = np.ones(targNum, dtype=bool)
     totexptimes = np.zeros(targNum, dtype=float)
+    totexptimes = star_table['texp'] * star_table['APFnshots']
+    
+    available = np.ones(targNum, dtype=bool)
     cur_elevations = np.zeros(targNum, dtype=float)
     scaled_elevations = np.zeros(targNum, dtype=float)
 
@@ -519,7 +527,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
 
-        totexptimes[available] = star_table['texp'][available] * star_table['APFnshots'][available]
 
     # Just need a normal star for observing
     else:
@@ -540,7 +547,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
         apflog("getNext(): Computing exposure times",echo=True)
         exp_counts = star_table['expcount']
-        totexptimes[available] += star_table['APFnshots'][available] * star_table['texp'][available]
         
         # Is the exposure time too long?
         apflog("getNext(): Removing really long exposures",echo=True)
@@ -553,6 +559,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, totexptimes[available])
         currently_available = available
         currently_available[available] = currently_available[available] & vis
+        cur_elevations[available] += star_elevations
 
         if slowdown > SLOWDOWN_THRESH or seeing > SEEING_THRESH:
             bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
@@ -601,7 +608,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     apflog("getNext(): selected target %s" % (t_n) )
 
     idx, = np.where(star_table['name'] == t_n)
-    idx = idx[0]
+    idx = idx[star_table['APFpri'][idx].argmax()]
 
     stars[idx].compute(apf_obs)
     cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table['lastobs'][idx]) / star_table['APFcad'][idx]), ephem.julian_date(dt), star_table['lastobs'][idx], star_table['APFcad'][idx])

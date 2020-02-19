@@ -160,7 +160,7 @@ def prep_master(outdir,mastername):
 
 def parse_args():
     parser = optparse.OptionParser()
-    parser.add_option("--sheetns",dest="sheetns",default="Bstars")
+    parser.add_option("--sheetns",dest="sheetns",default="Bstars,2020A_A000,2020A_A001,2020A_A002,2020A_A003,2020A_A004,2020A_A006,2020A_A008,2020A_A009,2020A_A011,2020A_A012,2020A_A013")
     parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
     parser.add_option("-f","--file",dest="datefile",default="")
     parser.add_option("--seed",dest="seed",default=None)
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     
     for datestr in datelist:
 
-        star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.sheetns.split(","),outfn=os.path.join(options.outdir,options.infile))
+        star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.sheetns.split(","),outfn=options.infile,outdir=options.outdir)
     
         fwhms = ns.gen_seeing()
         slowdowns = ns.gen_clouds()
@@ -226,7 +226,7 @@ if __name__ == "__main__":
         curtime, endtime, apf_obs = ns.sun_times(datestr)
         while observing:
 
-            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(options.outdir,options.infile))
+            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=options.infile,outdir=options.outdir)
             if result:
                 if bstar:
                     bstar = False
