@@ -325,7 +325,6 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < prilim: continue
         # Get the star name
-        #        names.append(parseStarname(ls[didx["Star Name"]]))
         star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
         # Get the RA
         raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
