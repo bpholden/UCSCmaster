@@ -559,8 +559,8 @@ def updateSheetLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='UCSC 
     if ctime is None:
         ctime = datetime.utcfromtimestamp(int(time.time()))
 
-#    outfn = os.path.join(outdir,outfn)
-#    star_table = astropy.io.ascii.read(outfn)
+    outfn = os.path.join(outdir,outfn)
+    star_table = astropy.io.ascii.read(outfn)
 
     # OK the following code is going to rely on the fact that owner
     # is the sheet name
