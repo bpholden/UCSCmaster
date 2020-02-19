@@ -592,12 +592,20 @@ def updateSheetLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='UCSC 
                 otime = obslog.times[nameidx]
                 taketemp = obslog.temps[nameidx]
                 curowner = obslog.owners[nameidx]
-                if isinstance(otime,float):
-                    t = datetime.utcfromtimestamp(otime)
+                try:
+                    star_table_row = star_table[(star_table['name'] == local_name)&(star_table['sheetn'] == sheetn)]
+                except:
+                    star_table_row = None
+
+                if  star_table_row is not None:
+                    jd = float(star_table_row['lastobs'][0])
                 else:
-                    hr, mn = otime
-                    t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
-                jd = float(ephem.julian_date(t))
+                    if isinstance(otime,float):
+                        t = datetime.utcfromtimestamp(otime)
+                    else:
+                        hr, mn = otime
+                        t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
+                    jd = float(ephem.julian_date(t))
                 try:
                     pastdate = float(v[col])
                     try:
