@@ -559,9 +559,17 @@ def updateSheetLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='UCSC 
         return
     if ctime is None:
         ctime = datetime.utcfromtimestamp(int(time.time()))
-    
+
+#    outfn = os.path.join(outdir,outfn)
+#    star_table = astropy.io.ascii.read(outfn)
+
+    # OK the following code is going to rely on the fact that owner
+    # is the sheet name
+    # this will need to be updated when we start using coverid
+    needed_sheetns = list( set(obslog.owners))
+        
     nupdates = 0
-    for sheetn in sheetns:
+    for sheetn in needed_sheetns:
         ws = getSpreadsheet(sheetn=sheetn,certificate=certificate)
         
         if ws:
