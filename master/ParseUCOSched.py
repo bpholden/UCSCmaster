@@ -546,7 +546,7 @@ def updateSheetLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='UCSC 
 
         returns the number of cells updated
     """
-#    names, times, temps, owners = ObservedLog.getObserved(filename)
+
     obslog = ObservedLog.ObservedLog(filename)
     if len(obslog.names) == 0:
         return
