@@ -543,13 +543,18 @@ def updateSheetLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='UCSC 
         updateSheetLastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
 
         filename - where the observations are logged
-
+        sheetns - list of sheets that will be updated
+        ctime - current time as a time stamp 
+        certificate - required for authentication
         outfn - the local copy of the star list
         outdir - directory of data files
         returns the number of cells updated
     """
 
-    obslog = ObservedLog.ObservedLog(filename)
+    if not outdir :
+        outdir = os.getcwd()
+    
+    obslog = ObservedLog.ObservedLog(os.path.join(outdir,observed_file))
     if len(obslog.names) == 0:
         return
     if ctime is None:
