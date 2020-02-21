@@ -331,26 +331,17 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
         raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval:
             star_table['ra'].append(raval)
-            star_table['RA hr'].append(ls[didx["RA hr"]])
-            star_table['RA min'].append(ls[didx["RA min"]])
-            star_table['RA sec'].append(ls[didx["RA sec"]])
         else:
             star_table['ra'].append(-1.)
-            star_table['RA hr'].append(ls[didx["RA hr"]])
-            star_table['RA min'].append(ls[didx["RA min"]])
-            star_table['RA sec'].append(ls[didx["RA sec"]])
         # Get the DEC
         decval = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
         if decval:
             star_table['dec'].append(decval)
-            star_table['Dec deg'].append(ls[didx["Dec deg"]])
-            star_table['Dec min'].append(ls[didx["Dec min"]])
-            star_table['Dec sec'].append(ls[didx["Dec sec"]])
         else:
             star_table['dec'].append(-3.14)
-            star_table['Dec deg'].append(ls[didx["Dec deg"]])
-            star_table['Dec min'].append(ls[didx["Dec min"]])
-            star_table['Dec sec'].append(ls[didx["Dec sec"]])
+
+        for coln in ("RA hr","RA min","RA sec","Dec deg","Dec min","Dec sec"):
+            star_table[coln].append(ls[didx[coln])
 
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))
