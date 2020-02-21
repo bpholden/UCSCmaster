@@ -341,7 +341,7 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
             star_table['dec'].append(-3.14)
 
         for coln in ("RA hr","RA min","RA sec","Dec deg","Dec min","Dec sec"):
-            star_table[coln].append(ls[didx[coln])
+            star_table[coln].append(ls[didx[coln]])
 
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))
