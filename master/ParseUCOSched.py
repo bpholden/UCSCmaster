@@ -68,9 +68,9 @@ def parseStarname(starname):
     return ostarname
 
 
-def int_or_default(value,default=0):
+def intDefault(value,default=0):
     """
-    int_or_default(value,default=0)
+    intDefault(value,default=0)
     returns the input value as an integer, and a failure to cast returns default
     """
     try:
@@ -79,9 +79,9 @@ def int_or_default(value,default=0):
         attr = default
     return attr
 
-def float_or_default(value,default=0.0):
+def floatDefault(value,default=0.0):
     """
-    float_or_default(value,default=0.0)
+    floatDefault(value,default=0.0)
     returns the input value as an float, and a failure to cast returns default
     """
     try:
@@ -241,7 +241,7 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             return None, None
         for row in cur_codex:
             sheetns.append(row[0])
-            frac.append(float_or_default(row[1]))
+            frac.append(floatDefault(row[1]))
             twod.append([row[0],row[1]])
 
             
@@ -262,7 +262,7 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
             return None, None
         for row in cur_codex[1:]:
             sheetns.append(row[0])
-            rank.append(float_or_default(row[1]))
+            rank.append(floatDefault(row[1]))
             
     return sheetns,rank
 
@@ -318,9 +318,9 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
         row = []
         if ls[0] == '':
             continue
-        apfpri = float_or_default(ls[didx["APFpri"]])
-        nobs = int_or_default(ls[didx["Nobs"]])
-        totobs = int_or_default(ls[didx["Total Obs"]],default=-1)
+        apfpri = floatDefault(ls[didx["APFpri"]])
+        nobs = intDefault(ls[didx["Nobs"]])
+        totobs = intDefault(ls[didx["Total Obs"]],default=-1)
 
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < prilim: continue
@@ -352,24 +352,24 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
             star_table['Dec sec'].append(ls[didx["Dec sec"]])
 
         for coln in ("pmRA", "pmDEC"):
-            star_table[coln].append(float_or_default(ls[didx[coln]]))
+            star_table[coln].append(floatDefault(ls[didx[coln]]))
 
 
-        star_table['Vmag'].append(float_or_default(ls[didx["Vmag"]],default=15.0))
-        star_table['texp'].append(float_or_default(ls[didx["texp"]],default=1200))
-        expcount = float_or_default(ls[didx["expcount"]],default=1e9)
+        star_table['Vmag'].append(floatDefault(ls[didx["Vmag"]],default=15.0))
+        star_table['texp'].append(floatDefault(ls[didx["texp"]],default=1200))
+        expcount = floatDefault(ls[didx["expcount"]],default=1e9)
         if expcount > EXP_LIM:
             expcount = EXP_LIM
         star_table['expcount'].append(expcount)
-        star_table['APFnshots'].append(int_or_default(ls[didx["APFnshots"]],default=1))
+        star_table['APFnshots'].append(intDefault(ls[didx["APFnshots"]],default=1))
 
 
         # scheduler specific
         star_table['APFpri'].append(apfpri)
-        star_table['APFcad'].append(float_or_default(ls[didx["APFcad"]],default=0.7))
-        star_table["lastobs"].append(float_or_default(ls[didx["lastobs"]],default=0))
+        star_table['APFcad'].append(floatDefault(ls[didx["APFcad"]],default=0.7))
+        star_table["lastobs"].append(floatDefault(ls[didx["lastobs"]],default=0))
 
-        inval = float_or_default(ls[didx["B-V"]],default=0.7)
+        inval = floatDefault(ls[didx["B-V"]],default=0.7)
         if inval < 0:
             inval = 1.
         if coln is 'B-V' and inval > 2:
@@ -377,10 +377,10 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
         star_table['B-V'].append(inval)
                     
         for coln in ["uth", "utm"]:
-            star_table[coln].append(int_or_default(ls[didx[coln]]))
+            star_table[coln].append(intDefault(ls[didx[coln]]))
                 
         # duration:
-        star_table['duration'].append(float_or_default(ls[didx["duration"]]))
+        star_table['duration'].append(floatDefault(ls[didx["duration"]]))
                 
         # Nobs
         star_table['nobs'].append(nobs)
