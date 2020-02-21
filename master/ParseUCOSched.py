@@ -28,10 +28,10 @@ except:
 def checkFlag(key,didx,line,regexp,default):
     """ checkFlag(key, dict_ind, line, regexp, default)
     
-    - key : the dictionary of indices
+    - key : the key in the dictionary indices, which key from the input list you want to check
     - didx : dictionary of indices so that keys can be used instead of indices for the line
-    - line : a list of entries 
-    - regexp : if the regexp is matched, that value is returned
+    - line : a list of entries, map to keys by didx
+    - regexp : if the regexp is matched, that value is returned as a string
     - default : value if the regexp fails
 
     """
