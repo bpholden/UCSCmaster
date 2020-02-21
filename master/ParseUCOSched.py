@@ -185,7 +185,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     required columns indices = findColumns(col_names, req_cols)
 
     indices - a dictionary of indices, each index maps to where in
-    col_names the column is found and in the order of req_cols
+    col_names the column is found 
 
     col_names - list of column names to be searched
     req_cols - list of names that should be in the first list
@@ -272,6 +272,7 @@ def initStarTable(col_list):
     """
     star_table = initStarTable(column_list)
     star_table - a Astropy Table object that has the columns needed, most are in column_list
+    forces certain columns to be added
 
 
     """
@@ -430,6 +431,15 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
     return star_table
 
 def genStars(star_table):
+    """pyephem_objs = genStars(star_table)
+
+    given a star_table returned by parseCodex (or initStarTable) returns
+    a list of pyephem objects for every object in the table
+
+    Inputs star_table - astropy Table that must have the RA and Dec in
+    sexigresimal format with each column for each part of the
+    coordinates separate
+    """
     stars = []
     for i in range(0,len(star_table['name'])):
         star = ephem.FixedBody()
