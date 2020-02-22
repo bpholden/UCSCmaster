@@ -454,7 +454,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
             ptime = datetime.utcfromtimestamp(int(time.time()))
             
     apflog("getNext(): Updating star list with previous observations",echo=True)
-    observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,observed_file="observed_targets")
+    observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,toofn=toofn,observed_file="observed_targets")
 
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
