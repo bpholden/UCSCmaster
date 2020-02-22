@@ -507,6 +507,9 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
     else:
         return obslog.names, None
 
+    toofn = os.path.join(outdir,toofn)
+    if os.path.exists(toofn):
+        too_table = astropy.io.ascii.read(toofn)
 
     for name in obslog.names:
         index = obslog.names.index(name)
@@ -526,14 +529,21 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
         jd = round(float(ephem.julian_date(t)), 4)
 
         selection = (star_table['name'] == name) & (star_table['sheetn'] == owner)
-        
-        if jd > star_table['lastobs'][selection]:
-            apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][selection], jd),echo=True)
-            star_table['lastobs'][selection] = jd
-            star_table['nobs'][selection] += 1
-                
+        if any(selection):
+            if jd > star_table['lastobs'][selection]:
+                apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][selection], jd),echo=True)
+                star_table['lastobs'][selection] = jd
+                star_table['nobs'][selection] += 1
+        else:
+            selection = (too_table['name'] == name) & (too_table['sheetn'] == owner)
+            if any(selection) and jd > too_table['lastobs'][selection]:
+                apflog( "Updating ToO target %s from time %.4f to %.4f" % (name, too_table['lastobs'][selection], jd),echo=True)
+                too_table['lastobs'][selection] = jd
+                too_table['nobs'][selection] += 1
 
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
+    astropy.io.ascii.write(too_table,toofn, format='ecsv', overwrite=True)
+    star_table = vstack(too_table,star_table)
     
     return obslog.names, star_table
 
