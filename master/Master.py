@@ -304,7 +304,7 @@ class Master(threading.Thread):
 
                 
             except Exception, e:
-                apflog("getTarget(): Cannot change obsBstar: %s" % (e),level='error',echo=True)
+                apflog("getTarget(): Cannot read apftask.MASTER_OBSBSTAR: %s" % (e),level='error',echo=True)
                 self.obsBstar = True
 
             if self.obsBstar:
