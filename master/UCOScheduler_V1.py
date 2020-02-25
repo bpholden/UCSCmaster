@@ -349,7 +349,7 @@ def findBstars(star_table,idx, bstars):
     return near_idx,end_idx
 
 
-def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
+def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False):
     res = dict()
 
     res['RA']     = stars[idx].a_ra
@@ -366,6 +366,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['PRI']    = star_table['APFpri'][idx]
     res['DECKER'] = star_table['decker'][idx]
     res['isTemp'] =    False
+    res['isBstar'] =    bstar
     res['owner'] =    star_table['sheetn'][idx]
     if str(star_table['Bstar'][idx]).upper() == 'Y':
         res['owner'] = 'public'
@@ -610,7 +611,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table['lastobs'][idx]) / star_table['APFcad'][idx]), ephem.julian_date(dt), star_table['lastobs'][idx], star_table['APFcad'][idx])
     apflog(cstr,echo=True)
 
-    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval)
+    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval,bstar=bstar)
     if do_templates and star_table['template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
