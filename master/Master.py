@@ -92,10 +92,8 @@ class Master(threading.Thread):
         too_close = rising and (cur_sunel > -20)
         if time.time() - lastfoc > FOCUSTIME:
             if current_val != "robot_autofocus_enable" and not too_close:
-#                self.APF.autofoc.write("robot_autofocus_enable")
-#                self.focval=1
-                self.APF.autofoc.write("robot_autofocus_disable")
-                self.focval=0
+                self.APF.autofoc.write("robot_autofocus_enable")
+                self.focval=1
                 APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
         else:
             if current_val == "robot_autofocus_enable":
