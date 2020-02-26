@@ -21,6 +21,7 @@ except:
 windlim = 40.0
 slowlim = 100
 WINDSHIELD_LIMIT = 10. # mph at the APF
+FOCUSTIME = 3600. # minimum time before checking telescope focus
 TEMP_LIMIT = 35. # deg F at the APF
 wxtimeout = timedelta(seconds=1800)
 SUNEL_HOR = -3.2
@@ -340,7 +341,6 @@ class APF:
         self.counts.monitor()
         self.teqmode.monitor()
         self.vmag.monitor()
-        self.autofoc.monitor()
         self.ldone.monitor()
         self.counts.monitor()
         self.decker.monitor()
@@ -392,6 +392,8 @@ class APF:
             s += "Robot is running\n"
         else:
             s += "Robot is not running\n"
+        focval = self.setAutofocVal()
+        s += "Focus value for scriptobs = %d\n" % focval
 
         return s
 
@@ -1033,6 +1035,28 @@ class APF:
                 
         return
 
+
+    def setAutofocVal(self):
+        """ APFControl.setAutofocVal()
+            tests when the last time the telescope was focused, if more than FOCUSTIME enable focus check
+        """
+
+        # check last telescope focus
+        lastfoc = self.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
+        current_val = self.autofoc.read()
+        rising = self.rising
+        cur_sunel = self.sunel.read(binary=True)
+        too_close = rising and (cur_sunel > -20)
+        focval = 0
+        if time.time() - lastfoc > FOCUSTIME:
+            if current_val != "robot_autofocus_enable" and not too_close:
+                self.autofoc.write("robot_autofocus_enable")
+                focval = 1
+                APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
+        else:
+            if current_val == "robot_autofocus_enable":
+                self.autofoc.write("robot_autofocus_disable")
+        return focval
 
     def updateWindshield(self, state):
         """Checks the current windshielding mode, and depending on the input and wind speed measurements makes sure it is set properly."""

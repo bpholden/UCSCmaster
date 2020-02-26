@@ -33,7 +33,6 @@ SUNEL_STARTLIM = -9.0
 SUNEL_HOR = -3.2
 AVERAGE_INSTRFOC = 8522
 DMLIM = 1140
-FOCUSTIME = 3600.
 
 class Master(threading.Thread):
     def __init__(self, apf, opt,totTemps=4,task='master'):
@@ -78,28 +77,6 @@ class Master(threading.Thread):
         self.nighttargetlog = None
 
     
-
-    def setAutofocVal(self):
-        """ Master.setAutofocVal()
-            tests when the last time the telescope was focused, if more than FOCUSTIME enable focus check
-        """
-
-        # check last telescope focus
-        lastfoc = self.APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
-        current_val = self.APF.autofoc.read()
-        rising = self.APF.rising
-        cur_sunel = self.APF.sunel.read(binary=True)
-        too_close = rising and (cur_sunel > -20)
-        if time.time() - lastfoc > FOCUSTIME:
-            if current_val != "robot_autofocus_enable" and not too_close:
-                self.APF.autofoc.write("robot_autofocus_enable")
-                self.focval=1
-                APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
-        else:
-            if current_val == "robot_autofocus_enable":
-                self.APF.autofoc.write("robot_autofocus_disable")
-                self.focval=0
-        return
 
     def checkScriptobsMessages():
         message = self.APF.message.read()
@@ -330,7 +307,7 @@ class Master(threading.Thread):
             
             self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen)
 
-            self.setAutofocVal()
+            self.focval = self.APF.setAutofocVal()
             if self.target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
