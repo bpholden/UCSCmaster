@@ -245,9 +245,11 @@ class APF:
     
     checkapf   = ktl.Service('checkapf')
     ok2open    = checkapf('OPEN_OK')
+    userkind   = checkapf('USERKIND')
     dmtimer    = checkapf('DMTIME')
     whatsopn   = checkapf('WHATSOPN')  
     mv_perm    = checkapf('MOVE_PERM')
+    instr_perm = checkapf('INSTR_PERM')
     chk_close  = checkapf('CHK_CLOSE')
 
     apfmet     = ktl.Service('met3apf')
