@@ -491,14 +491,10 @@ class APF:
         return
 
     def instrPermit(self):
-        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-        userkind = ktl.read("checkapf","USERKIND",binary=True)
-        while not instr_perm or userkind != 3:
+        while not self.instr_perm.read(binary=True) or self.userkind.read(binary=True) != 3:
             apflog("Waiting for instrument permission to be true and userkind to be robotic")
             APFTask.waitfor(self.task, True, expression="$checkapf.INSTR_PERM = true", timeout=600)
             APFTask.waitfor(self.task, True, expression="$checkapf.USERKIND = robotic", timeout=600)
-            instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
-            userkind = ktl.read("checkapf", "USERKIND", binary=True)
 
         return True
 
@@ -574,7 +570,7 @@ class APF:
         rv = self.enableCalInst()
         if rv is False:
             try:
-                ip = checkapf['INSTR_PERM'].read()
+                ip = self.checkapf['INSTR_PERM'].read()
             except:
                 ip = 'Unknown'
             apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
@@ -593,8 +589,7 @@ class APF:
         if not result or (dewarfocraw > DEWARMAX or dewarfocraw < DEWARMIN):
             flags = "-b"
             focusdict = APFTask.get("focusinstr", ["PHASE"])
-            instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
-            if not instr_perm:
+            if not self.instr_perm.read(binary=True):
                 self.instrPermit()
                 if len(focusdict['PHASE']) > 0:
                     flags = " ".join(["-p", focusdict['phase']])
@@ -619,7 +614,7 @@ class APF:
             rv = self.enableCalInst()
             if rv is False:
                 try:
-                    ip = checkapf['INSTR_PERM'].read()
+                    ip = self.instr_perm.read()
                 except:
                     ip = 'Unknown'
                 apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
