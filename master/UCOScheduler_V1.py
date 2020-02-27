@@ -298,29 +298,6 @@ def findClosest(ras,decs,ra,dec):
 
     return min_ind
 
-def makeTempRow(star_table,ind,bstar=False):
-
-    row = []
-
-    row.append(star_table['ra'][ind])
-    row.append(star_table['dec'][ind])
-    row.append(star_table['pmRA'][ind])
-    row.append(star_table['pmDEC'][ind])
-    row.append(star_table['Vmag'][ind])
-    row.append(1200)
-    row.append(1e9)
-    row.append( star_table['APFpri'][ind])
-    row.append(0)
-    if bstar:
-        row.append(2)
-    else:
-        if star_table['Vmag'][ind] > 10:
-            row.append(9)
-        elif star_table['Vmag'][ind] < 8:
-            row.append(5)
-        else:
-            row.append(7)
-    return row
 
 def enoughTime(star_table,stars,idx,apf_obs,dt):
     tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
@@ -614,7 +591,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval,bstar=bstar)
     if do_templates and star_table['template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
-        row = makeTempRow(star_table,idx)
+
         if enoughTime(star_table,stars,idx,apf_obs,dt):
             bline = makeScriptobsLine(bidx,star_table,dt,decker="N",I2="Y", owner=res['owner'],focval=2)
             line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=res['owner'])
