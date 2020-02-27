@@ -149,7 +149,7 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
             
     return rank_table
 
-def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0, coverid=''):
+def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0, coverid='',temp=False):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(idx, row, t, decker="W",I2="Y")
     idx - row of the star
@@ -157,6 +157,7 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     t - a datetime object, this is used to fill in the uth and utm fields,
     decker - one character field for the decker, defaults to "W"
     I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
+    temp - a boolean for whether or not this is a template observation
     """
 
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
@@ -176,7 +177,10 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     # V Mag
     ret += 'vmag=' + str(star_table['Vmag'][idx]) + ' '
     # T Exp
-    ret += 'texp=' + str(int(star_table['texp'][idx])) + ' '
+    if temp:
+        ret += 'texp=' + str(1200) + ' '
+    else:
+        ret += 'texp=' + str(int(star_table['texp'][idx])) + ' '
     # I2
     ret += 'I2=%s ' % (I2)
     # lamp
@@ -187,6 +191,8 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     # Exp Count
     if star_table['expcount'][idx] > 3e9:
         ret += 'expcount=%.3g' % (3e9) + ' '
+    elif temp:
+        ret += 'expcount=%.3g' % (1e9) + ' '
     else:
         ret += 'expcount=%.3g' % (star_table['expcount'][idx]) + ' '
     # Decker
@@ -197,7 +203,17 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     else:
         ret += 'do= '
     # Count
-    ret += 'count=' + str(int(star_table['APFnshots'][idx]))
+    if temp:
+        count = int(star_table['APFnshots'][idx])
+    else:
+        if star_table['Vmag'][ind] > 10:
+            count = 9
+        elif star_table['Vmag'][ind] < 8:
+            count = 5
+        else:
+            count = 7
+    ret += 'count=' + str(count)
+            
 
     ret += ' foc=' + str(int(focval))
 
@@ -594,7 +610,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
 
         if enoughTime(star_table,stars,idx,apf_obs,dt):
             bline = makeScriptobsLine(bidx,star_table,dt,decker="N",I2="Y", owner=res['owner'],focval=2)
-            line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=res['owner'])
+            line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=res['owner'],temp=True)
             bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y",owner=res['owner'],focval=2)
             res['SCRIPTOBS'] = []
             res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
