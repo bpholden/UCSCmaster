@@ -632,7 +632,7 @@ class Master(threading.Thread):
 
             # check last telescope focus
             if running and  float(sunel) <= sunel_lim:
-                self.setAutofocVal()
+                self.APF.setAutofocVal()
                 
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation
