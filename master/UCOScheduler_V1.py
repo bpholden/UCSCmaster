@@ -206,9 +206,9 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     if temp:
         count = int(star_table['APFnshots'][idx])
     else:
-        if star_table['Vmag'][ind] > 10:
+        if star_table['Vmag'][idx] > 10:
             count = 9
-        elif star_table['Vmag'][ind] < 8:
+        elif star_table['Vmag'][idx] < 8:
             count = 5
         else:
             count = 7
