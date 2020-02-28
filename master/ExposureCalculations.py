@@ -1,3 +1,4 @@
+from __future__ import print_function
 """
 This module is used to calculate exposure times according to recipe from Burt et al. (2015).
 The basic procedure is as follows:
@@ -76,7 +77,7 @@ def getEXPMeter_Rate(v, bv, el, seeing, deckers):
     """
     alpha = -0.908
     beta = 0.0852
-    Const = -21.8
+    Const = -22.8
     if seeing == 0:
 #        apflog( "Warning: AVG_FWHM seems to be 0. Using 15 instead.",level="Warn")
         seeing = np.array(15)
@@ -106,7 +107,7 @@ def getSpec_Rate( v, bv, el, seeing, deckers):
     """
     alpha = -0.0311
     beta = 0.158
-    Const = -11.2
+    Const = -12.2
     if seeing <= 0:
         seeing = np.array(15)
     # seeing  = 13.99

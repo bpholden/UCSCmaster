@@ -294,7 +294,7 @@ def computeSunrise(dt,horizon='0'):
 
 def templateConditions(moon, seeing, slowdown):
 
-    if seeing < 15 and slowdown < 0.5:
+    if seeing < 15 and slowdown < 1.25:
         apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon.alt),echo=True,level='debug')
         if moon.phase < 50 and float(moon.alt) < 0:
             return True
