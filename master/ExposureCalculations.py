@@ -147,3 +147,22 @@ def getEXPTime(cnts, v, bv, el, seeing, deckers):
     fin_cnt_rate = np.where(cnt_rate > 0,cnt_rate,1.0e-5)
     time = cnts/fin_cnt_rate
     return time
+
+if __name__ == "__main__":
+
+    decker = 'W'
+    seeing = 9.1
+    vmag = 6.1
+    bmv = 0.68
+    el = 72
+    unc = 1
+
+    print("I2=",getI2_K(unc)," for 1 m/s K star")
+    print("I2=",getI2_M(unc)," for 1 m/s M star")
+
+    print("exp 1 m/s %.3g" % getEXPMeter(getI2_K(unc),bmv))
+    print(getEXPMeter_Rate(vmag,bmv,el,seeing,decker))
+    r = getSpec_Rate(vmag,bmv,el,seeing,decker)
+    print(r)
+    print(getEXPTime(getI2_K(unc),vmag,bmv,el,seeing,decker))
+    
