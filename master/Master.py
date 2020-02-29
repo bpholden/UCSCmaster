@@ -566,11 +566,6 @@ class Master(threading.Thread):
             ripd, running = self.APF.findRobot()
             sunel = self.APF.sunel
             sunel.monitor()
-
-#            apflog("sunel = %.2f running = %s, phase = %s" % ( float(sunel),str(running), self.APF.sop.read().strip()),echo=True,level='debug')
-            # if paused:
-            #     apflog("Pausing because of apftask request",level='warn',echo=True)
-            #     APFTask.waitfor(self.task, True, timeout=60)
             
             # Check and close for weather
             if self.APF.isOpen()[0] and not self.APF.openOK:
