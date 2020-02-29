@@ -249,6 +249,9 @@ class Master(threading.Thread):
                 apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                 slowdown = 1
 
+            apflog("countrate = %.2f, ccountrate = %.2f" % (self.APF.countrate, self.APF.ccountrate))
+            apflog("slowdown factor = %4.2f" % slowdown, echo=True)
+            APFLib.write(self.APF.robot["MASTER_SLOWDOWN"], slowdown)
             return slowdown
         
         # This is called when an observation finishes, and selects the next target
@@ -295,9 +298,6 @@ class Master(threading.Thread):
             
             # Calculate the slowdown factor.
             slowdown = calcSlowdown()
-            apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
-            APFLib.write(self.APF.robot["MASTER_SLOWDOWN"], slowdown)
-            apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (self.APF.countrate, self.APF.ccountrate))
 
             # Check for a valid seeing measurment. If there isn't one, use a default
             if self.APF.avg_fwhm == 0.:
