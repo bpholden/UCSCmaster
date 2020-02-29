@@ -578,15 +578,7 @@ class Master(threading.Thread):
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
-                exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, self.APF.ael, self.APF.avg_fwhm,["W"])
-                try:
-                    slow = exp_cntrate / self.APF.countrate
-                    if slow < 0:
-                        slow = 5
-                        apflog("Countrate non-sensical %g" % self.APF.countrate, echo=True)
-                except ZeroDivisionError:
-                    apflog("No current countrate", echo=True)
-                    slow = 5
+                slow = calcSlowdown()
                 APFTask.set(self.task, suffix="MESSAGE",value="FWHM = %.2f and slowdown %.2f" % (self.APF.avg_fwhm,slow), wait=False)
                 if slow > 16:
                     # The slowdown is too high, we should close up and wait.
