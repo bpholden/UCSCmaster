@@ -46,9 +46,11 @@ class Master(threading.Thread):
         self.signal = True
         self.windshield = opt.windshield
         self.scriptobs = None
+
         self.BV = None
         self.VMAG = None
         self.decker = "W"
+        
         self.obsBstar = True
         self.lastObsSuccess = True
         self.lastObsFinished = True
