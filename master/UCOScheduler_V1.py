@@ -149,7 +149,7 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
             
     return rank_table
 
-def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0, coverid=''):
+def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', focval=0, coverid='',temp=False):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(idx, row, t, decker="W",I2="Y")
     idx - row of the star
@@ -157,6 +157,7 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     t - a datetime object, this is used to fill in the uth and utm fields,
     decker - one character field for the decker, defaults to "W"
     I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
+    temp - a boolean for whether or not this is a template observation
     """
 
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
@@ -176,7 +177,10 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     # V Mag
     ret += 'vmag=' + str(star_table['Vmag'][idx]) + ' '
     # T Exp
-    ret += 'texp=' + str(int(star_table['texp'][idx])) + ' '
+    if temp:
+        ret += 'texp=' + str(1200) + ' '
+    else:
+        ret += 'texp=' + str(int(star_table['texp'][idx])) + ' '
     # I2
     ret += 'I2=%s ' % (I2)
     # lamp
@@ -187,6 +191,8 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     # Exp Count
     if star_table['expcount'][idx] > 3e9:
         ret += 'expcount=%.3g' % (3e9) + ' '
+    elif temp:
+        ret += 'expcount=%.3g' % (1e9) + ' '
     else:
         ret += 'expcount=%.3g' % (star_table['expcount'][idx]) + ' '
     # Decker
@@ -197,7 +203,17 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     else:
         ret += 'do= '
     # Count
-    ret += 'count=' + str(int(star_table['APFnshots'][idx]))
+    if temp:
+        if star_table['Vmag'][idx] > 10:
+            count = 9
+        elif star_table['Vmag'][idx] < 8:
+            count = 5
+        else:
+            count = 7
+    else:
+        count = int(star_table['APFnshots'][idx])
+    ret += 'count=' + str(count)
+            
 
     ret += ' foc=' + str(int(focval))
 
@@ -279,7 +295,7 @@ def computeSunrise(dt,horizon='0'):
 
 def templateConditions(moon, seeing, slowdown):
 
-    if seeing < 15 and slowdown < 0.5:
+    if seeing < 15 and slowdown < 1.25:
         apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon.alt),echo=True,level='debug')
         if moon.phase < 50 and float(moon.alt) < 0:
             return True
@@ -299,29 +315,6 @@ def findClosest(ras,decs,ra,dec):
 
     return min_ind
 
-def makeTempRow(star_table,ind,bstar=False):
-
-    row = []
-
-    row.append(star_table['ra'][ind])
-    row.append(star_table['dec'][ind])
-    row.append(star_table['pmRA'][ind])
-    row.append(star_table['pmDEC'][ind])
-    row.append(star_table['Vmag'][ind])
-    row.append(1200)
-    row.append(1e9)
-    row.append( star_table['APFpri'][ind])
-    row.append(0)
-    if bstar:
-        row.append(2)
-    else:
-        if star_table['Vmag'][ind] > 10:
-            row.append(9)
-        elif star_table['Vmag'][ind] < 8:
-            row.append(5)
-        else:
-            row.append(7)
-    return row
 
 def enoughTime(star_table,stars,idx,apf_obs,dt):
     tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
@@ -350,7 +343,7 @@ def findBstars(star_table,idx, bstars):
     return near_idx,end_idx
 
 
-def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
+def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False):
     res = dict()
 
     res['RA']     = stars[idx].a_ra
@@ -367,6 +360,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0):
     res['PRI']    = star_table['APFpri'][idx]
     res['DECKER'] = star_table['decker'][idx]
     res['isTemp'] =    False
+    res['isBstar'] =    bstar
     res['owner'] =    star_table['sheetn'][idx]
     res['SCRIPTOBS'] = []
     scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
@@ -614,14 +608,14 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table['lastobs'][idx]) / star_table['APFcad'][idx]), ephem.julian_date(dt), star_table['lastobs'][idx], star_table['APFcad'][idx])
     apflog(cstr,echo=True)
 
-    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval)
-    if do_templates and star_table['Template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
+    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval,bstar=bstar)
+    if do_templates and star_table['template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
-        row = makeTempRow(star_table,idx)
+
         if enoughTime(star_table,stars,idx,apf_obs,dt):
             bline = makeScriptobsLine(bidx,star_table,dt,decker="N",I2="Y", owner=res['owner'],focval=2)
-            line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=res['owner'])
-            bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y",owner=res['owner'],focval=2)
+            line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=res['owner'],temp=True)
+            bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y",owner=res['owner'],focval=0)
             res['SCRIPTOBS'] = []
             res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
             res['SCRIPTOBS'].append(line + " # temp=Y")

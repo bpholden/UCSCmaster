@@ -33,7 +33,6 @@ SUNEL_STARTLIM = -9.0
 SUNEL_HOR = -3.2
 AVERAGE_INSTRFOC = 8522
 DMLIM = 1140
-FOCUSTIME = 3600.
 
 class Master(threading.Thread):
     def __init__(self, apf, opt,totTemps=4,task='master'):
@@ -47,9 +46,11 @@ class Master(threading.Thread):
         self.signal = True
         self.windshield = opt.windshield
         self.scriptobs = None
+
         self.BV = None
         self.VMAG = None
         self.decker = "W"
+        
         self.obsBstar = True
         self.lastObsSuccess = True
         self.lastObsFinished = True
@@ -78,28 +79,6 @@ class Master(threading.Thread):
         self.nighttargetlog = None
 
     
-
-    def setAutofocVal(self):
-        """ Master.setAutofocVal()
-            tests when the last time the telescope was focused, if more than FOCUSTIME enable focus check
-        """
-
-        # check last telescope focus
-        lastfoc = self.APF.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
-        current_val = self.APF.autofoc.read()
-        rising = self.APF.rising
-        cur_sunel = self.APF.sunel.read(binary=True)
-        too_close = rising and (cur_sunel > -20)
-        if time.time() - lastfoc > FOCUSTIME:
-            if current_val != "robot_autofocus_enable" and not too_close:
-                self.APF.autofoc.write("robot_autofocus_enable")
-                self.focval=1
-                APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
-        else:
-            if current_val == "robot_autofocus_enable":
-                self.APF.autofoc.write("robot_autofocus_disable")
-                self.focval=0
-        return
 
     def checkScriptobsMessages():
         message = self.APF.message.read()
@@ -270,6 +249,9 @@ class Master(threading.Thread):
                 apflog("Current countrate was 0. Slowdown will be set to 1.", echo=True)
                 slowdown = 1
 
+            apflog("countrate = %.2f, ccountrate = %.2f" % (self.APF.countrate, self.APF.ccountrate))
+            apflog("slowdown factor = %4.2f" % slowdown, echo=True)
+            APFLib.write(self.APF.robot["MASTER_SLOWDOWN"], slowdown)
             return slowdown
         
         # This is called when an observation finishes, and selects the next target
@@ -304,7 +286,7 @@ class Master(threading.Thread):
 
                 
             except Exception, e:
-                apflog("getTarget(): Cannot change obsBstar: %s" % (e),level='error',echo=True)
+                apflog("getTarget(): Cannot read apftask.MASTER_OBSBSTAR: %s" % (e),level='error',echo=True)
                 self.obsBstar = True
 
             if self.obsBstar:
@@ -316,9 +298,6 @@ class Master(threading.Thread):
             
             # Calculate the slowdown factor.
             slowdown = calcSlowdown()
-            apflog("getTarget(): slowdown factor = %4.2f" % slowdown, echo=True)
-            APFLib.write(self.APF.robot["MASTER_SLOWDOWN"], slowdown)
-            apflog("getTarget(): countrate = %.2f, ccountrate = %.2f" % (self.APF.countrate, self.APF.ccountrate))
 
             # Check for a valid seeing measurment. If there isn't one, use a default
             if self.APF.avg_fwhm == 0.:
@@ -330,7 +309,7 @@ class Master(threading.Thread):
             
             self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen)
 
-            self.setAutofocVal()
+            self.focval = self.APF.setAutofocVal()
             if self.target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
@@ -587,11 +566,6 @@ class Master(threading.Thread):
             ripd, running = self.APF.findRobot()
             sunel = self.APF.sunel
             sunel.monitor()
-
-#            apflog("sunel = %.2f running = %s, phase = %s" % ( float(sunel),str(running), self.APF.sop.read().strip()),echo=True,level='debug')
-            # if paused:
-            #     apflog("Pausing because of apftask request",level='warn',echo=True)
-            #     APFTask.waitfor(self.task, True, timeout=60)
             
             # Check and close for weather
             if self.APF.isOpen()[0] and not self.APF.openOK:
@@ -604,15 +578,7 @@ class Master(threading.Thread):
 
             # Check the slowdown factor to close for clouds
             if self.VMAG is not None and self.BV is not None and False:
-                exp_cntrate = ExposureCalculations.getEXPMeter_Rate(self.VMAG, self.BV, self.APF.ael, self.APF.avg_fwhm,["W"])
-                try:
-                    slow = exp_cntrate / self.APF.countrate
-                    if slow < 0:
-                        slow = 5
-                        apflog("Countrate non-sensical %g" % self.APF.countrate, echo=True)
-                except ZeroDivisionError:
-                    apflog("No current countrate", echo=True)
-                    slow = 5
+                slow = calcSlowdown()
                 APFTask.set(self.task, suffix="MESSAGE",value="FWHM = %.2f and slowdown %.2f" % (self.APF.avg_fwhm,slow), wait=False)
                 if slow > 16:
                     # The slowdown is too high, we should close up and wait.
@@ -655,7 +621,7 @@ class Master(threading.Thread):
 
             # check last telescope focus
             if running and  float(sunel) <= sunel_lim:
-                self.setAutofocVal()
+                self.APF.setAutofocVal()
                 
             # If the sun is rising and we are finishing an observation
             # Send scriptobs EOF. This will shut it down after the observation

@@ -1,3 +1,4 @@
+from __future__ import print_function
 """
 This module is used to calculate exposure times according to recipe from Burt et al. (2015).
 The basic procedure is as follows:
@@ -76,7 +77,7 @@ def getEXPMeter_Rate(v, bv, el, seeing, deckers):
     """
     alpha = -0.908
     beta = 0.0852
-    Const = -21.8
+    Const = -23.8
     if seeing == 0:
 #        apflog( "Warning: AVG_FWHM seems to be 0. Using 15 instead.",level="Warn")
         seeing = np.array(15)
@@ -106,7 +107,7 @@ def getSpec_Rate( v, bv, el, seeing, deckers):
     """
     alpha = -0.0311
     beta = 0.158
-    Const = -11.2
+    Const = -12.2
     if seeing <= 0:
         seeing = np.array(15)
     # seeing  = 13.99
@@ -146,3 +147,22 @@ def getEXPTime(cnts, v, bv, el, seeing, deckers):
     fin_cnt_rate = np.where(cnt_rate > 0,cnt_rate,1.0e-5)
     time = cnts/fin_cnt_rate
     return time
+
+if __name__ == "__main__":
+
+    decker = 'W'
+    seeing = 9.1
+    vmag = 6.1
+    bmv = 0.68
+    el = 72
+    unc = 1
+
+    print("I2=",getI2_K(unc)," for 1 m/s K star")
+    print("I2=",getI2_M(unc)," for 1 m/s M star")
+
+    print("exp 1 m/s %.3g" % getEXPMeter(getI2_K(unc),bmv))
+    print(getEXPMeter_Rate(vmag,bmv,el,seeing,decker))
+    r = getSpec_Rate(vmag,bmv,el,seeing,decker)
+    print(r)
+    print(getEXPTime(getI2_K(unc),vmag,bmv,el,seeing,decker))
+    
