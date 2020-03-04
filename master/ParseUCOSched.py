@@ -420,7 +420,11 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
     for k in badkeylist:
         del star_table[k]  
 
-    return star_table, star_table_names
+    star_table_names = list(star_table.keys())
+    for n in  ('Dec sec','Dec min','Dec deg','RA sec','RA min','RA hr','APFpri','sheetn','name'):
+        if n in star_table_names:
+            star_table_names.remove(n)
+            star_table_names = [n] + star_table_names
 
 def genStars(star_table):
     """pyephem_objs = genStars(star_table)
