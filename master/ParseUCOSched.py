@@ -297,7 +297,6 @@ def initStarTable(col_list):
         star_table_names.remove(n)
         star_table_names = [n] + star_table_names
 
-    return star_table
 
 
 def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',prilim=0.5):
