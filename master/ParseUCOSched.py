@@ -425,6 +425,9 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
         if n in star_table_names:
             star_table_names.remove(n)
             star_table_names = [n] + star_table_names
+                
+    star_table = astropy.table.Table(star_table,names=star_table_names)        
+    return star_table
 
 def genStars(star_table):
     """pyephem_objs = genStars(star_table)
@@ -478,12 +481,11 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     if os.path.exists(outfn) and force_download is False:
         try:
             star_table = astropy.io.ascii.read(outfn)
-            star_table_names = star_table.colnames
         except:
-            star_table,star_table_names  = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
+            star_table  = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
 
     else:
-        star_table,star_table_names = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
+        star_table = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
 
     stars = genStars(star_table)
 
