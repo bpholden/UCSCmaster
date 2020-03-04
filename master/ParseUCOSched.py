@@ -297,6 +297,7 @@ def initStarTable(col_list):
         star_table_names.remove(n)
         star_table_names = [n] + star_table_names
 
+    return star_table, star_table_names
 
 
 def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',prilim=0.5):
@@ -317,7 +318,7 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
     codex = full_codex[1:]
 
     didx = findColumns(col_names,req_cols)
-    star_table = initStarTable(req_cols)
+    star_table, star_table_names = initStarTable(req_cols)
     
     stars = []
     # Build the star table to return to 
@@ -425,7 +426,7 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
     for k in badkeylist:
         del star_table[k]  
 
-    return star_table
+    return star_table, star_table_names
 
 def genStars(star_table):
     """pyephem_objs = genStars(star_table)
@@ -487,6 +488,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
         star_table,star_table_names = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
 
     stars = genStars(star_table)
+
     
     star_table = astropy.table.Table(star_table,names=star_table_names)
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
