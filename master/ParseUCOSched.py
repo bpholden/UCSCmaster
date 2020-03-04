@@ -312,7 +312,7 @@ def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4
     codex = full_codex[1:]
 
     didx = findColumns(col_names,req_cols)
-    star_table, star_table_names = initStarTable(req_cols)
+    star_table = initStarTable(req_cols)
     
     stars = []
     # Build the star table to return to 
