@@ -489,8 +489,6 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
 
     stars = genStars(star_table)
 
-    
-    star_table = astropy.table.Table(star_table,names=star_table_names)
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
     
     return (star_table, stars)
