@@ -31,14 +31,14 @@ def getDECRad(deg, mn, sec, neg=False):
         return None
     if deg < 0:
         neg = True
-        deg = abs(deg)       
+
     if  mn < 0:
         neg = True
-        mn = abs(mn)
+
     if sec < 0:
         neg = True
-        sec = abs(sec)
-    x = deg + mn/60. + sec/3600.
+
+    x = abs(deg) + abs(mn)/60. + abs(sec)/3600.
     x = x * np.pi/180.
     if neg:
         return x*-1
