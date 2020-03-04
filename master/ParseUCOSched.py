@@ -489,7 +489,7 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     return (star_table, stars)
 
 
-def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesched.dat',outdir=None):
+def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesched.dat',toofn='too.dat',outdir=None):
     """
         Update the local copy of the googledex with the last observed star time.
         updateLocalStarlist(time,googledex_file="googledex.dat", observed_file="observed_targets")
