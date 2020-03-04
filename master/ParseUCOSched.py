@@ -291,13 +291,7 @@ def initStarTable(col_list):
     star_table['ra'] = []
     star_table['dec'] = []
 
-
-    star_table_names = list(star_table.keys())
-    for n in ("Dec sec", "Dec min", "Dec deg","RA sec", "RA min", "RA hr", 'sheetn','APFpri','name'):
-        star_table_names.remove(n)
-        star_table_names = [n] + star_table_names
-
-    return star_table, star_table_names
+    return star_table
 
 
 def parseCodex(config,sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',prilim=0.5):
