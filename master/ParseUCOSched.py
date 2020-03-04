@@ -480,15 +480,16 @@ def parseUCOSched(sheetns=["Bstars"],certificate='UCSC Dynamic Scheduler-4f4f8d6
     if os.path.exists(outfn) and force_download is False:
         try:
             star_table = astropy.io.ascii.read(outfn)
+            star_table_names = star_table.colnames
         except:
-            star_table  = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
+            star_table,star_table_names  = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
 
     else:
-        star_table = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
+        star_table,star_table_names = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
 
     stars = genStars(star_table)
     
-    star_table = astropy.table.Table(star_table)
+    star_table = astropy.table.Table(star_table,names=star_table_names)
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
     
     return (star_table, stars)
