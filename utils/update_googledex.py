@@ -18,6 +18,6 @@ if __name__ == "__main__":
 
     sheetns = sheetnl.split(",")
     for sheetn in sheetns:
-        n= ParseUCOSched.updateGoogledexLastobs(fn,sheetns=[sheetn])
+        n= ParseUCOSched.updateSheetLastobs(fn,sheetns=[sheetn])
         if n > 0:
             time.sleep(n)
