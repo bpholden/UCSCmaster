@@ -18,9 +18,9 @@ if __name__ == "__main__":
 
     if len(obslog.names) > 0:
         if obslog.sheetns[0] is None:
-            sheetns = set(ol.owners)
+            sheetns = set(obslog.owners)
         else:
-            sheetns = set(ol.sheetns)
+            sheetns = set(obslog.sheetns)
     for sheetn in sheetns:
         n= ParseUCOSched.updateSheetLastobs(fn,sheetns=[sheetn],outfn=outfn)
         if n > 0:
