@@ -14,7 +14,7 @@ if __name__ == "__main__":
     fn = sys.argv[1]
     outfn = sys.argv[2]
 
-    obslog = Observedlog.Observedlog(fn)
+    obslog = ObservedLog.ObservedLog(fn)
 
     if len(obslog.names) > 0:
         if obslog.sheetns[0] is None:
