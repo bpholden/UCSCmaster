@@ -557,7 +557,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
     
     return obslog.names, star_table
 
-def updateSheetLastobs(filename, sheetns=["Bstar"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn='parsesched.dat',outdir=None):
+def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn='parsesched.dat',outdir=None):
     """
         Update the online googledex lastobs column assuming things in filename have been observed.
         updateSheetLastobs(filename, sheetn="The Googledex",time=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
