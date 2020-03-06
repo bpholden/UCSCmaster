@@ -633,7 +633,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                         n = int(v[nobscol])
                     except:
                         n = 0
-                    if jd > pastdate and curowner == sheetn:
+                    if round(jd, 4) > pastdate and curowner == sheetn:
                         ws.update_cell(i+1, col+1, round(jd, 4) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
                         nupdates += 2
