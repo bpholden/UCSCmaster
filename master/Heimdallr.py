@@ -479,9 +479,8 @@ if __name__ == '__main__':
     if os.path.exists(os.path.join(os.getcwd(),"observed_targets")):
         try:
             apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-            for sn in master.sheetn:
-                n = ParseUCOSched.updateSheetLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=[sn],outfn="googledex.dat")
-                APFTask.wait(parent,True,timeout=n)
+            n = ParseUCOSched.updateSheetLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn,outfn="googledex.dat")
+
 
         except Exception as e:
             apflog("Error: Updating the online googledex has failed: %s" % (e), level="error")
