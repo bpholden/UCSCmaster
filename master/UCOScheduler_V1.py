@@ -407,7 +407,7 @@ def behindMoon(moon,ras,decs):
 
     return moon_check
 
-def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table'):
+def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_A100"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table'):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -633,7 +633,7 @@ if __name__ == '__main__':
     
     
 #    sheetn=["2018B"]
-    sheetn="Bstars,2020A_A000,2020A_A011,2020A_A012"
+    sheetn="RECUR_A100,2020A_A000,2020A_A011,2020A_A012"
 
     # For some test input what would the best target be?
     otfn = "observed_targets"
