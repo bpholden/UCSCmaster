@@ -160,7 +160,7 @@ def prep_master(outdir,mastername):
 
 def parse_args():
     parser = optparse.OptionParser()
-    parser.add_option("--sheetns",dest="sheetns",default="Bstars,2020A_A000,2020A_A001,2020A_A002,2020A_A003,2020A_A004,2020A_A006,2020A_A008,2020A_A009,2020A_A011,2020A_A012,2020A_A013")
+    parser.add_option("--sheetns",dest="sheetns",default="RECUR_A100,2020A_A000,2020A_A001,2020A_A002,2020A_A003,2020A_A004,2020A_A006,2020A_A008,2020A_A009,2020A_A011,2020A_A012,2020A_A013")
     parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
     parser.add_option("-f","--file",dest="datefile",default="")
     parser.add_option("--seed",dest="seed",default=None)

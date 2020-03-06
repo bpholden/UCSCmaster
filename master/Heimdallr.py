@@ -139,7 +139,7 @@ def args():
     parser.add_argument('--raster', action='store_true', default=False, help="If a fixed starlist is given, use it for a raster scan.")
 
     parser.add_argument('--rank_table', default='2020A_ranks', help="Optional name for table of sheet ranks")
-    parser.add_argument('--sheet',default="Bstars",help="Optional name for a Google spreadsheet")
+    parser.add_argument('--sheet',default="RECUR_A100",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='public',help="Optional name for file owners")    
     parser.add_argument('--ftable',default=None,help="Table of fractions of the night")    
     
