@@ -406,7 +406,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
 
         csheetn = checkFlag("sheetn",didx,ls,"\A(.*)",'public')
 
-        if 'Bstar' in csheetn :
+        if 'RECUR_A100' in csheetn :
             star_table['Bstar'].append("Y")
             star_table['sheetn'].append('RECUR_A100')
         else:
