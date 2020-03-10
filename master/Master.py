@@ -794,8 +794,11 @@ if __name__ == "__main__":
     opt.raster = False
     
     apf = APFControl.APF(task=parent,test=True)
+    APFTask.waitFor(parent, True,timeout=2)
     print(str(apf))
+
     master = Master(apf,opt,task=parent)
+    APFTask.waitFor(parent, True,timeout=2)
     master.start()
     while master.signal:
         try:
