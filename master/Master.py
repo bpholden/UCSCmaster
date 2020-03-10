@@ -357,7 +357,6 @@ class Master(threading.Thread):
             result = self.APF.ucam_status()
             if result is False:
                 apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
-                os._exit()
 
             result = self.APF.enableObsInst()
             if result == False:
@@ -660,7 +659,6 @@ class Master(threading.Thread):
                     if success is False:
                         if self.APF.openOK:
                             apflog("Error: Cannot open the dome", level="alert",echo=True)
-                            os._exit(0)
                         else:
                             # lost permision during opening, happens more often than you think
                             apflog("Error: No longer have opening permission", level="error",echo=True)
