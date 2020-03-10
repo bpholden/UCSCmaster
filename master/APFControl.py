@@ -317,7 +317,7 @@ class APF:
 
         self.ok2open.monitor()
         self.ok2open.callback(okmon)
-        self.openOK.read() # priming
+
         
         self.dmtimer.monitor()
         self.dmtimer.callback(dmtimemon)
