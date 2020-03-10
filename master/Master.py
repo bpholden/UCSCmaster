@@ -374,13 +374,13 @@ class Master(threading.Thread):
                 self.APF.DMZero()
 
             result = self.APF.openat(sunset=sunset)
-            apflog("openatsunset completed with result %s" % (result), echo=True)
+            apflog("opening completed with result %s" % (result), echo=True)
             if result == False:
-                apflog("openatsunset hasn't successfully opened. Current sunel = %4.2f" % ( float(sunel)), level='warn', echo=True)
+                apflog("opening hasn't successfully opened. Current sunel = %4.2f" % ( float(sunel)), level='warn', echo=True)
                 if ( float(sunel) < SUNEL_ENDLIM):
                     result = self.APF.openat(sunset=sunset)
-                    if not result:
-                        apflog("Error: openatsunset has failed twice.", level='error', echo=True)
+                    if not result and self.APF.openOK:
+                        apflog("Error: opening has failed twice.", level='Alert', echo=True)
                         self.APF.close()
                         self.canOpen = False
                         
