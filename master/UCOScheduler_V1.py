@@ -293,6 +293,35 @@ def computeSunrise(dt,horizon='0'):
     return sunrise
 
 
+def conditionCuts(moon,seeing,slowdown,star_table):
+    """ available = conditionCuts(moon, seeing, slowdown, star_table)
+
+    Checks if columns are in the star_table, then cuts on those, returns a boolean numpy array
+
+    available - Boolean numpy array of available targets
+
+    moon - phase value from pyephem, ranges from 0 to 100 (a percentage)
+    seeing - size in pixels
+    transparency - magnitudes of extinction
+
+    """
+    
+    if 'seeing' in star_table.colnames:
+        available = star_table['seeing']/0.109 > seeing
+    else:
+        available = np.ones(len(star_table['ra'], dtype=bool))
+
+    if 'moon' in star_table.colnames:
+        available = (star_table['moon'] > moon) & available
+        
+    if 'transparency' in star_table.colnames:
+        ext = 2.5 * np.log10(slowdown)
+        available = (star_table['transparency'] > ext) & available
+        
+    
+    return available
+
+
 def templateConditions(moon, seeing, slowdown):
 
     if seeing < 15 and slowdown < 1.25:
