@@ -78,7 +78,7 @@ class Master(threading.Thread):
         self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
         self.nighttargetlog = None
 
-    
+        self.canOpen = True
 
     def checkScriptobsMessages():
         message = self.APF.message.read()
@@ -347,6 +347,9 @@ class Master(threading.Thread):
 
         # opens the dome & telescope, if sunset is True calls open at sunset, else open at night
         def opening(sunel,sunset=False):
+            if self.canOpen is False:
+                apflog("We cannot open, so not trying", level='Error', echo=True)
+                return False
             when = "night"
             if sunset:
                 when = "sunset"
@@ -380,9 +383,8 @@ class Master(threading.Thread):
                     if not result:
                         apflog("Error: openatsunset has failed twice.", level='error', echo=True)
                         self.APF.close()
-                        return result
-
-                    
+                        self.canOpen = False
+                        
             if datetime.now().strftime("%p") == 'PM':
                 setting = True
             else:
@@ -651,7 +653,7 @@ class Master(threading.Thread):
                 self.stop()
                 
             # Open 
-            if not self.APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and self.APF.openOK:
+            if not self.APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and self.APF.openOK and self.canOpen:
                 if float(sunel) > sunel_lim and not rising:
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at sunset", wait=False)                    
                     success = opening(sunel, sunset=True)
@@ -684,7 +686,7 @@ class Master(threading.Thread):
                                 break
                                
                     
-                elif not rising or (rising and float(sunel) < (sunel_lim - 5)):
+                elif not rising or (rising and float(sunel) < (sunel_lim - 5)) and self.canOpen:
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at night", wait=False)                    
                     success = opening(sunel)
                 else:
