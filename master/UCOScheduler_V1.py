@@ -323,6 +323,17 @@ def conditionCuts(moon,seeing,slowdown,star_table):
 
 
 def templateConditions(moon, seeing, slowdown):
+    """ istrue = conditionCuts(moon, seeing, slowdown)
+
+    Checks to see if moon, seeing and slowdown factor are within template conditions
+
+    istrue - a simple Boolean
+
+    moon - phase value from pyephem, ranges from 0 to 100 (a percentage)
+    seeing - size in pixels
+    slowdown - relative to clear
+
+    """
 
     if seeing < 15 and slowdown < 1.25:
         apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon.alt),echo=True,level='debug')
