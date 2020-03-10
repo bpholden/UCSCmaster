@@ -788,7 +788,7 @@ if __name__ == "__main__":
     opt.windshield = 'auto'
     opt.fixed = None
     opt.sheet = 'Bstars'
-    opt.rank_tablen = '2020A_ranks'
+    opt.rank_table = '2020A_ranks'
     opt.start = None
     opt.test = True
     opt.raster = False
