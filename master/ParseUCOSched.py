@@ -294,6 +294,17 @@ def initStarTable(col_list):
     return star_table
 
 
+def normalizePriorities(star_table,sheetns):
+
+    for sheetn in sheetns :
+
+        select = (star_table['sheetn'] == sheetn)&(table['Bstar'] == 'N')
+        if any(select):
+            med = np.median(star_table['APFpri'])
+            star_table['APFpri'] += 5 - med
+
+    return
+
 def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',prilim=0.5):
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
@@ -426,7 +437,8 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
             star_table_names.remove(n)
             star_table_names = [n] + star_table_names
                 
-    star_table = astropy.table.Table(star_table,names=star_table_names)        
+    star_table = astropy.table.Table(star_table,names=star_table_names)
+    #    star_table = normalizePriorities(star_table)
     return star_table
 
 def genStars(star_table):
