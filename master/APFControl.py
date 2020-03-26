@@ -988,9 +988,16 @@ class APF:
             else:
                 apflog("Waiting for permission to move")
         chk_mv = '$checkapf.MOVE_PERM == true'
-        result = APFTask.waitFor(self.task, False, chk_mv, timeout=300)
+        result = APFTask.waitFor(self.task, False, chk_mv, timeout=1200)
         if not result:
-            apflog("Didn't have move permission after 5 minutes. Going ahead with closeup.", echo=True) 
+            apflog("Didn't have move permission after 20 minutes. Going ahead with closeup.", echo=True)
+            return False
+        if apfmon['FRONT_SHUTTER_CLOSEUPSTA'].read(binary=True) != 2:
+            # this is a check to see if the front shutter got caught running
+            # away, if so do not send any more shutter commands
+            apflog("Dome Shutters maybe running away!", level='error', echo=True)
+            return False
+        
         apflog("Running closeup script")
         attempts = 0
         close_start = datetime.now()
