@@ -992,7 +992,7 @@ class APF:
         if not result:
             apflog("Didn't have move permission after 20 minutes. Going ahead with closeup.", echo=True)
             return False
-        if apfmon['FRONT_SHUTTER_CLOSEUPSTA'].read(binary=True) != 2:
+        if self.apfmon['FRONT_SHUTTER_CLOSEUPSTA'].read(binary=True) != 2:
             # this is a check to see if the front shutter got caught running
             # away, if so do not send any more shutter commands
             apflog("Dome Shutters maybe running away!", level='error', echo=True)
