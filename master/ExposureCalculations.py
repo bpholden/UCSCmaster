@@ -77,7 +77,7 @@ def getEXPMeter_Rate(v, bv, el, seeing, deckers):
     """
     alpha = -0.908
     beta = 0.0852
-    Const = -23.8
+    Const = -23.3
     if seeing == 0:
 #        apflog( "Warning: AVG_FWHM seems to be 0. Using 15 instead.",level="Warn")
         seeing = np.array(15)
@@ -107,7 +107,7 @@ def getSpec_Rate( v, bv, el, seeing, deckers):
     """
     alpha = -0.0311
     beta = 0.158
-    Const = -12.2
+    Const = -11.7
     if seeing <= 0:
         seeing = np.array(15)
     # seeing  = 13.99
