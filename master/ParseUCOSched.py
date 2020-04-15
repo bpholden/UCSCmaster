@@ -405,7 +405,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         i2select = checkFlag("I2",didx,ls,"\A(n|N)",config["I2"])
         star_table['I2'].append(i2select.upper())
         tempselect = checkFlag("Template",didx,ls,"\A(n|N)",'Y')
-        star_table['template'].append(tempselect.upper())
+        star_table['Template'].append(tempselect.upper())
 
         star_table['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
         star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
