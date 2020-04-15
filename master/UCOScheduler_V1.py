@@ -218,6 +218,8 @@ def makeScriptobsLine(idx, star_table, t, decker="W", I2="Y", owner='public', fo
     ret += ' foc=' + str(int(focval))
 
     if owner != '':
+        if owner == 'RECUR_A100':
+            owner = 'public'
         ret += ' owner=' + str(owner)
 
     if coverid != '':
