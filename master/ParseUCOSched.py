@@ -599,7 +599,8 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
     # is the sheet name
     # this will need to be updated when we start using coverid
     needed_sheetns = list( set(obslog.owners))
-        
+    needed_sheetns.remove('public')
+    
     nupdates = 0
     for sheetn in needed_sheetns:
         ws = getSpreadsheet(sheetn=sheetn,certificate=certificate)
