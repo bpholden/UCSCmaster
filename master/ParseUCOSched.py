@@ -177,7 +177,7 @@ def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
                             nrow.append(None)
 
                 full_codex.append(nrow)
-                wait_time += 1
+                wait_time += .1
             time.sleep(wait_time)
 
                 
