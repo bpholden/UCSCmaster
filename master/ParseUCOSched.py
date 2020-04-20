@@ -155,6 +155,7 @@ def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
     full_codex.append(req_cols)
         
     for sheetn in sheetns:
+        wait_time = 0
         worksheet = getSpreadsheet(sheetn=sheetn,certificate=certificate)
         if worksheet:
             cur_codex = worksheet.get_all_values()
@@ -176,7 +177,9 @@ def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
                             nrow.append(None)
 
                 full_codex.append(nrow)
-        
+                wait_time += 1
+            time.sleep(wait_time)
+
                 
     return full_codex
     
