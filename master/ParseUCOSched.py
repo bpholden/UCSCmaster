@@ -320,6 +320,8 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
                     'sheetn' \
                     ]
 
+    negsearch = re.compile("\-(\d+\.*\d*)")
+        
     full_codex = retrieveCodex(req_cols,sheetns=sheetns,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
 
     col_names = full_codex[0]
@@ -355,9 +357,27 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         else:
             star_table['dec'].append(-3.14)
 
-        for coln in ("RA hr","RA min","RA sec","Dec deg","Dec min","Dec sec"):
-            star_table[coln].append(ls[didx[coln]])
+        # why are we doing this you may ask?
+        # we use Google sheets which cannot have -0 for a value
+        # but if we pass a value like 00:-16:00 to eostele, it generates
+        # an incorrect declination value
+        # so, we move the - to the front of the sexagesimal string
+        # the radian values above are only used for the scheduler, we still
+        # command the telescope in the raw units 
+        neg = False
+        for coln in ("Dec sec","Dec min","Dec deg"):
+            val = ls[didx[coln]]
+            mtch = negsearch.search(val)
+            if mtch :
+                neg = True
+                val = mtch.group(1)
+            if neg and coln == "Dec deg":
+                val = "-" + val
+            star_table[coln].append(val)
 
+        for coln in ("RA hr","RA min","RA sec"):
+            star_table[coln].append(ls[didx[coln]])
+            
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))
 
