@@ -153,12 +153,20 @@ def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
     full_codex = []
     # These are the columns we need for scheduling
     full_codex.append(req_cols)
-        
+    failed = []
     for sheetn in sheetns:
         wait_time = 0
         worksheet = getSpreadsheet(sheetn=sheetn,certificate=certificate)
         if worksheet:
-            cur_codex = worksheet.get_all_values()
+            cur_codex = None
+            more_sleeping=10.
+            while cur_codex is None:
+                try:
+                    cur_codex = worksheet.get_all_values()
+                except:
+                    time.sleep(more_sleeping)
+                    cur_codex = None
+            
             if len(cur_codex) <= 0:
                 apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
 
@@ -177,7 +185,7 @@ def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
                             nrow.append(None)
 
                 full_codex.append(nrow)
-                wait_time += .1
+                wait_time += .3
             time.sleep(wait_time)
 
                 
