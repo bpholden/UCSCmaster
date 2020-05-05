@@ -1,5 +1,12 @@
 import numpy as np
 
+def makeStrs(deg,mn,sec):
+
+    sdeg = "%d" % (deg)
+    smn = "%d" % (abs(mn))
+    ssec = "%.4f" % (abs(sec))
+    return sdeg, smn, ssec
+
 def getRARad(hr, mn, sec):
     rv = None, "-1", "0", "0"
     try:
@@ -15,9 +22,8 @@ def getRARad(hr, mn, sec):
         ra_hours = hr + mn/60. + sec/3600.
         ra_hours *= 15 * np.pi/180.0
 
-        shr = "%.0f" % (hr)
-        smn = "%.0f" % (mn)
-        ssec = "%.4f" % (sec)
+        shr, smn, ssec = makeStrs(hr,mn,sec)
+        
         return ra_hours, shr, smn, ssec
     except:
         return rv
@@ -51,10 +57,7 @@ def getDECRad(deg, mn, sec, neg=False):
         dec *= -1
         deg *= -1
 
-    sdeg = "%.0f" % (deg)
-    smn = "%.0f" % (abs(mn))
-    ssec = "%.4f" % (abs(sec))
-        
+    sdeg, smn, ssec = makeStrs(deg,abs(mn),abs(sec))
     return dec, sdeg, smn, ssec
 
         
