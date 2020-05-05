@@ -353,17 +353,30 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         # Get the star name
         star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
         # Get the RA
-        raval = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
+        raval,rahr,ramin,rasec = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval:
             star_table['ra'].append(raval)
+            star_table['RA hr'].append(rahr)
+            star_table['RA min'].append(ramin)
+            star_table['RA sec'].append(rasec)            
         else:
             star_table['ra'].append(-1.)
+            star_table['RA hr'].append("-1")
+            star_table['RA min'].append("0")
+            star_table['RA sec'].append("0")
+            
         # Get the DEC
-        decval = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
+        decval,decdeg,decmin,decsec = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
         if decval:
             star_table['dec'].append(decval)
+            star_table["Dec deg"].append(decdeg)
+            star_table["Dec min"].append(decmin)
+            star_table["Dec sec"].append(decsec)
         else:
             star_table['dec'].append(-3.14)
+            star_table["Dec deg"].append("-90")
+            star_table["Dec min"].append("0")
+            star_table["Dec sec"].append("0")
 
         # why are we doing this you may ask?
         # we use Google sheets which cannot have -0 for a value
@@ -372,19 +385,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         # so, we move the - to the front of the sexagesimal string
         # the radian values above are only used for the scheduler, we still
         # command the telescope in the raw units 
-        neg = False
-        for coln in ("Dec sec","Dec min","Dec deg"):
-            val = ls[didx[coln]]
-            mtch = negsearch.search(val)
-            if mtch :
-                neg = True
-                val = mtch.group(1)
-            if neg and coln == "Dec deg":
-                val = "-" + val
-            star_table[coln].append(val)
-
-        for coln in ("RA hr","RA min","RA sec"):
-            star_table[coln].append(ls[didx[coln]])
+        
             
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))

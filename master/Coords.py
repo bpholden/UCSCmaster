@@ -1,34 +1,41 @@
 import numpy as np
 
 def getRARad(hr, mn, sec):
+    rv = None, "-1", "0", "0"
     try:
-        hr = int(hr)
-        mn = int(mn)
+        hr = float(hr)
+        mn = float(mn)
         sec = float(sec)
         if hr < 0 or hr > 23:
-            return None
+            return rv
         if mn < 0 or mn >= 59:
-            return None
+            return rv
         if sec < 0 or sec >= 60:
-            return None
-        ra_hours = float(hr) + float(mn)/60. + float(sec)/3600.
-        return ra_hours * 15 * np.pi/180.0
+            return rv
+        ra_hours = hr + mn/60. + sec/3600.
+        ra_hours *= 15 * np.pi/180.0
+
+        shr = "%.0f" % (hr)
+        smn = "%.0f" % (mn)
+        ssec = "%.4f" % (sec)
+        return ra_hours, shr, smn, ssec
     except:
-        return None
+        return rv
 
 def getDECRad(deg, mn, sec, neg=False):
+    rv = (None, "-90", "0", "0")
     try:
-        deg = int(deg)
-        mn = int(mn)
+        deg = float(deg)
+        mn = float(mn)
         sec = float(sec)
         if deg < -60 or deg > 90:
-            return None
+            return rv
         if mn >= 59:
-            return None
+            return rv
         if sec >= 60:
-            return None
+            return rv
     except:
-        return None
+        return rv
     if deg < 0:
         neg = True
 
@@ -38,13 +45,19 @@ def getDECRad(deg, mn, sec, neg=False):
     if sec < 0:
         neg = True
 
-    x = abs(deg) + abs(mn)/60. + abs(sec)/3600.
-    x = x * np.pi/180.
+    dec = abs(deg) + abs(mn)/60. + abs(sec)/3600.
+    dec = dec * np.pi/180.
     if neg:
-        return x*-1
-    else:
-        return x
+        dec *= -1
+        deg *= -1
 
+    sdeg = "%.0f" % (deg)
+    smn = "%.0f" % (abs(mn))
+    ssec = "%.4f" % (abs(sec))
+        
+    return dec, sdeg, smn, ssec
+
+        
 def getCoordStr(floatval,isRA=False):
 
     neg = False
