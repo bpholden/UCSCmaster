@@ -60,7 +60,7 @@ def cmdexec(cmd, debug=False, cwd='./'):
     args = args + cmd.split()
     apflog("Executing Command: %s" % repr(cmd), echo=True)
 
-    args += ["|&","apflogger","-x" "-autolevel", "--"]
+#    args += ["|&","apflogger","-x", "-autolevel", "--"]
     
     p = subprocess.Popen(args, stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=cwd)
     
