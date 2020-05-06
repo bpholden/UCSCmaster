@@ -569,7 +569,9 @@ class Master(threading.Thread):
             sunel.monitor()
             
             # Check and close for weather
-            if self.APF.isOpen()[0] and not self.APF.openOK:
+            badweather = self.APF.humidityTooHigh() or not self.APF.openOK
+            
+            if self.APF.isOpen()[0] and badweather:
                 closetime = datetime.now()
                 APFTask.set(self.task, suffix="MESSAGE", value="Closing for weather", wait=False)
                 apflog("No longer ok to open.", echo=True)
