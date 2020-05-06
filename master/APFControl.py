@@ -435,7 +435,7 @@ class APF:
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
         s += "Current Weather = %s\n" % self.checkapf['WEATHER'].read()
-        s += "Humidity too high? = %s\n" % self.dewTooClose
+        s += "Too close to the dewpoint? = %s\n" % self.dewTooClose
         isopen, what = self.isOpen()
         if isopen:
             s += "Currently open: %s\n" % what
