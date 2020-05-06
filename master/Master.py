@@ -79,6 +79,7 @@ class Master(threading.Thread):
         self.nighttargetlog = None
 
         self.canOpen = True
+        self.badWeather = False
 
     def checkScriptobsMessages():
         message = self.APF.message.read()
@@ -569,9 +570,9 @@ class Master(threading.Thread):
             sunel.monitor()
             
             # Check and close for weather
-            badweather = self.APF.openOK == False
+            self.badweather = self.APF.dewTooClose or not self.APF.openOK
             
-            if self.APF.isOpen()[0] and badweather:
+            if self.APF.isOpen()[0] and self.badweather:
                 closetime = datetime.now()
                 APFTask.set(self.task, suffix="MESSAGE", value="Closing for weather", wait=False)
                 apflog("No longer ok to open.", echo=True)
@@ -654,7 +655,7 @@ class Master(threading.Thread):
                 self.stop()
                 
             # Open 
-            if not self.APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and self.APF.openOK and self.canOpen and not badweather:
+            if not self.APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and self.APF.openOK and self.canOpen and not self.badweather:
                 if float(sunel) > sunel_lim and not rising:
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at sunset", wait=False)                    
                     success = opening(sunel, sunset=True)
@@ -686,7 +687,7 @@ class Master(threading.Thread):
                                 break
                                
                     
-                elif not rising or (rising and float(sunel) < (sunel_lim - 5)) and self.canOpen and not badweather:
+                elif not rising or (rising and float(sunel) < (sunel_lim - 5)) and self.canOpen and not self.badweather:
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at night", wait=False)                    
                     success = opening(sunel)
                 else:
@@ -699,7 +700,7 @@ class Master(threading.Thread):
                         apflog("Error: Lost permission during opening", echo=True)
 
             # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
-            if self.APF.openOK and not rising and not self.APF.isOpen()[0] and not badweather:
+            if self.APF.openOK and not rising and not self.APF.isOpen()[0] and not self.badweather:
                 APFTask.set(self.task, suffix="MESSAGE", value="Powering up for APFTeq", wait=False)                    
                 if self.APF.clearestop():
                     try:
