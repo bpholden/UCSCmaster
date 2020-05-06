@@ -222,7 +222,8 @@ def dewptmon(dew):
         dewpt = float(dew)
         m2 = APF.m2temp.read(binary=True)
         air = APF.airtemp.read(binary=True)
-
+    except:
+        return
 
     if APF.dewlist == []:
         APF.dewlist = [dewpt]*10
@@ -245,7 +246,8 @@ def dewptmon(dew):
     else:
         APF.dewTooClose = False
         
-
+    return
+        
 class APF:
     """ Class which creates a monitored state object to track the condition of the APF telescope. """
 
