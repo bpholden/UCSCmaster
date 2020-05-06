@@ -569,7 +569,7 @@ class Master(threading.Thread):
             sunel.monitor()
             
             # Check and close for weather
-            badweather = self.APF.humidityTooHigh() or not self.APF.openOK
+            badweather = self.APF.openOK == False
             
             if self.APF.isOpen()[0] and badweather:
                 closetime = datetime.now()
