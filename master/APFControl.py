@@ -385,6 +385,7 @@ class APF:
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
         s += "Current Weather = %s\n" % self.checkapf['WEATHER'].read()
+        s += "Humidity too high? = %s\n" % self.humidityTooHigh()
         isopen, what = self.isOpen()
         if isopen:
             s += "Currently open: %s\n" % what
@@ -400,6 +401,16 @@ class APF:
 
         return s
 
+
+
+    def humidityTooHigh(self):
+        m2temp = ktl.read('eosti8k','TM2CSUR')
+        dew = ktl.read('eosmets','TMPDEWPT')
+
+        if m2temp - lvl3dew < 4:
+            return False
+        else:
+            return True
 
     def sunRising(self):
         now = datetime.now()
