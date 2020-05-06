@@ -407,7 +407,7 @@ class APF:
         m2temp = ktl.read('eosti8k','TM2CSUR')
         dew = ktl.read('eosmets','TMPDEWPT')
 
-        if m2temp - lvl3dew < 4:
+        if m2temp - dew < 4:
             return False
         else:
             return True
