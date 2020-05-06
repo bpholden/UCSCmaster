@@ -408,9 +408,9 @@ class APF:
         dew = ktl.read('eosmets','TMPDEWPT',binary=True)
 
         if m2temp - dew < 4:
-            return False
-        else:
             return True
+        else:
+            return False
 
     def sunRising(self):
         now = datetime.now()
