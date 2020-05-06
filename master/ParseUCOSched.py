@@ -261,7 +261,30 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             
     return sheetns,frac
 
-def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
+def timeLeft():
+    cmd = "/usr/local/lick/bin/timereport/time_left"
+    if os.path.exists(cmd):
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        while p.poll() is None:
+            time.sleep(1)
+        out, err = p.communicate()
+        if len(err):
+            return None
+
+        rv = dict()
+        lines = out.split('\n')
+        if len(lines) <= 1:
+            return None
+        for ln in lines[1:]:
+            d = ln.split(",")
+            if len(d) >= 2:
+                rv[d[0].strip()] = d[1].strip()
+        return rv
+        
+    else:
+        return None
+
+def parseRankTable(sheet_table_name='2020A_ranks',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
     
     apflog( "Starting parse of %s" % (sheet_table_name),echo=True)    
 
@@ -277,7 +300,15 @@ def parseRankTable(sheet_table_name='2019B_ranks',certificate='UCSC Dynamic Sche
         for row in cur_codex[1:]:
             sheetns.append(row[0])
             rank.append(floatDefault(row[1]))
-            
+
+    time_left = timeLeft()
+    if time_left is not None:
+        for ky in time_left.keys():
+            if time_left[ky] <= 0:
+                if ky in sheetns:
+                    sindx = sheetns.index(ky)
+                    rank[sindx] = -1000
+                    
     return sheetns,rank
 
 
