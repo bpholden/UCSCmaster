@@ -215,6 +215,37 @@ def dmtimemon(dmtime):
         apflog("Exception in dmtimemon: %s" % (e), level='error')
 
 
+def dewptmon(dew):
+    if dew['populated'] == False:
+        return
+    try:
+        dewpt = float(dew)
+        m2 = APF.m2temp.read(binary=True)
+        air = APF.airtemp.read(binary=True)
+
+
+    if APF.dewlist == []:
+        APF.dewlist = [dewpt]*10
+        APF.airlist = [air]*10
+        APF.m2list = [m2]*10
+    else:
+        APF.dewlist.append(dewpt)
+        APF.airlist.append(air)
+        APF.m2list.append(m2)
+        APF.dewlist = APF.dewlist[-10:]
+        APF.airlist = APF.airlist[-10:]
+        APF.m2list = APF.m2list[-10:]
+
+    dewlist = np.asarray(APF.dewlist)
+    airlist = np.asarray(APF.airlist)
+    m2list  = np.asarray(APF.m2list)
+
+    if np.average(airlist-dewlist) < 2 or np.average(m2list-dewlist) < 4:
+        APF.dewTooClose = True
+    else:
+        APF.dewTooClose = False
+        
+
 class APF:
     """ Class which creates a monitored state object to track the condition of the APF telescope. """
 
@@ -231,6 +262,12 @@ class APF:
     wslist = []
     wdlist = []
 
+    # Initial temps
+    m2list = []
+    dewlist = []
+    airlist = []
+    dewTooClose = False
+    
     # KTL Services and Keywords
     tel        = ktl.Service('eostele')
     sunel      = tel('SUNEL')
@@ -261,6 +298,14 @@ class APF:
     altwx      = apfmet('M3WIND')
     temp       = apfmet('M5OUTEMP')
 
+    eosmets    = ktl.Service('eosmets')
+    dewpt      = eosmets('TMPDEWPT')
+    airtemp    = eosmets('AIRTEMP')
+
+    eosti8k    = ktl.Service('eosti8k')
+    m2temp     = eosti8k('TM2CSUR')
+
+    
     robot        = ktl.Service('apftask')
     vmag         = robot['SCRIPTOBS_VMAG']
     ldone        = robot['SCRIPTOBS_LINES_DONE']
@@ -341,6 +386,9 @@ class APF:
         self.temp.monitor()
         self.whatsopn.monitor()
 
+        self.dewpt.monitor()
+        self.dewpt.callback(dewptmon)
+        
         self.counts.monitor()
         self.teqmode.monitor()
         self.vmag.monitor()
@@ -385,7 +433,7 @@ class APF:
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
         s += "Current Weather = %s\n" % self.checkapf['WEATHER'].read()
-        s += "Humidity too high? = %s\n" % self.humidityTooHigh()
+        s += "Humidity too high? = %s\n" % self.dewTooClose
         isopen, what = self.isOpen()
         if isopen:
             s += "Currently open: %s\n" % what
@@ -401,17 +449,6 @@ class APF:
 
         return s
 
-
-
-    def humidityTooHigh(self):
-        m2temp = ktl.read('eosti8k','TM2CSUR',binary=True)
-        dew = ktl.read('eosmets','TMPDEWPT',binary=True)
-        air = ktl.read('eosmets','AIRTEMP',binary=True)
-
-        if (m2temp - dew < 4) or (air - dew < 2):
-            return True
-        else:
-            return False
 
     def sunRising(self):
         now = datetime.now()
