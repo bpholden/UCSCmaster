@@ -404,8 +404,8 @@ class APF:
 
 
     def humidityTooHigh(self):
-        m2temp = ktl.read('eosti8k','TM2CSUR')
-        dew = ktl.read('eosmets','TMPDEWPT')
+        m2temp = ktl.read('eosti8k','TM2CSUR',binary=True)
+        dew = ktl.read('eosmets','TMPDEWPT',binary=True)
 
         if m2temp - dew < 4:
             return False
