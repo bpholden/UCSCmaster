@@ -2,9 +2,11 @@ from __future__ import print_function
 from datetime import datetime, timedelta
 import os
 import re
-
 import sys
+import json
 import time
+import subprocess
+
 import ephem
 import numpy as np
 import astropy
@@ -12,7 +14,6 @@ import astropy.table
 import astropy.io.ascii
 
 import gspread
-import json
 from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
