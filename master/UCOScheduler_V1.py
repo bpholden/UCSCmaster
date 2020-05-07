@@ -385,7 +385,7 @@ def findBstars(star_table,idx, bstars):
     return near_idx,end_idx
 
 
-def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False):
+def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode=''):
     res = dict()
 
     res['RA']     = stars[idx].a_ra
@@ -401,13 +401,22 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False):
     res['NAME']   = star_table['name'][idx]
     res['PRI']    = star_table['APFpri'][idx]
     res['DECKER'] = star_table['decker'][idx]
+    res['I2'] = star_table['I2'][idx]
     res['isTemp'] =    False
     res['isBstar'] =    bstar
     res['owner'] =    star_table['sheetn'][idx]
-    res['SCRIPTOBS'] = []
-    scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
-    scriptobs_line = scriptobs_line + " # end"
-    res['SCRIPTOBS'].append(scriptobs_line)
+    res['obsblock'] = star_table['obsblock'][idx]
+
+    if res['obsblock'] is '' or res['obsblock'] is None:
+        res['SCRIPTOBS'] = []
+        scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
+        scriptobs_line = scriptobs_line + " # end"
+        res['SCRIPTOBS'].append(scriptobs_line)
+    else:
+        allinblock = (star_table['obsblock'] == star_table['obsblock'][idx])
+        first = (star_table['mode'][allinblock] == mode)
+        scriptobs_line = makeScriptobsLine(idx, star_table, dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
+        
     return res
 
 def lastAttempted(observed):
@@ -650,7 +659,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table['lastobs'][idx]) / star_table['APFcad'][idx]), ephem.julian_date(dt), star_table['lastobs'][idx], star_table['APFcad'][idx])
     apflog(cstr,echo=True)
 
-    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval,bstar=bstar)
+    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval,bstar=bstar,mode=config['mode'])
     if do_templates and star_table['Template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
 
