@@ -149,10 +149,12 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
             
     return rank_table
 
-def makeScriptobsLine(row, t, decker="W", I2="Y", owner='public', focval=0, coverid='',temp=False):
-    """ given a row in a star table and a do_flag, will generate a scriptobs line as a string
-    line = makeScriptobsLine(idx, row, t, decker="W",I2="Y")
-    row -contains all of the data needed for the line except
+
+def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', focval=0, coverid='',temp=False):
+    """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
+    line = makeScriptobsLine(star_table_row, t, decker="W",I2="Y")
+    star_table_row -contains all of the data needed for the line except
+
     t - a datetime object, this is used to fill in the uth and utm fields,
     decker - one character field for the decker, defaults to "W"
     I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
@@ -161,25 +163,28 @@ def makeScriptobsLine(row, t, decker="W", I2="Y", owner='public', focval=0, cove
 
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
-    ret = str(row['name']) + ' '
+    ret = str(star_table_row['name']) + ' '
     # Add the RA as three elements, HR, MIN, SEC
-    rastr = "%s %s %s" % (row['RA hr'] ,row['RA min'] ,row['RA sec'] )
+    rastr = "%s %s %s" % (star_table_row['RA hr'],star_table_row['RA min'],star_table_row['RA sec'])
     ret += rastr + ' '
     # Add the DEC as three elements, DEG, MIN, SEC
-    decstr = "%s %s %s" % (row['Dec deg'] ,row['Dec min'] ,row['Dec sec'] )    
+    decstr = "%s %s %s" % (star_table_row['Dec deg'],star_table_row['Dec min'],star_table_row['Dec sec'])
+
     ret += decstr + ' '
     # Epoch
     ret += '2000 '
     # Proper motion RA and DEC
-    ret += 'pmra=' + str(row['pmRA']) + ' '
-    ret += 'pmdec=' + str(row['pmDEC']) + ' '
+    ret += 'pmra=' + str(star_table_row['pmRA']) + ' '
+    ret += 'pmdec=' + str(star_table_row['pmDEC']) + ' '
     # V Mag
-    ret += 'vmag=' + str(row['Vmag']) + ' '
+    ret += 'vmag=' + str(star_table_row['Vmag']) + ' '
+
     # T Exp
     if temp:
         ret += 'texp=' + str(1200) + ' '
     else:
-        ret += 'texp=' + str(int(row['texp'])) + ' '
+        ret += 'texp=' + str(int(star_table_row['texp'])) + ' '
+
     # I2
     ret += 'I2=%s ' % (I2)
     # lamp
@@ -188,31 +193,31 @@ def makeScriptobsLine(row, t, decker="W", I2="Y", owner='public', focval=0, cove
     ret += 'uth=' + str(t.hour) + ' '
     ret += 'utm=' + str(t.minute) + ' '
     # Exp Count
-    if row['expcount'] > 3e9:
+    if star_table_row['expcount'] > 3e9:
         ret += 'expcount=%.3g' % (3e9) + ' '
     elif temp:
         ret += 'expcount=%.3g' % (1e9) + ' '
     else:
-        ret += 'expcount=%.3g' % (row['expcount']) + ' '
+        ret += 'expcount=%.3g' % (star_table_row['expcount']) + ' '
     # Decker
     ret += 'decker=%s ' % (decker)
     # do flag
-    if row['do']:
+    if star_table_row['do']:
         ret += 'do=Y '
     else:
         ret += 'do= '
     # Count
     if temp:
-        if row['Vmag'] > 10:
+        if star_table_row['Vmag'] > 10:
             count = 9
-        elif row['Vmag'] < 8:
+        elif star_table_row['Vmag'] < 8:
             count = 5
         else:
             count = 7
     else:
-        count = int(row['APFnshots'])
+        count = int(star_table_row['APFnshots'])
+
     ret += 'count=' + str(count)
-            
 
     ret += ' foc=' + str(int(focval))
 
@@ -224,7 +229,7 @@ def makeScriptobsLine(row, t, decker="W", I2="Y", owner='public', focval=0, cove
     if coverid != '':
         ret += ' coverid=' + str(coverid)
         
-    if row['mode'] != '':
+    if star_table_row['mode'] != '':
         if mode == 'B':
             m='blank=Y'
         elif mode == 'O':
@@ -233,7 +238,7 @@ def makeScriptobsLine(row, t, decker="W", I2="Y", owner='public', focval=0, cove
     else:
         mode = ''
 
-    if row['raoff'] is not None and row['decoff'] is not None and mode != '':
+    if star_table_row['raoff'] is not None and star_table_row['decoff'] is not None and mode != '':
         ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
         
     return str(ret)
@@ -404,6 +409,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
     res['isTemp'] =    False
     res['isBstar'] =    bstar
     res['owner'] =    star_table['sheetn'][idx]
+
     res['obsblock'] = star_table['obsblock'][idx]
 
     if res['obsblock'] is '' or res['obsblock'] is None:
@@ -663,9 +669,9 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         bidx,bfinidx = findBstars(star_table,idx,bstars)
 
         if enoughTime(star_table,stars,idx,apf_obs,dt):
-            bline = makeScriptobsLine(bidx,star_table,dt,decker="N",I2="Y", owner=res['owner'],focval=2)
-            line  = makeScriptobsLine(idx,star_table,dt,decker="N",I2="N", owner=res['owner'],temp=True)
-            bfinline = makeScriptobsLine(bfinidx,star_table,dt,decker="N",I2="Y",owner=res['owner'],focval=0)
+            bline = makeScriptobsLine(star_table[bidx],dt,decker="N",I2="Y", owner=res['owner'],focval=2)
+            line  = makeScriptobsLine(star_table[idx],dt,decker="N",I2="N", owner=res['owner'],temp=True)
+            bfinline = makeScriptobsLine(star_table[bfinidx],dt,decker="N",I2="Y",owner=res['owner'],focval=0)
             res['SCRIPTOBS'] = []
             res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
             res['SCRIPTOBS'].append(line + " # temp=Y")
