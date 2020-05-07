@@ -233,6 +233,8 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
         if mode == 'B':
             m='blank=Y'
         elif mode == 'O':
+            m='offset=Y'
+        elif mode == 'G':
             m='guide=Y'
         ret += ' ' + str(m)
     else:
@@ -419,8 +421,23 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
         res['SCRIPTOBS'].append(scriptobs_line)
     else:
         allinblock = (star_table['obsblock'] == star_table['obsblock'][idx])
-        first = (star_table['mode'][allinblock] == mode)
-        scriptobs_line = makeScriptobsLine(star_table[allinblock][first], dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
+
+        if np.any(star_table['mode'][allinblock] == 'I'):
+            first = (star_table['mode'][allinblock] == 'I')
+        elif np.any(star_table['mode'][allinblock] == 'G'):
+            first = (star_table['mode'][allinblock] == 'G')
+        elif np.any(star_table['mode'][allinblock] == mode):
+            first = (star_table['mode'][allinblock] == mode)
+        else:
+            first = None
+            
+        if first:
+            scriptobs_line = makeScriptobsLine(star_table[allinblock][first], dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
+            res['SCRIPTOBS'].append(scriptobs_line)
+
+        
+
+        res['SCRIPTOBS'].reverse()
         
     return res
 
