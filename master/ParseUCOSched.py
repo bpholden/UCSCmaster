@@ -472,7 +472,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         star_table['Template'].append(tempselect.upper())
 
         star_table['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
-        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O)",config["mode"]).upper())
+        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O|g|G|c|C)",config["mode"]).upper())
         star_table['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
 #        star_table['inst'].append(checkFlag("inst",didx,ls,"(levy|darts)",config['inst']).lower())
 
