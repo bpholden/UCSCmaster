@@ -382,8 +382,6 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
 
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < prilim: continue
-        # Get the star name
-        star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
         # Get the RA
         raval,rahr,ramin,rasec = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval:
@@ -392,6 +390,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
             star_table['RA min'].append(ramin)
             star_table['RA sec'].append(rasec)            
         else:
+            apfpri = -1
             star_table['ra'].append(-1.)
             star_table['RA hr'].append("-1")
             star_table['RA min'].append("0")
@@ -405,6 +404,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
             star_table["Dec min"].append(decmin)
             star_table["Dec sec"].append(decsec)
         else:
+            apfpri = -1            
             star_table['dec'].append(-3.14)
             star_table["Dec deg"].append("-90")
             star_table["Dec min"].append("0")
@@ -418,6 +418,8 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         # the radian values above are only used for the scheduler, we still
         # command the telescope in the raw units 
         
+        # Get the star name
+        star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
             
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))
@@ -472,7 +474,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         star_table['Template'].append(tempselect.upper())
 
         star_table['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
-        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|o|O|g|G|c|C)",config["mode"]).upper())
+        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|g|G|c|C)",config["mode"]).upper())
         star_table['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
 #        star_table['inst'].append(checkFlag("inst",didx,ls,"(levy|darts)",config['inst']).lower())
 
