@@ -15,7 +15,7 @@ def getRARad(hr, mn, sec):
         sec = float(sec)
         if hr < 0 or hr > 23:
             return rv
-        if mn < 0 or mn >= 59:
+        if mn < 0 or mn > 59:
             return rv
         if sec < 0 or sec >= 60:
             return rv
@@ -36,7 +36,7 @@ def getDECRad(deg, mn, sec, neg=False):
         sec = float(sec)
         if deg < -60 or deg > 90:
             return rv
-        if mn >= 59:
+        if mn > 59:
             return rv
         if sec >= 60:
             return rv
