@@ -435,8 +435,11 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
             scriptobs_line = makeScriptobsLine(star_table[allinblock][first], dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
             res['SCRIPTOBS'].append(scriptobs_line)
 
-        
-
+        indices, = np.where(allinblock)
+        for idx in indices:
+            scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
+            res['SCRIPTOBS'].append(scriptobs_line)
+            
         res['SCRIPTOBS'].reverse()
         
     return res
