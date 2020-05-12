@@ -382,34 +382,16 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
 
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < prilim: continue
-        # Get the star name
-        star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
+
         # Get the RA
         raval,rahr,ramin,rasec = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
-        if raval:
-            star_table['ra'].append(raval)
-            star_table['RA hr'].append(rahr)
-            star_table['RA min'].append(ramin)
-            star_table['RA sec'].append(rasec)            
-        else:
-            star_table['ra'].append(-1.)
-            star_table['RA hr'].append("-1")
-            star_table['RA min'].append("0")
-            star_table['RA sec'].append("0")
-            
+        if raval is None:
+            continue
+        
         # Get the DEC
         decval,decdeg,decmin,decsec = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
-        if decval:
-            star_table['dec'].append(decval)
-            star_table["Dec deg"].append(decdeg)
-            star_table["Dec min"].append(decmin)
-            star_table["Dec sec"].append(decsec)
-        else:
-            star_table['dec'].append(-3.14)
-            star_table["Dec deg"].append("-90")
-            star_table["Dec min"].append("0")
-            star_table["Dec sec"].append("0")
-
+        if decval is None:
+            continue
         # why are we doing this you may ask?
         # we use Google sheets which cannot have -0 for a value
         # but if we pass a value like 00:-16:00 to eostele, it generates
@@ -418,7 +400,20 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         # the radian values above are only used for the scheduler, we still
         # command the telescope in the raw units 
         
-            
+        # Get the star name
+        star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
+
+        if raval and decval:
+            star_table['ra'].append(raval)
+            star_table['RA hr'].append(rahr)
+            star_table['RA min'].append(ramin)
+            star_table['RA sec'].append(rasec)            
+
+            star_table['dec'].append(decval)
+            star_table["Dec deg"].append(decdeg)
+            star_table["Dec min"].append(decmin)
+            star_table["Dec sec"].append(decsec)
+        
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))
 
