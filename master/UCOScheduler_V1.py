@@ -389,6 +389,31 @@ def findBstars(star_table,idx, bstars):
     return near_idx,end_idx
 
 
+def generateObsBlock(star_table, idx, dt):
+
+    rv = []
+    
+    allinblock = (star_table['obsblock'] == star_table['obsblock'][idx])
+    allinblock = allinblock & (star_table['owner'] == star_table['sheetn'][idx])
+
+    if np.any(star_table['mode'][allinblock] == 'C'):
+        first = (star_table['mode'][allinblock] == 'C')
+    elif np.any(star_table['mode'][allinblock] == 'G'):
+        first = (star_table['mode'][allinblock] == 'G')
+    else:
+        first = None
+            
+    if first:
+        scriptobs_line = makeScriptobsLine(star_table[allinblock][first], dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
+        rv.append(scriptobs_line)
+
+    indices, = np.where(allinblock)
+    for idx in indices:
+        scriptobs_line = makeScriptobsLine(star_table[idx], dt)
+        rv.append(scriptobs_line)
+            
+    return(rv.reverse())
+
 def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode=''):
     res = dict()
 
@@ -418,27 +443,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
         scriptobs_line = scriptobs_line + " # end"
         res['SCRIPTOBS'].append(scriptobs_line)
     else:
-        allinblock = (star_table['obsblock'] == star_table['obsblock'][idx])
-
-        if np.any(star_table['mode'][allinblock] == 'I'):
-            first = (star_table['mode'][allinblock] == 'I')
-        elif np.any(star_table['mode'][allinblock] == 'G'):
-            first = (star_table['mode'][allinblock] == 'G')
-        elif np.any(star_table['mode'][allinblock] == mode):
-            first = (star_table['mode'][allinblock] == mode)
-        else:
-            first = None
-            
-        if first:
-            scriptobs_line = makeScriptobsLine(star_table[allinblock][first], dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
-            res['SCRIPTOBS'].append(scriptobs_line)
-
-        indices, = np.where(allinblock)
-        for idx in indices:
-            scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
-            res['SCRIPTOBS'].append(scriptobs_line)
-            
-        res['SCRIPTOBS'].reverse()
+        res['SCRIPTOBS'] = genObsBlock(star_table,idx, dt, res['DECKER'], res['owner'], res['I2'])
         
     return res
 
