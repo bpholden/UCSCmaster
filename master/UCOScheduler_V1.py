@@ -389,7 +389,7 @@ def findBstars(star_table,idx, bstars):
     return near_idx,end_idx
 
 
-def generateObsBlock(star_table, idx, dt):
+def generateObsBlock(star_table, idx, dt, focval):
 
     rv = []
     
