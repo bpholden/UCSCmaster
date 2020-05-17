@@ -396,8 +396,8 @@ def generateObsBlock(star_table, idx, dt, focval):
     allinblock = (star_table['obsblock'] == star_table['obsblock'][idx])
     allinblock = allinblock & (star_table['owner'] == star_table['sheetn'][idx])
 
-    if np.any(star_table['mode'][allinblock] == 'C'):
-        first = (star_table['mode'][allinblock] == 'C')
+    if np.any(star_table['mode'][allinblock] == '1'):
+        first = (star_table['mode'][allinblock] == '1')
     elif np.any(star_table['mode'][allinblock] == 'G'):
         first = (star_table['mode'][allinblock] == 'G')
     else:
