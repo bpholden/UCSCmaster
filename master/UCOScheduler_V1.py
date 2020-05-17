@@ -404,15 +404,24 @@ def generateObsBlock(star_table, idx, dt, focval):
         first = None
             
     if first:
-        scriptobs_line = makeScriptobsLine(star_table[allinblock][first], dt, decker=res['DECKER'], owner=res['owner'], I2=res['I2'], focval=focval)
-        rv.append(scriptobs_line)
+        first_idxs = np.where(first)
+        for idx in first_idxs:
+            scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
+                                                owner=star_table['sheetn'][allinblock][idx], \
+                                                I2=star_table['I2'][allinblock][idx], focval=focval)
+            rv.append(scriptobs_line)
 
     indices, = np.where(allinblock)
     for idx in indices:
-        scriptobs_line = makeScriptobsLine(star_table[idx], dt)
-        rv.append(scriptobs_line)
+        if first is not None:
             
-    return(rv.reverse())
+        scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=star_table['decker'][allinblock][idx], \
+                                               owner=star_table['sheetn'][allinblock][first], \
+                                               I2=star_table['I2'][allinblock][first], focval=focval)
+        rv.append(scriptobs_line)
+
+    rv.reverse()
+    return(rv)
 
 def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode=''):
     res = dict()
