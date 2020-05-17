@@ -443,7 +443,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
         scriptobs_line = scriptobs_line + " # end"
         res['SCRIPTOBS'].append(scriptobs_line)
     else:
-        res['SCRIPTOBS'] = genObsBlock(star_table,idx, dt, res['DECKER'], res['owner'], res['I2'])
+        res['SCRIPTOBS'] = genObsBlock(star_table,idx, dt, focval)
         
     return res
 
