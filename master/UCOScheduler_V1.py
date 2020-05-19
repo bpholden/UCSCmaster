@@ -398,8 +398,8 @@ def generateObsBlock(star_table, idx, dt, focval):
 
     if np.any(star_table['mode'][allinblock] == '1'):
         first = (star_table['mode'][allinblock] == '1')
-    elif np.any(star_table['mode'][allinblock] == 'G'):
-        first = (star_table['mode'][allinblock] == 'G')
+    elif np.any(star_table['mode'][allinblock] == 'A'):
+        first = (star_table['mode'][allinblock] == 'A')
     else:
         first = None
             
