@@ -414,11 +414,11 @@ def generateObsBlock(star_table, idx, dt, focval):
     indices, = np.where(allinblock)
     for idx in indices:
         if first is not None:
-            
-        scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=star_table['decker'][allinblock][idx], \
-                                               owner=star_table['sheetn'][allinblock][first], \
-                                               I2=star_table['I2'][allinblock][first], focval=focval)
-        rv.append(scriptobs_line)
+            if idx is not in first_idxs:
+                scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=star_table['decker'][allinblock][idx], \
+                                                owner=star_table['sheetn'][allinblock][first], \
+                                                I2=star_table['I2'][allinblock][first], focval=focval)
+                rv.append(scriptobs_line)
 
     rv.reverse()
     return(rv)
