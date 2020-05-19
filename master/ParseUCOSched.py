@@ -477,12 +477,15 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
 
         csheetn = checkFlag("sheetn",didx,ls,"\A(.*)",'public')
 
-        if 'RECUR_A100' in csheetn :
-            star_table['Bstar'].append("Y")
-            star_table['sheetn'].append('RECUR_A100')
+        if 'Bstar' in didx:
+            star_table['Bstar'].append(checkFlag('Bstar',didx,ls,"(Y|y)",'N'))
         else:
-            star_table['Bstar'].append("N")
-            star_table['sheetn'].append(csheetn)
+            if 'RECUR_A100' in csheetn :
+                star_table['Bstar'].append("Y")
+                star_table['sheetn'].append('RECUR_A100')
+            else:
+                star_table['Bstar'].append("N")
+                star_table['sheetn'].append(csheetn)
 
     badkeylist = []
     for k in star_table.keys():
