@@ -389,7 +389,7 @@ def findBstars(star_table,idx, bstars):
     return near_idx,end_idx
 
 
-def generateObsBlock(star_table, idx, dt, focval):
+def makeObsBlock(star_table, idx, dt, focval):
 
     rv = []
     
@@ -452,7 +452,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
         scriptobs_line = scriptobs_line + " # end"
         res['SCRIPTOBS'].append(scriptobs_line)
     else:
-        res['SCRIPTOBS'] = genObsBlock(star_table,idx, dt, focval)
+        res['SCRIPTOBS'] = makeObsBlock(star_table,idx, dt, focval)
         
     return res
 
