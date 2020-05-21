@@ -404,7 +404,7 @@ def makeObsBlock(star_table, idx, dt, focval):
         first = None
             
     if first:
-        first_idxs = np.where(first)
+        first_idxs, = np.where(first)
         for idx in first_idxs:
             scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
                                                 owner=star_table['sheetn'][allinblock][idx], \
