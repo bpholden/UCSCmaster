@@ -402,6 +402,11 @@ def makeObsBlock(star_table, idx, dt, focval):
         first = (star_table['mode'][allinblock] == 'A')
     else:
         first = None
+
+    if np.any(star_table['mode'][allinblock] == 'L'):
+        last = (star_table['mode'][allinblock] == 'L')
+    else:
+        last = None
             
     if first:
         first_idxs, = np.where(first)
