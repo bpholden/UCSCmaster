@@ -546,6 +546,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     # Is the target behind the moon?
     moon_check = behindMoon(moon,star_table['ra'],star_table['dec'])
     available = available & moon_check
+    if len(last_objs_attempted)>0:
+        for n in last_objs_attempted:
+            attempted = (star_table['name'] == n)
+            available = available & np.logical_not(attempted) # Available and not observed
 
     # We just need a B star, so restrict our math to those
     if bstar:
@@ -569,12 +573,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
         apflog("getNext(): Culling B stars",echo=True)
         available = available & np.logical_not(bstars)
-
-        # has the star been observed - commented out as redundant with cadence
-        if len(last_objs_attempted)>0:
-            for n in last_objs_attempted:
-                attempted = (star_table['name'] == n)
-                available = available & np.logical_not(attempted) # Available and not observed
 
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
