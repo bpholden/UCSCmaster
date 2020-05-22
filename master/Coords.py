@@ -2,17 +2,12 @@ import numpy as np
 
 def makeStrs(deg,mn,sec,neg=False):
 
-    if neg:
-        if deg > 0:
-            deg *= -1
-        elif mn > 0:
-            mn *= -1
-        else:
-            sec *= -1
         
     sdeg = "%d" % (deg)
     smn = "%d" % (abs(mn))
     ssec = "%.4f" % (abs(sec))
+    if neg:
+        sdeg = "-" + sdeg
     return sdeg, smn, ssec
 
 def getRARad(hr, mn, sec):
