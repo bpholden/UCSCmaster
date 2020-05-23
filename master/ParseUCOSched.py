@@ -383,16 +383,19 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < prilim: continue
 
+        name =parseStarname(ls[didx["Star Name"]])            
         # Get the RA
         raval,rahr,ramin,rasec = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval is None:
             # alarm
+            apflog("Error in RA coordinates for %s" %(name),level='warn',echo=True)
             continue
         
         # Get the DEC
         decval,decdeg,decmin,decsec = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
         if decval is None:
             # alarm
+            apflog("Error in Dec coordinates for %s" %(name),level='warn',echo=True)
             continue
 
         # why are we doing this you may ask?
@@ -403,10 +406,15 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         # the radian values above are only used for the scheduler, we still
         # command the telescope in the raw units 
         
-        # Get the star name
-        star_table['name'].append(parseStarname(ls[didx["Star Name"]]))
 
-        if raval and decval:
+
+        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|a|A|c|C)",config["mode"]).upper())
+        star_table['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
+        star_table['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
+
+        if name and raval and decval:
+            star_table['name'].append(name)
+            
             star_table['ra'].append(raval)
             star_table['RA hr'].append(rahr)
             star_table['RA min'].append(ramin)
@@ -470,12 +478,9 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         star_table['Template'].append(tempselect.upper())
 
         star_table['owner'].append(checkFlag("owner",didx,ls,"\A(\w?\.?\w+)",config["owner"]))
-        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|a|A|c|C)",config["mode"]).upper())
         star_table['obsblock'].append(checkFlag("obsblock",didx,ls,"\A(\w+)",config["obsblock"]))
 #        star_table['inst'].append(checkFlag("inst",didx,ls,"(levy|darts)",config['inst']).lower())
 
-        star_table['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
-        star_table['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
 
         # need to check raoff and decoff values and alarm on failure
         
