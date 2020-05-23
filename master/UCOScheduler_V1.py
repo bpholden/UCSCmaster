@@ -230,9 +230,9 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
         ret += ' coverid=' + str(coverid)
         
     if star_table_row['mode'] != '':
-        if mode == 'B':
+        if star_table_row['mode'] == 'B':
             m='blank=Y'
-        elif mode == 'G':
+        elif star_table_row['mode'] == 'A':
             m='guide=Y'
         ret += ' ' + str(m)
     else:
