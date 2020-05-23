@@ -23,9 +23,15 @@ except:
     from fake_apflog import *
 import Visible
 
+# some globals
 
 last_objs_attempted = []
 
+# some constants
+ACQUIRE = 'A'
+BLANK = 'B'
+FIRST = '1'
+LAST = 'L'
 
 def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
@@ -229,14 +235,13 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     if coverid != '':
         ret += ' coverid=' + str(coverid)
         
-    if star_table_row['mode'] != '':
-        if star_table_row['mode'] == 'B':
-            m='blank=Y'
-        elif star_table_row['mode'] == 'A':
-            m='guide=Y'
-        ret += ' ' + str(m)
+    if star_table_row['mode'] != ' ':
+        if star_table_row['mode'] == BLANK:
+            ret += ' blank=Y'
+        elif star_table_row['mode'] == ACQUIRE:
+            ret += ' guide=Y'
     else:
-        mode = ''
+        ret += ''
 
     if star_table_row['raoff'] is not None and star_table_row['decoff'] is not None and mode != '':
         ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
@@ -396,15 +401,15 @@ def makeObsBlock(star_table, idx, dt, focval):
     allinblock = (star_table['obsblock'] == star_table['obsblock'][idx])
     allinblock = allinblock & (star_table['sheetn'] == star_table['sheetn'][idx])
 
-    if np.any(star_table['mode'][allinblock] == '1'):
-        first = (star_table['mode'][allinblock] == '1')
-    elif np.any(star_table['mode'][allinblock] == 'A'):
-        first = (star_table['mode'][allinblock] == 'A')
+    if np.any(star_table['mode'][allinblock] == FIRST):
+        first = (star_table['mode'][allinblock] == FIRST)
+    elif np.any(star_table['mode'][allinblock] == ACQUIRE):
+        first = (star_table['mode'][allinblock] == ACQUIRE)
     else:
         first = None
 
-    if np.any(star_table['mode'][allinblock] == 'L'):
-        last = (star_table['mode'][allinblock] == 'L')
+    if np.any(star_table['mode'][allinblock] == LAST):
+        last = (star_table['mode'][allinblock] == LAST)
     else:
         last = None
             
