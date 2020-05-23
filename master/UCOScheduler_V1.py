@@ -451,7 +451,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
 
     res['obsblock'] = star_table['obsblock'][idx]
 
-    if res['obsblock'] is '' or res['obsblock'] is None:
+    if res['obsblock'] == ' ' :
         res['SCRIPTOBS'] = []
         scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
         scriptobs_line = scriptobs_line + " # end"
@@ -514,8 +514,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     config = dict()
     config['I2'] = 'Y'
     config['decker']='W'
-    config['mode']=''
-    config['obsblock']=''
+    config['mode']=' '
+    config['obsblock']=' '
     config['Bstar']='N'
     config['owner']=owner
     config['inst']='levy'
