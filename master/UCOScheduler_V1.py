@@ -244,7 +244,8 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
         ret += ''
 
     if star_table_row['raoff'] is not None and star_table_row['decoff'] is not None:
-        ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
+        ret += ' raoff=' + str(star_table_row['raoff'])
+        ret += ' decoff=' + str(star_table_row['decoff'])
         
     return str(ret)
 
