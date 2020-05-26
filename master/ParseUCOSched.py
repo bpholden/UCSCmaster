@@ -47,6 +47,16 @@ def checkFlag(key,didx,line,regexp,default):
         return default
 
 
+def readStarTable(table_filename):
+    star_table = astropy.io.ascii.read(table_filename)
+
+    for coln in ('mode','obsblock','raoff','decoff','sheetn','owner'):
+        star_table[coln][star_table[coln] == 'None'] = None
+
+    return star_table
+                     
+            
+
 def parseStarname(starname):
     """parseStarname(starname)
 
