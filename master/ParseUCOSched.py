@@ -581,7 +581,7 @@ def parseUCOSched(sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4
     outfn = os.path.join(outdir,outfn)
     if os.path.exists(outfn) and force_download is False:
         try:
-            star_table = astropy.io.ascii.read(outfn)
+            star_table = readStarTable(outfn)
         except:
             star_table  = parseCodex(config,sheetns=sheetns,certificate=certificate,prilim=prilim)
 
@@ -611,13 +611,13 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
 
     outfn = os.path.join(outdir,outfn)
     if os.path.exists(outfn):
-        star_table = astropy.io.ascii.read(outfn)
+        star_table = readStarTable(outfn)
     else:
         return obslog.names, None
 
     toofn = os.path.join(outdir,toofn)
     if os.path.exists(toofn):
-        too_table = astropy.io.ascii.read(toofn)
+        too_table = readStarTable(toofn)
     else:
         too_table = None
         
@@ -682,7 +682,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
         ctime = datetime.utcfromtimestamp(int(time.time()))
 
     outfn = os.path.join(outdir,outfn)
-    star_table = astropy.io.ascii.read(outfn)
+    star_table = readStarTable(outfn)
 
     # OK the following code is going to rely on the fact that owner
     # is the sheet name
