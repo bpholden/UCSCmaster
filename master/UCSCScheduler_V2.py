@@ -38,7 +38,7 @@ def computeMaxTimes(exp_times,maxtimes):
     return fintimes
 
 
-def compute_priorities(star_table,available,cur_dt,flags):
+def computePriorities(star_table,available,cur_dt,flags,frac_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     if any(star_table[available, DS_DUR] > 0):
         new_pri = np.zeros_like(star_table[:, DS_APFPRI])
@@ -51,20 +51,19 @@ def compute_priorities(star_table,available,cur_dt,flags):
             if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
                 delta_pri[tdinx] += PRI_DELTA
         new_pri[available] += delta_pri
+    elif frac_table is not None:
+        new_pri = np.zeros_like(star_table[:, DS_APFPRI])
+        new_pri[available] += star_table[available,DS_APFPRI]
+        too_much = frac_table[:,DS_FT_CUR]  > frac_table[:,DS_FT_TOT]
+        done_sheets = frac_table[too_much,DS_FT_NAMES]
+        for sn in done_sheets:
+            bad = star_table[:, DS_SHEETN] == sn
+            new_pri[bad] = 0
+        
     else:
         new_pri = star_table[:, DS_APFPRI]
     return new_pri
 
-def float_keyval(instr):
-    try:
-        key,val = instr.split('=')
-    except:
-        return None
-    try:
-        retval = float(val)
-    except:
-        return None
-    return retval
 
 def parseStarlist(starlist):
     """ Parse a scriptobs-compatible starlist for the scheduler.
@@ -127,49 +126,6 @@ def parseStarlist(starlist):
     return names, np.array(star_table), lines, stars
 
 
-def readin_lastobs(filename,ctime):
-    codex = False
-    try:
-        fp = open(filename, 'rb')
-        full_codex = pickle.load(fp)
-        fp.close()
-        codex = True
-        colhead = full_codex[0]
-        codex = full_codex[1:]
-        # These are the columns we need for scheduling
-        req_cols = ["Star Name", "lastobs", "Template", "Nobs"]
-        didx = findColumns(colhead, req_cols)
-
-    except :
-        codex = False
-        names, times, temps = ObservedLog.getObserved(filename)
-        if len(names) == 0:
-            return
-        if ctime is None:
-            ctime = datetime.utcfromtimestamp(int(time.time()))
-
-
-    lastjds = []
-    fnames = []
-    nobs = []
-    if codex:
-
-        for cline in codex:
-            lastjds.append(float(cline[didx['lastobs']]))
-            fnames.append(cline[didx['Star Name']])
-            nobs.append(int(cline[didx['Nobs']]))
-    else:
-        for i in range(0, len(names)):
-            fnames.append(names[i])
-            otime = times[i]
-            if isinstance(otime, float):
-                t = datetime.utcfromtimestamp(otime)
-            else:
-                hr, mn = otime
-                t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
-            lastjds.append(float(ephem.julian_date(t)))
-
-    return fnames, lastjds
 
 def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focval=0):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
@@ -235,10 +191,10 @@ def makeScriptobsLine(name, row, do_flag, t, decker="W",I2="Y",owner='Vogt',focv
     return ret
 
 
-def calculate_ucsc_exposure_time(vmag, i2counts, elevation, seeing, bmv, deckers):
-    """ calculate_ucsc_exposure_time uses the recipe from Burt et al. (2015) to compute the exposure time for a target.
+def calculateUCSCExposureTime(vmag, i2counts, elevation, seeing, bmv, deckers):
+    """ calculateUCSCExposureTime uses the recipe from Burt et al. (2015) to compute the exposure time for a target.
 
-    exp_time, exp_counts, i2counts = calculate_ucsc_exposure_time(vmag, precision, elevation, seeing, bmv, decker="W")
+    exp_time, exp_counts, i2counts = calculateUCSCExposureTime(vmag, precision, elevation, seeing, bmv, decker="W")
     vmag - numpy array of V magnitudes (Johnson filter, Vega mags)
     i2counts - the required number of median Iodine cell counts, this is calculated from the precision and color of the star, this, in effect, sets the exposure time.
     elevation - elevation of the star above the horizon at the start of the exposure
@@ -272,16 +228,8 @@ def calculate_ucsc_exposure_time(vmag, i2counts, elevation, seeing, bmv, deckers
 
     return exp_time, exp_counts, i2counts
 
-def calc_elevations(stars, observer):
-    els = []
-    for s in stars:
-        observer.date = ephem.Date(observer.date)
-        s.compute(observer)
-        cur_el = np.degrees(s.alt)
-        els.append(cur_el)
-    return np.array(els)
 
-def compute_datetime(ctime):
+def computeDatetime(ctime):
     if type(ctime) == float:
         dt = datetime.utcfromtimestamp(int(ctime))
     elif type(ctime) == datetime:
@@ -294,7 +242,7 @@ def compute_datetime(ctime):
     return dt
 
 
-def make_apf_obs(dt,horizon=str(TARGET_ELEVATION_MIN)):
+def makeAPFObs(dt,horizon=str(TARGET_ELEVATION_MIN)):
     # Generate a pyephem observer for the APF
     apf_obs = ephem.Observer()
     apf_obs.lat  = '37:20:33.1'
@@ -308,7 +256,7 @@ def make_apf_obs(dt,horizon=str(TARGET_ELEVATION_MIN)):
 
 def compute_sunset_n_rise(dt,horizon='0'):
     # computes time in seconds before sunset
-    apf_obs = make_apf_obs(dt,horizon=horizon)
+    apf_obs = makeAPFObs(dt,horizon=horizon)
     sunset = apf_obs.next_setting(ephem.Sun())
     sunset -= ephem.Date(dt)
     sunset *= 86400.0 # convert to seconds
@@ -334,13 +282,13 @@ def smartList(starlist, ctime, seeing, slowdown,outdir = None):
         but those that rise above 85 degrees will be regected to avoid slewing through the zenith. """
     # Convert the unix timestamp into a python datetime
 
-    dt = compute_datetime(ctime)
+    dt = computeDatetime(ctime)
 
     if not outdir:
         outdir = os.getcwd()
     observed, times, temps = ObservedLog.getObserved(os.path.join(outdir, "observed_targets"))
 
-    apf_obs = make_apf_obs(dt)
+    apf_obs = makeAPFObs(dt)
     # APF latitude in radians
     apf_lat = apf_obs.lat
 
@@ -528,7 +476,7 @@ def findBstars(snames,star_table,idx, bstars):
     near_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],star_table[idx,DS_RA],star_table[idx,DS_DEC])
     row = makeTempRow(star_table[bstars],near_idx,bstar=True)
     
-    end_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],(star_table[idx,DS_RA]+45*np.pi/180.),star_table[idx,DS_DEC])
+    end_idx = findClosest(star_table[:,DS_RA][bstars],star_table[:,DS_DEC][bstars],(star_table[idx,DS_RA]+15*np.pi/180.),star_table[idx,DS_DEC])
     finrow = makeTempRow(star_table[bstars],end_idx,bstar=True)
     
     return snames[near_idx],row,snames[end_idx],finrow
@@ -620,7 +568,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     if not outdir:
         outdir = os.getcwd()
 
-    dt = compute_datetime(ctime)
+    dt = computeDatetime(ctime)
 
     confg = dict()
     confg['I2'] = 'Y'
@@ -644,7 +592,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         else:
             ptime = datetime.utcfromtimestamp(int(time.time()))
 
-    observed = ParseGoogledex.update_local_googledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
+    observed = ParseGoogledex.updateLocalGoogledex(ptime,googledex_file=os.path.join(outdir,"googledex.dat"), observed_file=os.path.join(outdir,"observed_targets"))
 
     # List of targets already observed
 
@@ -681,7 +629,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
     # timedelta = now - uth,utm : minus current JD?
     ###
 
-    apf_obs = make_apf_obs(dt)
+    apf_obs = makeAPFObs(dt)
     # APF latitude in radians
     apf_lat = (37 + 20/60. + 33.1/3600.) * np.pi/180.
 
@@ -745,7 +693,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         available[f] = available[f] & vis
         cur_elevations[np.where(f)] += star_elevations[np.where(vis)]
 
-        star_table[available, DS_COUNTS] = 1e9
+        star_table[available, DS_COUNTS] = 2e9
         star_table[available, DS_EXPT] = 900
         star_table[available, DS_NSHOTS] = 2
         totexptimes[available] = 400
@@ -776,7 +724,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         fstars = [s for s,_ in zip(stars,f) if _ ]
 
         apflog("getNext(): Computing exposure times",echo=True)
-        exp_times, exp_counts, i2counts = calculate_ucsc_exposure_time( star_table[f,DS_VMAG], \
+        exp_times, exp_counts, i2counts = calculateUCSCExposureTime( star_table[f,DS_VMAG], \
                                             star_table[f,DS_I2CNTS], star_elevations[np.array(vis)], seeing, \
                                             star_table[f,DS_BV], deckers[f])
 
@@ -819,7 +767,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         return None
 
 
-    final_priorities = compute_priorities(star_table,available,dt,flags)
+    final_priorities = computePriorities(star_table,available,dt,flags)
 
     cadence_check = (ephem.julian_date(dt) - star_table[:, DS_LAST]) / star_table[:, DS_CAD]
     good_cadence = np.where(cadence_check >  1.0, True, False)
@@ -875,9 +823,9 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["Bstars
         bname,brow,bnamefin,browfin = findBstars(sn,star_table,idx,bstars)
         row = makeTempRow(star_table,idx)
         if enoughTime(star_table,stars,idx,row,apf_obs,dt):
-            bline = makeScriptobsLine(bname,brow,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
-            line  = makeScriptobsLine(sn[idx],row,'Y',dt,decker="N",I2="N", owner=flags['owner'][idx])
-            bfinline = makeScriptobsLine(bnamefin,browfin,'Y',dt,decker="N",I2="Y", owner='public',focval=2)
+            bline = makeScriptobsLine(bname,brow,'',dt,decker="N",I2="Y", owner='public',focval=2)
+            line  = makeScriptobsLine(sn[idx],row,flags['do'][idx],dt,decker="N",I2="N", owner=flags['owner'][idx])
+            bfinline = makeScriptobsLine(bnamefin,browfin,'',dt,decker="N",I2="Y", owner=flags['owner'][idx],focval=2)
             res['SCRIPTOBS'] = []
             res['SCRIPTOBS'].append(bfinline + " # temp=Y end")
             res['SCRIPTOBS'].append(line + " # temp=Y")

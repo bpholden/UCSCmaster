@@ -11,7 +11,8 @@ class ObservedLog():
         self.names = []
         self.times = []
         self.temps = []
-        self.owners = []        
+        self.owners = []
+        self.sheetns = []
         self.filename = filename
 
         self.read_observed_log()
@@ -33,10 +34,14 @@ class ObservedLog():
     def read_observed_log(self):
         """ read_observed_log parses a file to find the object names and times
         ObservedLog.read_observed_log(filename)
+
+        The following attributes in the object are filled:
+
         names - list of names, must be first column of file called filename
         times - times either as a timestamp in second column or a (hour,minute) tuple from a scriptobs line
         temps - a list of template observations
-
+        owners - a list of owners
+        sheetns - a list of names for the sheets
         """
 
         try:
@@ -66,11 +71,19 @@ class ObservedLog():
                             
                         if 'owner' in keyvals.keys():
                             self.owners.append(keyvals['owner'])
+                        else:
+                            self.owners.append(None)
+
+                        if 'coverid' in keyvals.keys():
+                            self.sheetns.append(keyvals['coversheetid'])
+                        else:
+                            self.sheetns.append(None)
             
         self.names.reverse()
         self.times.reverse()
         self.temps.reverse()
         self.owners.reverse()
+        self.sheetns.reverse()
         return 
         
 
@@ -127,3 +140,4 @@ if __name__ == "__main__":
         print(ol.times)
         print(ol.temps)
         print(ol.owners)
+        print(ol.sheetns)

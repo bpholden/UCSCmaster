@@ -53,9 +53,9 @@ def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
 
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
-parser.add_option("-f","--fixed",dest="fixed",default="")
+parser.add_option("-f","--frac",dest="frac",default='2019B_frac')
 parser.add_option("-s","--smartlist",dest="smartlist",default=False,action="store_true")
-parser.add_option("-g","--googledex",dest="googledex",default="RECUR_A100,2020A_A000,2020A_A001,2020A_A002,2020A_A003,2020A_A004,2020A_A005,2020A_A006,2020A_A008,2020A_A009,2020A_A011,2020A_A012,2020A_A013")
+parser.add_option("-g","--googledex",dest="googledex",default="Bstars_test,2020A_A000,2020A_A001,2020A_A002,2020A_A003,2020A_A004,2020A_A005,2020A_A006,2020A_A008,2020A_A009,2020A_A011,2020A_A012,2020A_A013")
 parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
 parser.add_option("-o","--outfile",dest="outfile",default=None)
 parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
@@ -69,10 +69,6 @@ else:
     datestr = options.date
 
     
-if options.fixed != "":
-    if not os.path.isfile(options.fixed):
-        print ("%s is not a file" % (options.fixed))
-
 if not ns.checkdate(datestr):
     print ("%s is not an acceptable date string" % (datestr))
     sys.exit()
@@ -90,8 +86,10 @@ except Exception as e:
 
 hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
 outfp.write(hdrstr)
-        
-star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex.split(","),outfn=options.infile,outdir=outdir)
+
+sheetns = options.googledex.split(",")
+
+star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=os.path.join(outdir,options.infile))
 
 fwhms = ns.gen_seeing(val=0.1) # good conditions
 slowdowns = ns.gen_clouds(val=0.1) # good conditions
@@ -109,10 +107,7 @@ tempcount = 0
 while observing:
     curtime = ephem.Date(curtime)
 
-    if options.smartlist and options.fixed != "":
-        result = ds.smartList(options.fixed, curtime.datetime(), lastfwhm, lastslow)
-    else:
-        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=options.infile,template=doTemp,sheetns=options.googledex.split(","),outdir=outdir)
+    result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(outdir,options.infile),template=doTemp,sheetns=sheetns,rank_sheetn='2020A_ranks')
     if result:
         if bstar:
             bstar = False
@@ -121,8 +116,7 @@ while observing:
         if tempcount == 2:
             doTemp=False # two per night
         curtime += 70./86400 # acquisition time
-        (idx,) = np.where(star_table['name'] == result['NAME'])
-        idx = idx[0]
+        idx = allnames.index(result['NAME'])
         for i in range(0,int(result['NEXP'])):
             (curtime,lastfwhm,lastslow) = compute_simulation(result,curtime,stars[idx],apf_obs,slowdowns,fwhms,outfp)
         ot = open(otfn,"a+")
@@ -138,4 +132,7 @@ while observing:
         
         
 print ("sun rose")
+fn = "observed_targets"
+ParseUCOSched.updateLocalGoogledex(curtime,googledex_file=os.path.join(outdir,options.infile), observed_file=os.path.join(outdir,fn))
+
 outfp.close()

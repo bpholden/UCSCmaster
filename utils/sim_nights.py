@@ -14,10 +14,10 @@ import ephem
 import numpy as np
 
 import NightSim as ns
-import UCSCScheduler_V2 as ds
+import UCOScheduler_V1 as ds
 import ExposureCalculations as ec
 import Generate_Errors as ge
-import ParseGoogledex
+import ParseUCOSched
 
 def compute_simulation(curtime,result,star,apf_obs,slowdowns,fwhms,star_tab,owner):
     actel,actaz = ns.compute_el(curtime,star,apf_obs)
@@ -80,7 +80,7 @@ def gen_datelist(startstr,endstr,double=False):
     start = datetime.strptime(startstr,"%Y/%m/%d")
     end  = datetime.strptime(endstr,"%Y/%m/%d")
 
-    rng = [2,3,4]
+    rng = [1,2,3]
 
     cur = start
     while cur < end:
@@ -160,10 +160,10 @@ def prep_master(outdir,mastername):
 
 def parse_args():
     parser = optparse.OptionParser()
-    parser.add_option("-g","--googledex",dest="googledex",default="The Googledex")
+    parser.add_option("--sheetns",dest="sheetns",default="RECUR_A100,2020A_A000,2020A_A001,2020A_A002,2020A_A003,2020A_A004,2020A_A006,2020A_A008,2020A_A009,2020A_A011,2020A_A012,2020A_A013")
     parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
     parser.add_option("-f","--file",dest="datefile",default="")
-    parser.add_option("-s","--seed",dest="seed",default=None)
+    parser.add_option("--seed",dest="seed",default=None)
     parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
     parser.add_option("-o","--outdir",dest="outdir",default=".")        
     parser.add_option("-d","--double",dest="double",default=False,action="store_true")
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     
     for datestr in datelist:
 
-        allnames, star_table, do_flag, stars  = ParseGoogledex.parseGoogledex(sheetns=options.googledex,outfn=os.path.join(options.outdir,options.infile))
+        star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.sheetns.split(","),outfn=options.infile,outdir=options.outdir)
     
         fwhms = ns.gen_seeing()
         slowdowns = ns.gen_clouds()
@@ -226,13 +226,15 @@ if __name__ == "__main__":
         curtime, endtime, apf_obs = ns.sun_times(datestr)
         while observing:
 
-            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=os.path.join(options.outdir,options.infile))
+            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=options.infile,outdir=options.outdir)
             if result:
                 if bstar:
                     bstar = False
                 
                 curtime += 70./86400 # acquisition time
-                idx = allnames.index(result['NAME'])                
+                (idx,) = np.where(star_table['name'] == result['NAME'])
+                idx = idx[0]
+
                 for i in range(0,int(result['NEXP'])):
                     (curtime,lastfwhm,lastslow,outstr) = compute_simulation(curtime,result,stars[idx],apf_obs,slowdowns,fwhms,star_table[idx],result['owner'])
                     sim_results(outstr,star_strs,star_dates)

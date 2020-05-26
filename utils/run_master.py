@@ -65,13 +65,16 @@ def read_config(configfile,runstr):
     programs = remap_config(config.items('programs'))
     program = programs[srun]
     program_config = remap_config(config.items(program))
+    
+    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
 
     if program_config['obsnum'] == "ucsc":
-        program_config['obsnum'] = findUCSCObsNum()
+        program_config['obsnum'] = findUCSCObsNum(last)
     if program_config['obsnum'] == "apf":
-        program_config['obsnum'] = findAPFObsNum()
+        program_config['obsnum'] = findAPFObsNum(last)
     if program_config['name'] == "ucb":
-        program_config['name'] = findUCBObsNum()
+        lastcode = ktl.read('apftask','MASTER_LAST_OBS_UCB')
+        program_config['name'] = findUCBObsNum(lastcode)
     if program_config['name'] == "apf":
         program_config['name'] = findAPFObsName()
 
@@ -84,15 +87,13 @@ def findAPFObsName():
 
     return fn
 
-def findAPFObsNum():
-    last = int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True))
+def findAPFObsNum(last):
 
-    if last > 20000:
+    last += 100 - (last % 100)
+    if last % 1000 > 700:
+        last += 1000 - (last % 1000)
+    if last >= 20000:
         last = 10000
-    else:    
-        last += 100 - (last % 100)
-        if last % 1000 > 700:
-            last += 1000 - (last % 1000)
 
     return last
 
@@ -108,13 +109,12 @@ def findUCSCObsNum():
     return last
 
 
-def findUCBObsNum(lastcode=None):
-    apftask = ktl.Service('apftask')
-    if lastcode == None:
-        lastcode = apftask['MASTER_LAST_OBS_UCB'].read()
-        if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
-            apflog.apflog( "Existing files detected for run %s. Not incrementing night code." % lastcode,echo=True)
-            return lastcode
+def findUCBObsNum(lastcode):
+
+
+    if os.path.isfile('/data/apf/ucb-%s100.fits' % lastcode):
+        apflog.apflog( "Existing files detected for run %s. Not incrementing night code." % lastcode,echo=True)
+        return lastcode
 
     zloc = list(np.where(np.array(list(lastcode)) == 'z')[0])
 
@@ -174,8 +174,6 @@ def config_kwds(config,test=False):
         writeem('checkapf','OBSLOCAT',obs)
         writeem('apfucam','OBSERVER',config['observer'])
         writeem('apfschedule','ACTIVE_RUN',primary_run(schedule))
-
-
         writeem('apfschedule','OWNRHINT',ownr)
 
         if config['name'] == 'ucsc':

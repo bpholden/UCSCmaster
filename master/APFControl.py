@@ -21,6 +21,7 @@ except:
 windlim = 40.0
 slowlim = 100
 WINDSHIELD_LIMIT = 10. # mph at the APF
+FOCUSTIME = 3600. # minimum time before checking telescope focus
 TEMP_LIMIT = 35. # deg F at the APF
 wxtimeout = timedelta(seconds=1800)
 SUNEL_HOR = -3.2
@@ -30,17 +31,14 @@ DEWARMIN = 8400
 #ScriptDir = '@LROOT@/bin/robot/'
 ScriptDir = '/usr/local/lick/bin/robot/'
 
-deckscale = {'M': 1.0, 'W':1.0, 'N': 3.0, 'B': 0.5, 'S':2.0, 'P':1.0}
-
-
 # Aquire the ktl services and associated keywords
 tel        = ktl.Service('eostele')
 sunelServ  = tel('SUNEL')
-apfmet     = ktl.Service('apfmet')
+apfmet     = ktl.Service('met3apf')
 checkapf   = ktl.Service('checkapf')
 ok2open    = ktl.cache('checkapf','OPEN_OK')
 dmtimer    = ktl.cache('checkapf','DMTIME')
-wx         = ktl.cache('apfmet','M5WIND')
+wx         = ktl.cache('met3apf','M5WIND')
 
 robot      = ktl.Service('apftask')
 vmag       = robot['SCRIPTOBS_VMAG']
@@ -61,6 +59,8 @@ def cmdexec(cmd, debug=False, cwd='./'):
     args = ["apftask","do"]
     args = args + cmd.split()
     apflog("Executing Command: %s" % repr(cmd), echo=True)
+
+#    args += ["|&","apflogger","-autolevel", "--"]
     
     p = subprocess.Popen(args, stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=cwd)
     
@@ -215,6 +215,39 @@ def dmtimemon(dmtime):
         apflog("Exception in dmtimemon: %s" % (e), level='error')
 
 
+def dewptmon(dew):
+    if dew['populated'] == False:
+        return
+    try:
+        dewpt = float(dew)
+        m2 = APF.m2temp.read(binary=True)
+        air = APF.airtemp.read(binary=True)
+    except:
+        return
+
+    if APF.dewlist == []:
+        APF.dewlist = [dewpt]*10
+        APF.airlist = [air]*10
+        APF.m2list = [m2]*10
+    else:
+        APF.dewlist.append(dewpt)
+        APF.airlist.append(air)
+        APF.m2list.append(m2)
+        APF.dewlist = APF.dewlist[-10:]
+        APF.airlist = APF.airlist[-10:]
+        APF.m2list = APF.m2list[-10:]
+
+    dewlist = np.asarray(APF.dewlist)
+    airlist = np.asarray(APF.airlist)
+    m2list  = np.asarray(APF.m2list)
+
+    if np.average(airlist-dewlist) < 2 or np.average(m2list-dewlist) < 4:
+        APF.dewTooClose = True
+    else:
+        APF.dewTooClose = False
+        
+    return
+        
 class APF:
     """ Class which creates a monitored state object to track the condition of the APF telescope. """
 
@@ -231,6 +264,12 @@ class APF:
     wslist = []
     wdlist = []
 
+    # Initial temps
+    m2list = []
+    dewlist = []
+    airlist = []
+    dewTooClose = False
+    
     # KTL Services and Keywords
     tel        = ktl.Service('eostele')
     sunel      = tel('SUNEL')
@@ -248,25 +287,36 @@ class APF:
     
     checkapf   = ktl.Service('checkapf')
     ok2open    = checkapf('OPEN_OK')
+    userkind   = checkapf('USERKIND')
     dmtimer    = checkapf('DMTIME')
     whatsopn   = checkapf('WHATSOPN')  
     mv_perm    = checkapf('MOVE_PERM')
+    instr_perm = checkapf('INSTR_PERM')
     chk_close  = checkapf('CHK_CLOSE')
 
-    apfmet     = ktl.Service('apfmet')
+    apfmet     = ktl.Service('met3apf')
     wx         = apfmet('M5WIND')
     down       = apfmet('M5DOWN')
     altwx      = apfmet('M3WIND')
     temp       = apfmet('M5OUTEMP')
 
-    robot      = ktl.Service('apftask')
-    vmag       = robot['SCRIPTOBS_VMAG']
-    ldone      = robot['SCRIPTOBS_LINES_DONE']
-    line      = robot['SCRIPTOBS_LINE']
-    sop        = robot['SCRIPTOBS_PHASE']
-    message    = robot['SCRIPTOBS_MESSAGE']  
-    autofoc    = robot["SCRIPTOBS_AUTOFOC"]
+    eosmets    = ktl.Service('eosmets')
+    dewpt      = eosmets('TMPDEWPT')
+    airtemp    = eosmets('AIRTEMP')
+
+    eosti8k    = ktl.Service('eosti8k')
+    m2temp     = eosti8k('TM2CSUR')
+
+    
+    robot        = ktl.Service('apftask')
+    vmag         = robot['SCRIPTOBS_VMAG']
+    ldone        = robot['SCRIPTOBS_LINES_DONE']
+    line         = robot['SCRIPTOBS_LINE']
+    sop          = robot['SCRIPTOBS_PHASE']
+    message      = robot['SCRIPTOBS_MESSAGE']  
+    autofoc      = robot["SCRIPTOBS_AUTOFOC"]
     slew_allowed = robot['SLEW_ALLOWED']
+    observed     = robot['SCRIPTOBS_OBSERVED']
 
     ucam       = ktl.Service('apfucam')
     user       = ucam['OUTFILE']
@@ -317,6 +367,7 @@ class APF:
         self.ok2open.monitor()
         self.ok2open.callback(okmon)
 
+        
         self.dmtimer.monitor()
         self.dmtimer.callback(dmtimemon)
 
@@ -337,10 +388,12 @@ class APF:
         self.temp.monitor()
         self.whatsopn.monitor()
 
+        self.dewpt.monitor()
+        self.dewpt.callback(dewptmon)
+        
         self.counts.monitor()
         self.teqmode.monitor()
         self.vmag.monitor()
-        self.autofoc.monitor()
         self.ldone.monitor()
         self.counts.monitor()
         self.decker.monitor()
@@ -382,6 +435,7 @@ class APF:
         s += "M2 Focus Value = % 4.3f\n" % self.aafocus
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
         s += "Current Weather = %s\n" % self.checkapf['WEATHER'].read()
+        s += "Too close to the dewpoint? = %s\n" % self.dewTooClose
         isopen, what = self.isOpen()
         if isopen:
             s += "Currently open: %s\n" % what
@@ -392,6 +446,8 @@ class APF:
             s += "Robot is running\n"
         else:
             s += "Robot is not running\n"
+        focval = self.setAutofocVal()
+        s += "Focus value for scriptobs = %d\n" % focval
 
         return s
 
@@ -479,6 +535,7 @@ class APF:
         self.ucam('OUTFILE').write(name)
         self.ucam('OUTDIR').write('/data/apf/')
         self.ucam('OBSNUM').write(str(num))
+        self.robot['UCAMLAUNCHER_UCAM_PCC'].write(0)
 
         apflog("Updated science camera parameters:")
         apflog("Observer = %s" % self.ucam('OBSERVER').read(),echo=True)
@@ -490,14 +547,10 @@ class APF:
         return
 
     def instrPermit(self):
-        instr_perm = ktl.read("checkapf","INSTR_PERM",binary=True)
-        userkind = ktl.read("checkapf","USERKIND",binary=True)
-        while not instr_perm or userkind != 3:
+        while not self.instr_perm.read(binary=True) or self.userkind.read(binary=True) != 3:
             apflog("Waiting for instrument permission to be true and userkind to be robotic")
             APFTask.waitfor(self.task, True, expression="$checkapf.INSTR_PERM = true", timeout=600)
             APFTask.waitfor(self.task, True, expression="$checkapf.USERKIND = robotic", timeout=600)
-            instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
-            userkind = ktl.read("checkapf", "USERKIND", binary=True)
 
         return True
 
@@ -573,7 +626,7 @@ class APF:
         rv = self.enableCalInst()
         if rv is False:
             try:
-                ip = checkapf['INSTR_PERM'].read()
+                ip = self.checkapf['INSTR_PERM'].read()
             except:
                 ip = 'Unknown'
             apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
@@ -592,17 +645,16 @@ class APF:
         if not result or (dewarfocraw > DEWARMAX or dewarfocraw < DEWARMIN):
             flags = "-b"
             focusdict = APFTask.get("focusinstr", ["PHASE"])
-            instr_perm = ktl.read("checkapf", "INSTR_PERM", binary=True)
-            if not instr_perm:
+            if not self.instr_perm.read(binary=True):
                 self.instrPermit()
                 if len(focusdict['PHASE']) > 0:
                     flags = " ".join(["-p", focusdict['phase']])
             else:
-                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["LASTFOCUS"]), level='error', echo=True)
-                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["LASTFOCUS"])
+                apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
+                APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["lastfocus"])
             result = self.focus(flags=flags)
             if not result:
-                apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["LASTFOCUS"]), level='error', echo=True)
+                apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
         self.apfschedule('OWNRHINT').write(owner)        
 
         return result
@@ -618,7 +670,7 @@ class APF:
             rv = self.enableCalInst()
             if rv is False:
                 try:
-                    ip = checkapf['INSTR_PERM'].read()
+                    ip = self.instr_perm.read()
                 except:
                     ip = 'Unknown'
                 apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
@@ -798,9 +850,7 @@ class APF:
         except Exception, e:
             apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
         if self.slew(star):
-            if self.runAutoexposure(ind=1):
-                if self.runCenterup():
-                    return self.runFocustel()
+            return self.runFocustel()
         return False
     
                 
@@ -991,9 +1041,16 @@ class APF:
             else:
                 apflog("Waiting for permission to move")
         chk_mv = '$checkapf.MOVE_PERM == true'
-        result = APFTask.waitFor(self.task, False, chk_mv, timeout=300)
+        result = APFTask.waitFor(self.task, False, chk_mv, timeout=1200)
         if not result:
-            apflog("Didn't have move permission after 5 minutes. Going ahead with closeup.", echo=True) 
+            apflog("Didn't have move permission after 20 minutes. Going ahead with closeup.", echo=True)
+            return False
+        if self.apfmon['FRONT_SHUTTER_CLOSEUPSTA'].read(binary=True) != 2:
+            # this is a check to see if the front shutter got caught running
+            # away, if so do not send any more shutter commands
+            apflog("Dome Shutters maybe running away!", level='error', echo=True)
+            return False
+        
         apflog("Running closeup script")
         attempts = 0
         close_start = datetime.now()
@@ -1039,6 +1096,28 @@ class APF:
                 
         return
 
+
+    def setAutofocVal(self):
+        """ APFControl.setAutofocVal()
+            tests when the last time the telescope was focused, if more than FOCUSTIME enable focus check
+        """
+
+        # check last telescope focus
+        lastfoc = self.robot['FOCUSTEL_LAST_SUCCESS'].read(binary=True)
+        current_val = self.autofoc.read()
+        rising = self.rising
+        cur_sunel = self.sunel.read(binary=True)
+        too_close = rising and (cur_sunel > -20)
+        focval = 0
+        if time.time() - lastfoc > FOCUSTIME:
+            if current_val != "robot_autofocus_enable" and not too_close:
+                self.autofoc.write("robot_autofocus_enable")
+                focval = 1
+                APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
+        else:
+            if current_val == "robot_autofocus_enable":
+                self.autofoc.write("robot_autofocus_disable")
+        return focval
 
     def updateWindshield(self, state):
         """Checks the current windshielding mode, and depending on the input and wind speed measurements makes sure it is set properly."""
@@ -1236,9 +1315,10 @@ class APF:
             if not ucam['EVENT_STR'].read() == "ControllerReady":
                 apflog("Waiting for current exposure to finish.")
                 ucam['EVENT_STR'].waitfor(" = ReadoutBegin", timeout=1200)
-        apflog("Killing Robot.")
+
         ripd, running = self.findRobot()
         if running:
+            apflog("Killing Robot %s" % (str(ripd)))
             try:
                 APFLib.write(self.robot['SCRIPTOBS_CONTROL'], "abort")
             except Exception, e:

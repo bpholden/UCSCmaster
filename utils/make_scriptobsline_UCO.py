@@ -8,8 +8,8 @@ import numpy as np
 import sys
 sys.path.append("../master")
 #from ExposureCalc import *
-import UCSCScheduler_V2 as ds
-import ParseGoogledex
+import UCOScheduler_V1 as ds
+import ParseUCOSched
 
 if __name__ == "__main__":
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 #    vals = ws.get_all_values()
 #    texpcol = vals[0].index("APFtexp") 
     
-    allnames, star_table, flags, stars  = ParseGoogledex.parseGoogledex()
+    allnames, star_table, flags, stars  = ParseUCO.parseGoogledex()
     if len(desiredstars) == 0:
         desiredstars = allnames
     el = np.zeros_like(star_table[:, ds.DS_BV])
@@ -36,15 +36,7 @@ if __name__ == "__main__":
     totexptimes = np.zeros_like(star_table[:, ds.DS_BV])
     deckers = np.array(flags['decker'])
     
-    precision = star_table[:, ds.DS_ERR]
-    i2counts = ds.getI2_K(precision)
-    mstars_inds = np.where(star_table[:, ds.DS_BV] > 1.2)
-    i2counts[mstars_inds] = ds.getI2_M(precision[mstars_inds])
 
-    exp_times, exp_counts, i2cnts = ds.calculateUCSCExposureTime(star_table[:, ds.DS_VMAG],precision,el,fwhm,star_table[:, ds.DS_BV],deckers)
-    exp_times *= options.slowdown
-
-    totexptimes += ds.computeMaxTimes(exp_times,star_table[:, ds.DS_MAX])
     
     
     mxtime = np.zeros_like(star_table[:,ds.DS_MAX])
@@ -60,6 +52,6 @@ if __name__ == "__main__":
         i = allnames.index(star)
         if star_table[i, ds.DS_APFPRI] < 5:
             continue
-
+res =  makeResult(stars,star_table,flags,totexptimes,i2cnts,sn,dt,idx,focval=focval)
         ret = ds.makeScriptobsLine(allnames[i],star_table[i,:], flags['do'][i], datetime.datetime.utcfromtimestamp(int(time.time())),decker=flags['decker'][i],owner=flags['owner'][i])
         print(ret)

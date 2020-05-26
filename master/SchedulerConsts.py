@@ -2,7 +2,7 @@
 TARGET_ELEVATION_MIN = 20 # this elevation is the physical minimum, below this the ADC does not work
 TARGET_ELEVATION_HIGH_MIN = 45 # this elevation is the preferred one for stars that will be high in the sky
 TARGET_ELEVATION_MAX = 85
-TARGET_EXPOSURE_TIME_MAX =  1* 60 * 60 # 1 hour
+TARGET_EXPOSURE_TIME_MAX =  2* 60 * 60 # 2 hour
 TARGET_MOON_DIST_MIN = 15
 TARGET_MOON_DIST_MAX = 25
 
@@ -41,34 +41,20 @@ DS_MAX    = 17
 DS_NOB    = 18
 DS_TOT    = 19
 DS_I2CNTS = 20
+DS_SHEETN = 21
 
-SLOWDOWN_MIN = 0.4
+SLOWDOWN_MIN = 0.6
+SLOWDOWN_THRESH = 2.5
 SLOWDOWN_MAX = 5.0
+SLOWDOWN_VMAG_LIM = 9.0 
+SEEING_THRESH = 30.0
 
-PRI_DELTA = 5
+PRI_DELTA = 20
 
-# A few constants to make accessing the star table more readable
-TOO_RA     = 0
-TOO_DEC    = 1
-TOO_PMRA   = 2
-TOO_PMDEC  = 3
-TOO_VMAG   = 4
-TOO_EXPT   = 5
-TOO_COUNTS = 6
-TOO_APFPRI = 7
-TOO_CAD    = 8
-TOO_NSHOTS = 9
-TOO_LAST   = 10
-TOO_UTH    = 11
-TOO_UTM    = 12
-TOO_DUR    = 13
-TOO_NOB    = 14
-TOO_TOT    = 15
+DS_FT_NAMES = 0
+DS_FT_FRAC = 1
+DS_FT_TOT = 2
+DS_FT_CUR = 3
 
-IMMEDIATE = 3
-NEXTEXP = 2
-NEXTLINE = 1
-
-PRI_IMMEDIATE = 300
-PRI_NEXT_EXP = 200
+EXP_LIM = 4e9
 
