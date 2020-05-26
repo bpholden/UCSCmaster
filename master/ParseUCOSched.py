@@ -129,8 +129,9 @@ def getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f
     try:
         gs = gspread.authorize(credentials)
         apflog("Successfully logged in.", echo=True)
-    except:
+    except Exception as e:
         apflog("Cannot log into Google API.", echo=True,level='error')
+        apflog(e,echo=True,level='error')
         return None
     worksheet = None
     tries = 0
