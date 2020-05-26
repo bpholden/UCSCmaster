@@ -418,8 +418,10 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         # command the telescope in the raw units 
         
 
-
-        star_table['mode'].append(checkFlag("mode",didx,ls,"\A(b|B|a|A|c|C)",config["mode"]).upper())
+        mode = checkFlag("mode",didx,ls,"\A(b|B|a|A|c|C)",config["mode"])
+        if type(mode) == str:
+            mode = mode.upper()
+        star_table['mode'].append(mode)
         star_table['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
         star_table['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
 
