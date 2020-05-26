@@ -444,6 +444,7 @@ def makeObsBlock(star_table, idx, dt, focval):
         
 
     rv.reverse()
+    rv[0] += ' # end'
     return(rv)
 
 def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode=''):
