@@ -398,8 +398,10 @@ def findBstars(star_table,idx, bstars):
 def makeObsBlock(star_table, idx, dt, focval):
 
     rv = []
+
+    cur_obsblock = star_table['obsblock'][idx]
     
-    allinblock = (star_table['obsblock'] == star_table['obsblock'][idx])
+    allinblock = (star_table['obsblock'] == cur_obsblock)
     allinblock = allinblock & (star_table['sheetn'] == star_table['sheetn'][idx])
 
     if np.any(star_table['mode'][allinblock] == FIRST):
@@ -444,7 +446,7 @@ def makeObsBlock(star_table, idx, dt, focval):
         
 
     rv.reverse()
-    rv[0] += ' # end'
+    rv[0] += ' # obsblock=%s end' % (cur_obsblock)
     return(rv)
 
 def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode=''):
