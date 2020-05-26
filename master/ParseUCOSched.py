@@ -494,6 +494,8 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
     for k in badkeylist:
         del star_table[k]  
 
+    # This just reorders the columns
+    # This way the ascii table has these columns in front to make finding targets by specific programs easier
     star_table_names = list(star_table.keys())
     for n in  ('Dec sec','Dec min','Dec deg','RA sec','RA min','RA hr','APFpri','sheetn','name'):
         if n in star_table_names:
