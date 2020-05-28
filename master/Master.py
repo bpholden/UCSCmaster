@@ -339,7 +339,7 @@ class Master(threading.Thread):
             istemp = str(self.target['isTemp'])
             if self.target["mode"] == 'B' or self.target["mode"] == 'A':
                 self.blank = True
-            else
+            else:
                 self.blank = False
                 
             apflog("getTarget(): V=%.2f  B-V=%.2f Pri=%.2f " % (self.VMAG, self.BV, self.target["PRI"]))
