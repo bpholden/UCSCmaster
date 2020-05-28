@@ -242,7 +242,7 @@ if __name__ == "__main__":
                     masterfp.write("%s\n" % (outstr))
                     
                 ot = open(otfn,"a+")
-                ot.write("%s\n" % (result["SCRIPTOBS"]))
+                ot.write("%s\n" % (result["SCRIPTOBS"].pop()))
                 ot.close()
             else:
                 curtime += 2100./86400 # close for lack of target
