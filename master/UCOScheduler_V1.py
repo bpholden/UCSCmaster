@@ -46,7 +46,7 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
     elif frac_table is not None:
         new_pri += star_table['APFpri']
         too_much = frac_table['cur']  > frac_table['tot']
-        done_sheets = frac_table[DS_FT_NAMES][too_much]
+        done_sheets = frac_table['sheetn'][too_much]
         for sheetn in done_sheets:
             bad = star_table['sheetn'] == sheetn
             new_pri[bad] = 0
