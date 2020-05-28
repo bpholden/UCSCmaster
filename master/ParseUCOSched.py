@@ -616,7 +616,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
 
         selection = (star_table['name'] == name) & (star_table['sheetn'] == owner)
         if any(selection):
-            if jd > star_table['lastobs'][selection]:
+            if np.any(jd > star_table['lastobs'][selection]):
                 apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][selection], jd),echo=True)
                 star_table['lastobs'][selection] = jd
                 star_table['nobs'][selection] += 1
