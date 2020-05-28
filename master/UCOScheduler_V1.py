@@ -224,17 +224,19 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     if coverid != '':
         ret += ' coverid=' + str(coverid)
         
-    if star_table_row['mode'] != '':
-        if mode == 'B':
+    if star_table_row['mode'] != None:
+        if star_table_row['mode'] == 'B':
             m='blank=Y'
-        elif mode == 'O':
+        elif star_table_row['mode'] == 'O':
             m='guide=Y'
-        ret += ' ' + str(m)
+        else:
+            m = ''
     else:
-        mode = ''
-
-    if star_table_row['raoff'] is not None and star_table_row['decoff'] is not None and mode != '':
-        ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
+        m =  ''
+    ret += ' ' + str(m)
+    
+    if star_table_row['raoff'] is not None and star_table_row['decoff'] is not None:
+        ret += ' raoff=' + str(star_table_row['raoff']) + ' decoff=' + str(star_table_row['decoff'])
         
     return str(ret)
 
