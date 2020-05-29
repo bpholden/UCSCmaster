@@ -58,8 +58,6 @@ class Master(threading.Thread):
         self.fixedList = opt.fixed
         self.sheetn = opt.sheet
         self.rank_tablen = opt.rank_table
-        self.targetlogname = os.path.join(os.getcwd(),"targetlog.txt")
-        self.targetlog = None
         self.starttime = opt.start
         self.raster = opt.raster
         self.debug = opt.test
@@ -76,9 +74,6 @@ class Master(threading.Thread):
         self.observed = self.apftask['SCRIPTOBS_OBSERVED']
         self.observed.monitor()
         
-        self.nighttargetlogname = os.path.join(os.getcwd(),"nighttargetlog.txt")
-        self.nighttargetlog = None
-
         self.canOpen = True
         self.badWeather = False
 
