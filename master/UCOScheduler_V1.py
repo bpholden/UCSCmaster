@@ -44,7 +44,7 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
             sdt = datetime(cur_dt.year,cur_dt.month,cur_dt.day,
                                int(star_table['uth'][available][tdinx]),
                                int(star_table['utm'][available][tdinx]),0)
-            
+
             durdelt = timedelta(0,star_table['duration'][available][tdinx],0)
             if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
                 delta_pri[tdinx] += PRI_DELTA
@@ -52,7 +52,7 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
     elif frac_table is not None:
         new_pri += star_table['APFpri']
         too_much = frac_table['cur']  > frac_table['tot']
-        done_sheets = frac_table[DS_FT_NAMES][too_much]
+        done_sheets = frac_table['sheetn'][too_much]
         for sheetn in done_sheets:
             bad = star_table['sheetn'] == sheetn
             new_pri[bad] = 0
@@ -90,7 +90,7 @@ def readFracTable(table_name):
     else:
         sheetns= None
         fracs = None
-        
+
     return sheetns, fracs
 
 def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table'):
@@ -146,13 +146,13 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
         rank_table = astropy.table.Table.read(outfn,format='ascii')
     else:
         sheetns, ranks = ParseUCOSched.parseRankTable(sheet_table_name=sheet_table_name)
-        
+
         rank_table= astropy.table.Table([sheetns,ranks],names=['sheetn','rank'])
         try:
             rank_table.write(outfn,format='ascii')
         except Exception as e:
             apflog("Cannot write table %s: %s" % (outfn,e),level='error',echo=True)
-            
+
     return rank_table
 
 
@@ -234,7 +234,7 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
 
     if coverid != '':
         ret += ' coverid=' + str(coverid)
-        
+
     if star_table_row['mode'] != None:
         if star_table_row['mode'] == BLANK:
             ret += ' blank=Y'
@@ -243,10 +243,17 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     else:
         ret += ''
 
-    if star_table_row['raoff'] is not None and star_table_row['decoff'] is not None:
-        ret += ' raoff=' + str(star_table_row['raoff'])
-        ret += ' decoff=' + str(star_table_row['decoff'])
-        
+    raoff  = star_table_row['raoff']
+    decoff = star_table_row['decoff']
+    if raoff == 'None':
+        raoff = None
+    if decoff == 'None':
+        decoff = None
+    if raoff is not None and decoff is not None:
+        ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
+
+
+
     return str(ret)
 
 def calc_elevations(stars, observer):
@@ -289,7 +296,7 @@ def computeSunsetRise(dt,horizon='0'):
     sunset = apf_obs.next_setting(ephem.Sun())
     sunset -= ephem.Date(dt)
     sunset *= 86400.0 # convert to seconds
-    
+
     sunrise = apf_obs.next_rising(ephem.Sun())
     sunrise -= ephem.Date(dt)
     sunrise *= 86400.0 # convert to seconds
@@ -299,7 +306,7 @@ def computeSunset(dt,horizon='0'):
 
     sunset, sunrise = computeSunsetRise(dt,horizon=horizon)
     return sunset
-    
+
 def computeSunrise(dt,horizon='0'):
     sunset, sunrise = computeSunsetRise(dt,horizon=horizon)
     return sunrise
@@ -317,7 +324,7 @@ def conditionCuts(moon,seeing,slowdown,star_table):
     transparency - magnitudes of extinction
 
     """
-    
+
     if 'seeing' in star_table.colnames:
         available = star_table['seeing']/0.109 > seeing
     else:
@@ -325,12 +332,12 @@ def conditionCuts(moon,seeing,slowdown,star_table):
 
     if 'moon' in star_table.colnames:
         available = (star_table['moon'] > moon) & available
-        
+
     if 'transparency' in star_table.colnames:
         ext = 2.5 * np.log10(slowdown)
         available = (star_table['transparency'] > ext) & available
-        
-    
+
+
     return available
 
 
@@ -378,20 +385,20 @@ def enoughTime(star_table,stars,idx,apf_obs,dt):
         apflog( "enoughTime(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
     except:
         apflog("enoughTime(): cannot log times!?!",echo=True)
-        
+
     if tot_time < time_left_before_sunrise  and vis and time_left_before_sunrise < 14*3600.:
         return True
     else:
         return False
-        
-    
+
+
 def findBstars(star_table,idx, bstars):
 
     near_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],star_table['ra'][idx],star_table['dec'][idx])
-    
+
     end_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],(star_table['ra'][idx]+15*np.pi/180.),star_table['dec'][idx])
 
-    
+
     return near_idx,end_idx
 
 
@@ -400,7 +407,7 @@ def makeObsBlock(star_table, idx, dt, focval):
     rv = []
 
     cur_obsblock = star_table['obsblock'][idx]
-    
+
     allinblock = (star_table['obsblock'] == cur_obsblock)
     allinblock = allinblock & (star_table['sheetn'] == star_table['sheetn'][idx])
 
@@ -421,7 +428,7 @@ def makeObsBlock(star_table, idx, dt, focval):
     rest = rest & (star_table['mode'][allinblock] != LAST)
     rest_idxs, = np.where(rest)
 
-        
+
     if np.any(first):
         first_idxs, = np.where(first)
         for idx in first_idxs:
@@ -443,7 +450,7 @@ def makeObsBlock(star_table, idx, dt, focval):
                                                 owner=star_table['sheetn'][allinblock][idx], \
                                                 I2=star_table['I2'][allinblock][idx], focval=focval)
             rv.append(scriptobs_line)
-        
+
 
     rv.reverse()
     rv[0] += ' # obsblock=%s end' % (cur_obsblock)
@@ -479,7 +486,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
         res['SCRIPTOBS'].append(scriptobs_line)
     else:
         res['SCRIPTOBS'] = makeObsBlock(star_table,idx, dt, focval)
-        
+
     return res
 
 def lastAttempted(observed):
@@ -501,7 +508,7 @@ def lastAttempted(observed):
     if lastobj:
         if lastobj not in observed and lastobj not in last_objs_attempted:
             last_objs_attempted.append(lastobj)
-            
+
             apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
 
 
@@ -541,8 +548,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     config['owner']=owner
     config['inst']='levy'
     config['raoff'] = None
-    config['decoff'] = None 
-    
+    config['decoff'] = None
+
 
     apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
@@ -560,7 +567,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
             ptime = dt
         else:
             ptime = datetime.utcfromtimestamp(int(time.time()))
-            
+
     apflog("getNext(): Updating star list with previous observations",echo=True)
     observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,toofn=toofn,observed_file="observed_targets")
 
@@ -573,14 +580,14 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     else:
         stars = ParseUCOSched.genStars(star_table)
     targNum = len(stars)
-    
+
     # List of targets already observed
 
     last_objs_attempted = lastAttempted(observed)
     if len(last_objs_attempted) > 5:
         apflog( "getNext(): 5 failed acquisition attempts",echo=True)
         last_objs_attempted = []
-            
+
     ###
     # Need to update the googledex with the lastObserved date for observed targets
     # Scriptobs line uth utm can be used for this
@@ -598,7 +605,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     do_templates = template and templateConditions(moon, seeing, slowdown)
 
-    
+
     apflog("getNext(): Parsed the Googledex...",echo=True)
 
 
@@ -611,7 +618,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     totexptimes = np.zeros(targNum, dtype=float)
     totexptimes = star_table['texp'] * star_table['APFnshots']
-    
+
     available = np.ones(targNum, dtype=bool)
     cur_elevations = np.zeros(targNum, dtype=float)
     scaled_elevations = np.zeros(targNum, dtype=float)
@@ -619,15 +626,19 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     # Is the target behind the moon?
     moon_check = behindMoon(moon,star_table['ra'],star_table['dec'])
     available = available & moon_check
+    if len(last_objs_attempted)>0:
+        for n in last_objs_attempted:
+            attempted = (star_table['name'] == n)
+            available = available & np.logical_not(attempted) # Available and not observed
 
     # We just need a B star, so restrict our math to those
     if bstar:
-        
+
         apflog("getNext(): Selecting B stars",echo=True)
         available = available & bstars
 
         f = available
-        
+
         apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
         vis,star_elevations,fin_star_elevations = Visible.is_visible(apf_obs, fstars, [400]*len(bstars[f]))
@@ -643,19 +654,13 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         apflog("getNext(): Culling B stars",echo=True)
         available = available & np.logical_not(bstars)
 
-        # has the star been observed - commented out as redundant with cadence
-        if len(last_objs_attempted)>0:
-            for n in last_objs_attempted:
-                attempted = (star_table['name'] == n)
-                available = available & np.logical_not(attempted) # Available and not observed
-
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
 
 
         apflog("getNext(): Computing exposure times",echo=True)
         exp_counts = star_table['expcount']
-        
+
         # Is the exposure time too long?
         apflog("getNext(): Removing really long exposures",echo=True)
         time_check = totexptimes <= TARGET_EXPOSURE_TIME_MAX
@@ -678,7 +683,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
-    
+
     final_priorities = computePriorities(star_table,available,dt,rank_table=makeRankTable(rank_sheetn))
 
     cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) / star_table['APFcad']
@@ -744,8 +749,8 @@ if __name__ == '__main__':
 
     rank_tablen='2020A_ranks'
     rank_table = makeRankTable(rank_tablen)
-    
-    
+
+
 #    sheetn=["2018B"]
     sheetn="RECUR_A100,2020A_A000,2020A_A011,2020A_A012"
 

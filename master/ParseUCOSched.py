@@ -18,7 +18,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
 import Coords
-from SchedulerConsts import MIN_TOTOBS, DS_BV, DS_ERR, EXP_LIM
+from SchedulerConsts import EXP_LIM
 import ExposureCalculations as ec
 
 try:
@@ -28,7 +28,7 @@ except:
 
 def checkFlag(key,didx,line,regexp,default):
     """ checkFlag(key, dict_ind, line, regexp, default)
-    
+
     - key : the key in the dictionary indices, which key from the input list you want to check
     - didx : dictionary of indices so that keys can be used instead of indices for the line
     - line : a list of entries, map to keys by didx
@@ -36,7 +36,7 @@ def checkFlag(key,didx,line,regexp,default):
     - default : value if the regexp fails
 
     """
-    
+
     try:
         match = re.search(regexp,line[didx[key]])
         if match:
@@ -54,14 +54,14 @@ def readStarTable(table_filename):
         star_table[coln][star_table[coln] == 'None'] = None
 
     return star_table
-                     
-            
+
+
 
 def parseStarname(starname):
     """parseStarname(starname)
 
     starname - input value which should be the name of the a star, duh
-    returns the starname value, doing some clean up to meet requirements (no spaces, trim trialing spaces, etc.) 
+    returns the starname value, doing some clean up to meet requirements (no spaces, trim trialing spaces, etc.)
     """
     ostarname = starname.strip()
     m= re.search("HD\s+\d+",starname)
@@ -75,7 +75,7 @@ def parseStarname(starname):
     while m:
         ostarname = re.sub("\+","p",ostarname)
 
-        
+
     return ostarname
 
 
@@ -110,7 +110,7 @@ def getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f
 
     sheetn - name of the google sheet, defaults to "The Googledex"
     certificate - certificate used to control access to the google sheet
-    
+
     """
     # this downloads the googledex from the Google Drive
     # the certificate must be available
@@ -118,10 +118,10 @@ def getSpreadsheet(sheetn="The Googledex",certificate='UCSC Dynamic Scheduler-4f
     # the developer must select the correct API for access
 
     # the certificate has an email associated with it, that email must
-    # have the document shared with it to allow access 
+    # have the document shared with it to allow access
 
     certificate_path = os.path.dirname(__file__)
-    
+
     json_key = json.load(open(os.path.join(certificate_path, certificate)))
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
@@ -178,7 +178,7 @@ def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
                 except:
                     time.sleep(more_sleeping)
                     cur_codex = None
-            
+
             if len(cur_codex) <= 0:
                 apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
 
@@ -200,9 +200,9 @@ def retrieveCodex(req_cols,sheetns=["The Googledex"],certificate='UCSC Dynamic S
                 wait_time += .3
             time.sleep(wait_time)
 
-                
+
     return full_codex
-    
+
 
 def findColumns(col_names,req_cols,opt_cols=[]):
     """findColumns finds the indices for the column names in the list of
@@ -210,7 +210,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     required columns indices = findColumns(col_names, req_cols)
 
     indices - a dictionary of indices, each index maps to where in
-    col_names the column is found 
+    col_names the column is found
 
     col_names - list of column names to be searched
     req_cols - list of names that should be in the first list
@@ -227,7 +227,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     for r in opt_cols:
         if r in col_names:
             didx[r] = col_names.index(r)
-            
+
     # hack to handle an error
     if req_cols[0] == "Star Name" and req_cols[0] not in didx.keys():
         didx[req_cols[0]] = 0
@@ -237,8 +237,8 @@ def findColumns(col_names,req_cols,opt_cols=[]):
 
 
 def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn=None,outdir=None):
-    
-    apflog( "Starting parse of %s" % (sheet_table_name),echo=True)    
+
+    apflog( "Starting parse of %s" % (sheet_table_name),echo=True)
     if not outdir :
         outdir = os.getcwd()
     if outfn is not None and os.path.exists(os.path.join(outdir,outfn)):
@@ -269,7 +269,7 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             frac.append(floatDefault(row[1]))
             twod.append([row[0],row[1]])
 
-            
+
     return sheetns,frac
 
 def timeLeft():
@@ -291,13 +291,13 @@ def timeLeft():
             if len(d) >= 2:
                 rv[d[0].strip()] = d[1].strip()
         return rv
-        
+
     else:
         return None
 
 def parseRankTable(sheet_table_name='2020A_ranks',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json'):
-    
-    apflog( "Starting parse of %s" % (sheet_table_name),echo=True)    
+
+    apflog( "Starting parse of %s" % (sheet_table_name),echo=True)
 
     sheetns = []
     rank = []
@@ -319,7 +319,7 @@ def parseRankTable(sheet_table_name='2020A_ranks',certificate='UCSC Dynamic Sche
                 if ky in sheetns:
                     sindx = sheetns.index(ky)
                     rank[sindx] = -1000
-                    
+
     return sheetns,rank
 
 
@@ -332,7 +332,7 @@ def initStarTable(col_list):
 
 
     """
-    
+
 # star_table = { "name" : [], "ra" : [], 'dec' : [], 'pmRA' : [], 'pmDEC' : [], 'Vmag' : [], 'texp' : [], 'expcount' : [], 'APFnshots' : [], 'APFpri' : [], 'APFcad' : [], 'lastobs' : [], 'BmV' : [], 'uth' : [], 'utm' : [], 'duration' : [], 'nobs' : [], 'totobs' : [], "do" : [], "decker" : [], "I2" : [], "owner" : [], "template" : [], "obsblock" : [], "mode" : [], "Bstar" : [],  "raoff" : [], "decoff" : [], 'sheetn' : [] }
 
     star_table = dict()
@@ -372,7 +372,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
                     ]
 
     negsearch = re.compile("\-(\d+\.*\d*)")
-        
+
     full_codex = retrieveCodex(req_cols,sheetns=sheetns,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json')
 
     col_names = full_codex[0]
@@ -380,9 +380,9 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
 
     didx = findColumns(col_names,req_cols)
     star_table = initStarTable(req_cols)
-    
+
     stars = []
-    # Build the star table to return to 
+    # Build the star table to return to
     for ls in codex:
         row = []
         if ls[0] == '':
@@ -394,14 +394,14 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < prilim: continue
 
-        name =parseStarname(ls[didx["Star Name"]])            
+        name =parseStarname(ls[didx["Star Name"]])
         # Get the RA
         raval,rahr,ramin,rasec = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval is None:
             # alarm
             apflog("Error in RA coordinates for %s" %(name),level='warn',echo=True)
             continue
-        
+
         # Get the DEC
         decval,decdeg,decmin,decsec = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
         if decval is None:
@@ -415,8 +415,8 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         # an incorrect declination value
         # so, we move the - to the front of the sexagesimal string
         # the radian values above are only used for the scheduler, we still
-        # command the telescope in the raw units 
-        
+        # command the telescope in the raw units
+
 
         mode = checkFlag("mode",didx,ls,"\A(b|B|a|A|c|C)",config["mode"])
         if type(mode) == str:
@@ -427,17 +427,17 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
 
         if name and raval and decval:
             star_table['name'].append(name)
-            
+
             star_table['ra'].append(raval)
             star_table['RA hr'].append(rahr)
             star_table['RA min'].append(ramin)
-            star_table['RA sec'].append(rasec)            
+            star_table['RA sec'].append(rasec)
 
             star_table['dec'].append(decval)
             star_table["Dec deg"].append(decdeg)
             star_table["Dec min"].append(decmin)
             star_table["Dec sec"].append(decsec)
-        
+
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))
 
@@ -462,16 +462,16 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         if coln is 'B-V' and inval > 2:
             inval = 1
         star_table['B-V'].append(inval)
-                    
+
         for coln in ["uth", "utm"]:
             star_table[coln].append(intDefault(ls[didx[coln]]))
-                
+
         # duration:
         star_table['duration'].append(floatDefault(ls[didx["duration"]]))
-                
+
         # Nobs
         star_table['nobs'].append(nobs)
-                
+
         # Total Obs
         if totobs >= 0:
             star_table['totobs'].append(totobs)
@@ -483,7 +483,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
             star_table['do'].append(check)
         else:
             star_table['do'].append("")
-            
+
         star_table['decker'].append(checkFlag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
         i2select = checkFlag("I2",didx,ls,"\A(n|N)",config["I2"])
         star_table['I2'].append(i2select.upper())
@@ -496,7 +496,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
 
 
         # need to check raoff and decoff values and alarm on failure
-        
+
         csheetn = checkFlag("sheetn",didx,ls,"\A(.*)",'public')
 
         if 'Bstar' in didx:
@@ -515,8 +515,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         if len(star_table[k]) == 0:
             badkeylist.append(k)
     for k in badkeylist:
-        del star_table[k]  
-
+        del star_table[k]
 
     # This just reorders the columns
     # This way the ascii table has these columns in front to make finding targets by specific programs easier
@@ -525,7 +524,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         if n in star_table_names:
             star_table_names.remove(n)
             star_table_names = [n] + star_table_names
-                
+
     star_table = astropy.table.Table(star_table,names=star_table_names)
     #    star_table = normalizePriorities(star_table)
     return star_table
@@ -547,7 +546,7 @@ def genStars(star_table):
         star._ra = ephem.hours(str(":".join([star_table["RA hr"][i], star_table["RA min"][i], star_table["RA sec"][i]])))
         star._dec = ephem.degrees(str(":".join([star_table["Dec deg"][i], star_table["Dec min"][i], star_table["Dec sec"][i]])))
         stars.append(star)
-        
+
     return stars
 
 
@@ -555,11 +554,11 @@ def genStars(star_table):
 def parseUCOSched(sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5):
     """ parseUCOSched parses google sheets and returns the output as a tuple
     This routine downloads the data if needed and saves the output to a file. If the file exists, it just reads in the file.
-    
+
     star_table, stars = parseUCOSched(sheetns=["RECUR_A100"],certificate='cert.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5)
 
     star_table - an astropy table
-    stars - a list of pyEphem objects 
+    stars - a list of pyEphem objects
 
     Inputs:
     sheetns - list of google sheet names
@@ -572,8 +571,8 @@ def parseUCOSched(sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4
 
     """
 
-    
-    
+
+
     # Downloading all the values is going slowly.
     # Try to only have to load this once a day
     if not outdir :
@@ -591,7 +590,7 @@ def parseUCOSched(sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4
     stars = genStars(star_table)
 
     astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
-    
+
     return (star_table, stars)
 
 
@@ -606,7 +605,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
 
     if not outdir :
         outdir = os.getcwd()
-    
+
     obslog = ObservedLog.ObservedLog(os.path.join(outdir,observed_file))
 
     outfn = os.path.join(outdir,outfn)
@@ -620,11 +619,11 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
         too_table = readStarTable(toofn)
     else:
         too_table = None
-        
+
     for name in obslog.names:
         index = obslog.names.index(name)
         obstime = obslog.times[index]
-        owner = obslog.owners[index]        
+        owner = obslog.owners[index]
         if isinstance(obstime,float):
             t = datetime.utcfromtimestamp(obstime)
         else:
@@ -640,10 +639,10 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
 
         selection = (star_table['name'] == name) & (star_table['sheetn'] == owner)
         if any(selection):
-            if jd > star_table['lastobs'][selection]:
-                apflog( "Updating local googledex star %s from time %.4f to %.4f" % (name, star_table['lastobs'][selection], jd),echo=True)
+            if np.any(jd > star_table['lastobs'][selection]):
                 star_table['lastobs'][selection] = jd
                 star_table['nobs'][selection] += 1
+                apflog( "Updating local googledex star %s to %.4f" % (name, jd),echo=True)
         elif too_table is not None:
             selection = (too_table['name'] == name) & (too_table['sheetn'] == owner)
             if any(selection) and jd > too_table['lastobs'][selection]:
@@ -655,7 +654,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
     if too_table is not None:
         astropy.io.ascii.write(too_table,toofn, format='ecsv', overwrite=True)
         star_table = astropy.table.vstack(too_table,star_table)
-    
+
     return obslog.names, star_table
 
 def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn='parsesched.dat',outdir=None):
@@ -665,7 +664,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
 
         filename - where the observations are logged
         sheetns - list of sheets that will be updated
-        ctime - current time as a time stamp 
+        ctime - current time as a time stamp
         certificate - required for authentication
         outfn - the local copy of the star list
         outdir - directory of data files
@@ -674,7 +673,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
 
     if not outdir :
         outdir = os.getcwd()
-    
+
     obslog = ObservedLog.ObservedLog(os.path.join(outdir,observed_file))
     if len(obslog.names) == 0:
         return
@@ -691,22 +690,22 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
 
     if 'public' in needed_sheetns:
         needed_sheetns.remove('public')
-    
+
     nupdates = 0
     for sheetn in needed_sheetns:
         ws = getSpreadsheet(sheetn=sheetn,certificate=certificate)
-        
+
         if ws:
             vals = ws.get_all_values()
         else:
             continue
-        col = vals[0].index("lastobs") 
+        col = vals[0].index("lastobs")
         nobscol = vals[0].index("Nobs")
         tempcol = vals[0].index("Template")
 
         wait_time = len(vals)
         time.sleep(wait_time)
-    
+
         for i, v in enumerate(vals):
             # Did we observe this target tonight?
             local_name = parseStarname(v[0])
@@ -752,9 +751,8 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                    if taketemp == "Y" and have_temp == "N" and curowner == sheetn:
                        ws.update_cell(i+1, tempcol+1, "Y")
                        nupdates += 1
-                       apflog( "Updated %s to having a template in %s" % (v[0],sheetn),echo=True)                       
+                       apflog( "Updated %s to having a template in %s" % (v[0],sheetn),echo=True)
                 except:
                     apflog( "Error logging template obs for %s" % (v[0]),echo=True,level='error')
 
     return nupdates
-

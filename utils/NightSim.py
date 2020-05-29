@@ -1,8 +1,6 @@
 import sys
 sys.path.append("../master")
 #from ExposureCalc import *
-import UCSCScheduler_V2 as ds
-import ExposureCalculations as ec
 
 import numpy as np
 import pickle

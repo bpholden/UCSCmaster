@@ -31,9 +31,8 @@ except:
 
 import APFControl 
 from apflog import *
-import UCSCScheduler_V2 as ds
+import UCOScheduler_V1 as ds
 from x_gaussslit import *
-import ExposureCalculations
 import ParseUCOSched
 import SchedulerConsts
 from Master import Master
@@ -106,7 +105,7 @@ def calcFocusStartTime():
     # computes time 3.25 hours before sunset
     udt = datetime.utcnow()
     dt = datetime.now()    
-    time_to_sunset = ds.compute_sunset(udt)
+    time_to_sunset = ds.computeSunset(udt)
     if time_to_sunset > 36000:
         # the sun has already set
         start_time = -1.

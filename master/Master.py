@@ -49,6 +49,7 @@ class Master(threading.Thread):
 
         self.BV = None
         self.VMAG = None
+        self.blank = False
         self.decker = "W"
         
         self.obsBstar = True
@@ -207,7 +208,10 @@ class Master(threading.Thread):
         APF = self.APF
 
         def calcSlowdown():
-        
+
+            if self.blank:
+                return self.APF.robot["MASTER_SLOWDOWN"].read()
+            
             if self.BV is None:
                 apflog("Warning!: Ended up in getTarget() with no B Magnitude value, slowdown can't be computed.", echo=True)
                 self.BV = 0.6 # use a default average
@@ -333,7 +337,11 @@ class Master(threading.Thread):
             self.BV   = self.target["BV"]
             self.decker = self.target["DECKER"]
             istemp = str(self.target['isTemp'])
-            
+            if self.target["mode"] == 'B' or self.target["mode"] == 'A':
+                self.blank = True
+            else:
+                self.blank = False
+                
             apflog("getTarget(): V=%.2f  B-V=%.2f Pri=%.2f " % (self.VMAG, self.BV, self.target["PRI"]))
             apflog("getTarget(): FWHM=%.2f  Slowdown=%.2f  Countrate=%.2f" % (self.APF.avg_fwhm, slowdown, self.APF.countrate))
 

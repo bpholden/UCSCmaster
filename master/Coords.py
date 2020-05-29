@@ -1,10 +1,13 @@
 import numpy as np
 
-def makeStrs(deg,mn,sec):
+def makeStrs(deg,mn,sec,neg=False):
 
+        
     sdeg = "%d" % (deg)
     smn = "%d" % (abs(mn))
     ssec = "%.4f" % (abs(sec))
+    if neg:
+        sdeg = "-" + sdeg
     return sdeg, smn, ssec
 
 def getRARad(hr, mn, sec):
@@ -55,9 +58,9 @@ def getDECRad(deg, mn, sec, neg=False):
     dec = dec * np.pi/180.
     if neg:
         dec *= -1
-        deg *= -1
 
-    sdeg, smn, ssec = makeStrs(deg,abs(mn),abs(sec))
+    sdeg, smn, ssec = makeStrs(abs(deg),abs(mn),abs(sec),neg=neg)
+    
     return dec, sdeg, smn, ssec
 
         
