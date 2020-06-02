@@ -141,19 +141,19 @@ def okmon(ok2open):
         return
     try:
         ok = ok2open # historical
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in okmon for checkapf.OPEN_OK: %s" % (e), level='error')
         return
     try:
         if checkapf['MOVE_PERM'].read(binary=False) == False:
             ok = False
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in okmon for checkapf.MOVE_PERM: %s" % (e), level='error')
         return
     try:
         if not checkapf['USERKIND'].read(binary=True) == 3:
             ok = False
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in okmon checkapf.USERKIND: %s" % (e), level='error')
         return
     APF.openOK = ok
@@ -167,7 +167,7 @@ def windmon(wx):
         return
     try:
         wvel = float(wx)
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in windmon: %s" % (e), level='error')
         return
         
@@ -185,14 +185,14 @@ def altwindmon(wx):
         return
     try:
         downval = APF.down.read(binary=True)
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in altwindmon: %s" % (e), level='error')
         return
     if downval == 0:
         return 
     try:
         wvel = float(wx)
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in altwindmon: %s" % (e), level='error')
         return
         
@@ -212,7 +212,7 @@ def dmtimemon(dmtime):
         return
     try:
         APF.dmtime = dmtime
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in dmtimemon: %s" % (e), level='error')
 
 
@@ -559,7 +559,7 @@ class APF:
         for lamp in ("HALOGEN2","HALOGEN1","THORIUM1","THORIUM2"):
             try:
                 rv = ktl.write("apfmot",lamp,"Off",wait=False)
-            except Exception, e:
+            except Exception as e:
                 apflog("Exception: %s" % (e),echo=True,level="alert")
                 rv = False
             if rv is False:
@@ -843,12 +843,12 @@ class APF:
         apflog("Targeting telescope on %s" % star[0], echo=True)
         try:
             self.vmag.write(star[6])
-        except Exception, e:
+        except Exception as e:
             apflog("Cannot write SCRIPTOBS_VMAG: %s" % (e), level='error',echo=True)
         try:
             sline = "%s %s %s pmra=%s pmdec=%s vmag=%s # end" % (star[0],star[1],star[2],star[4],star[5],star[6])
             self.line.write(sline)
-        except Exception, e:
+        except Exception as e:
             apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
         if self.slew(star):
             return self.runFocustel()
@@ -864,7 +864,7 @@ class APF:
         result = self.teqmode.waitfor('== %s' % mode, timeout=60)
         if not result:
             apflog("Error setting the TEQMODE.")
-            raise RuntimeError, "Couldn't set TEQ mode"
+            raise RuntimeError("Couldn't set TEQ mode")
 
 
     def clearestop(self):
@@ -909,7 +909,7 @@ class APF:
     def checkHome(self,home=True):
         try:
             homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
-        except Exception, e:
+        except Exception as e:
             apflog("apfmon.ELHOMERIGHTSTA cannot be read: %s" % (e),level='Alert',echo=True)
             return False
         if homed == 2:
@@ -1228,7 +1228,7 @@ class APF:
     def DMReset(self):
         try:
             APFLib.write(self.checkapf['ROBOSTATE'], "master operating",timeout=10)
-        except Exception, e:
+        except Exception as e:
             try:
                 ukind = self.checkapf['USERKIND'].read()
             except:
@@ -1240,7 +1240,7 @@ class APF:
         try:
             if self.checkapf['DMTIME'].read(binary=True) < 1:
                 APFLib.write(self.checkapf['DMTIME'], -1,timeout=10)
-        except Exception, e:
+        except Exception as e:
             ostr = "Error: cannot touch DM Timer: %s " %( e)
             apflog(ostr,level='error',echo=True)
 
@@ -1322,7 +1322,7 @@ class APF:
             apflog("Killing Robot %s" % (str(ripd)))
             try:
                 APFLib.write(self.robot['SCRIPTOBS_CONTROL'], "abort")
-            except Exception, e:
+            except Exception as e:
                 errstr = "Cannot abort scriptobs: %s" % (e)
                 apflog(errstr,level="Warn",echo=True)
 
