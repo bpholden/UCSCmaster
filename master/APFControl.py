@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Class definition for an APF object which tracks the state of the telescope.
 
 import subprocess
@@ -1440,7 +1441,7 @@ class APF:
         return True
     
 if __name__ == '__main__':
-    print "Testing telescope monitors, grabbing and printing out current state."
+    print("Testing telescope monitors, grabbing and printing out current state.")
 
     task = 'example'
 
@@ -1451,10 +1452,10 @@ if __name__ == '__main__':
     APFTask.waitFor(task, True,timeout=2)
 
     
-    print str(apf)
+    print(str(apf))
 
     while True:
-        print str(apf)
+        print(str(apf))
         APFTask.wait(task,True,timeout=10)
 
 
