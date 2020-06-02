@@ -492,12 +492,6 @@ if __name__ == '__main__':
     if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
         logpush(os.path.join(os.getcwd(),"robot.log"))
         
-    if master.nighttargetlog:
-        try:
-            logpush(master.nighttargetlogname)
-        except:
-            apflog("cannot roll %s" % (master.nighttargetlogname))
-
     # If there is a copy of the googledex laying around, remove it so it gets re-downloaded.
     try:
         os.remove(os.path.join(os.getcwd(),"googledex.dat"))
