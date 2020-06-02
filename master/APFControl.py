@@ -326,6 +326,7 @@ class APF:
     event      = ucam['EVENT']
     combo_ps   = ucam['COMBO_PS']
     nerase     = ucam['NERASE']
+    disp0sta   = ucam['DISP0STA']
 
     apfschedule= ktl.Service('apfschedule')
     
@@ -347,7 +348,9 @@ class APF:
     save3d     = eosgcam('SAVE3D')
 
     apfmon     = ktl.Service('apfmon')
+    ucamd0sta  = apfmon['UCAMDSTA0STA']
 
+    
     def __init__(self, task="example", test=False):
         """ Initilize the current state of APF. Setup the callbacks and monitors necessary for automated telescope operation."""
         # Set up the calling task that set up the monitor and if this is a test instance
