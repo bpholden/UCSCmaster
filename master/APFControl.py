@@ -663,7 +663,7 @@ class APF:
     def calibrate(self, script, time):
         s_calibrate = os.path.join(ScriptDir,"calibrate")
         if self.test: 
-            print "Test Mode: calibrate %s %s." % (script, time)
+            apflog("Test Mode: calibrate %s %s." % (script, time))
             APFTask.waitFor(self.task, True, timeout=10)
             return True
         if time == 'pre' or 'post':
@@ -699,14 +699,14 @@ class APF:
                 
             return result
         else:
-            print "Couldn't understand argument %s, nothing was done." % time
+            apflog("Couldn't understand argument %s, nothing was done." % time)
 
     def focus(self,flags="-b"):
         """Runs the focus routine appropriate for the user."""
 
         if self.test: 
             APFTask.waitFor(self.task, True, timeout=10)
-            print "Test Mode: Would be running focusinstr."
+            apflog("Test Mode: Would be running focusinstr.")
             return True
         else:
             supplies = ('PS1_48V_ENA', 'PS2_48V_ENA')
@@ -858,7 +858,7 @@ class APF:
     def setTeqMode(self, mode):
         apflog("Setting TEQMode to %s" % mode)
         if self.test: 
-            print "Would be setting TEQMode to %s" % mode
+            apflog("Would be setting TEQMode to %s" % mode)
             return
         self.teqmode.write(mode,wait=False)
         result = self.teqmode.waitfor('== %s' % mode, timeout=60)
