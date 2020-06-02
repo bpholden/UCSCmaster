@@ -388,7 +388,8 @@ if __name__ == '__main__':
         apf.instrPermit()
         apflog("Starting the main watcher." ,echo=True)
         try:
-            sheetns, ranks = ParseUCOSched.parseRankTable(sheet_table_name=opt.rank_table)
+            if os.path.exists(opt.rank_table) is False:
+                sheetns, ranks = ParseUCOSched.parseRankTable(sheet_table_name=opt.rank_table)
             star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet,outfn='googledex.dat',outdir=".")
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
