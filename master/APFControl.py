@@ -248,6 +248,19 @@ def dewptmon(dew):
         APF.dewTooClose = False
         
     return
+
+
+def ucamdispatch(disp0sta):
+    if disp0sta['populated'] == False:
+        return
+    try:
+        apfmon_stat = APF.ucamd0sta.read(binary=True)            
+        if disp0sta['binary'] == 0 and apfmon_stat == 5:
+            # modify -s apfucam DISP0DWIM="ksetMacval DISP0STA READY"
+            apfucam['DISP0DWIM'].write("ksetMacval DISP0STA READY")
+    except:
+        return
+            
         
 class APF:
     """ Class which creates a monitored state object to track the condition of the APF telescope. """
