@@ -23,6 +23,7 @@ except:
     from fake_apflog import *
 import Visible
 
+# some globals
 
 last_objs_attempted = []
 
@@ -38,7 +39,7 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
             sdt = datetime(cur_dt.year,cur_dt.month,cur_dt.day,
                                int(star_table['uth'][available][tdinx]),
                                int(star_table['utm'][available][tdinx]),0)
-            
+
             durdelt = timedelta(0,star_table['duration'][available][tdinx],0)
             if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
                 delta_pri[tdinx] += PRI_DELTA
@@ -84,7 +85,7 @@ def readFracTable(table_name):
     else:
         sheetns= None
         fracs = None
-        
+
     return sheetns, fracs
 
 def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table'):
@@ -140,19 +141,21 @@ def makeRankTable(sheet_table_name,outfn='rank_table',outdir=None):
         rank_table = astropy.table.Table.read(outfn,format='ascii')
     else:
         sheetns, ranks = ParseUCOSched.parseRankTable(sheet_table_name=sheet_table_name)
-        
+
         rank_table= astropy.table.Table([sheetns,ranks],names=['sheetn','rank'])
         try:
             rank_table.write(outfn,format='ascii')
         except Exception as e:
             apflog("Cannot write table %s: %s" % (outfn,e),level='error',echo=True)
-            
+
     return rank_table
+
 
 def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', focval=0, coverid='',temp=False):
     """ given a name, a row in a star table and a do_flag, will generate a scriptobs line as a string
     line = makeScriptobsLine(star_table_row, t, decker="W",I2="Y")
     star_table_row -contains all of the data needed for the line except
+
     t - a datetime object, this is used to fill in the uth and utm fields,
     decker - one character field for the decker, defaults to "W"
     I2 - one character field for whether or not the Iodine cell is in, must be "Y" or "N"
@@ -167,6 +170,7 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     ret += rastr + ' '
     # Add the DEC as three elements, DEG, MIN, SEC
     decstr = "%s %s %s" % (star_table_row['Dec deg'],star_table_row['Dec min'],star_table_row['Dec sec'])
+
     ret += decstr + ' '
     # Epoch
     ret += '2000 '
@@ -175,11 +179,13 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     ret += 'pmdec=' + str(star_table_row['pmDEC']) + ' '
     # V Mag
     ret += 'vmag=' + str(star_table_row['Vmag']) + ' '
+
     # T Exp
     if temp:
         ret += 'texp=' + str(1200) + ' '
     else:
         ret += 'texp=' + str(int(star_table_row['texp'])) + ' '
+
     # I2
     ret += 'I2=%s ' % (I2)
     # lamp
@@ -211,8 +217,8 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
             count = 7
     else:
         count = int(star_table_row['APFnshots'])
+
     ret += 'count=' + str(count)
-            
 
     ret += ' foc=' + str(int(focval))
 
@@ -223,7 +229,7 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
 
     if coverid != '':
         ret += ' coverid=' + str(coverid)
-        
+
     if star_table_row['mode'] != None:
         if star_table_row['mode'] == 'B':
             m='blank=Y'
@@ -286,7 +292,7 @@ def computeSunsetRise(dt,horizon='0'):
     sunset = apf_obs.next_setting(ephem.Sun())
     sunset -= ephem.Date(dt)
     sunset *= 86400.0 # convert to seconds
-    
+
     sunrise = apf_obs.next_rising(ephem.Sun())
     sunrise -= ephem.Date(dt)
     sunrise *= 86400.0 # convert to seconds
@@ -296,7 +302,7 @@ def computeSunset(dt,horizon='0'):
 
     sunset, sunrise = computeSunsetRise(dt,horizon=horizon)
     return sunset
-    
+
 def computeSunrise(dt,horizon='0'):
     sunset, sunrise = computeSunsetRise(dt,horizon=horizon)
     return sunrise
@@ -314,7 +320,7 @@ def conditionCuts(moon,seeing,slowdown,star_table):
     transparency - magnitudes of extinction
 
     """
-    
+
     if 'seeing' in star_table.colnames:
         available = star_table['seeing']/0.109 > seeing
     else:
@@ -322,12 +328,12 @@ def conditionCuts(moon,seeing,slowdown,star_table):
 
     if 'moon' in star_table.colnames:
         available = (star_table['moon'] > moon) & available
-        
+
     if 'transparency' in star_table.colnames:
         ext = 2.5 * np.log10(slowdown)
         available = (star_table['transparency'] > ext) & available
-        
-    
+
+
     return available
 
 
@@ -375,20 +381,20 @@ def enoughTime(star_table,stars,idx,apf_obs,dt):
         apflog( "enoughTime(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
     except:
         apflog("enoughTime(): cannot log times!?!",echo=True)
-        
+
     if tot_time < time_left_before_sunrise  and vis and time_left_before_sunrise < 14*3600.:
         return True
     else:
         return False
-        
-    
+
+
 def findBstars(star_table,idx, bstars):
 
     near_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],star_table['ra'][idx],star_table['dec'][idx])
-    
+
     end_idx = findClosest(star_table['ra'][bstars],star_table['dec'][bstars],(star_table['ra'][idx]+15*np.pi/180.),star_table['dec'][idx])
 
-    
+
     return near_idx,end_idx
 
 
@@ -438,7 +444,7 @@ def lastAttempted(observed):
     if lastobj:
         if lastobj not in observed and lastobj not in last_objs_attempted:
             last_objs_attempted.append(lastobj)
-            
+
             apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
 
 
@@ -497,7 +503,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
             ptime = dt
         else:
             ptime = datetime.utcfromtimestamp(int(time.time()))
-            
+
     apflog("getNext(): Updating star list with previous observations",echo=True)
     observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,toofn=toofn,observed_file="observed_targets")
 
@@ -510,14 +516,14 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     else:
         stars = ParseUCOSched.genStars(star_table)
     targNum = len(stars)
-    
+
     # List of targets already observed
 
     last_objs_attempted = lastAttempted(observed)
     if len(last_objs_attempted) > 5:
         apflog( "getNext(): 5 failed acquisition attempts",echo=True)
         last_objs_attempted = []
-            
+
     ###
     # Need to update the googledex with the lastObserved date for observed targets
     # Scriptobs line uth utm can be used for this
@@ -535,7 +541,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     do_templates = template and templateConditions(moon, seeing, slowdown)
 
-    
+
     apflog("getNext(): Parsed the Googledex...",echo=True)
 
 
@@ -548,7 +554,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     totexptimes = np.zeros(targNum, dtype=float)
     totexptimes = star_table['texp'] * star_table['APFnshots']
-    
+
     available = np.ones(targNum, dtype=bool)
     cur_elevations = np.zeros(targNum, dtype=float)
     scaled_elevations = np.zeros(targNum, dtype=float)
@@ -563,12 +569,12 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     # We just need a B star, so restrict our math to those
     if bstar:
-        
+
         apflog("getNext(): Selecting B stars",echo=True)
         available = available & bstars
 
         f = available
-        
+
         apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,f) if _ ]
         vis,star_elevations,fin_star_elevations = Visible.is_visible(apf_obs, fstars, [400]*len(bstars[f]))
@@ -590,7 +596,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
         apflog("getNext(): Computing exposure times",echo=True)
         exp_counts = star_table['expcount']
-        
+
         # Is the exposure time too long?
         apflog("getNext(): Removing really long exposures",echo=True)
         time_check = totexptimes <= TARGET_EXPOSURE_TIME_MAX
@@ -613,7 +619,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
-    
+
     final_priorities = computePriorities(star_table,available,dt,rank_table=makeRankTable(rank_sheetn))
 
     cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) / star_table['APFcad']
@@ -679,8 +685,7 @@ if __name__ == '__main__':
 
     rank_tablen='2020A_ranks'
     rank_table = makeRankTable(rank_tablen)
-    
-    
+
 #    sheetn=["2018B"]
     sheetn="RECUR_A100,2020A_A000,2020A_A011,2020A_A012"
 
