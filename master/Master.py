@@ -67,6 +67,7 @@ class Master(threading.Thread):
         self.totTemps = totTemps        
 
         self.target = None
+        self.nexttarget = None
         
         self.apftask = ktl.Service('apftask')
         self.lineresult = self.apftask['SCRIPTOBS_LINE_RESULT']
