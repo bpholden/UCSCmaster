@@ -27,6 +27,11 @@ import Visible
 
 last_objs_attempted = []
 
+# some constants
+ACQUIRE = 'A'
+BLANK = 'B'
+FIRST = '1'
+LAST = 'L'
 
 def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
