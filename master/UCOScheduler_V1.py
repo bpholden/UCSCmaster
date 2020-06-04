@@ -416,6 +416,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False):
     res['NAME']   = star_table['name'][idx]
     res['PRI']    = star_table['APFpri'][idx]
     res['DECKER'] = star_table['decker'][idx]
+    res['I2']     = star_table['I2'][idx]
     res['isTemp'] =    False
     res['isBstar'] =    bstar
     res['owner'] =    star_table['sheetn'][idx]
