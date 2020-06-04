@@ -400,7 +400,61 @@ def findBstars(star_table,idx, bstars):
     return near_idx,end_idx
 
 
-def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False):
+def makeObsBlock(star_table, idx, dt, focval):
+
+    rv = []
+
+    cur_obsblock = star_table['obsblock'][idx]
+
+    allinblock = (star_table['obsblock'] == cur_obsblock)
+    allinblock = allinblock & (star_table['sheetn'] == star_table['sheetn'][idx])
+
+    if np.any(star_table['mode'][allinblock] == FIRST):
+        first = (star_table['mode'][allinblock] == FIRST)
+    elif np.any(star_table['mode'][allinblock] == ACQUIRE):
+        first = (star_table['mode'][allinblock] == ACQUIRE)
+    else:
+        first = None
+
+    if np.any(star_table['mode'][allinblock] == LAST):
+        last = (star_table['mode'][allinblock] == LAST)
+    else:
+        last = None
+
+    rest = (star_table['mode'][allinblock] != FIRST)
+    rest = rest & (star_table['mode'][allinblock] != ACQUIRE)
+    rest = rest & (star_table['mode'][allinblock] != LAST)
+    rest_idxs, = np.where(rest)
+
+
+    if np.any(first):
+        first_idxs, = np.where(first)
+        for idx in first_idxs:
+            scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
+                                                owner=star_table['sheetn'][allinblock][idx], \
+                                                I2=star_table['I2'][allinblock][idx], focval=focval)
+            rv.append(scriptobs_line)
+
+    for idx in rest_idxs:
+        scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
+                                               owner=star_table['sheetn'][allinblock][idx], \
+                                               I2=star_table['I2'][allinblock][idx], focval=focval)
+        rv.append(scriptobs_line)
+
+    if np.any(last):
+        last_idxs, = np.where(last)
+        for idx in last_idxs:
+            scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
+                                                owner=star_table['sheetn'][allinblock][idx], \
+                                                I2=star_table['I2'][allinblock][idx], focval=focval)
+            rv.append(scriptobs_line)
+
+
+    rv.reverse()
+    rv[0] += ' # obsblock=%s end' % (cur_obsblock)
+    return(rv)
+
+def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode=''):
     res = dict()
 
     res['RA']     = stars[idx].a_ra
