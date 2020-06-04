@@ -241,8 +241,7 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
         elif star_table_row['mode'] == ACQUIRE:
             ret += ' guide=Y'
     else:
-        m =  ''
-    ret += ' ' + str(m)
+        ret += ''
 
     raoff  = star_table_row['raoff']
     decoff = star_table_row['decoff']
