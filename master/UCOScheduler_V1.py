@@ -251,7 +251,7 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
         decoff = None
     if raoff is not None and decoff is not None:
         ret += ' raoff=' + str(raoff) + ' decoff=' + str(decoff)
-        
+
     return str(ret)
 
 def calc_elevations(stars, observer):
