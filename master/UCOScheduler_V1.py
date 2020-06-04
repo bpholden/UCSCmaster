@@ -665,7 +665,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table['lastobs'][idx]) / star_table['APFcad'][idx]), ephem.julian_date(dt), star_table['lastobs'][idx], star_table['APFcad'][idx])
     apflog(cstr,echo=True)
 
-    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval,bstar=bstar)
+    res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval,bstar=bstar,mode=config['mode'])
     if do_templates and star_table['Template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
 
