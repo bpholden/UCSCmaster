@@ -474,12 +474,17 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
     res['isTemp'] =    False
     res['isBstar'] =    bstar
     res['owner'] =    star_table['sheetn'][idx]
-    res['mode'] = star_table['mode'][idx]
-    
-    res['SCRIPTOBS'] = []
-    scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
-    scriptobs_line = scriptobs_line + " # end"
-    res['SCRIPTOBS'].append(scriptobs_line)
+
+    res['obsblock'] = star_table['obsblock'][idx]
+
+    if res['obsblock'] == None :
+        res['SCRIPTOBS'] = []
+        scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
+        scriptobs_line = scriptobs_line + " # end"
+        res['SCRIPTOBS'].append(scriptobs_line)
+    else:
+        res['SCRIPTOBS'] = makeObsBlock(star_table,idx, dt, focval)
+
     return res
 
 def lastAttempted(observed):
