@@ -752,7 +752,8 @@ if __name__ == '__main__':
 
 
 #    sheetn=["2018B"]
-    sheetn="RECUR_A100,2020A_A000,2020A_A011,2020A_A012"
+#    sheetn="RECUR_A100,2020A_A000,2020A_A011,2020A_A012"
+    sheetn="RECUR_A100,test_obsblock"
 
     # For some test input what would the best target be?
     otfn = "observed_targets"
