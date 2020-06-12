@@ -428,19 +428,22 @@ def makeObsBlock(star_table, idx, dt, focval):
     rest = rest & (star_table['mode'][allinblock] != LAST)
     rest_idxs, = np.where(rest)
 
-
+    first_line = ""
     if np.any(first):
         first_idxs, = np.where(first)
-        for idx in first_idxs:
-            scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
-                            owner=star_table['sheetn'][allinblock][idx], \
+        idx = first_idxs[0]
+
+        first_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
+                                owner=star_table['sheetn'][allinblock][idx], \
                             I2=star_table['I2'][allinblock][idx], focval=focval)
-            rv.append(scriptobs_line)
+        
 
     for idx in rest_idxs:
         scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
                             owner=star_table['sheetn'][allinblock][idx], \
                             I2=star_table['I2'][allinblock][idx], focval=focval)
+        if len(first_line) > 0:
+            rv.append(first_line)
         rv.append(scriptobs_line)
 
     if np.any(last):
