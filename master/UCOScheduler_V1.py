@@ -433,22 +433,22 @@ def makeObsBlock(star_table, idx, dt, focval):
         first_idxs, = np.where(first)
         for idx in first_idxs:
             scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
-                                                owner=star_table['sheetn'][allinblock][idx], \
-                                                I2=star_table['I2'][allinblock][idx], focval=focval)
+                            owner=star_table['sheetn'][allinblock][idx], \
+                            I2=star_table['I2'][allinblock][idx], focval=focval)
             rv.append(scriptobs_line)
 
     for idx in rest_idxs:
         scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
-                                               owner=star_table['sheetn'][allinblock][idx], \
-                                               I2=star_table['I2'][allinblock][idx], focval=focval)
+                            owner=star_table['sheetn'][allinblock][idx], \
+                            I2=star_table['I2'][allinblock][idx], focval=focval)
         rv.append(scriptobs_line)
 
     if np.any(last):
         last_idxs, = np.where(last)
         for idx in last_idxs:
             scriptobs_line = makeScriptobsLine(star_table[allinblock][idx], dt, decker=star_table['decker'][allinblock][idx], \
-                                                owner=star_table['sheetn'][allinblock][idx], \
-                                                I2=star_table['I2'][allinblock][idx], focval=focval)
+                            owner=star_table['sheetn'][allinblock][idx], \
+                            I2=star_table['I2'][allinblock][idx], focval=focval)
             rv.append(scriptobs_line)
 
 
