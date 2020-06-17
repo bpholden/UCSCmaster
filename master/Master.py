@@ -255,7 +255,7 @@ class Master(threading.Thread):
             APFLib.write(self.APF.robot["MASTER_SLOWDOWN"], slowdown)
             return slowdown
 
-        def popNext()
+        def popNext():
 
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
