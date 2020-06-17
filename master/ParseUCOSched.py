@@ -18,7 +18,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
 import Coords
-from SchedulerConsts import EXP_LIM
+from SchedulerConsts import EXP_LIM, MAX_PRI
 import ExposureCalculations as ec
 
 try:
@@ -393,7 +393,9 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
 
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < prilim: continue
+        if apfpri > MAX_PRI: apfpri = MAX_PRI
 
+            
         name =parseStarname(ls[didx["Star Name"]])
         # Get the RA
         raval,rahr,ramin,rasec = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
