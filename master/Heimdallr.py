@@ -388,14 +388,20 @@ if __name__ == '__main__':
         apf.instrPermit()
         apflog("Starting the main watcher." ,echo=True)
         try:
-            if os.path.exists(opt.rank_table) is False:
-                sheetns, ranks = ParseUCOSched.parseRankTable(sheet_table_name=opt.rank_table)
-            star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet,outfn='googledex.dat',outdir=".")
+            star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet,outfn='googledex.dat',outdir=os.getcwd())
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
             # goto backup
             if os.path.exists("googledex.dat.1"):
                 shutil.copyfile("googledex.dat.1","googledex.dat")
+                
+        try:
+            rank_table = ParseUCOSched.makeRankTable(sheet_table_name=opt.rank_table,outdir=os.getcwd())
+        except Exception as e:
+            apflog("Error: Cannot download rank_table?! %s" % (e),level="error")
+            # goto backup
+            if os.path.exists("rank_table.1"):
+                shutil.copyfile("rank_table.1","rank_table")
 
         bstr = "%d,%d" % (opt.binning,opt.binning)
         apf.ucam['BINNING'].write(bstr)
