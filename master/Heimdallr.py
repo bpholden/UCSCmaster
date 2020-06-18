@@ -489,6 +489,9 @@ if __name__ == '__main__':
     if os.path.exists(os.path.join(os.getcwd(),"googledex.dat")):
         logpush(os.path.join(os.getcwd(),"googledex.dat"))
         
+    if os.path.exists(os.path.join(os.getcwd(),"rank_table")):
+        logpush(os.path.join(os.getcwd(),"rank_table"))
+        
     if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
         logpush(os.path.join(os.getcwd(),"robot.log"))
         
@@ -497,6 +500,11 @@ if __name__ == '__main__':
         os.remove(os.path.join(os.getcwd(),"googledex.dat"))
     except OSError:
         apflog("Note: There was no googledex save file to delete today.", echo=True)
+        
+    try:
+        os.remove(os.path.join(os.getcwd(),"rank_table"))
+    except OSError:
+        apflog("Note: There was no rank table file to delete today.", echo=True)
 
     apfmon = ktl.Service('apfmon')
     if apfmon['BINNINGDIS'].read(binary=True) > 0:
