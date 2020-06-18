@@ -44,7 +44,7 @@ def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
     precision, true_error = ge.compute_real_uncertainty(totcounts,result['BV'])
     if actaz < 180:
         actel *= -1.
-    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %.2f" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow, actel)
+    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow, actel, res['owner'])
     print (outstr)
     outfp.write(outstr + "\n")
     return curtime, lastfwhm, lastslow
