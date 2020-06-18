@@ -473,6 +473,7 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
     res['I2']     = star_table['I2'][idx]
     res['isTemp'] =    False
     res['isBstar'] =    bstar
+    res['mode']   =   None
     res['owner'] =    star_table['sheetn'][idx]
 
     res['obsblock'] = star_table['obsblock'][idx]
