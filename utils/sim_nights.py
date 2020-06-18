@@ -75,7 +75,7 @@ def read_datefile(datefn):
         
     return datelist
 
-def gen_datelist(startstr,endstr,double=False):
+def gen_datelist(startstr,endstr):
     datelist = []
     start = datetime.strptime(startstr,"%Y/%m/%d")
     end  = datetime.strptime(endstr,"%Y/%m/%d")
@@ -171,7 +171,7 @@ def parse_args():
         df = os.path.join(options.outdir,options.datefile)
         datelist = read_datefile(df)
     else:
-        datelist = gen_datelist(args[0],args[1],double=options.double)
+        datelist = gen_datelist(args[0],args[1])
 
     if options.seed:
         random.seed(int(options.seed))
