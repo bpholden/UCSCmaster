@@ -396,7 +396,7 @@ if __name__ == '__main__':
                 shutil.copyfile("googledex.dat.1","googledex.dat")
                 
         try:
-            rank_table = ParseUCOSched.makeRankTable(sheet_table_name=opt.rank_table,outdir=os.getcwd())
+            rank_table = ds.makeRankTable(sheet_table_name=opt.rank_table,outdir=os.getcwd())
         except Exception as e:
             apflog("Error: Cannot download rank_table?! %s" % (e),level="error")
             # goto backup
