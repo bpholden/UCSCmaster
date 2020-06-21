@@ -354,8 +354,8 @@ def normalizePriorities(star_table,sheetns):
 
         select = (star_table['sheetn'] == sheetn)&(star_table['Bstar'] == 'N')
         if any(select):
-            med = np.median(star_table['APFpri'])
-            star_table['APFpri'] += 5 - med
+            offset = MAX_PRI - np.max(star_table['APFpri'][select])
+            star_table['APFpri'][select] += offset
 
     return
 
