@@ -32,7 +32,7 @@ BLANK = 'B'
 FIRST = '1'
 LAST = 'L'
 
-def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=None):
+def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     new_pri = np.zeros_like(star_table['APFpri'])
     if any(star_table['duration'][available] > 0):
@@ -48,10 +48,10 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
             if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
                 delta_pri[tdinx] += PRI_DELTA
         new_pri[available] += delta_pri
-    elif frac_table is not None:
+    elif hour_table is not None:
         new_pri += star_table['APFpri']
-        too_much = frac_table['cur']  > frac_table['tot']
-        done_sheets = frac_table['sheetn'][too_much]
+        too_much = hour_table['cur']  > hour_table['tot']
+        done_sheets = hour_table['sheetn'][too_much]
         for sheetn in done_sheets:
             bad = star_table['sheetn'] == sheetn
             new_pri[bad] = 0
