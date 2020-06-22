@@ -528,7 +528,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
             star_table_names = [n] + star_table_names
 
     star_table = astropy.table.Table(star_table,names=star_table_names)
-    #    star_table = normalizePriorities(star_table)
+    # star_table = normalizePriorities(star_table)
     return star_table
 
 def genStars(star_table):
