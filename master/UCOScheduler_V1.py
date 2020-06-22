@@ -12,7 +12,6 @@ import astropy.io
 import ephem
 from ExposureCalculations import getI2_M, getI2_K, getEXPMeter, getEXPMeter_Rate, getEXPTime
 import ParseUCOSched
-import ObservedLog
 import Coords
 from SchedulerConsts import * # I know
 
@@ -68,7 +67,7 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
 
 
 
-def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table'):
+def makeHourTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table'):
 
     if not outdir :
         outdir = os.getcwd()
@@ -721,7 +720,11 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
 if __name__ == '__main__':
 
-
+    dt = datetime.now()
+    
+    frac_tablen='2020A_frac'
+    hour_table = makeHourTable(frac_tablen,dt)
+    
     rank_tablen='2020A_ranks'
     rank_table = makeRankTable(rank_tablen)
 
