@@ -101,6 +101,7 @@ def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
 
     sunset,sunrise = computeSunsetRise(dt,horizon='-9')
     tot = sunrise - sunset
+    tot /= 3600.
 
     hour_table['tot'] =tot*hour_table['frac']
     hour_table['cur'] =0.0*hour_table['frac']
