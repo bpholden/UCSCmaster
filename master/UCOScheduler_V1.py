@@ -545,6 +545,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     apflog("getNext(): Updating star list with previous observations",echo=True)
     observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,toofn=toofn,observed_file="observed_targets")
 
+    if frac_sheetn is not None:
+        hour_table = makeHourTable(frac_sheetn,dt)
+        hour_table = updateHourTable(hour_table,observed)
+    
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
 
