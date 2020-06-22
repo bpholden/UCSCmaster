@@ -65,7 +65,40 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
         new_pri += star_table['APFpri']
     return new_pri
 
+def updateHourTable(hour_table,observed,outfn='hour_table'):
+    '''
+    updateHourTableobserved_logs,outfn='hour_table')
 
+    Updates hour_table with history of observations.
+    
+    '''
+
+
+    cur = datetime.now()
+
+    hours = dict()
+
+    # observed objects have lists as attributes
+    # in reverse time order, so most recent target observed is first.
+    nobj = len(observed.names)
+    for i in range(0,nobj):
+            own = observe.owner[i]
+            if own not in hours.keys():
+                    hours[own] = 0.0
+    
+    for i in range(0,nobj):
+            hr, mn = observe.times[i]
+            prev = datetime.datetime(dt.year,dt.month,dt.day,hr,mn)
+            diff = cur - prev
+            diff *= 24
+            hours[observe.owner[i]] += diff
+            cur = prev
+
+    for ky in hours.keys():
+        hour_table['cur'][hour_table['sheetn'] == ky] = hours[ky]
+
+    return hour_table
+    
 
 def makeHourTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table'):
 
