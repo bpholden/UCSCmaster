@@ -657,7 +657,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
         astropy.io.ascii.write(too_table,toofn, format='ecsv', overwrite=True)
         star_table = astropy.table.vstack(too_table,star_table)
 
-    return obslog.names, star_table
+    return obslog, star_table
 
 def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn='parsesched.dat',outdir=None):
     """
