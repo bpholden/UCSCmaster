@@ -21,7 +21,5 @@ if __name__ == "__main__":
             sheetns = set(obslog.owners)
         else:
             sheetns = set(obslog.sheetns)
-    for sheetn in sheetns:
-        n= ParseUCOSched.updateSheetLastobs(fn,sheetns=[sheetn],outfn=outfn)
-        if n > 0:
-            time.sleep(n)
+
+        ParseUCOSched.updateSheetLastobs(fn,sheetns=sheetns,outfn=outfn)
