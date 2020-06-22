@@ -578,9 +578,12 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     apflog("getNext(): Updating star list with previous observations",echo=True)
     observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,toofn=toofn,observed_file="observed_targets")
 
+    hour_table = None
     if frac_sheetn is not None:
         hour_table = makeHourTable(frac_sheetn,dt)
         hour_table = updateHourTable(hour_table,observed)
+    
+        
     
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
@@ -695,7 +698,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         return None
 
 
-    final_priorities = computePriorities(star_table,available,dt,rank_table=makeRankTable(rank_sheetn))
+    final_priorities = computePriorities(star_table,available,dt,rank_table=makeRankTable(rank_sheetn),hour_table=hour_table)
 
     cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) / star_table['APFcad']
     good_cadence = cadence_check >  1.0
