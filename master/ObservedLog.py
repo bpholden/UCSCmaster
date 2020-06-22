@@ -77,7 +77,10 @@ class ObservedLog():
                         if 'coverid' in keyvals.keys():
                             self.sheetns.append(keyvals['coversheetid'])
                         else:
-                            self.sheetns.append(None)
+                            if 'owner' in keyvals.keys():
+                                self.sheetns.append(keyvals['owner'])
+                            else:
+                                self.sheetns.append(None)
             
         self.names.reverse()
         self.times.reverse()
