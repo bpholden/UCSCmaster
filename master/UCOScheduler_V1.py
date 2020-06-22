@@ -67,31 +67,6 @@ def computePriorities(star_table,available,cur_dt,frac_table=None,rank_table=Non
     return new_pri
 
 
-def readFracTable(table_name):
-    sheetns = []
-    fracs = []
-    if table_name is not None and os.path.exists(table_name):
-        with open(table_name, 'r') as f:
-            for line in f:
-                sline = line.strip()
-                if sline == '':
-                    continue
-                elif sline[0] == '#':
-                    continue
-                else:
-                    sheetn, strfrac = line.split()
-                    sheetns.append(sheetn)
-                    try:
-                        frac = float(strfrac)
-                    except:
-                        frac = 0
-                        apflog("Sheet %s has a fraction of %s which is not a float" %(sheetn,frac),level='error',echo=True)
-                    fracs.append(frac)
-    else:
-        sheetns= None
-        fracs = None
-
-    return sheetns, fracs
 
 def makeFracTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table'):
 
