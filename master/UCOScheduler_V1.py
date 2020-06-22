@@ -480,7 +480,7 @@ def lastAttempted(observed):
         lastobj = None
 
     if lastobj:
-        if lastobj not in observed and lastobj not in last_objs_attempted:
+        if lastobj not in observed.names and lastobj not in last_objs_attempted:
             last_objs_attempted.append(lastobj)
 
             apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
