@@ -236,7 +236,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     return didx
 
 
-def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn=None,outdir=None):
+def parseFracTable(sheet_table_name='2020B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn=None,outdir=None):
 
     apflog( "Starting parse of %s" % (sheet_table_name),echo=True)
     if not outdir :
@@ -248,6 +248,8 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             lines = fp.readlines()
             for ln in lines:
                 row = ln.strip().split()
+                if row[0] == 'sheetn':
+                    continue
                 sheetns.append(row[0])
                 try:
                     frac.append(float(row[0]))
@@ -257,7 +259,7 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
 
     sheetns = []
     frac = []
-    twod = []
+
     worksheet = getSpreadsheet(sheetn=sheet_table_name,certificate=certificate)
     if worksheet:
         cur_codex = worksheet.get_all_values()
@@ -265,9 +267,10 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
             return None, None
         for row in cur_codex:
+            if row[0] == 'sheetn':
+                continue
             sheetns.append(row[0])
             frac.append(floatDefault(row[1]))
-            twod.append([row[0],row[1]])
 
 
     return sheetns,frac
