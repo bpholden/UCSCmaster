@@ -33,9 +33,9 @@ def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
     exp_time = result['EXP_TIME']
     barycentertime = curtime
     if metertime < exp_time:
-        fexptime = metertime
+        fexptime = float(metertime)
     else:
-        fexptime = exp_time
+        fexptime = float(exp_time)
         
     curtime += (fexptime+40.)/86400
     barycentertime += fexptime/(2.*86400)
@@ -44,7 +44,7 @@ def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
     precision, true_error = ge.compute_real_uncertainty(totcounts,result['BV'])
     if actaz < 180:
         actel *= -1.
-    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow, actel, res['owner'])
+    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow, actel, result['owner'])
     print (outstr)
     outfp.write(outstr + "\n")
     return curtime, lastfwhm, lastslow
@@ -54,8 +54,8 @@ def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
 parser.add_option("-f","--fixed",dest="fixed",default="")
-parser.add_option("-s","--smartlist",dest="smartlist",default=False,action="store_true")
 parser.add_option("-g","--googledex",dest="googledex",default="RECUR_A100,2020A_A000,2020A_A001,2020A_A002,2020A_A003,2020A_A004,2020A_A005,2020A_A006,2020A_A008,2020A_A009,2020A_A011,2020A_A012,2020A_A013")
+parser.add_option("--frac_table",dest="frac_tablen",default="2020A_frac")
 parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
 parser.add_option("-o","--outfile",dest="outfile",default=None)
 parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
@@ -109,10 +109,7 @@ tempcount = 0
 while observing:
     curtime = ephem.Date(curtime)
 
-    if options.smartlist and options.fixed != "":
-        result = ds.smartList(options.fixed, curtime.datetime(), lastfwhm, lastslow)
-    else:
-        result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=options.infile,template=doTemp,sheetns=options.googledex.split(","),outdir=outdir)
+    result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=options.infile,template=doTemp,sheetns=options.googledex.split(","),outdir=outdir,frac_sheet=options.frac_tablen)
     if result:
         if bstar:
             bstar = False
