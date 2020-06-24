@@ -542,7 +542,7 @@ def behindMoon(moon,ras,decs):
 
     return moon_check
 
-def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_A100"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table',frac_sheetn=None):
+def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_A100"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table',frac_sheet=None):
     """ Determine the best target for UCSC team to observe for the given input.
         Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
@@ -586,9 +586,9 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,toofn=toofn,observed_file="observed_targets")
 
     hour_table = None
-    if frac_sheetn is not None:
-        hour_table = makeHourTable(frac_sheetn,dt)
-        hour_table = updateHourTable(hour_table,observed)
+    if frac_sheet is not None:
+        hour_table = makeHourTable(frac_sheet,dt)
+        hour_table = updateHourTable(hour_table,observed,dt)
     
         
     
