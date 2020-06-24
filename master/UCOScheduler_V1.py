@@ -80,13 +80,14 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
     # in reverse time order, so most recent target observed is first.
     nobj = len(observed.names)
     for i in range(0,nobj):
-            own = observe.owner[i]
+            own = observed.owners[i]
             if own not in hours.keys():
                     hours[own] = 0.0
-    
+                    
+    cur = dt
     for i in range(0,nobj):
-            hr, mn = observe.times[i]
-            prev = datetime.datetime(dt.year,dt.month,dt.day,hr,mn)
+            hr, mn = observed.times[i]
+            prev = datetime(dt.year,dt.month,dt.day,hr,mn)
             diff = cur - prev
             diff *= 24
             hours[observe.owner[i]] += diff
