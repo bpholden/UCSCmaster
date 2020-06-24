@@ -65,7 +65,7 @@ def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=Non
         new_pri += star_table['APFpri']
     return new_pri
 
-def updateHourTable(hour_table,observed,outfn='hour_table'):
+def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
     '''
     updateHourTableobserved_logs,outfn='hour_table')
 
@@ -73,8 +73,6 @@ def updateHourTable(hour_table,observed,outfn='hour_table'):
     
     '''
 
-
-    cur = datetime.now()
 
     hours = dict()
 
