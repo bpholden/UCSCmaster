@@ -137,6 +137,8 @@ def makeHourTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
     hour_table= astropy.table.Table(frac_table,names=['sheetn','frac'])
 
     sunset,sunrise = computeSunsetRise(dt,horizon='-9')
+    if sunrise < sunset:
+        sunrise += 86400
     tot = sunrise - sunset
     tot /= 3600.
 
