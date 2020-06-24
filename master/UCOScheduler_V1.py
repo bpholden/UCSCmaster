@@ -97,6 +97,11 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
     for ky in hours.keys():
         hour_table['cur'][hour_table['sheetn'] == ky] = hours[ky]
 
+    try:
+        hour_table.write(outfn,format='ascii',overwrite=True)
+    except Exception as e:
+        apflog("Cannot write table %s: %s" % (outfn,e),level='error',echo=True)
+
     return hour_table
     
 
