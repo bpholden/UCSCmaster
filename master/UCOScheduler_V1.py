@@ -89,8 +89,9 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
             hr, mn = observed.times[i]
             prev = datetime(dt.year,dt.month,dt.day,hr,mn)
             diff = cur - prev
-            diff *= 24
-            hours[observe.owner[i]] += diff
+            hourdiff = (diff.days * 24 + diff.seconds / 3600.)
+            if hourdiff > 0:
+                hours[observed.owners[i]] += hourdiff
             cur = prev
 
     for ky in hours.keys():
