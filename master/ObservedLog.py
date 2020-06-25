@@ -48,7 +48,7 @@ class ObservedLog():
             f = open(self.filename, 'r')
         except IOError:
             apflog( "Couldn't open %s" % filename,level="warn",echo=True)
-            return (), (), (), ()
+            return 
         else: 
             for line in f:
                 line = line.strip()
