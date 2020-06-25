@@ -638,7 +638,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
 
     totexptimes = np.zeros(targNum, dtype=float)
-    totexptimes = star_table['texp'] * star_table['APFnshots']
+    totexptimes = star_table['texp'] * star_table['APFnshots'] + 40 * (star_table['APFnshots']-1)
 
     available = np.ones(targNum, dtype=bool)
     cur_elevations = np.zeros(targNum, dtype=float)
