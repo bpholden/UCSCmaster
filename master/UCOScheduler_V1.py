@@ -556,13 +556,13 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     config = dict()
     config['I2'] = 'Y'
     config['decker']='W'
-    config['mode']=None
-    config['obsblock']=None
+    config['mode']=''
+    config['obsblock']=''
     config['Bstar']='N'
     config['owner']=owner
     config['inst']='levy'
-    config['raoff'] = None
-    config['decoff'] = None
+    config['raoff'] = ''
+    config['decoff'] = ''
 
 
     apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
