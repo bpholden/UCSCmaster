@@ -396,6 +396,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         if ls[0] == '':
             continue
         apfpri = floatDefault(ls[didx["APFpri"]])
+        apfpri = int(round(apfpri))
         nobs = intDefault(ls[didx["Nobs"]])
         totobs = intDefault(ls[didx["Total Obs"]],default=-1)
 
