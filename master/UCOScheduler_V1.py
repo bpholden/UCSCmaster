@@ -724,17 +724,16 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     else:
         sort_j = scaled_elevations[sort_i].argsort()[::-1]
 
-    t_n = star_table['name'][sort_i][sort_j][0]
+    allidx, = np.where(sort_i)
+    idx = allidx[sort_j][0]
+        
+    t_n = star_table['name'][idx]
+    o_n = star_table['sheetn'][idx]
+    p_n = star_table['APFpri'][idx]
 
+    apflog("getNext(): selected target %s for program %s at priority %.0f" % (t_n,o_n,p_n) )
     elstr= "getNext(): star elevations %s" % (cur_elevations[sort_i][sort_j])
     apflog(elstr,echo=True)
-
-    t_n = star_table['name'][sort_i][sort_j][0]
-
-    apflog("getNext(): selected target %s" % (t_n) )
-
-    idx, = np.where(star_table['name'] == t_n)
-    idx = idx[star_table['APFpri'][idx].argmax()]
 
     stars[idx].compute(apf_obs)
 
