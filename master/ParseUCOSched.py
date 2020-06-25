@@ -623,7 +623,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
     if os.path.exists(outfn):
         star_table = readStarTable(outfn)
     else:
-        return obslog.names, None
+        return obslog, None
 
     toofn = os.path.join(outdir,toofn)
     if os.path.exists(toofn):
