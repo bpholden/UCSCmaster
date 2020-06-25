@@ -359,7 +359,12 @@ def normalizePriorities(star_table,sheetns):
         if any(select):
             offset = MAX_PRI - np.max(star_table['APFpri'][select])
             star_table['APFpri'][select] += offset
-
+            
+        negselect = (star_table['sheetn'] == sheetn)&(star_table['Bstar'] == 'N')&(star_table['APFpri'] <1)
+        if any(negselect):
+            offset = np.min(star_table['APFpri'][negselect])
+            star_table['APFpri'][negselect] += -1*offset
+            
     return
 
 def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',prilim=0.5):
