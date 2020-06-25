@@ -651,6 +651,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         for n in last_objs_attempted:
             attempted = (star_table['name'] == n)
             available = available & np.logical_not(attempted) # Available and not observed
+            
+    cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) / star_table['APFcad']
+    good_cadence = cadence_check >  1.0
+    available = available & good_cadence
 
     # We just need a B star, so restrict our math to those
     if bstar:
@@ -707,22 +711,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     final_priorities = computePriorities(star_table,available,dt,rank_table=makeRankTable(rank_sheetn),hour_table=hour_table)
 
-    cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) / star_table['APFcad']
-    good_cadence = cadence_check >  1.0
-    good_cadence_available = available & good_cadence
-
-    if any(good_cadence_available):
-        try:
-            pri = max(final_priorities[good_cadence_available])
-            sort_i = (final_priorities == pri) & good_cadence_available
-        except:
-            pri = max(final_priorities[available])
-            sort_i = (final_priorities == pri) & available
-    elif any(available):
-        apflog( "getNext(): No new stars available, going back to the previously observed list.",level="warn",echo=True)
+    try:
         pri = max(final_priorities[available])
         sort_i = (final_priorities == pri) & available
-    else:
+    except:
         apflog( "getNext(): Couldn't find any suitable targets!",level="error",echo=True)
         return None
 
@@ -745,8 +737,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     idx = idx[star_table['APFpri'][idx].argmax()]
 
     stars[idx].compute(apf_obs)
-    cstr= "getNext(): cadence check: %f (%f %f %f)" % (((ephem.julian_date(dt) - star_table['lastobs'][idx]) / star_table['APFcad'][idx]), ephem.julian_date(dt), star_table['lastobs'][idx], star_table['APFcad'][idx])
-    apflog(cstr,echo=True)
 
     res =  makeResult(stars,star_table,totexptimes,dt,idx,focval=focval,bstar=bstar,mode=config['mode'])
     if do_templates and star_table['Template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
