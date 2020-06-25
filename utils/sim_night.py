@@ -88,6 +88,9 @@ except Exception as e:
     print ("cannot open file %s for output, %s,  exiting" % (outfile,e))
     sys.exit()
 
+if os.path.exists('hour_table'):
+    os.remove('hour_table')
+    
 hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
 outfp.write(hdrstr)
         
