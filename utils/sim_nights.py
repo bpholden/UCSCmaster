@@ -205,6 +205,9 @@ if __name__ == "__main__":
     
     for datestr in datelist:
 
+        if os.path.exists('hour_table'):
+            os.remove('hour_table')
+        
         star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.sheetns.split(","),outfn=options.infile,outdir=options.outdir)
     
         fwhms = ns.gen_seeing()
