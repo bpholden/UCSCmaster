@@ -159,6 +159,8 @@ def parse_args():
     parser.add_option("--seed",dest="seed",default=None)
     parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
     parser.add_option("-o","--outdir",dest="outdir",default=".")        
+    parser.add_option("--frac_table",dest="frac_sheetn",default="2020A_frac")
+    parser.add_option("--rank_table",dest="rank_sheetn",default="2020A_ranks")
 
     parser.add_option("-m","--masterfile",dest="master",default="sim_master.simout")
     (options, args) = parser.parse_args()    
@@ -222,7 +224,8 @@ if __name__ == "__main__":
         curtime, endtime, apf_obs = ns.sun_times(datestr)
         while observing:
 
-            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=options.infile,outdir=options.outdir)
+            result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=options.infile, outdir=options.outdir,template=doTemp,
+                                    frac_sheet=options.frac_sheetn,rank_sheetn=options.rank_sheetn)
             if result:
                 if bstar:
                     bstar = False
