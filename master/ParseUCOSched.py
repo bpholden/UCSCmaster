@@ -313,7 +313,9 @@ def parseRankTable(sheet_table_name='2020A_ranks',certificate='UCSC Dynamic Sche
             return None, None
         for row in cur_codex[1:]:
             sheetns.append(row[0])
-            rank.append(floatDefault(row[1]))
+            crank = floatDefault(row[1])
+            crank = int(round(crank))
+            rank.append(crank)
 
     time_left = timeLeft()
     if time_left is not None:
