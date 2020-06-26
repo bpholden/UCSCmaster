@@ -35,6 +35,8 @@ LAST = 'L'
 def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     new_pri = np.zeros_like(star_table['APFpri'])
+    new_pri += star_table['APFpri']
+    
     if any(star_table['duration'][available] > 0):
         new_pri[available] += star_table['APFpri'][available]
         delta_pri = np.zeros_like(new_pri[available])
@@ -48,21 +50,20 @@ def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=Non
             if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
                 delta_pri[tdinx] += PRI_DELTA
         new_pri[available] += delta_pri
-    elif hour_table is not None:
-        new_pri += star_table['APFpri']
+        
+    if hour_table is not None:
         too_much = hour_table['cur']  > hour_table['tot']
         done_sheets = hour_table['sheetn'][too_much]
         for sheetn in done_sheets:
             bad = star_table['sheetn'] == sheetn
             new_pri[bad] = 0
 
-    elif rank_table is not None:
-        new_pri += star_table['APFpri']
+    if rank_table is not None:
         for sheetn in rank_table['sheetn']:
             cur = star_table['sheetn'] == sheetn
             new_pri[cur] += rank_table['rank'][rank_table['sheetn'] == sheetn]
-    else:
-        new_pri += star_table['APFpri']
+    
+    
     return new_pri
 
 def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
