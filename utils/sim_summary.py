@@ -64,7 +64,7 @@ def parse_args():
 options = parse_args()
 try:
     fp = open(options.infile)
-except Exception, e:
+except Exception as e:
     print ("Cannot open %s: %s" % (options.infile,e))
     
 simin = fp.read()

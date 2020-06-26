@@ -388,13 +388,20 @@ if __name__ == '__main__':
         apf.instrPermit()
         apflog("Starting the main watcher." ,echo=True)
         try:
-            sheetns, ranks = ParseUCOSched.parseRankTable(sheet_table_name=opt.rank_table)
-            star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet,outfn='googledex.dat',outdir=".")
+            star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet,outfn='googledex.dat',outdir=os.getcwd())
         except Exception as e:
             apflog("Error: Cannot download googledex?! %s" % (e),level="error")
             # goto backup
             if os.path.exists("googledex.dat.1"):
                 shutil.copyfile("googledex.dat.1","googledex.dat")
+                
+        try:
+            rank_table = ds.makeRankTable(sheet_table_name=opt.rank_table,outdir=os.getcwd())
+        except Exception as e:
+            apflog("Error: Cannot download rank_table?! %s" % (e),level="error")
+            # goto backup
+            if os.path.exists("rank_table.1"):
+                shutil.copyfile("rank_table.1","rank_table")
 
         bstr = "%d,%d" % (opt.binning,opt.binning)
         apf.ucam['BINNING'].write(bstr)
@@ -478,7 +485,7 @@ if __name__ == '__main__':
     if os.path.exists(os.path.join(os.getcwd(),"observed_targets")):
         try:
             apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-            n = ParseUCOSched.updateSheetLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn,outfn="googledex.dat")
+            ParseUCOSched.updateSheetLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn,outfn="googledex.dat")
 
 
         except Exception as e:
@@ -488,6 +495,15 @@ if __name__ == '__main__':
     if os.path.exists(os.path.join(os.getcwd(),"googledex.dat")):
         logpush(os.path.join(os.getcwd(),"googledex.dat"))
         
+    if os.path.exists(os.path.join(os.getcwd(),"rank_table")):
+        logpush(os.path.join(os.getcwd(),"rank_table"))
+        
+    if os.path.exists(os.path.join(os.getcwd(),"hour_table")):
+        os.remove(os.path.join(os.getcwd(),"hour_table"))
+        
+    if os.path.exists(os.path.join(os.getcwd(),"frac_table")):
+        os.remove(os.path.join(os.getcwd(),"frac_table"))
+        
     if os.path.exists(os.path.join(os.getcwd(),"robot.log")):
         logpush(os.path.join(os.getcwd(),"robot.log"))
         
@@ -496,6 +512,11 @@ if __name__ == '__main__':
         os.remove(os.path.join(os.getcwd(),"googledex.dat"))
     except OSError:
         apflog("Note: There was no googledex save file to delete today.", echo=True)
+        
+    try:
+        os.remove(os.path.join(os.getcwd(),"rank_table"))
+    except OSError:
+        apflog("Note: There was no rank table file to delete today.", echo=True)
 
     apfmon = ktl.Service('apfmon')
     if apfmon['BINNINGDIS'].read(binary=True) > 0:

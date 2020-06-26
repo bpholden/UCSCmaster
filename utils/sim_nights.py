@@ -75,27 +75,20 @@ def read_datefile(datefn):
         
     return datelist
 
-def gen_datelist(startstr,endstr,double=False):
+def gen_datelist(startstr,endstr):
     datelist = []
     start = datetime.strptime(startstr,"%Y/%m/%d")
     end  = datetime.strptime(endstr,"%Y/%m/%d")
-
-    rng = [1,2,3]
 
     cur = start
     while cur < end:
         breakbeg = datetime(cur.year,12,24)
         breakend = datetime(cur.year+1,1,1)
-        td = timedelta(random.choice(rng))
+        td = timedelta(1)
         cur = cur + td
         if cur < end and (cur < breakbeg or cur > breakend):
             datestr = "%d/%02d/%02d" % (cur.year,cur.month,cur.day)
             datelist.append(datestr)
-        if double:
-            cur = cur + timedelta(1)
-            if cur < end and (cur < breakbeg or cur > breakend):
-                datestr = "%d/%02d/%02d" % (cur.year,cur.month,cur.day)
-                datelist.append(datestr)
                         
     return datelist
 
@@ -166,7 +159,7 @@ def parse_args():
     parser.add_option("--seed",dest="seed",default=None)
     parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
     parser.add_option("-o","--outdir",dest="outdir",default=".")        
-    parser.add_option("-d","--double",dest="double",default=False,action="store_true")
+
     parser.add_option("-m","--masterfile",dest="master",default="sim_master.simout")
     (options, args) = parser.parse_args()    
 
@@ -178,7 +171,7 @@ def parse_args():
         df = os.path.join(options.outdir,options.datefile)
         datelist = read_datefile(df)
     else:
-        datelist = gen_datelist(args[0],args[1],double=options.double)
+        datelist = gen_datelist(args[0],args[1])
 
     if options.seed:
         random.seed(int(options.seed))

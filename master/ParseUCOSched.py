@@ -18,7 +18,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 import ObservedLog
 import Coords
-from SchedulerConsts import EXP_LIM
+from SchedulerConsts import EXP_LIM, MAX_PRI
 import ExposureCalculations as ec
 
 try:
@@ -51,7 +51,7 @@ def readStarTable(table_filename):
     star_table = astropy.io.ascii.read(table_filename)
 
     for coln in ('mode','obsblock','raoff','decoff','sheetn','owner'):
-        star_table[coln][star_table[coln] == 'None'] = None
+        star_table[coln][star_table[coln] == 'None'] = ''
 
     return star_table
 
@@ -236,7 +236,7 @@ def findColumns(col_names,req_cols,opt_cols=[]):
     return didx
 
 
-def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn=None,outdir=None):
+def parseFracTable(sheet_table_name='2020B_frac',certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn=None,outdir=None):
 
     apflog( "Starting parse of %s" % (sheet_table_name),echo=True)
     if not outdir :
@@ -248,6 +248,8 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             lines = fp.readlines()
             for ln in lines:
                 row = ln.strip().split()
+                if row[0] == 'sheetn':
+                    continue
                 sheetns.append(row[0])
                 try:
                     frac.append(float(row[0]))
@@ -257,7 +259,7 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
 
     sheetns = []
     frac = []
-    twod = []
+
     worksheet = getSpreadsheet(sheetn=sheet_table_name,certificate=certificate)
     if worksheet:
         cur_codex = worksheet.get_all_values()
@@ -265,9 +267,10 @@ def parseFracTable(sheet_table_name='2019B_frac',certificate='UCSC Dynamic Sched
             apflog("Worksheet %s exists but is empty, skipping" % (sheetn), level='error', echo=True)
             return None, None
         for row in cur_codex:
+            if row[0] == 'sheetn':
+                continue
             sheetns.append(row[0])
             frac.append(floatDefault(row[1]))
-            twod.append([row[0],row[1]])
 
 
     return sheetns,frac
@@ -354,12 +357,17 @@ def normalizePriorities(star_table,sheetns):
 
         select = (star_table['sheetn'] == sheetn)&(star_table['Bstar'] == 'N')
         if any(select):
-            med = np.median(star_table['APFpri'])
-            star_table['APFpri'] += 5 - med
-
+            offset = MAX_PRI - np.max(star_table['APFpri'][select])
+            star_table['APFpri'][select] += offset
+            
+        negselect = (star_table['sheetn'] == sheetn)&(star_table['Bstar'] == 'N')&(star_table['APFpri'] <1)
+        if any(negselect):
+            offset = np.min(star_table['APFpri'][negselect])
+            star_table['APFpri'][negselect] += -1*offset
+            
     return
 
-def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',prilim=0.5):
+def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',prilim=1):
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
                     "Dec deg", "Dec min", "Dec sec", "pmRA", "pmDEC", "Vmag", \
@@ -388,12 +396,15 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         if ls[0] == '':
             continue
         apfpri = floatDefault(ls[didx["APFpri"]])
+        apfpri = int(round(apfpri))
         nobs = intDefault(ls[didx["Nobs"]])
         totobs = intDefault(ls[didx["Total Obs"]],default=-1)
 
         if totobs > 0 and nobs >= totobs: continue
         if apfpri < prilim: continue
+        if apfpri > MAX_PRI: apfpri = MAX_PRI
 
+            
         name =parseStarname(ls[didx["Star Name"]])
         # Get the RA
         raval,rahr,ramin,rasec = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
@@ -526,7 +537,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
             star_table_names = [n] + star_table_names
 
     star_table = astropy.table.Table(star_table,names=star_table_names)
-    #    star_table = normalizePriorities(star_table)
+#    normalizePriorities(star_table,sheetns)
     return star_table
 
 def genStars(star_table):
@@ -612,7 +623,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
     if os.path.exists(outfn):
         star_table = readStarTable(outfn)
     else:
-        return obslog.names, None
+        return obslog, None
 
     toofn = os.path.join(outdir,toofn)
     if os.path.exists(toofn):
@@ -642,7 +653,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
             if np.any(jd > star_table['lastobs'][selection]):
                 star_table['lastobs'][selection] = jd
                 star_table['nobs'][selection] += 1
-                apflog( "Updating local googledex star %s to %.4f" % (name, jd),echo=True)
+                apflog( "Updating local googledex star %s in program %s to %.4f" % (name,owner, jd),echo=True)
         elif too_table is not None:
             selection = (too_table['name'] == name) & (too_table['sheetn'] == owner)
             if any(selection) and jd > too_table['lastobs'][selection]:
@@ -655,7 +666,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
         astropy.io.ascii.write(too_table,toofn, format='ecsv', overwrite=True)
         star_table = astropy.table.vstack(too_table,star_table)
 
-    return obslog.names, star_table
+    return obslog, star_table
 
 def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',outfn='parsesched.dat',outdir=None):
     """
@@ -740,7 +751,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                         ws.update_cell(i+1, col+1, round(jd, 4) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
                         nupdates += 2
-                        apflog( "Updated %s to %.4f and %d in %s" % (v[0],round(jd, 4),n+1,sheetn),echo=True)
+                        apflog( "Updated %s from %.4f to %.4f and %d in %s" % (v[0],pastdate,round(jd, 4),n+1,sheetn),echo=True)
                 except:
                     print (v[0], v[col])
                     ws.update_cell(i+1, col+1, round(jd,4) )

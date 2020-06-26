@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Class definition for an APF object which tracks the state of the telescope.
 
 import subprocess
@@ -140,19 +141,19 @@ def okmon(ok2open):
         return
     try:
         ok = ok2open # historical
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in okmon for checkapf.OPEN_OK: %s" % (e), level='error')
         return
     try:
         if checkapf['MOVE_PERM'].read(binary=False) == False:
             ok = False
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in okmon for checkapf.MOVE_PERM: %s" % (e), level='error')
         return
     try:
         if not checkapf['USERKIND'].read(binary=True) == 3:
             ok = False
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in okmon checkapf.USERKIND: %s" % (e), level='error')
         return
     APF.openOK = ok
@@ -166,7 +167,7 @@ def windmon(wx):
         return
     try:
         wvel = float(wx)
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in windmon: %s" % (e), level='error')
         return
         
@@ -184,14 +185,14 @@ def altwindmon(wx):
         return
     try:
         downval = APF.down.read(binary=True)
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in altwindmon: %s" % (e), level='error')
         return
     if downval == 0:
         return 
     try:
         wvel = float(wx)
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in altwindmon: %s" % (e), level='error')
         return
         
@@ -211,7 +212,7 @@ def dmtimemon(dmtime):
         return
     try:
         APF.dmtime = dmtime
-    except Exception, e:
+    except Exception as e:
         apflog("Exception in dmtimemon: %s" % (e), level='error')
 
 
@@ -247,6 +248,19 @@ def dewptmon(dew):
         APF.dewTooClose = False
         
     return
+
+
+def ucamdispatchmon(disp0sta):
+    if disp0sta['populated'] == False:
+        return
+    try:
+        apfmon_stat = APF.ucamd0sta.read(binary=True)            
+        if disp0sta['binary'] == 0 and apfmon_stat == 5:
+            # modify -s apfucam DISP0DWIM="ksetMacval DISP0STA READY"
+            apfucam['DISP0DWIM'].write("ksetMacval DISP0STA READY")
+    except:
+        return
+            
         
 class APF:
     """ Class which creates a monitored state object to track the condition of the APF telescope. """
@@ -325,6 +339,7 @@ class APF:
     event      = ucam['EVENT']
     combo_ps   = ucam['COMBO_PS']
     nerase     = ucam['NERASE']
+    disp0sta   = ucam['DISP0STA']
 
     apfschedule= ktl.Service('apfschedule')
     
@@ -346,7 +361,9 @@ class APF:
     save3d     = eosgcam('SAVE3D')
 
     apfmon     = ktl.Service('apfmon')
+    ucamd0sta  = apfmon['UCAMDSTA0STA']
 
+    
     def __init__(self, task="example", test=False):
         """ Initilize the current state of APF. Setup the callbacks and monitors necessary for automated telescope operation."""
         # Set up the calling task that set up the monitor and if this is a test instance
@@ -390,6 +407,9 @@ class APF:
 
         self.dewpt.monitor()
         self.dewpt.callback(dewptmon)
+
+        self.disp0sta.monitor()
+        self.disp0sta.callback(ucamdispatchmon)
         
         self.counts.monitor()
         self.teqmode.monitor()
@@ -558,7 +578,7 @@ class APF:
         for lamp in ("HALOGEN2","HALOGEN1","THORIUM1","THORIUM2"):
             try:
                 rv = ktl.write("apfmot",lamp,"Off",wait=False)
-            except Exception, e:
+            except Exception as e:
                 apflog("Exception: %s" % (e),echo=True,level="alert")
                 rv = False
             if rv is False:
@@ -662,7 +682,7 @@ class APF:
     def calibrate(self, script, time):
         s_calibrate = os.path.join(ScriptDir,"calibrate")
         if self.test: 
-            print "Test Mode: calibrate %s %s." % (script, time)
+            apflog("Test Mode: calibrate %s %s." % (script, time))
             APFTask.waitFor(self.task, True, timeout=10)
             return True
         if time == 'pre' or 'post':
@@ -698,14 +718,14 @@ class APF:
                 
             return result
         else:
-            print "Couldn't understand argument %s, nothing was done." % time
+            apflog("Couldn't understand argument %s, nothing was done." % time)
 
     def focus(self,flags="-b"):
         """Runs the focus routine appropriate for the user."""
 
         if self.test: 
             APFTask.waitFor(self.task, True, timeout=10)
-            print "Test Mode: Would be running focusinstr."
+            apflog("Test Mode: Would be running focusinstr.")
             return True
         else:
             supplies = ('PS1_48V_ENA', 'PS2_48V_ENA')
@@ -842,12 +862,12 @@ class APF:
         apflog("Targeting telescope on %s" % star[0], echo=True)
         try:
             self.vmag.write(star[6])
-        except Exception, e:
+        except Exception as e:
             apflog("Cannot write SCRIPTOBS_VMAG: %s" % (e), level='error',echo=True)
         try:
             sline = "%s %s %s pmra=%s pmdec=%s vmag=%s # end" % (star[0],star[1],star[2],star[4],star[5],star[6])
             self.line.write(sline)
-        except Exception, e:
+        except Exception as e:
             apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
         if self.slew(star):
             return self.runFocustel()
@@ -857,13 +877,13 @@ class APF:
     def setTeqMode(self, mode):
         apflog("Setting TEQMode to %s" % mode)
         if self.test: 
-            print "Would be setting TEQMode to %s" % mode
+            apflog("Would be setting TEQMode to %s" % mode)
             return
         self.teqmode.write(mode,wait=False)
         result = self.teqmode.waitfor('== %s' % mode, timeout=60)
         if not result:
             apflog("Error setting the TEQMODE.")
-            raise RuntimeError, "Couldn't set TEQ mode"
+            raise RuntimeError("Couldn't set TEQ mode")
 
 
     def clearestop(self):
@@ -908,7 +928,7 @@ class APF:
     def checkHome(self,home=True):
         try:
             homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
-        except Exception, e:
+        except Exception as e:
             apflog("apfmon.ELHOMERIGHTSTA cannot be read: %s" % (e),level='Alert',echo=True)
             return False
         if homed == 2:
@@ -1227,7 +1247,7 @@ class APF:
     def DMReset(self):
         try:
             APFLib.write(self.checkapf['ROBOSTATE'], "master operating",timeout=10)
-        except Exception, e:
+        except Exception as e:
             try:
                 ukind = self.checkapf['USERKIND'].read()
             except:
@@ -1239,7 +1259,7 @@ class APF:
         try:
             if self.checkapf['DMTIME'].read(binary=True) < 1:
                 APFLib.write(self.checkapf['DMTIME'], -1,timeout=10)
-        except Exception, e:
+        except Exception as e:
             ostr = "Error: cannot touch DM Timer: %s " %( e)
             apflog(ostr,level='error',echo=True)
 
@@ -1321,7 +1341,7 @@ class APF:
             apflog("Killing Robot %s" % (str(ripd)))
             try:
                 APFLib.write(self.robot['SCRIPTOBS_CONTROL'], "abort")
-            except Exception, e:
+            except Exception as e:
                 errstr = "Cannot abort scriptobs: %s" % (e)
                 apflog(errstr,level="Warn",echo=True)
 
@@ -1440,7 +1460,7 @@ class APF:
         return True
     
 if __name__ == '__main__':
-    print "Testing telescope monitors, grabbing and printing out current state."
+    print("Testing telescope monitors, grabbing and printing out current state.")
 
     task = 'example'
 
@@ -1451,10 +1471,10 @@ if __name__ == '__main__':
     APFTask.waitFor(task, True,timeout=2)
 
     
-    print str(apf)
+    print(str(apf))
 
     while True:
-        print str(apf)
+        print(str(apf))
         APFTask.wait(task,True,timeout=10)
 
 

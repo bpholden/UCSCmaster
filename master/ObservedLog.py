@@ -48,7 +48,7 @@ class ObservedLog():
             f = open(self.filename, 'r')
         except IOError:
             apflog( "Couldn't open %s" % filename,level="warn",echo=True)
-            return (), (), (), ()
+            return 
         else: 
             for line in f:
                 line = line.strip()
@@ -77,7 +77,10 @@ class ObservedLog():
                         if 'coverid' in keyvals.keys():
                             self.sheetns.append(keyvals['coversheetid'])
                         else:
-                            self.sheetns.append(None)
+                            if 'owner' in keyvals.keys():
+                                self.sheetns.append(keyvals['owner'])
+                            else:
+                                self.sheetns.append(None)
             
         self.names.reverse()
         self.times.reverse()

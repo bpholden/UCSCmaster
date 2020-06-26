@@ -67,6 +67,7 @@ class Master(threading.Thread):
         self.totTemps = totTemps        
 
         self.target = None
+        self.nexttarget = None
         
         self.apftask = ktl.Service('apftask')
         self.lineresult = self.apftask['SCRIPTOBS_LINE_RESULT']
@@ -253,27 +254,35 @@ class Master(threading.Thread):
             apflog("slowdown factor = %4.2f" % slowdown, echo=True)
             APFLib.write(self.APF.robot["MASTER_SLOWDOWN"], slowdown)
             return slowdown
-        
-        # This is called when an observation finishes, and selects the next target
-        def getTarget():
-            APFLib.write(self.APF.ucam["RECORD"], "Yes") # safe / sorry
 
-            if self.APF.nerase != 2:
-                self.APF.nerase.write(2,binary=True)
-            
+        def popNext():
+
             if self.target is not None and 'SCRIPTOBS' in self.target.keys():
                 if len(self.target["SCRIPTOBS"]) > 0:
                     # just keep going with last block
                     apflog("getTarget(): Going through remaining target queue.",echo=True)
                     try:
                         curstr = self.target["SCRIPTOBS"].pop() + '\n'
-                        self.scriptobs.stdin.write(curstr)
-                        return
+                        
+                        return curstr
                     except Exception, e:
                         apflog("Failure in getTarget popping item off stack and writing to stdin: %s" % (e),level='error',echo=True)
                         self.APF.killRobot()
-                        pass
+                       
+            return None
 
+        # This is called when an observation finishes, and selects the next target
+        def getTarget():
+            APFLib.write(self.APF.ucam["RECORD"], "Yes") # safe / sorry
+
+            if self.APF.nerase != 2:
+                self.APF.nerase.write(2,binary=True)
+
+            curstr = popNext()
+            if curstr:
+                self.scriptobs.stdin.write(curstr)
+                return
+            
             if self.checkObsFinished():
                 apflog("getTarget(): Scriptobs phase is input, determining next target.",echo=True)
             else:
