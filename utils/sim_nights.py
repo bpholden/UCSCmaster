@@ -215,6 +215,7 @@ if __name__ == "__main__":
         fwhms = ns.gen_seeing()
         slowdowns = ns.gen_clouds()
 
+        doTemp = True
         lastslow = 5
         lastfwhm = 15
         otfn = os.path.join(options.outdir,"observed_targets")
