@@ -687,11 +687,11 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         apflog("getNext(): Removing really long exposures",echo=True)
 
         time_left_before_sunrise = computeSunrise(dt,horizon='-9')
-        maxexptime =TARGET_EXPOSURE_TIME_MAX
+        maxexptime = TARGET_EXPOSURE_TIME_MAX
         if TARGET_EXPOSURE_TIME_MAX > time_left_before_sunrise:
             maxexptime = time_left_before_sunrise
-        if maxexptime < 1240:
-            maxexptime = 1240
+        if maxexptime < TARGET_EXPOSURE_TIME_MIN:
+            maxexptime = TARGET_EXPOSURE_TIME_MIN # this will try a target in case we get lucky
             
         time_check = totexptimes <= maxexptime
 
