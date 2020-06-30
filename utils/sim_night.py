@@ -55,7 +55,8 @@ parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
 parser.add_option("-f","--fixed",dest="fixed",default="")
 parser.add_option("-g","--googledex",dest="googledex",default="RECUR_A100,2020A_A000,2020A_A001,2020A_A002,2020A_A003,2020A_A004,2020A_A005,2020A_A006,2020A_A008,2020A_A009,2020A_A011,2020A_A012,2020A_A013")
-parser.add_option("--frac_table",dest="frac_tablen",default="2020A_frac")
+parser.add_option("--frac_table",dest="frac_sheetn",default="2020A_frac")
+parser.add_option("--rank_table",dest="rank_sheetn",default="2020A_ranks")
 parser.add_option("-i","--infile",dest="infile",default="googledex.dat")
 parser.add_option("-o","--outfile",dest="outfile",default=None)
 parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
@@ -90,14 +91,19 @@ except Exception as e:
 
 if os.path.exists('hour_table'):
     os.remove('hour_table')
+
+   
+
+rank_table = ds.makeRankTable(options.rank_sheetn)
+
     
 hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
 outfp.write(hdrstr)
         
 star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex.split(","),outfn=options.infile,outdir=outdir)
 
-fwhms = ns.gen_seeing(val=0.1) # good conditions
-slowdowns = ns.gen_clouds(val=0.1) # good conditions
+fwhms = ns.gen_seeing(val=1.0) # good conditions
+slowdowns = ns.gen_clouds(val=0.5) # good conditions
 
 lastslow = 5
 lastfwhm = 15
@@ -109,10 +115,12 @@ curtime, endtime, apf_obs = ns.sun_times(datestr)
 bstar = options.bstar
 doTemp = True
 tempcount = 0
+hour_table = ds.makeHourTable(options.frac_sheetn,curtime.datetime())
+
 while observing:
     curtime = ephem.Date(curtime)
 
-    result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=options.infile,template=doTemp,sheetns=options.googledex.split(","),outdir=outdir,frac_sheet=options.frac_tablen)
+    result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=options.infile,template=doTemp,sheetns=options.googledex.split(","),outdir=outdir,frac_sheet=options.frac_sheetn,rank_sheetn=options.rank_sheetn)
     if result:
         if bstar:
             bstar = False

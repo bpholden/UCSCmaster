@@ -250,17 +250,6 @@ def dewptmon(dew):
     return
 
 
-def ucamdispatchmon(disp0sta):
-    if disp0sta['populated'] == False:
-        return
-    try:
-        apfmon_stat = APF.ucamd0sta.read(binary=True)            
-        if disp0sta['binary'] == 0 and apfmon_stat == 5:
-            # modify -s apfucam DISP0DWIM="ksetMacval DISP0STA READY"
-            apfucam['DISP0DWIM'].write("ksetMacval DISP0STA READY")
-    except:
-        return
-            
         
 class APF:
     """ Class which creates a monitored state object to track the condition of the APF telescope. """
@@ -471,6 +460,18 @@ class APF:
 
         return s
 
+    def ucamdispatchmon(self):
+        if self.ucamd0sta['populated'] == False:
+            return
+        try:
+            apfmon_stat = self.ucamd0sta['binary']
+            if apfmon_stat == 5:
+                # modify -s apfucam DISP0DWIM="ksetMacval DISP0STA READY"
+                if self.disp0sta.read(binary=True) == 0:
+                    self.apfucam['DISP0DWIM'].write("ksetMacval DISP0STA READY")
+        except:
+            return
+            
 
     def sunRising(self):
         now = datetime.now()
@@ -1065,10 +1066,14 @@ class APF:
         if not result:
             apflog("Didn't have move permission after 20 minutes. Going ahead with closeup.", echo=True)
             return False
-        if self.apfmon['FRONT_SHUTTER_CLOSEUPSTA'].read(binary=True) != 2:
-            # this is a check to see if the front shutter got caught running
-            # away, if so do not send any more shutter commands
-            apflog("Dome Shutters maybe running away!", level='error', echo=True)
+        try:
+            if self.apfmon['FRONT_SHUTTER_CLOSEUPSTA'].read(binary=True) != 2:
+                # this is a check to see if the front shutter got caught running
+                # away, if so do not send any more shutter commands
+                apflog("Dome Shutters maybe running away!", level='error', echo=True)
+                return False
+        except:
+            apflog("Cannot communicate with apfmon1", level='error', echo=True)
             return False
         
         apflog("Running closeup script")
@@ -1165,6 +1170,10 @@ class APF:
             apflog("APF is not open. Can't target a star while closed.",level='error',echo=True)
             return
         self.DMReset()
+
+        # check on weirdness for UCAM host post-reboot
+        self.ucamdispatchmon()
+
         # Call prep-obs
         apflog("Calling prep-obs.",echo=True)
         result, ret_code = cmdexec('prep-obs')
@@ -1299,6 +1308,9 @@ class APF:
             apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values. Resetting to last derived value %d" % (self.dewarfoc,lastfit_dewarfoc), level = "error", echo=True)
             APFLib.write("apfmot.DEWARFOCRAW",lastfit_dewarfoc)
 
+        # check on weirdness for UCAM host post-reboot
+        self.ucamdispatchmon()
+            
         robotdir = "/usr/local/lick/bin/robot/"
 
         telstate = tel['TELSTATE'].read()

@@ -2,6 +2,7 @@ from __future__ import print_function
 import os
 import re
 import optparse
+import sys
 
 def init_sim_vals():
     vals = dict()

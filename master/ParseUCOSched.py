@@ -313,7 +313,9 @@ def parseRankTable(sheet_table_name='2020A_ranks',certificate='UCSC Dynamic Sche
             return None, None
         for row in cur_codex[1:]:
             sheetns.append(row[0])
-            rank.append(floatDefault(row[1]))
+            crank = floatDefault(row[1])
+            crank = int(round(crank))
+            rank.append(crank)
 
     time_left = timeLeft()
     if time_left is not None:
@@ -727,14 +729,21 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                 otime = obslog.times[nameidx]
                 taketemp = obslog.temps[nameidx]
                 curowner = obslog.owners[nameidx]
+                jd = None
                 try:
                     star_table_row = star_table[(star_table['name'] == local_name)&(star_table['sheetn'] == sheetn)]
                 except:
                     star_table_row = None
 
+                # idealy get JD from the local table
                 if  star_table_row is not None:
-                    jd = float(star_table_row['lastobs'][0])
-                else:
+                    if len(star_table_row['lastobs']) > 0:
+                        jd = float(star_table_row['lastobs'][0])
+                        
+                # if the above fails, we should be able to use the observing log
+                # but this is JUST the UT hour and minute, not the day so we have to use the otime
+                # value to calculate the full JD
+                if jd is None:
                     if isinstance(otime,float):
                         t = datetime.utcfromtimestamp(otime)
                     else:
@@ -747,14 +756,14 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                         n = int(v[nobscol])
                     except:
                         n = 0
-                    if round(jd, 4) > pastdate and curowner == sheetn:
-                        ws.update_cell(i+1, col+1, round(jd, 4) )
+                    if round(jd, 3) > pastdate and curowner == sheetn:
+                        ws.update_cell(i+1, col+1, round(jd, 3) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
                         nupdates += 2
-                        apflog( "Updated %s from %.4f to %.4f and %d in %s" % (v[0],pastdate,round(jd, 4),n+1,sheetn),echo=True)
+                        apflog( "Updated %s from %.4f to %.4f and %d in %s" % (v[0],pastdate,round(jd, 3),n+1,sheetn),echo=True)
                 except:
                     print (v[0], v[col])
-                    ws.update_cell(i+1, col+1, round(jd,4) )
+                    ws.update_cell(i+1, col+1, round(jd,3) )
                     ws.update_cell(i+1, nobscol+1, 1 )
                     nupdates += 2
                 try:
