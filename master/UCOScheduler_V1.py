@@ -680,7 +680,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         # Calculate the exposure time for the target
         # Want to pass the entire list of targets to this function
 
-
         apflog("getNext(): Computing exposure times",echo=True)
         exp_counts = star_table['expcount']
 
@@ -689,7 +688,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
         time_left_before_sunrise = computeSunrise(dt,horizon='-9')
         maxexptime = TARGET_EXPOSURE_TIME_MAX
-        if TARGET_EXPOSURE_TIME_MAX > time_left_before_sunrise:
+        if maxexptime > time_left_before_sunrise:
             maxexptime = time_left_before_sunrise
         if maxexptime < TARGET_EXPOSURE_TIME_MIN:
             maxexptime = TARGET_EXPOSURE_TIME_MIN # this will try a target in case we get lucky
