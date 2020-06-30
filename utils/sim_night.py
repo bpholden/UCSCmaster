@@ -64,8 +64,8 @@ parser.add_option("-b","--bstar",dest="bstar",default=True,action="store_false")
 outdir = "."
 
 if options.date == "today":
-    today = datetime.now()
-    datestr = "%d/%02d/%02d" % (today.year,today.month,today.day+1)
+    today = datetime.utcnow()
+    datestr = "%d/%02d/%02d" % (today.year,today.month,today.day)
 else:
     datestr = options.date
 
