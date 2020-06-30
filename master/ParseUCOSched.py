@@ -756,14 +756,14 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                         n = int(v[nobscol])
                     except:
                         n = 0
-                    if round(jd, 4) > pastdate and curowner == sheetn:
-                        ws.update_cell(i+1, col+1, round(jd, 4) )
+                    if round(jd, 3) > pastdate and curowner == sheetn:
+                        ws.update_cell(i+1, col+1, round(jd, 3) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
                         nupdates += 2
-                        apflog( "Updated %s from %.4f to %.4f and %d in %s" % (v[0],pastdate,round(jd, 4),n+1,sheetn),echo=True)
+                        apflog( "Updated %s from %.4f to %.4f and %d in %s" % (v[0],pastdate,round(jd, 3),n+1,sheetn),echo=True)
                 except:
                     print (v[0], v[col])
-                    ws.update_cell(i+1, col+1, round(jd,4) )
+                    ws.update_cell(i+1, col+1, round(jd,3) )
                     ws.update_cell(i+1, nobscol+1, 1 )
                     nupdates += 2
                 try:
