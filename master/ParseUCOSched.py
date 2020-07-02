@@ -476,12 +476,6 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
             inval = 1
         star_table['B-V'].append(inval)
 
-        for coln in ["uth", "utm"]:
-            star_table[coln].append(intDefault(ls[didx[coln]]))
-
-        # duration:
-        star_table['duration'].append(floatDefault(ls[didx["duration"]]))
-
         # Nobs
         star_table['nobs'].append(nobs)
 

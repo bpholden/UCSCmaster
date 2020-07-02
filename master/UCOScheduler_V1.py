@@ -37,19 +37,6 @@ def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=Non
     new_pri = np.zeros_like(star_table['APFpri'])
     new_pri += star_table['APFpri']
     
-    if any(star_table['duration'][available] > 0):
-        new_pri[available] += star_table['APFpri'][available]
-        delta_pri = np.zeros_like(new_pri[available])
-        timedependent, = np.where(star_table['duration'][available]> 0)
-        for tdinx in timedependent:
-            sdt = datetime(cur_dt.year,cur_dt.month,cur_dt.day,
-                               int(star_table['uth'][available][tdinx]),
-                               int(star_table['utm'][available][tdinx]),0)
-
-            durdelt = timedelta(0,star_table['duration'][available][tdinx],0)
-            if (cur_dt - sdt < durdelt) and (cur_dt - sdt > timedelta(0,0,0) ):
-                delta_pri[tdinx] += PRI_DELTA
-        new_pri[available] += delta_pri
         
     if hour_table is not None:
         too_much = hour_table['cur']  > hour_table['tot']
