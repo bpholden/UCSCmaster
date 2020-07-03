@@ -396,9 +396,6 @@ class APF:
 
         self.dewpt.monitor()
         self.dewpt.callback(dewptmon)
-
-        self.disp0sta.monitor()
-        self.disp0sta.callback(ucamdispatchmon)
         
         self.counts.monitor()
         self.teqmode.monitor()
