@@ -369,6 +369,24 @@ def normalizePriorities(star_table,sheetns):
             
     return
 
+
+def makeStarTable(star_table,star_table_names):
+
+    cols = []
+    for name in star_table_names:
+        if name in ('mode','obsblock','raoff','decoff'):
+            acol = np.asarray(star_table[name])
+            m = np.zeros_like(acol,dtype=bool)
+            m[acol == ''] = True
+            cur_col = astropy.table.MaskedColumn(star_table[name],name=name,fill_value='',mask=m)
+        else:
+            cur_col = astropy.table.Column(star_table[name],name=name)
+        cols.append(cur_col)
+    
+    star_table = astropy.table.Table(cols)
+
+    return star_table
+    
 def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler-4f4f8d64827e.json',prilim=1):
     # These are the columns we need for scheduling
     req_cols = ["Star Name", "RA hr", "RA min", "RA sec", \
@@ -532,7 +550,9 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
             star_table_names.remove(n)
             star_table_names = [n] + star_table_names
 
-    star_table = astropy.table.Table(star_table,names=star_table_names)
+#    star_table = astropy.table.Table(star_table,names=star_table_names)
+    star_table = makeStarTable(star_table,star_table_names)
+
 #    normalizePriorities(star_table,sheetns)
     return star_table
 
