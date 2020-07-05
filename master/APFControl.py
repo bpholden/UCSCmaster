@@ -278,7 +278,179 @@ class APF:
         except:
             return
             
+    def countmon(self,counts):
+        if counts['populated'] == False:
+            return
+        try:
+            cnts = float(counts.read(binary=True))
+        except:
+            return
+        try:
+            time = float(elapsed.read(binary=True))
+        except:
+            return
 
+        try:
+            self.ccountrate = cnts/time
+        except:
+            return
+
+
+    def countratemon(self,kcountrate):
+        if kcountrate['populated'] == False:
+            return
+
+        try:
+            ctr = float(kcountrate['binary'])
+        except:
+            apflog("Cannot read apfguide.COUNTRATE",level='warn',echo=True)
+            return
+        self.countrate *=  (1.0*self.ncountrate)/(self.ncountrate+1)
+        self.countrate += ctr/(self.ncountrate+1)
+        self.ncountrate += 1
+        return
+
+    def eventmon(self,event):
+        if event['populated'] == False:
+            return
+
+        try:
+            eventval = event.read(binary=True)
+            if eventval == 0 or eventval == 7 :
+                self.ncountrate = 0
+        except:
+            return
+
+
+        try:
+            cnts = float(counts.read(binary=True))
+            time = float(elapsed.read(binary=True))
+        except:
+            return
+        try:
+            self.ccountrate = cnts/time
+        except:
+            return
+
+    # Callback for ok2open permission
+    # -- Check that if we fall down a logic hole we don't error out
+    def okmon(self,ok2open):
+        if ok2open['populated'] == False:
+            return
+        try:
+            ok = ok2open # historical
+        except Exception as e:
+            apflog("Exception in okmon for checkapf.OPEN_OK: %s" % (e), level='error')
+            return
+        try:
+            if checkapf['MOVE_PERM'].read(binary=False) == False:
+                ok = False
+        except Exception as e:
+            apflog("Exception in okmon for checkapf.MOVE_PERM: %s" % (e), level='error')
+            return
+        try:
+            if not checkapf['USERKIND'].read(binary=True) == 3:
+                ok = False
+        except Exception as e:
+            apflog("Exception in okmon checkapf.USERKIND: %s" % (e), level='error')
+            return
+        self.openOK = ok
+        return
+
+
+
+    # Callback for the windspeed
+    def windmon(self,wx):
+        if wx['populated'] == False:
+            return
+        try:
+            wvel = float(wx)
+        except Exception as e:
+            apflog("Exception in windmon: %s" % (e), level='error')
+            return
+        
+        if self.wslist == []:
+            self.wslist = [wvel]*20
+
+        else:
+            self.wslist.append(wvel)
+            self.wslist = self.wslist[-20:]
+
+        self.wvel = np.median(self.wslist)
+        return
+
+    def altwindmon(self,wx):
+        if wx['populated'] == False:
+            return
+        try:
+            downval = self.down.read(binary=True)
+        except Exception as e:
+            apflog("Exception in altwindmon: %s" % (e), level='error')
+            return
+        if downval == 0:
+            return 
+        try:
+            wvel = float(wx)
+        except Exception as e:
+            apflog("Exception in altwindmon: %s" % (e), level='error')
+            return
+        
+        if self.wslist == []:
+            self.wslist = [wvel]*20
+
+        else:
+            self.wslist.append(wvel)
+            self.wslist = self.wslist[-20:]
+
+        self.wvel = np.median(self.wslist)
+        return
+        
+    # Callback for Deadman timer
+    def dmtimemon(self,dmtime):
+        if dmtime['populated'] == False:
+            return
+        try:
+            self.dmtime = dmtime
+        except Exception as e:
+            apflog("Exception in dmtimemon: %s" % (e), level='error')
+
+
+    def dewptmon(self,dew):
+        if dew['populated'] == False:
+            return
+        try:
+            dewpt = float(dew)
+            m2 = self.m2temp.read(binary=True)
+            air = self.airtemp.read(binary=True)
+        except:
+            return
+
+        if self.dewlist == []:
+            self.dewlist = [dewpt]*10
+            self.airlist = [air]*10
+            self.m2list = [m2]*10
+        else:
+            self.dewlist.append(dewpt)
+            self.airlist.append(air)
+            self.m2list.append(m2)
+            self.dewlist = self.dewlist[-10:]
+            self.airlist = self.airlist[-10:]
+            self.m2list = self.m2list[-10:]
+
+        dewlist = np.asarray(self.dewlist)
+        airlist = np.asarray(self.airlist)
+        m2list  = np.asarray(self.m2list)
+
+        if np.average(airlist-dewlist) < 2 or np.average(m2list-dewlist) < 4:
+            self.dewTooClose = True
+        else:
+            self.dewTooClose = False
+        
+        return
+
+    ## end of callbacks for monitoring stuff
+
+        
     def sunRising(self):
         now = datetime.now()
         if now.strftime("%p") == 'AM':
