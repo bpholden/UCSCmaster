@@ -174,20 +174,20 @@ class APF:
         
         # Set the callbacks and monitors
         self.wx.monitor()
-        self.wx.callback(windmon)
+        self.wx.callback(self.windmon)
 
         self.altwx.monitor()
-        self.altwx.callback(altwindmon)
+        self.altwx.callback(self.altwindmon)
 
         self.ok2open.monitor()
-        self.ok2open.callback(okmon)
+        self.ok2open.callback(self.okmon)
 
         
         self.dmtimer.monitor()
-        self.dmtimer.callback(dmtimemon)
+        self.dmtimer.callback(self.dmtimemon)
 
         self.kcountrate.monitor()
-        self.kcountrate.callback(countratemon)
+        self.kcountrate.callback(self.countratemon)
 
         self.elapsed.monitor()
 
@@ -195,7 +195,7 @@ class APF:
         self.obsnum.callback(self.updateLastObs)
 
         self.event.monitor()
-        self.event.callback(eventmon)
+        self.event.callback(self.eventmon)
 
         self.nerase.monitor()
 
@@ -204,7 +204,7 @@ class APF:
         self.whatsopn.monitor()
 
         self.dewpt.monitor()
-        self.dewpt.callback(dewptmon)
+        self.dewpt.callback(self.dewptmon)
         
         self.counts.monitor()
         self.teqmode.monitor()
