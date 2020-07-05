@@ -277,6 +277,8 @@ class APF:
                     self.apfucam['DISP0DWIM'].write("ksetMacval DISP0STA READY")
         except:
             return
+        
+        return
             
     def countmon(self,counts):
         if counts['populated'] == False:
