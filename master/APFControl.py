@@ -32,28 +32,6 @@ DEWARMIN = 8400
 #ScriptDir = '@LROOT@/bin/robot/'
 ScriptDir = '/usr/local/lick/bin/robot/'
 
-# Aquire the ktl services and associated keywords
-tel        = ktl.Service('eostele')
-sunelServ  = tel('SUNEL')
-apfmet     = ktl.Service('met3apf')
-checkapf   = ktl.Service('checkapf')
-ok2open    = ktl.cache('checkapf','OPEN_OK')
-dmtimer    = ktl.cache('checkapf','DMTIME')
-wx         = ktl.cache('met3apf','M5WIND')
-
-robot      = ktl.Service('apftask')
-vmag       = robot['SCRIPTOBS_VMAG']
-
-ucam       = ktl.Service('apfucam')
-apfteq     = ktl.Service('apfteq')
-teqmode    = apfteq['MODE']
-guide      = ktl.Service('apfguide')
-counts     = ktl.cache('apfguide','COUNTS')
-kcountrate     = ktl.cache('apfguide','COUNTRATE')
-thresh     = guide['XPOSE_THRESH']
-elapsed    = ktl.cache('apfucam','ELAPSED')
-motor      = ktl.Service('apfmot')
-decker     = motor['DECKERNAM']
 
 
 def cmdexec(cmd, debug=False, cwd='./'):
