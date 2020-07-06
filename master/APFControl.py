@@ -247,7 +247,7 @@ class APF:
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
         s += "Teq Mode - %s\n" % self.teqmode
-        s += "M2 Focus Value = % 4.3f\n" % self.aafocus
+        s += "M2 Focus Value = % 4.3f\n" % self.aafocus*1000.0
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
         s += "Current Weather = %s\n" % self.checkapf['WEATHER'].read()
         s += "Too close to the dewpoint? = %s\n" % self.dewTooClose
