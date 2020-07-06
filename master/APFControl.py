@@ -32,28 +32,6 @@ DEWARMIN = 8400
 #ScriptDir = '@LROOT@/bin/robot/'
 ScriptDir = '/usr/local/lick/bin/robot/'
 
-# Aquire the ktl services and associated keywords
-tel        = ktl.Service('eostele')
-sunelServ  = tel('SUNEL')
-apfmet     = ktl.Service('met3apf')
-checkapf   = ktl.Service('checkapf')
-ok2open    = ktl.cache('checkapf','OPEN_OK')
-dmtimer    = ktl.cache('checkapf','DMTIME')
-wx         = ktl.cache('met3apf','M5WIND')
-
-robot      = ktl.Service('apftask')
-vmag       = robot['SCRIPTOBS_VMAG']
-
-ucam       = ktl.Service('apfucam')
-apfteq     = ktl.Service('apfteq')
-teqmode    = apfteq['MODE']
-guide      = ktl.Service('apfguide')
-counts     = ktl.cache('apfguide','COUNTS')
-kcountrate     = ktl.cache('apfguide','COUNTRATE')
-thresh     = guide['XPOSE_THRESH']
-elapsed    = ktl.cache('apfucam','ELAPSED')
-motor      = ktl.Service('apfmot')
-decker     = motor['DECKERNAM']
 
 
 def cmdexec(cmd, debug=False, cwd='./'):
@@ -79,175 +57,6 @@ def cmdexec(cmd, debug=False, cwd='./'):
         return False, ret_code
 
 
-
-def countmon(counts):
-    if counts['populated'] == False:
-        return
-    try:
-        cnts = float(counts.read(binary=True))
-    except:
-        return
-    try:
-        time = float(elapsed.read(binary=True))
-    except:
-        return
-
-    try:
-        APF.ccountrate = cnts/time
-    except:
-        return
-
-
-def countratemon(kcountrate):
-     if kcountrate['populated'] == False:
-         return
-
-     try:
-         ctr = float(kcountrate['binary'])
-     except:
-         apflog("Cannot read apfguide.COUNTRATE",level='warn',echo=True)
-         return
-     APF.countrate *=  (1.0*APF.ncountrate)/(APF.ncountrate+1)
-     APF.countrate += ctr/(APF.ncountrate+1)
-     APF.ncountrate += 1
-     return
-
-def eventmon(event):
-    if event['populated'] == False:
-        return
-
-    try:
-        eventval = event.read(binary=True)
-        if eventval == 0 or eventval == 7 :
-            APF.ncountrate = 0
-    except:
-        return
-
-
-    try:
-        cnts = float(counts.read(binary=True))
-        time = float(elapsed.read(binary=True))
-    except:
-        return
-    try:
-        APF.ccountrate = cnts/time
-    except:
-        return
-
-# Callback for ok2open permission
-# -- Check that if we fall down a logic hole we don't error out
-def okmon(ok2open):
-    if ok2open['populated'] == False:
-        return
-    try:
-        ok = ok2open # historical
-    except Exception as e:
-        apflog("Exception in okmon for checkapf.OPEN_OK: %s" % (e), level='error')
-        return
-    try:
-        if checkapf['MOVE_PERM'].read(binary=False) == False:
-            ok = False
-    except Exception as e:
-        apflog("Exception in okmon for checkapf.MOVE_PERM: %s" % (e), level='error')
-        return
-    try:
-        if not checkapf['USERKIND'].read(binary=True) == 3:
-            ok = False
-    except Exception as e:
-        apflog("Exception in okmon checkapf.USERKIND: %s" % (e), level='error')
-        return
-    APF.openOK = ok
-    return
-
-
-
-# Callback for the windspeed
-def windmon(wx):
-    if wx['populated'] == False:
-        return
-    try:
-        wvel = float(wx)
-    except Exception as e:
-        apflog("Exception in windmon: %s" % (e), level='error')
-        return
-        
-    if APF.wslist == []:
-        APF.wslist = [wvel]*20
-
-    else:
-        APF.wslist.append(wvel)
-        APF.wslist = APF.wslist[-20:]
-
-    APF.wvel = np.median(APF.wslist)
-
-def altwindmon(wx):
-    if wx['populated'] == False:
-        return
-    try:
-        downval = APF.down.read(binary=True)
-    except Exception as e:
-        apflog("Exception in altwindmon: %s" % (e), level='error')
-        return
-    if downval == 0:
-        return 
-    try:
-        wvel = float(wx)
-    except Exception as e:
-        apflog("Exception in altwindmon: %s" % (e), level='error')
-        return
-        
-    if APF.wslist == []:
-        APF.wslist = [wvel]*20
-
-    else:
-        APF.wslist.append(wvel)
-        APF.wslist = APF.wslist[-20:]
-
-    APF.wvel = np.median(APF.wslist)
-
-
-# Callback for Deadman timer
-def dmtimemon(dmtime):
-    if dmtime['populated'] == False:
-        return
-    try:
-        APF.dmtime = dmtime
-    except Exception as e:
-        apflog("Exception in dmtimemon: %s" % (e), level='error')
-
-
-def dewptmon(dew):
-    if dew['populated'] == False:
-        return
-    try:
-        dewpt = float(dew)
-        m2 = APF.m2temp.read(binary=True)
-        air = APF.airtemp.read(binary=True)
-    except:
-        return
-
-    if APF.dewlist == []:
-        APF.dewlist = [dewpt]*10
-        APF.airlist = [air]*10
-        APF.m2list = [m2]*10
-    else:
-        APF.dewlist.append(dewpt)
-        APF.airlist.append(air)
-        APF.m2list.append(m2)
-        APF.dewlist = APF.dewlist[-10:]
-        APF.airlist = APF.airlist[-10:]
-        APF.m2list = APF.m2list[-10:]
-
-    dewlist = np.asarray(APF.dewlist)
-    airlist = np.asarray(APF.airlist)
-    m2list  = np.asarray(APF.m2list)
-
-    if np.average(airlist-dewlist) < 2 or np.average(m2list-dewlist) < 4:
-        APF.dewTooClose = True
-    else:
-        APF.dewTooClose = False
-        
-    return
 
 
         
@@ -365,20 +174,20 @@ class APF:
         
         # Set the callbacks and monitors
         self.wx.monitor()
-        self.wx.callback(windmon)
+        self.wx.callback(self.windmon)
 
         self.altwx.monitor()
-        self.altwx.callback(altwindmon)
+        self.altwx.callback(self.altwindmon)
 
         self.ok2open.monitor()
-        self.ok2open.callback(okmon)
+        self.ok2open.callback(self.okmon)
 
         
         self.dmtimer.monitor()
-        self.dmtimer.callback(dmtimemon)
+        self.dmtimer.callback(self.dmtimemon)
 
         self.kcountrate.monitor()
-        self.kcountrate.callback(countratemon)
+        self.kcountrate.callback(self.countratemon)
 
         self.elapsed.monitor()
 
@@ -386,7 +195,7 @@ class APF:
         self.obsnum.callback(self.updateLastObs)
 
         self.event.monitor()
-        self.event.callback(eventmon)
+        self.event.callback(self.eventmon)
 
         self.nerase.monitor()
 
@@ -395,10 +204,7 @@ class APF:
         self.whatsopn.monitor()
 
         self.dewpt.monitor()
-        self.dewpt.callback(dewptmon)
-
-        self.disp0sta.monitor()
-        self.disp0sta.callback(ucamdispatchmon)
+        self.dewpt.callback(self.dewptmon)
         
         self.counts.monitor()
         self.teqmode.monitor()
@@ -441,7 +247,7 @@ class APF:
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
         s += "Teq Mode - %s\n" % self.teqmode
-        s += "M2 Focus Value = % 4.3f\n" % self.aafocus
+        s += "M2 Focus Value = % 4.3f\n" % (float(self.aafocus['binary'])*1000.0)
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
         s += "Current Weather = %s\n" % self.checkapf['WEATHER'].read()
         s += "Too close to the dewpoint? = %s\n" % self.dewTooClose
@@ -471,8 +277,182 @@ class APF:
                     self.apfucam['DISP0DWIM'].write("ksetMacval DISP0STA READY")
         except:
             return
+        
+        return
             
+    def countmon(self,counts):
+        if counts['populated'] == False:
+            return
+        try:
+            cnts = float(counts.read(binary=True))
+        except:
+            return
+        try:
+            time = float(elapsed.read(binary=True))
+        except:
+            return
 
+        try:
+            self.ccountrate = cnts/time
+        except:
+            return
+
+
+    def countratemon(self,kcountrate):
+        if kcountrate['populated'] == False:
+            return
+
+        try:
+            ctr = float(kcountrate['binary'])
+        except:
+            apflog("Cannot read apfguide.COUNTRATE",level='warn',echo=True)
+            return
+        self.countrate *=  (1.0*self.ncountrate)/(self.ncountrate+1)
+        self.countrate += ctr/(self.ncountrate+1)
+        self.ncountrate += 1
+        return
+
+    def eventmon(self,event):
+        if event['populated'] == False:
+            return
+
+        try:
+            eventval = event.read(binary=True)
+            if eventval == 0 or eventval == 7 :
+                self.ncountrate = 0
+        except:
+            return
+
+
+        try:
+            cnts = float(counts.read(binary=True))
+            time = float(elapsed.read(binary=True))
+        except:
+            return
+        try:
+            self.ccountrate = cnts/time
+        except:
+            return
+
+    # Callback for ok2open permission
+    # -- Check that if we fall down a logic hole we don't error out
+    def okmon(self,ok2open):
+        if ok2open['populated'] == False:
+            return
+        try:
+            ok = ok2open # historical
+        except Exception as e:
+            apflog("Exception in okmon for checkapf.OPEN_OK: %s" % (e), level='error')
+            return
+        try:
+            if self.mv_perm.read(binary=False) == False:
+                ok = False
+        except Exception as e:
+            apflog("Exception in okmon for checkapf.MOVE_PERM: %s" % (e), level='error')
+            return
+        try:
+            if not self.userkind.read(binary=True) == 3:
+                ok = False
+        except Exception as e:
+            apflog("Exception in okmon checkapf.USERKIND: %s" % (e), level='error')
+            return
+        self.openOK = ok
+        return
+
+
+
+    # Callback for the windspeed
+    def windmon(self,wx):
+        if wx['populated'] == False:
+            return
+        try:
+            wvel = float(wx)
+        except Exception as e:
+            apflog("Exception in windmon: %s" % (e), level='error')
+            return
+        
+        if self.wslist == []:
+            self.wslist = [wvel]*20
+
+        else:
+            self.wslist.append(wvel)
+            self.wslist = self.wslist[-20:]
+
+        self.wvel = np.median(self.wslist)
+        return
+
+    def altwindmon(self,wx):
+        if wx['populated'] == False:
+            return
+        try:
+            downval = self.down.read(binary=True)
+        except Exception as e:
+            apflog("Exception in altwindmon: %s" % (e), level='error')
+            return
+        if downval == 0:
+            return 
+        try:
+            wvel = float(wx)
+        except Exception as e:
+            apflog("Exception in altwindmon: %s" % (e), level='error')
+            return
+        
+        if self.wslist == []:
+            self.wslist = [wvel]*20
+
+        else:
+            self.wslist.append(wvel)
+            self.wslist = self.wslist[-20:]
+
+        self.wvel = np.median(self.wslist)
+        return
+        
+    # Callback for Deadman timer
+    def dmtimemon(self,dmtime):
+        if dmtime['populated'] == False:
+            return
+        try:
+            self.dmtime = dmtime
+        except Exception as e:
+            apflog("Exception in dmtimemon: %s" % (e), level='error')
+
+
+    def dewptmon(self,dew):
+        if dew['populated'] == False:
+            return
+        try:
+            dewpt = float(dew)
+            m2 = self.m2temp.read(binary=True)
+            air = self.airtemp.read(binary=True)
+        except:
+            return
+
+        if self.dewlist == []:
+            self.dewlist = [dewpt]*10
+            self.airlist = [air]*10
+            self.m2list = [m2]*10
+        else:
+            self.dewlist.append(dewpt)
+            self.airlist.append(air)
+            self.m2list.append(m2)
+            self.dewlist = self.dewlist[-10:]
+            self.airlist = self.airlist[-10:]
+            self.m2list = self.m2list[-10:]
+
+        dewlist = np.asarray(self.dewlist)
+        airlist = np.asarray(self.airlist)
+        m2list  = np.asarray(self.m2list)
+
+        if np.average(airlist-dewlist) < 2 or np.average(m2list-dewlist) < 4:
+            self.dewTooClose = True
+        else:
+            self.dewTooClose = False
+        
+        return
+
+    ## end of callbacks for monitoring stuff
+
+        
     def sunRising(self):
         now = datetime.now()
         if now.strftime("%p") == 'AM':
@@ -1134,11 +1114,10 @@ class APF:
         cur_sunel = self.sunel.read(binary=True)
         too_close = rising and (cur_sunel > -20)
         focval = 0
-        if time.time() - lastfoc > FOCUSTIME:
-            if current_val != "robot_autofocus_enable" and not too_close:
-                self.autofoc.write("robot_autofocus_enable")
-                focval = 1
-                APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)            
+        if time.time() - lastfoc > FOCUSTIME and not too_close:
+            self.autofoc.write("robot_autofocus_enable")
+            focval = 1
+            APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)
         else:
             if current_val == "robot_autofocus_enable":
                 self.autofoc.write("robot_autofocus_disable")

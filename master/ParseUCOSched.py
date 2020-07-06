@@ -509,7 +509,7 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC Dynamic Scheduler
         else:
             star_table['do'].append("")
 
-        star_table['decker'].append(checkFlag("APF decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
+        star_table['decker'].append(checkFlag("decker",didx,ls,"\A(W|N|T|S|O|K|L|M|B)",config["decker"]))
         i2select = checkFlag("I2",didx,ls,"\A(n|N)",config["I2"])
         star_table['I2'].append(i2select.upper())
         tempselect = checkFlag("Template",didx,ls,"\A(n|N)",'Y')
