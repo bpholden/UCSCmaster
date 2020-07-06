@@ -345,13 +345,13 @@ class APF:
             apflog("Exception in okmon for checkapf.OPEN_OK: %s" % (e), level='error')
             return
         try:
-            if checkapf['MOVE_PERM'].read(binary=False) == False:
+            if self.mv_perm.read(binary=False) == False:
                 ok = False
         except Exception as e:
             apflog("Exception in okmon for checkapf.MOVE_PERM: %s" % (e), level='error')
             return
         try:
-            if not checkapf['USERKIND'].read(binary=True) == 3:
+            if not self.userkind.read(binary=True) == 3:
                 ok = False
         except Exception as e:
             apflog("Exception in okmon checkapf.USERKIND: %s" % (e), level='error')
