@@ -44,7 +44,7 @@ def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
     precision, true_error = ge.compute_real_uncertainty(totcounts,result['BV'])
     if actaz < 180:
         actel *= -1.
-    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts, precision, true_error, actfwhm, actslow, actel, result['owner'])
+    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts,  actel,actaz, actfwhm, actslow, result['owner'])
     print (outstr)
     outfp.write(outstr + "\n")
     return curtime, lastfwhm, lastslow
@@ -97,7 +97,7 @@ if os.path.exists('hour_table'):
 rank_table = ds.makeRankTable(options.rank_sheetn)
 
     
-hdrstr = "#starname date time mjd exptime i2counts precision error fwhm slowdown elevation\n"
+hdrstr = "#starname date time mjd exptime i2counts elevation azimuth fwhm slowdown owner\n"
 outfp.write(hdrstr)
         
 star_table, stars  = ParseUCOSched.parseUCOSched(sheetns=options.googledex.split(","),outfn=options.infile,outdir=outdir)
