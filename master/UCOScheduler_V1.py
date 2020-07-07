@@ -38,6 +38,11 @@ def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=Non
     new_pri += star_table['APFpri']
     
         
+    if rank_table is not None:
+        for sheetn in rank_table['sheetn']:
+            cur = star_table['sheetn'] == sheetn
+            new_pri[cur] += rank_table['rank'][rank_table['sheetn'] == sheetn]
+    
     if hour_table is not None:
         too_much = hour_table['cur']  > hour_table['tot']
         done_sheets = hour_table['sheetn'][too_much]
@@ -45,11 +50,6 @@ def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=Non
             bad = star_table['sheetn'] == sheetn
             new_pri[bad] = 0
 
-    if rank_table is not None:
-        for sheetn in rank_table['sheetn']:
-            cur = star_table['sheetn'] == sheetn
-            new_pri[cur] += rank_table['rank'][rank_table['sheetn'] == sheetn]
-    
     
     return new_pri
 
