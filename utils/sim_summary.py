@@ -75,6 +75,8 @@ lines = simin.split("\n")
 sim_vals,sim_names = init_sim_vals()
 
 for l in lines:
+    if re.search("\A\#",l):
+        continue
     d = l.split()
     if len(d) == 11:
         for i in range(0,len(sim_names)):
