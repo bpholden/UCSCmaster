@@ -34,9 +34,9 @@ LAST = 'L'
 
 def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=None):
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
+    
     new_pri = np.zeros_like(star_table['APFpri'])
     new_pri += star_table['APFpri']
-    
         
     if hour_table is not None:
         too_much = hour_table['cur']  > hour_table['tot']
@@ -485,9 +485,13 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
     res['obsblock'] = star_table['obsblock'][idx]
 
     res['SCRIPTOBS'] = []
-    scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
-    scriptobs_line = scriptobs_line + " # end"
-    res['SCRIPTOBS'].append(scriptobs_line)
+    if star_table['obsblock'].mask[idx]:
+        scriptobs_line = makeScriptobsLine(star_table[idx], dt, decker=res['DECKER'], owner=res['owner'], I2=star_table['I2'][idx], focval=focval)
+        scriptobs_line = scriptobs_line + " # end"        
+        res['SCRIPTOBS'].append(scriptobs_line)
+    else:
+        res['SCRIPTOBS'] = makeObsBlock(star_table,idx, dt, focval)
+        
 
     return res
 
@@ -753,15 +757,15 @@ if __name__ == '__main__':
 
     dt = datetime.now()
     
-    frac_tablen='2020A_frac'
+    frac_tablen='test_frac'
     hour_table = makeHourTable(frac_tablen,dt)
     
-    rank_tablen='2020A_ranks'
+    rank_tablen='test_ranks'
     rank_table = makeRankTable(rank_tablen)
 
 #    sheetn=["2018B"]
 #    sheetn="RECUR_A100,2020A_A000,2020A_A011,2020A_A012"
-    sheetn="RECUR_A100,test_obsblock"
+    sheetn="RECUR_A100,test_obsblock,Test_TOO,2020A_A000,2020A_A011,2020A_A012"
 
     # For some test input what would the best target be?
     otfn = "observed_targets"
@@ -781,10 +785,10 @@ if __name__ == '__main__':
         else:
             for k in result:
                 print(k, result[k])
+        ot = open(otfn,"a")
         while len(result["SCRIPTOBS"]) > 0:
-            ot = open(otfn,"a")
             ot.write("%s\n" % (result["SCRIPTOBS"].pop()))
-            ot.close()
             starttime += result["EXP_TIME"]
+        ot.close()
 
     print("Done")
