@@ -36,7 +36,6 @@ def computePriorities(star_table,available,cur_dt,hour_table=None,rank_table=Non
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     new_pri = np.zeros_like(star_table['APFpri'])
     new_pri += star_table['APFpri']
-    
         
     if rank_table is not None:
         for sheetn in rank_table['sheetn']:
