@@ -45,7 +45,7 @@ def cmdexec(cmd, debug=False, cwd='./'):
     
     while p.poll() is None:
         l = p.stdout.readline().rstrip('\n')
-        if debug: apflog(l, echo=debug)
+        apflog(l, echo=debug)
 
     out, err = p.communicate()
     if debug: apflog(out, echo=debug)
