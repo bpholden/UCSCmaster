@@ -1433,13 +1433,11 @@ class APF:
 
     def ucam_status(self,fake=False):
 
-        comb = ucam['combo_ps']
-        ctalk = ucam['ctalkto']
-        if ctalk.read(binary=True) > 0:
+        if self.ctalk.read(binary=True) > 0:
             rv = self.ucam_powercycle(fake=fake)
             return rv
 
-        if comb.read(binary=True) > 0:
+        if self.combo_ps.read(binary=True) > 0:
             # brains!
             rv = self.ucam_restart(fake=fake)
             return rv
