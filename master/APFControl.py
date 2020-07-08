@@ -455,6 +455,7 @@ class APF:
 
         
     def sunRising(self):
+        # the sun also rises
         now = datetime.now()
         if now.strftime("%p") == 'AM':
             return True
@@ -534,9 +535,9 @@ class APF:
         apflog("Setting science camera parameters.")
         self.ucam('OBSERVER').write(name)
         self.apfschedule('OWNRHINT').write(owner)        
-        self.ucam('OUTFILE').write(name)
+        self.user.write(name)
         self.ucam('OUTDIR').write('/data/apf/')
-        self.ucam('OBSNUM').write(str(num))
+        self.obsnum.write(str(num))
         self.robot['UCAMLAUNCHER_UCAM_PCC'].write(0)
 
         apflog("Updated science camera parameters:")
@@ -1019,7 +1020,7 @@ class APF:
         prefixs = ["AZ","EL","FA","FB","FC","TR" ]
         for pr in prefixs:
             nm = pr + "AMPFLT"
-            val = tel[nm].read(binary=True)
+            val = self.tel[nm].read(binary=True)
             if val:
                 servo_failed = True
                 
@@ -1191,9 +1192,9 @@ class APF:
         # Things to reset after this
         apflog("checkClouds(): Storing current UCAM keywords for later...", echo=True)
         # UCAM outfile
-        obs_file = self.ucam["OUTFILE"].read()
+        obs_file = self.user.read()
         # UCAM Obsnumber
-        obs_num = self.ucam["OBSNUM"].read()
+        obs_num = self.obsnum.read()
         robot['MASTER_LAST_OBS_UCSC'].write(obs_num)
         # scriptobs_lines_done
         lines_done = int(self.robot["SCRIPTOBS_LINES_DONE"])
@@ -1223,8 +1224,8 @@ class APF:
 
         apflog("checkClouds(): Resetting UCAM keywords to previous values.", echo=True)
         APFLib.write(self.ucam["RECORD"], "Yes")
-        APFLib.write(self.ucam["OUTFILE"], obs_file)
-        APFLib.write(self.ucam["OBSNUM"], obs_num)
+        APFLib.write(self.user, obs_file)
+        APFLib.write(self.obsnum, obs_num)
         APFLib.write(self.robot["SCRIPTOBS_LINES_DONE"], lines_done)
         APFTask.waitFor(self.task, True, timeout=5)
         apflog("checkClouds(): Keywords successfully written.", echo=True)
@@ -1237,7 +1238,7 @@ class APF:
             APFLib.write(self.checkapf['ROBOSTATE'], "master operating",timeout=10)
         except Exception as e:
             try:
-                ukind = self.checkapf['USERKIND'].read()
+                ukind = self.userkind.read()
             except:
                 ukind = "Unknown"
             ostr = "Error: Cannot write to ROBOSTATE, USERKIND = %s, reason: %s" % (ukind,e)
@@ -1246,7 +1247,7 @@ class APF:
     def DMZero(self):
         try:
             if self.checkapf['DMTIME'].read(binary=True) < 1:
-                APFLib.write(self.checkapf['DMTIME'], -1,timeout=10)
+                APFLib.write(self.dmtimer, -1,timeout=10)
         except Exception as e:
             ostr = "Error: cannot touch DM Timer: %s " %( e)
             apflog(ostr,level='error',echo=True)
@@ -1325,7 +1326,7 @@ class APF:
         else:
             if not self.ucam['EVENT_STR'].read() == "ControllerReady":
                 apflog("Waiting for current exposure to finish.")
-                ucam['EVENT_STR'].waitfor(" = ReadoutBegin", timeout=1200)
+                self.ucam['EVENT_STR'].waitfor(" = ReadoutBegin", timeout=1200)
 
         ripd, running = self.findRobot()
         if running:
