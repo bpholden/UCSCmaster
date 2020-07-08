@@ -136,6 +136,7 @@ class APF:
     obsnum     = ucam['OBSNUM']
     event      = ucam['EVENT']
     combo_ps   = ucam['COMBO_PS']
+    ctalk      = ucam['CTALKTO']
     nerase     = ucam['NERASE']
     disp0sta   = ucam['DISP0STA']
 
