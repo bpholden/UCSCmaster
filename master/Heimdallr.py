@@ -1,4 +1,6 @@
 #!/usr/bin/env  /opt/kroot/bin/kpython
+from __future__ import print_function
+
 # Heimdallr.py
 # UCSC script for the master task.
 # Monitors and operates the APF for an observing night
@@ -90,10 +92,10 @@ def shutdown():
         APFTask.set(parent, 'STATUS', status)
         sys.exit()
     except:   
-        print 'Exited/Failure'
+        print('Exited/Failure')
         os._exit(1)
     else:
-        print status
+        print(status)
         os._exit(0)
 
 def getStartTime(hr,mn):
@@ -152,7 +154,7 @@ def args():
             mn = int(mtch.group(2))
             opt.start = getStartTime(hr,mn)
         else:
-            print "Start time %s does not match required format hours:minutes where both the hours and the minutes are integers"
+            print("Start time %s does not match required format hours:minutes where both the hours and the minutes are integers")
             shutdown()
 
 
@@ -456,8 +458,8 @@ if __name__ == '__main__':
                 master.start()
                 
             if debug:
-                print 'Master is running.'
-                print str(apf)
+                print('Master is running.')
+                print(str(apf))
             APFTask.waitFor(parent, True, timeout=30)
         except KeyboardInterrupt:
             apflog("Heimdallr has been killed by user.", echo=True)
