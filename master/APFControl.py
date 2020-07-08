@@ -641,8 +641,7 @@ class APF:
             lastfocus_dict["lastfocus"] =  lastfocus_dict["nominal"]
         result = self.focus()
 
-        apfmot = ktl.Service('apfmot')
-        dewarfocraw = apfmot['DEWARFOCRAW'].read(binary=True)
+        dewarfocraw = self.dewarfoc.read(binary=True)
         
         if not result or (dewarfocraw > DEWARMAX or dewarfocraw < DEWARMIN):
             flags = "-b"
@@ -712,9 +711,9 @@ class APF:
         else:
             supplies = ('PS1_48V_ENA', 'PS2_48V_ENA')
             for keyword in supplies:
-                value = motor[keyword].read(binary=True)
+                value = self.motor[keyword].read(binary=True)
                 if value != 1:
-                    motor[keyword].write('Enabled', wait=False)
+                    self.motor[keyword].write('Enabled', wait=False)
                     
             apflog("Running focusinstr routine.",echo=True)
             cmdpath = '/usr/local/lick/bin/robot/'
