@@ -1292,7 +1292,7 @@ class APF:
             
         robotdir = "/usr/local/lick/bin/robot/"
 
-        telstate = tel['TELSTATE'].read()
+        telstate = self.tel['TELSTATE'].read()
         if telstate == 'Disabled':
             rv, retc = cmdexec(os.path.join(robotdir,"slew --hold"))
             if not rv:
@@ -1323,7 +1323,7 @@ class APF:
         if now:
             apflog("Abort exposure, terminating robot now.")
         else:
-            if not ucam['EVENT_STR'].read() == "ControllerReady":
+            if not self.ucam['EVENT_STR'].read() == "ControllerReady":
                 apflog("Waiting for current exposure to finish.")
                 ucam['EVENT_STR'].waitfor(" = ReadoutBegin", timeout=1200)
 
