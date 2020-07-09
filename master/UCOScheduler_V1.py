@@ -720,7 +720,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         
     t_n = star_table['name'][idx]
     o_n = star_table['sheetn'][idx]
-    p_n = star_table['APFpri'][idx]
+    p_n = final_priorities[idx]
 
     apflog("getNext(): selected target %s for program %s at priority %.0f" % (t_n,o_n,p_n) )
     elstr= "getNext(): star elevations %s" % (cur_elevations[sort_i][sort_j])
