@@ -501,7 +501,7 @@ if __name__ == '__main__':
         logpush(os.path.join(os.getcwd(),"rank_table"))
         
     if os.path.exists(os.path.join(os.getcwd(),"hour_table")):
-        os.remove(os.path.join(os.getcwd(),"hour_table"))
+        logpush(os.path.join(os.getcwd(),"hour_table"))
         
     if os.path.exists(os.path.join(os.getcwd(),"frac_table")):
         os.remove(os.path.join(os.getcwd(),"frac_table"))
