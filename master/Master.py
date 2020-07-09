@@ -334,11 +334,6 @@ class Master(threading.Thread):
             else:
                 apflog("Observing target: %s" % self.target['NAME'], echo=True)
                 APFTask.set(self.task, suffix="MESSAGE", value="Observing target: %s"  % self.target['NAME'], wait=False)
-                try:
-                    ktl.write("apfschedule","ownrhint",self.target['owner'],timeout=2)
-                except:
-                    apflog("Error setting ownrhint %s" % self.target['owner'], echo=True, level='warning')
-                    
                 self.scriptobs.stdin.write(self.target["SCRIPTOBS"].pop() + '\n')
                 
             # Set the Vmag and B-V mag of the latest target
