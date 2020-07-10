@@ -690,6 +690,9 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         currently_available[available] = currently_available[available] & vis
         cur_elevations[available] += star_elevations[vis]
 
+        scaled_elevations[available] += scaled_els[vis]
+
+        
         if slowdown > SLOWDOWN_THRESH or seeing > SEEING_THRESH:
             bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
             available = available & bright_enough
