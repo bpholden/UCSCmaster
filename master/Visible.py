@@ -155,7 +155,7 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MI
         
         diff = np.abs(s.a_dec - observer.lat)
         transit_alt = 90.0 - np.degrees(diff)
-        se = 90.0 * (np.degrees(s.alt) / transit_alt)
+        se = 90.0 - (transit_alt - np.degrees(s.alt))
         scaled_elevations.append(se)
         
         if fin_el < min_el or fin_el > max_el:
