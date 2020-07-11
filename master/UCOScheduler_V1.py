@@ -97,7 +97,7 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
     return hour_table
     
 
-def makeHourTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table'):
+def makeHourTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table',hour_constraints=None):
 
     if not outdir :
         outdir = os.getcwd()
@@ -136,6 +136,13 @@ def makeHourTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
 
     hour_table['tot'] =tot*hour_table['frac']
     hour_table['cur'] =0.0*hour_table['frac']
+
+    if hour_constraints is not None:
+        if 'runname' in hour_constraints.keys() and 'left' in hour_constraints.keys():
+            for runname in hour_constraints['runname']:
+                if hour_constraints['left'][hour_constraints['runname']==runname] < hour_table['tot'][hour_table['sheetn']==runname]:
+                     hour_table['tot'][hour_table['sheetn']==runname] = hour_constraints['left'][hour_constraints['runname']==runname]
+                     
 
     try:
         hour_table.write(outfn,format='ascii')
