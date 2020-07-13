@@ -191,6 +191,29 @@ def setObsDefaults(opt):
     return opt
 
 
+def downloadFiles(opt):
+
+    try:
+        star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet,outfn='googledex.dat',outdir=os.getcwd())
+    except Exception as e:
+        apflog("Error: Cannot download googledex?! %s" % (e),level="error")
+        # goto backup
+        if os.path.exists("googledex.dat.1"):
+            shutil.copyfile("googledex.dat.1","googledex.dat")
+
+    try:
+        rank_table = ds.makeRankTable(sheet_table_name=opt.rank_table,outdir=os.getcwd())
+    except Exception as e:
+        apflog("Error: Cannot download rank_table?! %s" % (e),level="error")
+        # goto backup
+        if os.path.exists("rank_table.1"):
+            shutil.copyfile("rank_table.1","rank_table")
+
+    try:
+        hour_table = ds.makeHourTable(opt.frac_table,datetime.datetime.now(),outdir=os.getcwd())
+    except Exception as e:
+        apflog("Error: Cannot download frac_table?! %s" % (e),level="error")
+
 if __name__ == '__main__':
 
     apflog("Starting Heimdallr...")
@@ -389,22 +412,9 @@ if __name__ == '__main__':
     if 'Watching' == str(phase).strip():
         apf.instrPermit()
         apflog("Starting the main watcher." ,echo=True)
-        try:
-            star_table,stars = ParseUCOSched.parseUCOSched(sheetns=opt.sheet,outfn='googledex.dat',outdir=os.getcwd())
-        except Exception as e:
-            apflog("Error: Cannot download googledex?! %s" % (e),level="error")
-            # goto backup
-            if os.path.exists("googledex.dat.1"):
-                shutil.copyfile("googledex.dat.1","googledex.dat")
-                
-        try:
-            rank_table = ds.makeRankTable(sheet_table_name=opt.rank_table,outdir=os.getcwd())
-        except Exception as e:
-            apflog("Error: Cannot download rank_table?! %s" % (e),level="error")
-            # goto backup
-            if os.path.exists("rank_table.1"):
-                shutil.copyfile("rank_table.1","rank_table")
 
+        downloadFiles(opt)
+        
         bstr = "%d,%d" % (opt.binning,opt.binning)
         apf.ucam['BINNING'].write(bstr)
 
