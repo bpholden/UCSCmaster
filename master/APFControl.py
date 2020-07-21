@@ -29,8 +29,11 @@ SUNEL_HOR = -3.2
 DEWARMAX = 8600
 DEWARMIN = 8400
 
+#LROOT = @LROOT
 #SCRIPTDIR = '@LROOT@/bin/robot/'
-SCRIPTDIR = '/usr/local/lick/bin/robot/'
+
+LROOT = '/usr/local/lick'
+SCRIPTDIR = os.path.join(LROOT,'bin/robot/')
 
 
 def apftaskDo(cmd, debug=True, cwd='./'):
@@ -754,7 +757,7 @@ class APF:
 
         cmd = os.path.join(SCRIPTDIR,"closest")
         cmdargs =  [cmd, rah,ram, ras, decd,decm,decs, "5","1","8"]
-        sfncat = "/usr/local/lick/data/apf/StarCatalog.dat"
+        sfncat = os.path.join(LROOT,"/data/apf/StarCatalog.dat")
         try:
             starcat = open(sfncat)
         except:
