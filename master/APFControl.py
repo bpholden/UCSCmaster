@@ -44,10 +44,10 @@ def cmdexec(cmd, debug=False, cwd='./'):
     try:
         p = subprocess.Popen(args, stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=cwd)
     except OSError as e:
-        apflog("command %s does not exist: %s" % (cmd,e))
+        apflog("command %s does not exist: %s" % (cmd,e),echo=True)
         return False, -1
     except Exception as e:
-        apflog("command %s failed: %s" % (cmd,e))
+        apflog("command %s failed: %s" % (cmd,e),echo=True)
         return False, -1
         
     while p.poll() is None:
