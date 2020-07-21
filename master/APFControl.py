@@ -29,14 +29,16 @@ SUNEL_HOR = -3.2
 DEWARMAX = 8600
 DEWARMIN = 8400
 
-#ScriptDir = '@LROOT@/bin/robot/'
-ScriptDir = '/usr/local/lick/bin/robot/'
+#SCRIPTDIR = '@LROOT@/bin/robot/'
+SCRIPTDIR = '/usr/local/lick/bin/robot/'
 
+
+def apftaskDo(cmd, debug=True, cwd='./'):
+    newcmd = "apftask do %s" % (cmd)
+    cmdexec(newcmd, debug=debug, cwd=cwd)
 
 
 def cmdexec(cmd, debug=False, cwd='./'):
-    args = ["apftask","do"]
-    args = args + cmd.split()
     apflog("Executing Command: %s" % repr(cmd), echo=True)
 
 #    args += ["|&","apflogger","-autolevel", "--"]
@@ -670,7 +672,7 @@ class APF:
         return result
         
     def calibrate(self, script, time):
-        s_calibrate = os.path.join(ScriptDir,"calibrate")
+        s_calibrate = os.path.join(SCRIPTDIR,"calibrate")
         if self.test: 
             apflog("Test Mode: calibrate %s %s." % (script, time))
             APFTask.waitFor(self.task, True, timeout=10)
@@ -698,7 +700,7 @@ class APF:
             self.apfschedule('OWNRHINT').write('public')        
             
             cmd = '%s %s %s' % (s_calibrate,script, time)
-            result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
+            result, code = apftaskDo(cmd,debug=True,cwd=os.getcwd())
             if not result:
                 apflog("%s %s failed with return code %d" % (s_calibrate, script, code),echo=True)
             expression="($apftask.CALIBRATE_STATUS != 0) and ($apftask.CALIBRATE_STATUS != 1) "
@@ -725,9 +727,9 @@ class APF:
                     self.motor[keyword].write('Enabled', wait=False)
                     
             apflog("Running focusinstr routine.",echo=True)
-            cmdpath = '/usr/local/lick/bin/robot/'
+
             execstr = " ".join(['focusinstr',flags])
-            cmd = os.path.join(cmdpath,execstr)
+            cmd = os.path.join(SCRIPTDIR,execstr)
             result, code = cmdexec(cmd,debug=False,cwd=os.getcwd())
             if not result:
                 apflog("focusinstr failed with code %d" % code, echo=True)
@@ -749,8 +751,8 @@ class APF:
         dec = self.tel['DEC'].read()
         rah,ram,ras = ra.split(":") 
         decd,decm,decs = dec.split(":")
-        cmdpath = '/usr/local/lick/bin/robot/'
-        cmd = os.path.join(cmdpath,"closest")
+
+        cmd = os.path.join(SCRIPTDIR,"closest")
         cmdargs =  [cmd, rah,ram, ras, decd,decm,decs, "5","1","8"]
         sfncat = "/usr/local/lick/data/apf/StarCatalog.dat"
         try:
@@ -770,8 +772,8 @@ class APF:
             return out.split()
     
     def slew(self,star):
-        cmdpath = '/usr/local/lick/bin/robot/'
-        cmd = os.path.join(cmdpath,'slewlock')
+
+        cmd = os.path.join(SCRIPTDIR,'slewlock')
         try:
             ra = float(star[1])
             ra *= 3.819718
@@ -784,7 +786,7 @@ class APF:
             apflog("Would slew by executing %s" %(cmd), echo=True)
         else:
             apflog("Slewing by executing %s" %(cmd), echo=True)
-            result, code = cmdexec(cmd,cwd=os.path.curdir,debug=True)
+            result, code = apftaskDo(cmd,cwd=os.path.curdir,debug=True)
             if not result:
                 apflog("Failed at slewing: %s" %(code), level="error", echo=True)
 
@@ -807,9 +809,8 @@ class APF:
             return True
         else:
             apflog("Running focus_telescope routine.",echo=True)
-            cmdpath = '/usr/local/lick/bin/robot/'
-            cmd = os.path.join(cmdpath,'focus_telescope')
-            result, code = cmdexec(cmd,cwd=os.path.curdir)
+            cmd = os.path.join(SCRIPTDIR,'focus_telescope')
+            result, code = apftaskDo(cmd,cwd=os.path.curdir)
             try:
                 self.guide['MODE'].write('Guide')
             except:
@@ -824,22 +825,21 @@ class APF:
             return True
 
     def runAutoexposure(self,ind=5):
-        cmdpath = '/usr/local/lick/bin/robot/'
-        cmd = os.path.join(cmdpath,'autoexposure')
+
+        cmd = os.path.join(SCRIPTDIR,'autoexposure')
         istr = "%d" % (ind)
         cmdargs = cmd
-#       cmdargs = cmd + " -i " + istr
-        result, code = cmdexec(cmdargs,cwd=os.path.curdir)
 
-#        result, code = cmdexec([cmd,istr],cwd=os.path.curdir)
+        result, code = apftaskDo(cmdargs,cwd=os.path.curdir)
+
         if not result:
             apflog("autoexposure failed with code %d" % code, echo=True)
         return result
 
     def runCenterup(self):
-        cmdpath = '/usr/local/lick/bin/robot/'
-        cmd = os.path.join(cmdpath,'centerup')
-        result, code = cmdexec(cmd,cwd=os.path.curdir)
+
+        cmd = os.path.join(SCRIPTDIR,'centerup')
+        result, code = apftaskDo(cmd,cwd=os.path.curdir)
         if not result:
             apflog("centerup failed with code %d" % code, echo=True)
         return result
@@ -886,8 +886,8 @@ class APF:
                 apflog("Can't open. No move permission.",echo=True)
                 return False
 
-        cmd = '/usr/local/lick/bin/robot/clear_estop'
-        result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
+        cmd = os.path.join(SCRIPTDIR,'clear_estop')
+        result, code = apftaskDo(cmd,debug=True,cwd=os.getcwd())
         if result:
             return True
         else:
@@ -903,7 +903,8 @@ class APF:
 
 
     def homeTelescope(self):
-        rv, rc = cmdexec("/usr/local/lick/bin/robot/slew --home")
+        cmd = os.path.join(SCRIPTDIR,"slew") + " --home"
+        rv, rc = apftaskDo(cmd)
         try:
             homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
             if rc == 0 and homed == 2:
@@ -972,17 +973,17 @@ class APF:
             
         # Everything seems acceptable, so lets try opening
         if sunset:
-            cmd = '/usr/local/lick/bin/robot/openatsunset'
+            cmd = os.path.join(SCRIPTDIR,'openatsunset')
         else:
-            cmd = '/usr/local/lick/bin/robot/openatnight'
+            cmd = os.path.join(SCRIPTDIR,'openatnight')
 
         # Make two tries at opening. If they both fail return False so the caller can act
         # accordingly.
-        result, code = cmdexec(cmd)
+        result, code = apftaskDo(cmd)
         if not result:
             apflog("First openup attempt has failed. Exit code = %d. After a pause, will make one more attempt." % code,echo=True)
             APFTask.waitFor(self.task, True, timeout=10)
-            result, code = cmdexec(cmd)
+            result, code = apftaskDo(cmd)
             if not result:
                 apflog("Second openup attempt also failed. Exit code %d. Giving up." % code,echo=True)
                 return False
@@ -999,7 +1000,7 @@ class APF:
     def powerDownTelescope(self):
         """Checks that we have the proper permission and dome is closed, then resets telescope power."""
         if self.test: return True
-        cmd = "/usr/local/lick/bin/robot/power_down_telescope"
+        cmd = os.path.join(SCRIPTDIR,"power_down_telescope")
         self.DMReset()
         if self.mv_perm.binary == False:
                 apflog("Waiting for permission to move")
@@ -1011,7 +1012,7 @@ class APF:
         # one last check
         
         apflog("Running power_down_telescope script")
-        result, code = cmdexec(cmd)
+        result, code = apftaskDo(cmd)
         if not result:
             apflog("power_down_telescope has failed. Human intervention likely required.", level='error', echo=True)
         else:
@@ -1040,10 +1041,10 @@ class APF:
     def close(self, force=False):
         """Checks that we have the proper permission, then runs the closeup script."""
         if self.test: return True
-        cmd = "/usr/local/lick/bin/robot/closeup"
+        cmd = os.path.join(SCRIPTDIR,"closeup")
         if force:
             apflog("Calling a single instance of closeup. Will return regardless of result.", echo=True)
-            result, code = cmdexec(cmd)
+            result, code = apftaskDo(cmd)
             return result
         if self.mv_perm.binary == False:
             if self.chk_close.binary == True:
@@ -1074,7 +1075,7 @@ class APF:
                 apflog("Didn't have move permission after 5 minutes. ", echo=True) 
                 break
             attempts += 1
-            result, code = cmdexec(cmd)
+            result, code = apftaskDo(cmd)
             if not result:
                 apflog("Closeup failed with exit code %d" % code, echo=True)
                 if attempts == 2:
@@ -1164,18 +1165,18 @@ class APF:
 
         # Call prep-obs
         apflog("Calling prep-obs.",echo=True)
-        result, ret_code = cmdexec('prep-obs')
+        result, ret_code = apftaskDo('prep-obs')
         if result == False:
             # try again
             self.DMReset()
-            result, ret_code = cmdexec('prep-obs')
+            result, ret_code = apftaskDo('prep-obs')
             if result is False:
                 apflog("Prep-obs returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
                 return
             
         self.DMReset()
         apflog("Slewing to lower el",echo=True)
-        result, ret_code = cmdexec('slew -e 75')
+        result, ret_code = apftaskDo('slew -e 75')
         if result == False:
             apflog("Slew returned error code %d. Targeting object has failed." % (ret_code),level='error',echo=True)
             return
@@ -1215,8 +1216,8 @@ class APF:
         APFLib.write(self.ucam["RECORD"], "No")
 
 
-        cmdexec('/usr/local/lick/bin/robot/prep-obs')
-        args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.path.join(self.cwd,'checkClouds/')]
+        apftaskDo(os.path.join(SCRIPTDIR,'prep-obs'))
+        args = [os.path.join(SCRIPTDIR,'scriptobs'), '-dir', os.path.join(self.cwd,'checkClouds/')]
 
         apflog("checkClouds(): Observing %s as a test star to check the clouds/seeing/transparency" % target["NAME"], echo=True)
         outfile = open('robot.log', 'a')
@@ -1299,26 +1300,26 @@ class APF:
         # check on weirdness for UCAM host post-reboot
         self.ucamdispatchmon()
             
-        robotdir = "/usr/local/lick/bin/robot/"
+
 
         telstate = self.tel['TELSTATE'].read()
         if telstate == 'Disabled':
-            rv, retc = cmdexec(os.path.join(robotdir,"slew --hold"))
+            rv, retc = apftaskDo(os.path.join(SCRIPTDIR,"slew --hold"))
             if not rv:
                 return rv
-        rv, retc = cmdexec(os.path.join(robotdir,"prep-obs"))
+        rv, retc = apftaskDo(os.path.join(SCRIPTDIR,"prep-obs"))
         if not rv:
             return rv
         # Start scriptobs
 
         outfile = open("robot.log", 'a')
         if raster:
-            args = ['/home/holden/src/raster_scan']
+            args = ['/home/holden/src/scriptobs_offset']
         else:
             if skip:
-                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd(),'-skip']
+                args = [os.path.join(SCRIPTDIR,'scriptobs'), '-dir', os.getcwd(),'-skip']
             else:
-                args = ['/usr/local/lick/bin/robot/scriptobs', '-dir', os.getcwd()]
+                args = [os.path.join(SCRIPTDIR,'scriptobs'), '-dir', os.getcwd()]
 
 
         p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=outfile, stderr=outfile)
@@ -1348,10 +1349,10 @@ class APF:
     def ucam_powercycle(self, fake=False):
 
         if fake:
-            apflog("would have executed @LROOT/bin/robot/robot_power_cycle_ucam")
+            apflog("would have executed %s" % (os.path.join(SCRIPTDIR,"robot_power_cycle_ucam")))
             return True
         else:
-            val = subprocess.call("/usr/local/lick/bin/robot/robot_power_cycle_ucam")
+            val = subprocess.call(os.path.join(SCRIPTDIR,"robot_power_cycle_ucam"))
             if val > 0:
                 apflog("power cycle of UCAM failed",level='alert')
                 return False
