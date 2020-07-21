@@ -728,7 +728,7 @@ class APF:
             cmdpath = '/usr/local/lick/bin/robot/'
             execstr = " ".join(['focusinstr',flags])
             cmd = os.path.join(cmdpath,execstr)
-            result, code = cmdexec(cmd,debug=True,cwd=os.getcwd())
+            result, code = cmdexec(cmd,debug=False,cwd=os.getcwd())
             if not result:
                 apflog("focusinstr failed with code %d" % code, echo=True)
                 result = False
