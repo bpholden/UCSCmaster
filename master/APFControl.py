@@ -51,12 +51,13 @@ def cmdexec(cmd, debug=False, cwd='./'):
         return False, -1
         
     while p.poll() is None:
-        l = p.stdout.readline().rstrip('\n')
-        apflog(l, echo=debug)
+        if debug:
+            l = p.stdout.readline().rstrip('\n')
+            apflog(l, echo=True)
 
     out, err = p.communicate()
-    if debug: apflog(out, echo=debug)
-    if len(err): apflog(err, echo=debug)
+    if debug: apflog(out, echo=True)
+    if len(err): apflog(err, echo=True)
     ret_code = p.returncode
     if ret_code == 0:
         return True, ret_code
