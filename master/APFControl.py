@@ -41,8 +41,15 @@ def cmdexec(cmd, debug=False, cwd='./'):
 
 #    args += ["|&","apflogger","-autolevel", "--"]
     
-    p = subprocess.Popen(args, stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=cwd)
-    
+    try:
+        p = subprocess.Popen(args, stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=cwd)
+    except OSError as e:
+        apflog("command %s does not exist: %s" % (cmd,e))
+        return False, -1
+    except Exception as e:
+        apflog("command %s failed: %s" % (cmd,e))
+        return False, -1
+        
     while p.poll() is None:
         l = p.stdout.readline().rstrip('\n')
         apflog(l, echo=debug)
