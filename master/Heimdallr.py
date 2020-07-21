@@ -176,17 +176,14 @@ def findObsNum(last):
     return last
 
 def setObsDefaults(opt):
-    if opt.name is None or opt.name == "apf":
-        opt.owner = 'public'
+    opt.owner = 'public'
+    if opt.name == None:
         opt.name = 'apf'
-        if opt.obsnum == None:
-            apflog("Figuring out what the observation number should be.",echo=False)
-            opt.obsnum = findObsNum(int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True)))
-        else:
-            opt.obsnum = int(opt.obsnum)
+    if opt.obsnum == None:
+        apflog("Figuring out what the observation number should be.",echo=False)
+        opt.obsnum = findObsNum(int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True)))
     else:
-        if opt.owner == None:
-            opt.owner = opt.name
+        opt.obsnum = int(opt.obsnum)
 
     return opt
 
