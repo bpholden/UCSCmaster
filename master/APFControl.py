@@ -44,7 +44,7 @@ def apftaskDo(cmd, debug=True, cwd='./'):
 def cmdexec(cmd, debug=False, cwd='./'):
     apflog("Executing Command: %s" % repr(cmd), echo=True)
 
-#    args += ["|&","apflogger","-autolevel", "--"]
+    args = cmd.split()
     
     try:
         p = subprocess.Popen(args, stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=cwd)
