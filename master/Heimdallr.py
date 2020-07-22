@@ -207,7 +207,7 @@ def downloadFiles(opt):
             shutil.copyfile("rank_table.1","rank_table")
 
     try:
-        hour_table = ds.makeHourTable(opt.frac_table,datetime.datetime.now(),outdir=os.getcwd())
+        hour_table = ds.makeHourTable(opt.frac_table,datetime.now(),outdir=os.getcwd())
     except Exception as e:
         apflog("Error: Cannot download frac_table?! %s" % (e),level="error")
 
