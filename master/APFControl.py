@@ -736,7 +736,13 @@ class APF:
             result, code = apftaskDo(cmd,cwd=os.getcwd())
             if not result:
                 apflog("focusinstr failed with code %d" % code, echo=True)
-                result = False
+                try:
+                    resultd = APFTask.get('FOCUSINSTR',('LASTFOCUS','PHASE'))
+                    if resultd['PHASE'] == 'Cleanup':
+                        apflog('focusinstr failed in or after cleanup, proceeding with value %s' % (str(resultd['LASTFOCUS'])), echo=True)
+                        result = True
+                except:
+                    result = False
                 
             expression="($apftask.FOCUSINSTR_STATUS == 3)"
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
