@@ -733,7 +733,7 @@ class APF:
 
             execstr = " ".join(['focusinstr',flags])
             cmd = os.path.join(SCRIPTDIR,execstr)
-            result, code = cmdexec(cmd,debug=False,cwd=os.getcwd())
+            result, code = apftaskDo(cmd,cwd=os.getcwd())
             if not result:
                 apflog("focusinstr failed with code %d" % code, echo=True)
                 result = False
