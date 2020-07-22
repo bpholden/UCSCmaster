@@ -764,7 +764,7 @@ class APF:
 
         cmd = os.path.join(SCRIPTDIR,"closest")
         cmdargs =  [cmd, rah,ram, ras, decd,decm,decs, "5","1","8"]
-        sfncat = os.path.join(LROOT,"/data/apf/StarCatalog.dat")
+        sfncat = os.path.join(LROOT,"data/apf/StarCatalog.dat")
         try:
             starcat = open(sfncat)
         except:
