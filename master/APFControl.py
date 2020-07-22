@@ -38,7 +38,8 @@ SCRIPTDIR = os.path.join(LROOT,'bin/robot/')
 
 def apftaskDo(cmd, debug=True, cwd='./'):
     newcmd = "apftask do %s" % (cmd)
-    cmdexec(newcmd, debug=debug, cwd=cwd)
+    rv, retcode = cmdexec(newcmd, debug=debug, cwd=cwd)
+    return rv, retcode
 
 
 def cmdexec(cmd, debug=False, cwd='./'):
