@@ -753,7 +753,7 @@ class APF:
                         apflog('focusinstr failed in or after cleanup, proceeding with value %s' % (str(resultd['LASTFOCUS'])), echo=True)
                         result = True
                 except:
-                    apflog("focusinstr failed" ,echo=True, level="error")
+                    apflog("focusinstr failed, exited with Exited/Unknown" ,echo=True, level="error")
                     result = False
             expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
