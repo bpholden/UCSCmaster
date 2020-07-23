@@ -747,8 +747,14 @@ class APF:
                 
             expression="($apftask.FOCUSINSTR_STATUS == 3)"
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                apflog("focusinstr failed" ,echo=True, level="error")
-                result = False
+                try:
+                    resultd = APFTask.get('FOCUSINSTR',('LASTFOCUS','PHASE'))
+                    if resultd['PHASE'] == 'Cleanup':
+                        apflog('focusinstr failed in or after cleanup, proceeding with value %s' % (str(resultd['LASTFOCUS'])), echo=True)
+                        result = True
+                except:
+                    apflog("focusinstr failed" ,echo=True, level="error")
+                    result = False
             expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                 apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
