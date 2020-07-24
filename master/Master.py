@@ -1,7 +1,6 @@
 #!/usr/bin/env  /opt/kroot/bin/kpython
 from __future__ import print_function
 
-# Heimdallr.py
 # UCSC script for the master task.
 # Monitors and operates the APF for an observing night
 
@@ -176,17 +175,14 @@ def findObsNum(last):
     return last
 
 def setObsDefaults(opt):
-    if opt.name is None or opt.name == "apf":
-        opt.owner = 'public'
+    opt.owner = 'public'
+    if opt.name == None:
         opt.name = 'apf'
-        if opt.obsnum == None:
-            apflog("Figuring out what the observation number should be.",echo=False)
-            opt.obsnum = findObsNum(int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True)))
-        else:
-            opt.obsnum = int(opt.obsnum)
+    if opt.obsnum == None:
+        apflog("Figuring out what the observation number should be.",echo=False)
+        opt.obsnum = findObsNum(int(ktl.read('apftask','MASTER_LAST_OBS_UCSC',binary=True)))
     else:
-        if opt.owner == None:
-            opt.owner = opt.name
+        opt.obsnum = int(opt.obsnum)
 
     return opt
 
@@ -210,13 +206,13 @@ def downloadFiles(opt):
             shutil.copyfile("rank_table.1","rank_table")
 
     try:
-        hour_table = ds.makeHourTable(opt.frac_table,datetime.datetime.now(),outdir=os.getcwd())
+        hour_table = ds.makeHourTable(opt.frac_table,datetime.now(),outdir=os.getcwd())
     except Exception as e:
         apflog("Error: Cannot download frac_table?! %s" % (e),level="error")
 
 if __name__ == '__main__':
 
-    apflog("Starting Heimdallr...")
+    apflog("Starting master...")
 
     # Parse the command line arguments
     opt = args()
@@ -238,7 +234,7 @@ if __name__ == '__main__':
     if opt.test:
         debug = True
         parent = 'example'
-        apflog("Heimdallr starting in test mode.")
+        apflog("master starting in test mode.")
     else:
         debug = False
         parent = 'master'
@@ -472,11 +468,11 @@ if __name__ == '__main__':
                 print(str(apf))
             APFTask.waitFor(parent, True, timeout=30)
         except KeyboardInterrupt:
-            apflog("Heimdallr has been killed by user.", echo=True)
+            apflog("master has been killed by user.", echo=True)
             observe.stop()
             shutdown()
         except:
-            apflog("Heimdallr killed by unknown.", echo=True)
+            apflog("master killed by unknown.", echo=True)
             observe.stop()
             shutdown()
 
@@ -497,7 +493,7 @@ if __name__ == '__main__':
     if os.path.exists(os.path.join(os.getcwd(),"observed_targets")):
         try:
             apflog("Updating the online googledex with the observed times", level='Info', echo=True)
-            ParseUCOSched.updateSheetLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=observe.sheetn,outfn="googledex.dat")
+            ParseUCOSched.updateSheetLastobs(os.path.join(os.getcwd(),"observed_targets"),sheetns=master.sheetn,outfn="googledex.dat")
 
 
         except Exception as e:

@@ -1,7 +1,6 @@
 #!/usr/bin/env  /opt/kroot/bin/kpython
 from __future__ import print_function
 
-# Heimdallr.py
 # UCSC script for the master task.
 # Monitors and operates the APF for an observing night
 
@@ -37,7 +36,7 @@ import UCOScheduler_V1 as ds
 from x_gaussslit import *
 import ParseUCOSched
 import SchedulerConsts
-from Master import Master
+from Observe import Observe
 
 os.umask(0007)
 
@@ -213,7 +212,7 @@ def downloadFiles(opt):
 
 if __name__ == '__main__':
 
-    apflog("Starting Heimdallr...")
+    apflog("Starting master...")
 
     # Parse the command line arguments
     opt = args()
@@ -235,7 +234,7 @@ if __name__ == '__main__':
     if opt.test:
         debug = True
         parent = 'example'
-        apflog("Heimdallr starting in test mode.")
+        apflog("master starting in test mode.")
     else:
         debug = False
         parent = 'master'
@@ -405,7 +404,7 @@ if __name__ == '__main__':
 
 
     # 4) Start the main watcher thread
-    master = Master(apf,opt)
+    observe = Observe(apf,opt)
     if 'Watching' == str(phase).strip():
         apf.instrPermit()
         apflog("Starting the main watcher." ,echo=True)
@@ -433,14 +432,14 @@ if __name__ == '__main__':
                 apflog("Will be starting star list %s at line 0" % opt.fixed,echo=True)
         else:
             apflog("Starting dynamic scheduler", echo=True)
-        master.task = parent
+        observe.task = parent
 
-        master.start()
+        observe.start()
     else:
-        master.signal = False
+        observe.signal = False
 
-    while master.signal:
-        # Master is running, check for keyboard interupt
+    while observe.signal:
+        # Observe is running, check for keyboard interupt
         try:
             currTime = datetime.now()
             # Check if it is after ~8:00AM.
@@ -449,38 +448,38 @@ if __name__ == '__main__':
             #  Log that we force a close so we can look into why this happened.
             if currTime.hour == 8:
                 # Its 8 AM. Lets closeup
-                master.stop()
-                master.signal=False
-                apflog("Master was still running at 8AM. It was stopped and post calibrations will be attempted.", level='warn')
+                observe.stop()
+                observe.signal=False
+                apflog("Observe was still running at 8AM. It was stopped and post calibrations will be attempted.", level='warn')
                 break
-            if master.isAlive() is False:
+            if observe.isAlive() is False:
                 # this means that the thread died, usually because of an uncaught exception
-                # master.signal will still be True
-                # overwrite master with a new instance and restart the thread
-                apflog("Master thread has died. Will attempt to restart.", level='error', echo=True)
+                # observe.signal will still be True
+                # overwrite observe with a new instance and restart the thread
+                apflog("Observe thread has died. Will attempt to restart.", level='error', echo=True)
                 apf.killrobot()
-                master = Master(apf,opt)
-                master.task = parent
+                observe = Observe(apf,opt)
+                observe.task = parent
 
-                master.start()
+                observe.start()
                 
             if debug:
-                print('Master is running.')
+                print('Observe is running.')
                 print(str(apf))
             APFTask.waitFor(parent, True, timeout=30)
         except KeyboardInterrupt:
-            apflog("Heimdallr has been killed by user.", echo=True)
-            master.stop()
+            apflog("master has been killed by user.", echo=True)
+            observe.stop()
             shutdown()
         except:
-            apflog("Heimdallr killed by unknown.", echo=True)
-            master.stop()
+            apflog("master killed by unknown.", echo=True)
+            observe.stop()
             shutdown()
 
-    # Check if the master left us an exit message.
+    # Check if the observe left us an exit message.
     # If so, something strange likely happened so log it.
     try:
-        msg = master.exitMessage
+        msg = observe.exitMessage
     except AttributeError:
         pass
     else:
