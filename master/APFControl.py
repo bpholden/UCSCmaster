@@ -38,7 +38,8 @@ SCRIPTDIR = os.path.join(LROOT,'bin/robot/')
 
 def apftaskDo(cmd, debug=True, cwd='./'):
     newcmd = "apftask do %s" % (cmd)
-    cmdexec(newcmd, debug=debug, cwd=cwd)
+    rv, retcode = cmdexec(newcmd, debug=debug, cwd=cwd)
+    return rv, retcode
 
 
 def cmdexec(cmd, debug=False, cwd='./'):
@@ -746,8 +747,14 @@ class APF:
                 
             expression="($apftask.FOCUSINSTR_STATUS == 3)"
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                apflog("focusinstr failed" ,echo=True, level="error")
-                result = False
+                try:
+                    resultd = APFTask.get('FOCUSINSTR',('LASTFOCUS','PHASE'))
+                    if resultd['PHASE'] == 'Cleanup':
+                        apflog('focusinstr failed in or after cleanup, proceeding with value %s' % (str(resultd['LASTFOCUS'])), echo=True)
+                        result = True
+                except:
+                    apflog("focusinstr failed, exited with Exited/Unknown" ,echo=True, level="error")
+                    result = False
             expression="($apftask.FOCUSINSTR_LASTFOCUS > 0)"
             if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
                 apflog("focusinstr failed to find an adequate focus" ,echo=True, level="error")
@@ -763,7 +770,7 @@ class APF:
 
         cmd = os.path.join(SCRIPTDIR,"closest")
         cmdargs =  [cmd, rah,ram, ras, decd,decm,decs, "5","1","8"]
-        sfncat = os.path.join(LROOT,"/data/apf/StarCatalog.dat")
+        sfncat = os.path.join(LROOT,"data/apf/StarCatalog.dat")
         try:
             starcat = open(sfncat)
         except:
