@@ -1,4 +1,4 @@
-#!/usr/bin/env  /opt/kroot/bin/kpython
+#! @KPYTHON@
 from __future__ import print_function
 
 # UCSC script for the master task.
