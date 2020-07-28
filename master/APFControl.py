@@ -29,10 +29,10 @@ SUNEL_HOR = -3.2
 DEWARMAX = 8600
 DEWARMIN = 8400
 
-#LROOT = @LROOT
-#SCRIPTDIR = '@LROOT@/bin/robot/'
-
-LROOT = '/usr/local/lick'
+if "LROOT" in os.environ:
+    LROOT = os.environ["LROOT"]
+else:
+    LROOT = '/usr/local/lick'
 SCRIPTDIR = os.path.join(LROOT,'bin/robot/')
 
 
