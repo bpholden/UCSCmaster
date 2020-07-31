@@ -1,15 +1,20 @@
 from __future__ import print_function
 import sys
 import os
+import argparse
 sys.path.append("../master")
 
 import ParseUCOSched
 
 if __name__ == "__main__":
-    if len(sys.argv) <= 1:
-        print ("needs a sheet list")
-        sys.exit()
-    sheetns = sys.argv[1].split(",")
+
+    parser = argparse.ArgumentParser(description="Set default options")
+    parser.add_argument('sheetn',type=str,nargs='+')
+    parser.add_argument('-f', '--frac_sheet', dest='frac_sheet', default=None, help='Download a frac table as well')
+    parser.add_argument('-r', '--rank_sheet', dest='rank_sheet', default=None, help='Download a rank table as well')
+    opt = parser.parse_args()
+    
+    sheetns = opt.sheetn.split(",")
     outdir = "."
     outfn = "googledex.dat"
     if os.path.exists(os.path.join(outdir,outfn)):
@@ -29,4 +34,9 @@ if __name__ == "__main__":
 
         
     ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
+
+    if opt.frac_sheet is not None:
+        hour_table = ds.makeHourTable(opt.frac_sheet,curtime.datetime())
+    if opt.rank_sheet is not None:
+        rank_table = ds.makeRankTable(opt.rank_sheet)
 
