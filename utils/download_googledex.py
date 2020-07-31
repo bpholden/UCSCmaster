@@ -9,7 +9,7 @@ import ParseUCOSched
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Set default options")
-    parser.add_argument('sheetn',type=str,nargs='+')
+    parser.add_argument('sheetn',type=str)
     parser.add_argument('-f', '--frac_sheet', dest='frac_sheet', default=None, help='Download a frac table as well')
     parser.add_argument('-r', '--rank_sheet', dest='rank_sheet', default=None, help='Download a rank table as well')
     opt = parser.parse_args()
