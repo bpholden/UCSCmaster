@@ -36,24 +36,19 @@ def computePriorities(star_table,available,cur_dt,observed=None,hour_table=None,
     # make this a function, have it return the current priorities, than change references to the star_table below into references to the current priority list
     new_pri = np.zeros_like(star_table['APFpri'])
     new_pri += star_table['APFpri']
-        
-    if rank_table is not None:
-        for sheetn in rank_table['sheetn']:
-            cur = star_table['sheetn'] == sheetn
-            new_pri[cur] += rank_table['rank'][rank_table['sheetn'] == sheetn]
-    
+
     if hour_table is not None:
         too_much = hour_table['cur']  > hour_table['tot']
         done_sheets = hour_table['sheetn'][too_much]
-        for sheetn in done_sheets:
-            bad = star_table['sheetn'] == sheetn
-            new_pri[bad] = 0
+    else:
+        done_sheets = []
 
-    if observed is not None and len(observed.sheetns) > 0:
-
-        last_sheet = observed.sheetns[0]
-        cur =  star_table['sheetn'] == last_sheet
-        new_pri[cur] -= 1
+    if rank_table is not None:
+        for sheetn in rank_table['sheetn']:
+            if sheetn not in done_sheets:
+                cur = star_table['sheetn'] == sheetn
+                new_pri[cur] += rank_table['rank'][rank_table['sheetn'] == sheetn]
+    
         
     return new_pri
 
