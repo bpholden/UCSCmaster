@@ -120,9 +120,12 @@ def getSpreadsheet(sheetn="The Googledex",certificate='UCSC_Dynamic_Scheduler-4f
     # the certificate has an email associated with it, that email must
     # have the document shared with it to allow access
 
-    certificate_path = os.path.dirname(__file__)
+    certificate_path = os.path.dirname("/usr/local/lick/data/apf/master/")    
+    if os.path.exists(certificate_path) is False:
+        certificate_path = os.path.dirname(__file__)
+    finpath = os.path.join(certificate_path, certificate)
 
-    json_key = json.load(open(os.path.join(certificate_path, certificate)))
+    json_key = json.load(open(finpath))
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
     credentials = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(certificate_path, certificate), scope)
