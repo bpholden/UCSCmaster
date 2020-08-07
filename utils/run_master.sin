@@ -1,4 +1,4 @@
-#!/opt/kroot/bin/kpython
+#! @KPYTHON@
 from __future__ import print_function
 import os
 import stat
@@ -15,13 +15,13 @@ import ConfigParser
 import ktl
 import numpy as np
 
-LROOT = "/usr/local/lick/"
+LROOT = "@LROOT@"
 
 try:
-    sys.path.append('/home/holden/src/UCSCmaster/master')
+    sys.path.append(LROOT + '/lib/python')
     import apflog
 except:
-    sys.path.append('/home/holden/src/UCSCmaster/master')
+    sys.path.append(LROOT + '/lib/python')
     import fake_apflog
 
 def readem_or_weep(service,keyword,binary=False):
@@ -243,7 +243,8 @@ if __name__ == "__main__":
         sys.exit("master has been started")
 
     curpath = os.path.dirname(os.path.abspath("~"))
-    cpath = os.path.dirname(os.path.join(LROOT,"data/apf/master"))    
+    cpath = os.path.join(LROOT,"data/apf/master")
+    
     config = read_config(os.path.join(cpath,args.config_file),schedule)
 
     if ok_config(config) and config_kwds(config):
