@@ -766,10 +766,10 @@ if __name__ == '__main__':
 
     dt = datetime.now()
     
-    frac_tablen='2020A_frac'
+    frac_tablen='2020B_frac'
     hour_table = makeHourTable(frac_tablen,dt)
     
-    rank_tablen='2020A_ranks'
+    rank_tablen='2020B_ranks'
     rank_table = makeRankTable(rank_tablen)
 
 #    sheetn=["2018B"]
