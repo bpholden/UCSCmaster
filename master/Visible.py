@@ -7,14 +7,10 @@ import os
 import sys
 import time
 
-# Some variables that will soon be moved to a separate file
-TARGET_ELEVATION_MIN = 20 # this elevation is the physical minimum, below this the ADC does not work
-TARGET_ELEVATION_HIGH_MIN = 45 # this elevation is the preferred one for stars that will be high in the sky
-TARGET_ELEVATION_MAX = 85
+import SchedulerConsts
 
-
-def is_visible(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MIN, min_el=TARGET_ELEVATION_MIN,
-                   max_el=TARGET_ELEVATION_MAX):
+def is_visible(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+                   max_el=SchedulerConsts.TARGET_ELEVATION_MAX):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
             observer: A pyephem observer to use a the visibility reference
@@ -111,8 +107,8 @@ def is_visible(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MIN, 
 
 
 
-def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MIN, min_el=TARGET_ELEVATION_MIN,
-                   max_el=TARGET_ELEVATION_MAX):
+def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+                   max_el=SchedulerConsts.TARGET_ELEVATION_MAX,shiftwest=False):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
             observer: A pyephem observer to use a the visibility reference
@@ -133,6 +129,21 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MI
     start_elevations = []
     scaled_elevations = []
     observer.horizon = str(min_el)
+
+    sun = ephem.Sun(observer)
+    sun_el = np.degrees(sun.alt)
+    sun_az = np.degrees(sun.az)
+
+    bottom_angle = SchedulerConsts.SUNEL_STARTLIM-15 # typically -24 degrees
+    
+    if sun_el > (bottom_angle) and sun_az > 180 and shiftwest:
+        offset = 3*(sun_el - bottom_angle) # note, this is positive
+        preferred_angle = (90 - offset)
+    else:
+        offset = 0.0
+        preferred_angle = 90 
+
+    
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
 
@@ -141,7 +152,14 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MI
         observer.date = ephem.Date(cdate)
         s.compute(observer)
         cur_el = np.degrees(s.alt)
+        cur_az = np.degrees(s.az)
         start_elevations.append(cur_el)
+        
+        if cur_el < min_el or cur_el > max_el:
+            fin_elevations.append(cur_el)
+            scaled_elevations.append(cur_el)
+            ret.append(False)
+            continue
 
         if dt > 0:
             # Is the target visible at the end of the observations?
@@ -155,16 +173,20 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MI
         
         diff = np.abs(s.a_dec - observer.lat)
         transit_alt = 90.0 - np.degrees(diff)
-        se = 90.0 - (transit_alt - np.degrees(s.alt))
+        se = 90.0 - (transit_alt - cur_el) 
+
+        if offset > 0:
+            if cur_az < 180:
+                se -= offset
+            else:
+                se = 90 - np.abs(preferred_angle - se)
+        
         scaled_elevations.append(se)
         
         if fin_el < min_el or fin_el > max_el:
             ret.append(False)
             continue
             
-        if cur_el < min_el or cur_el > max_el:
-            ret.append(False)
-            continue
 
         # Does the target remain visible through the observation?
         # The next setting/rising functions throw an exception if the body never sets or rises
@@ -221,7 +243,7 @@ if __name__ == '__main__':
     apf_obs.long = '-121:38:17.7'
     apf_obs.elevation = 1274
     # Minimum observation to observe things at
-    apf_obs.horizon = str(TARGET_ELEVATION_MIN)
+    apf_obs.horizon = str(SchedulerConsts.TARGET_ELEVATION_MIN)
     apf_obs.date = datetime.utcfromtimestamp(int(time.time()))
 
     star = ephem.FixedBody()

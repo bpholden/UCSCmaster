@@ -29,9 +29,6 @@ from x_gaussslit import *
 import ExposureCalculations
 import SchedulerConsts
 
-SUNEL_ENDLIM = -10.0
-SUNEL_STARTLIM = -9.0
-SUNEL_HOR = -3.2
 AVERAGE_INSTRFOC = 8522
 DMLIM = 1140
 
@@ -390,7 +387,7 @@ class Observe(threading.Thread):
             apflog("opening completed with result %s" % (result), echo=True)
             if result == False:
                 apflog("opening hasn't successfully opened. Current sunel = %4.2f" % ( float(sunel)), level='warn', echo=True)
-                if ( float(sunel) < SUNEL_ENDLIM):
+                if ( float(sunel) < SchedulerConsts.SUNEL_ENDLIM):
                     result = self.APF.openat(sunset=sunset)
                     if not result and self.APF.openOK:
                         apflog("Error: opening has failed twice.", level='Alert', echo=True)
@@ -572,10 +569,10 @@ class Observe(threading.Thread):
             # Check on everything
             if datetime.now().strftime("%p") == 'AM':
                 rising = True
-                sunel_lim = SUNEL_ENDLIM
+                sunel_lim = SchedulerConsts.SUNEL_ENDLIM
             else:
                 rising = False
-                sunel_lim = SUNEL_STARTLIM
+                sunel_lim = SchedulerConsts.SUNEL_STARTLIM
             wind_vel = self.APF.wvel
             ripd, running = self.APF.findRobot()
             sunel = self.APF.sunel
@@ -667,7 +664,7 @@ class Observe(threading.Thread):
                 self.stop()
                 
             # Open 
-            if not self.APF.isReadyForObserving()[0] and float(sunel) < SUNEL_HOR and self.APF.openOK and self.canOpen and not self.badweather:
+            if not self.APF.isReadyForObserving()[0] and float(sunel) < SchedulerConsts.SUNEL_HOR and self.APF.openOK and self.canOpen and not self.badweather:
                 if float(sunel) > sunel_lim and not rising:
                     APFTask.set(self.task, suffix="MESSAGE", value="Open at sunset", wait=False)                    
                     success = opening(sunel, sunset=True)
@@ -683,8 +680,8 @@ class Observe(threading.Thread):
                         if not rv:
                             apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
             
-                        chk_done = "$eostele.SUNEL < %f" % (SUNEL_STARTLIM*np.pi/180.0)
-                        while float(sunel.read()) > SUNEL_STARTLIM and not rising:
+                        chk_done = "$eostele.SUNEL < %f" % (SchedulerConsts.SUNEL_STARTLIM*np.pi/180.0)
+                        while float(sunel.read()) > SchedulerConsts.SUNEL_STARTLIM and not rising:
                             outstr = "Sun is setting and sun at elevation of %.3f" % (float(sunel.read()))
                             apflog(outstr,level='info', echo=True)
                             result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)

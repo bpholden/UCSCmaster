@@ -692,11 +692,11 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
         apflog("getNext(): Computing star elevations",echo=True)
         fstars = [s for s,_ in zip(stars,available) if _ ]
-        vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, totexptimes[available])
+        vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, totexptimes[available],shiftwest=True)
         currently_available = available
         currently_available[available] = currently_available[available] & vis
-        cur_elevations[available] += star_elevations[vis]
 
+        cur_elevations[available] += star_elevations[vis]
         scaled_elevations[available] += scaled_els[vis]
 
         
