@@ -134,11 +134,14 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_E
     sun_el = np.degrees(sun.alt)
     sun_az = np.degrees(sun.az)
 
-    if sun_el < (SchedulerConsts.SUNEL_STARTLIM-15) and sun_az > 180 and shiftwest:
-        offset = 3*(sun_el - SchedulerConsts.SUNEL_STARTLIM) # note, this is negative
+    bottom_angle = SchedulerConsts.SUNEL_STARTLIM-15 # typically -24 degrees
+    
+    if sun_el > (bottom_angle) and sun_az > 180 and shiftwest:
+        offset = 3*(sun_el - bottom_angle) # note, this is positive
+        preferred_angle = (90 - offset)
     else:
         offset = 0.0
-        
+        preferred_angle = 90 
 
     
     # Now loop over each body to check visibility
