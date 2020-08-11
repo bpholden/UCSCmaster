@@ -35,7 +35,6 @@ from apflog import *
 import UCOScheduler_V1 as ds
 from x_gaussslit import *
 import ParseUCOSched
-import SchedulerConsts
 from Observe import Observe
 
 os.umask(0007)
