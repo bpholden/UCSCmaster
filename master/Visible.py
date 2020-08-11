@@ -173,12 +173,13 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_E
         
         diff = np.abs(s.a_dec - observer.lat)
         transit_alt = 90.0 - np.degrees(diff)
-        se = 90.0 - (transit_alt - np.degrees(s.alt)) + offset
+        se = 90.0 - (transit_alt - cur_el) 
 
-        if cur_az > 180:
-            se -= offset
-        else:
-            se += offset
+        if offset > 0:
+            if cur_az < 180:
+                se -= offset
+            else:
+                se = 90 - np.abs(preferred_angle - se)
         
         scaled_elevations.append(se)
         
