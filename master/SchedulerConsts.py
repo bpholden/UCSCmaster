@@ -7,6 +7,11 @@ TARGET_EXPOSURE_TIME_MIN = 1240
 TARGET_MOON_DIST_MIN = 15
 TARGET_MOON_DIST_MAX = 25
 
+SUNEL_ENDLIM = -10.0
+SUNEL_STARTLIM = -9.0
+SUNEL_HOR = -3.2
+
+
 # A few constants to make accessing the star table more readable
 
 SLOWDOWN_MIN = 0.6
