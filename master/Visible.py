@@ -187,9 +187,6 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_E
             ret.append(False)
             continue
             
-        if cur_el < min_el or cur_el > max_el:
-            ret.append(False)
-            continue
 
         # Does the target remain visible through the observation?
         # The next setting/rising functions throw an exception if the body never sets or rises
