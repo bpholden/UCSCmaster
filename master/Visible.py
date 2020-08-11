@@ -112,7 +112,7 @@ def is_visible(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MIN, 
 
 
 def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MIN, min_el=TARGET_ELEVATION_MIN,
-                   max_el=TARGET_ELEVATION_MAX):
+                   max_el=TARGET_ELEVATION_MAX,shiftwest=False):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
             observer: A pyephem observer to use a the visibility reference
@@ -141,6 +141,7 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MI
         observer.date = ephem.Date(cdate)
         s.compute(observer)
         cur_el = np.degrees(s.alt)
+        cur_az = np.degrees(s.az)
         start_elevations.append(cur_el)
 
         if dt > 0:
