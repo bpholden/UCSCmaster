@@ -2,9 +2,11 @@ from __future__ import print_function
 import sys
 import os
 import argparse
+import datetime
 sys.path.append("../master")
 
 import ParseUCOSched
+import UCOScheduler_V1 as ds
 
 if __name__ == "__main__":
 
@@ -36,7 +38,7 @@ if __name__ == "__main__":
     ParseUCOSched.parseUCOSched(sheetns=sheetns,outfn=outfn,outdir=outdir,config=config)
 
     if opt.frac_sheet is not None:
-        hour_table = ds.makeHourTable(opt.frac_sheet,curtime.datetime())
+        hour_table = ds.makeHourTable(opt.frac_sheet,datetime.datetime.now())
     if opt.rank_sheet is not None:
         rank_table = ds.makeRankTable(opt.rank_sheet)
 
