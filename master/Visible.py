@@ -236,7 +236,7 @@ if __name__ == '__main__':
     apf_obs.long = '-121:38:17.7'
     apf_obs.elevation = 1274
     # Minimum observation to observe things at
-    apf_obs.horizon = str(TARGET_ELEVATION_MIN)
+    apf_obs.horizon = str(SchedulerConsts.TARGET_ELEVATION_MIN)
     apf_obs.date = datetime.utcfromtimestamp(int(time.time()))
 
     star = ephem.FixedBody()
