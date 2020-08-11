@@ -7,14 +7,10 @@ import os
 import sys
 import time
 
-# Some variables that will soon be moved to a separate file
-TARGET_ELEVATION_MIN = 20 # this elevation is the physical minimum, below this the ADC does not work
-TARGET_ELEVATION_HIGH_MIN = 45 # this elevation is the preferred one for stars that will be high in the sky
-TARGET_ELEVATION_MAX = 85
+import SchedulerConsts
 
-
-def is_visible(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MIN, min_el=TARGET_ELEVATION_MIN,
-                   max_el=TARGET_ELEVATION_MAX):
+def is_visible(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+                   max_el=SchedulerConsts.TARGET_ELEVATION_MAX):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
             observer: A pyephem observer to use a the visibility reference
@@ -111,8 +107,8 @@ def is_visible(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MIN, 
 
 
 
-def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MIN, min_el=TARGET_ELEVATION_MIN,
-                   max_el=TARGET_ELEVATION_MAX,shiftwest=False):
+def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+                   max_el=SchedulerConsts.TARGET_ELEVATION_MAX,shiftwest=False):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
             observer: A pyephem observer to use a the visibility reference
@@ -138,8 +134,8 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MI
     sun_el = np.degrees(sun.alt)
     sun_az = np.degrees(sun.az)
 
-    if sun_el < (SUNEL_STARTLIM-15) and sun_az > 180 and shiftwest:
-        offset = 3*(sun_el - SUNEL_STARTLIM) # note, this is negative
+    if sun_el < (SchedulerConsts.SUNEL_STARTLIM-15) and sun_az > 180 and shiftwest:
+        offset = 3*(sun_el - SchedulerConsts.SUNEL_STARTLIM) # note, this is negative
     else:
         offset = 0.0
         
