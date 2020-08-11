@@ -151,6 +151,12 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_E
         cur_el = np.degrees(s.alt)
         cur_az = np.degrees(s.az)
         start_elevations.append(cur_el)
+        
+        if cur_el < min_el or cur_el > max_el:
+            fin_elevations.append(cur_el)
+            scaled_elevations.append(cur_el)
+            ret.append(False)
+            continue
 
         if dt > 0:
             # Is the target visible at the end of the observations?
