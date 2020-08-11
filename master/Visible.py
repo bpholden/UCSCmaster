@@ -133,6 +133,18 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MI
     start_elevations = []
     scaled_elevations = []
     observer.horizon = str(min_el)
+
+    sun = ephem.Sun(observer)
+    sun_el = np.degrees(sun.alt)
+    sun_az = np.degrees(sun.az)
+
+    if sun_el < (SUNEL_STARTLIM-15) and sun_az > 180 and shiftwest:
+        offset = 3*(sun_el - SUNEL_STARTLIM) # note, this is negative
+    else:
+        offset = 0.0
+        
+
+    
     # Now loop over each body to check visibility
     for s, dt in zip(stars, obs_len):
 
