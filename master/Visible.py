@@ -173,6 +173,8 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=TARGET_ELEVATION_HIGH_MI
         if cur_az > 180:
             se -= offset
         else:
+            se += offset
+        
         scaled_elevations.append(se)
         
         if fin_el < min_el or fin_el > max_el:
