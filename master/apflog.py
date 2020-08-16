@@ -67,7 +67,7 @@ def sendmail(subject, body, to=['holden@ucolick.org']):
     msg["Subject"] = subject
     msg["From"] = me
     msg["To"] = ', '.join(to)
-    msg.attach(MIMEText(body))
+    msg.attach(MIMEText(body+"\n"))
     user_msg = "Script was being run by user %s" % getpass.getuser()
     msg.attach(MIMEText(user_msg))
 
