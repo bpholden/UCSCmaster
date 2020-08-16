@@ -905,7 +905,14 @@ class APF:
         cmd = os.path.join(SCRIPTDIR,'clear_estop')
         result, code = apftaskDo(cmd,debug=True,cwd=os.getcwd())
         if result:
-            return True
+            try:
+                estopstate = self.dome.read('ESTOPST')
+                if estopstate:
+                    return False
+                else:
+                    return True
+            except:
+                return False
         else:
             return False
 
