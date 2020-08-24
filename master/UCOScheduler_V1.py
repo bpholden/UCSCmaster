@@ -288,16 +288,27 @@ def computeDatetime(ctime):
     return dt
 
 
-def makeAPFObs(dt,horizon=str(TARGET_ELEVATION_MIN)):
-    # Generate a pyephem observer for the APF
-    apf_obs = ephem.Observer()
-    apf_obs.lat  = '37:20:33.1'
-    apf_obs.long = '-121:38:17.7'
-    apf_obs.elevation = 1274
-    # Minimum observation to observe things at
-    apf_obs.horizon = horizon
-    apf_obs.date = dt
+def makeAPFObs(horizon=str(TARGET_ELEVATION_MIN)):
+    # Generate a astropy.coordinate observer for the APF
 
+    apf_lat = astropy.coordinates.Latitude((37,20,33.1),unit=astropy.units.deg)
+    apf_long = astropy.coordinates.Longitude((-121,38,17.7),wrap_angle=astropy.units.deg*180,unit=astropy.units.deg)
+    apf_height = 1274 * astropy.units.meter
+    apf_loc = astropy.coordinates.EarthLocation.from_geodetic(apf_long,apf_lat,apf_height)
+##    apf_obs.lat  = '37:20:33.1'
+#    apf_obs.long = '-121:38:17.7'
+#    apf_obs.elevation = 1274
+# Minimum observation to observe things at
+#    apf_obs.horizon = horizon
+#    apf_obs.date = dt
+
+    apf_obs = astroplan.Observer(name='APF Telescope',
+               location=apf_loc,
+               pressure=870 * astropy.units.hPa,
+               relative_humidity=0.3,
+               timezone=pytz.timezone('US/Pacific'),
+               description="APF Telescope on Mount Hamilton, California")
+    
     return apf_obs
 
 def computeSunsetRise(dt,horizon='0'):
