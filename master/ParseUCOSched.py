@@ -12,6 +12,7 @@ import numpy as np
 import astropy
 import astropy.table
 import astropy.io.ascii
+import astropy.coordinates
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials

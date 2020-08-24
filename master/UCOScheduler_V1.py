@@ -9,7 +9,10 @@ from datetime import datetime, timedelta
 import numpy as np
 import astropy
 import astropy.io
-import ephem
+import astropy.coordinates
+import astroplan
+
+
 from ExposureCalculations import getI2_M, getI2_K, getEXPMeter, getEXPMeter_Rate, getEXPTime
 import ParseUCOSched
 import Coords
