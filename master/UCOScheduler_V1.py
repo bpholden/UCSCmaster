@@ -642,15 +642,12 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     do_templates = template and templateConditions(apf_obs, dt, seeing, slowdown)
 
-
     apflog("getNext(): Parsed the Googledex...",echo=True)
-
 
     apflog("getNext(): Finding B stars",echo=True)
     # Note which of these are B-Stars for later.
     bstars = (star_table['Bstar'] == 'Y')|(star_table['Bstar'] == 'y')
 
-    # Distance to stay away from the moon
 
 
     totexptimes = np.zeros(targNum, dtype=float)
