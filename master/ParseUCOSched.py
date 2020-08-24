@@ -413,31 +413,15 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler
             
         name =parseStarname(ls[didx["Star Name"]])
         # Get the RA
-        raval,rahr,ramin,rasec = Coords.getRARad(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
-        if raval is None:
-            # alarm
-            apflog("Error in RA coordinates for %s" %(name),level='warn',echo=True)
-            continue
-
-        # Get the DEC
-        decval,decdeg,decmin,decsec = Coords.getDECRad(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
-        if decval is None:
-            # alarm
-            apflog("Error in Dec coordinates for %s" %(name),level='warn',echo=True)
-            continue
-
-        # why are we doing this you may ask?
-        # we use Google sheets which cannot have -0 for a value
-        # but if we pass a value like 00:-16:00 to eostele, it generates
-        # an incorrect declination value
-        # so, we move the - to the front of the sexagesimal string
-        # the radian values above are only used for the scheduler, we still
-        # command the telescope in the raw units
-
-
+        ra_str = "%sh%sm%s" %(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
+        dec_str = "%sd%sm%s" %(ls[didx["Dec hr"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
+        
+        
         mode = checkFlag("mode",didx,ls,"\A(b|B|a|A|c|C)",config["mode"])
         if type(mode) == str:
             mode = mode.upper()
+        star_table['raval'].append(ra_str)
+        star_table['decval'].append(dec_str)        
         star_table['mode'].append(mode)
         star_table['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
         star_table['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
@@ -541,21 +525,11 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler
     return star_table
 
 def genStars(star_table):
-    """pyephem_objs = genStars(star_table)
 
-    given a star_table returned by parseCodex (or initStarTable) returns
-    a list of pyephem objects for every object in the table
-
-    Inputs star_table - astropy Table that must have the RA and Dec in
-    sexigresimal format with each column for each part of the
-    coordinates separate
-    """
     stars = []
-    for i in range(0,len(star_table['name'])):
-        star = ephem.FixedBody()
-        star.name = star_table['name'][i]
-        star._ra = ephem.hours(str(":".join([star_table["RA hr"][i], star_table["RA min"][i], star_table["RA sec"][i]])))
-        star._dec = ephem.degrees(str(":".join([star_table["Dec deg"][i], star_table["Dec min"][i], star_table["Dec sec"][i]])))
+
+    for i in range(0,len(star_table)):
+        star = astropy.coordinates.SkyCoord(star_table['raval'][i],star_table['decval'][i])
         stars.append(star)
 
     return stars
