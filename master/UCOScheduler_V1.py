@@ -366,7 +366,7 @@ def conditionCuts(moon,seeing,slowdown,star_table):
     return available
 
 
-def templateConditions(moon, seeing, slowdown):
+def templateConditions(apf_obs, dt, seeing, slowdown):
     """ istrue = conditionCuts(moon, seeing, slowdown)
 
     Checks to see if moon, seeing and slowdown factor are within template conditions
@@ -379,11 +379,15 @@ def templateConditions(moon, seeing, slowdown):
 
     """
 
+    moon_pos   = apf_obs.moon_altaz(dt)
+    moon_pos   = apf_obs.moon_phase(dt)
+
+    
     if seeing < 15 and slowdown < 1.25:
-        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon.alt),echo=True,level='debug')
-        if moon.phase < 50 and float(moon.alt) < 0:
+        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon_pos.alt),echo=True,level='debug')
+        if moon_phase.value > np.pi/2 and moon_pos.alt.value < 0:
             return True
-        elif moon.phase < 25 and float(moon.alt) < 0.7:
+        elif moon_phase.value > 3*np.pi/2 and moon_pos.alt.value < 45:
             return True
         else:
             return False
