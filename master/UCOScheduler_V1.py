@@ -313,15 +313,18 @@ def makeAPFObs(horizon=str(TARGET_ELEVATION_MIN)):
 
 def computeSunsetRise(dt,horizon='0'):
     # computes time in seconds before sunset
-    apf_obs = makeAPFObs(dt,horizon=horizon)
-    sunset = apf_obs.next_setting(ephem.Sun())
-    sunset -= ephem.Date(dt)
-    sunset *= 86400.0 # convert to seconds
 
-    sunrise = apf_obs.next_rising(ephem.Sun())
-    sunrise -= ephem.Date(dt)
-    sunrise *= 86400.0 # convert to seconds
-    return sunset, sunrise
+    compute_time = Time(dt)
+    
+    apf_obs = makeAPFObs(horizon=horizon)
+    sunset = apf_obs.sun_set_time(compute_time,which='next')
+    sunset_sec = sunset.jd - compute_time.jd
+    sunset_sec *= 86400.0 # convert to seconds
+
+    sunrise = apf_obs.sun_rise_time(compute_time,which='next')
+    sunrise_sec = sunrise.jd - compute_time.jd
+    sunrise_sec *= 86400.0 # convert to seconds
+    return sunset_sec, sunrise_sec
 
 def computeSunset(dt,horizon='0'):
 
