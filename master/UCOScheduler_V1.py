@@ -553,7 +553,7 @@ def behindMoon(apf_obs,dt,ras,decs):
     
     md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
     minMoonDist = ( moon_phase  * md) + TARGET_MOON_DIST_MIN
-    moonDist = np.degrees(np.sqrt((moon.ra - ras)**2 + (moon.dec - decs)**2))
+    moonDist = np.sqrt((moon_pos.icrs.ra.value - ras)**2 + (moon_pos.icrs.dec.value - decs)**2)
 
     apflog("getNext(): Culling stars behind the moon",echo=True)
     moon_check = moonDist > minMoonDist
