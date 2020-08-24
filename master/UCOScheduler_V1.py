@@ -545,9 +545,14 @@ def lastAttempted(observed):
 
     return last_objs_attempted
 
-def behindMoon(moon,ras,decs):
+def behindMoon(apf_obs,dt,ras,decs):
+    moon_pos   = apf_obs.moon_altaz(dt)
+    moon_phase_ang = apf_obs.moon_phase(dt)
+
+    moon_phase = 1.0 - (moon_phase_ang.value / np.pi) 
+    
     md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
-    minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN
+    minMoonDist = ( moon_phase  * md) + TARGET_MOON_DIST_MIN
     moonDist = np.degrees(np.sqrt((moon.ra - ras)**2 + (moon.dec - decs)**2))
 
     apflog("getNext(): Culling stars behind the moon",echo=True)
@@ -629,15 +634,13 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     # timedelta = now - uth,utm : minus current JD?
     ###
 
-    apf_obs = makeAPFObs(dt)
+    apf_obs = makeAPFObs()
     # APF latitude in radians
     apf_lat = (37 + 20/60. + 33.1/3600.) * np.pi/180.
 
     # Calculate the moon's location
-    moon = ephem.Moon()
-    moon.compute(apf_obs)
 
-    do_templates = template and templateConditions(moon, seeing, slowdown)
+    do_templates = template and templateConditions(apf_obs, dt, seeing, slowdown)
 
 
     apflog("getNext(): Parsed the Googledex...",echo=True)
@@ -658,7 +661,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     scaled_elevations = np.zeros(targNum, dtype=float)
 
     # Is the target behind the moon?
-    moon_check = behindMoon(moon,star_table['ra'],star_table['dec'])
+    moon_check = behindMoon(apf_obs,dt,star_table['ra'],star_table['dec'])
     available = available & moon_check
     if len(last_objs_attempted)>0:
         for n in last_objs_attempted:
