@@ -306,6 +306,7 @@ def makeAPFObs(horizon=str(TARGET_ELEVATION_MIN)):
                location=apf_loc,
                pressure=870 * astropy.units.hPa,
                relative_humidity=0.3,
+               temperature=20 * astropy.units.deg_C,
                timezone=pytz.timezone('US/Pacific'),
                description="APF Telescope on Mount Hamilton, California")
     
