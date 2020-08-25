@@ -13,6 +13,33 @@ import astroplan
 
 import SchedulerConsts
 
+
+def makeAPFObs(horizon=str(TARGET_ELEVATION_MIN)):
+    # Generate a astropy.coordinate observer for the APF
+
+    apf_lat = astropy.coordinates.Latitude((37,20,33.1),unit=astropy.units.deg)
+    apf_long = astropy.coordinates.Longitude((-121,38,17.7),wrap_angle=astropy.units.deg*180,unit=astropy.units.deg)
+    apf_height = 1274 * astropy.units.meter
+    apf_loc = astropy.coordinates.EarthLocation.from_geodetic(apf_long,apf_lat,apf_height)
+##    apf_obs.lat  = '37:20:33.1'
+#    apf_obs.long = '-121:38:17.7'
+#    apf_obs.elevation = 1274
+# Minimum observation to observe things at
+#    apf_obs.horizon = horizon
+#    apf_obs.date = dt
+
+    apf_obs = astroplan.Observer(name='APF Telescope',
+               location=apf_loc,
+               pressure=870 * astropy.units.hPa,
+               relative_humidity=0.3,
+               temperature=20 * astropy.units.deg_C,
+               timezone=pytz.timezone('US/Pacific'),
+               description="APF Telescope on Mount Hamilton, California")
+    
+    return apf_obs
+
+
+
 def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
                    max_el=SchedulerConsts.TARGET_ELEVATION_MAX):
     """ Args:
@@ -146,7 +173,7 @@ def visibleSE(observer, cdate, stars, obs_len, pref_min_el=SchedulerConsts.TARGE
 
 if __name__ == '__main__':
     # Generate a pyephem observer for the APF
-    apf_obs = ephem.Observer()
+    apf_obs = makeAPFobs()
     apf_obs.lat  = '37:20:33.1'
     apf_obs.long = '-121:38:17.7'
     apf_obs.elevation = 1274
