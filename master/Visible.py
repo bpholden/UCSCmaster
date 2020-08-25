@@ -1,15 +1,19 @@
 from __future__ import print_function
 
 from datetime import datetime, timedelta
-import ephem
-import numpy as np
 import os
 import sys
 import time
 
+import numpy as np
+import astropy
+import astropy.coordinates
+import astropy.units
+import astroplan
+
 import SchedulerConsts
 
-def is_visible(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
                    max_el=SchedulerConsts.TARGET_ELEVATION_MAX):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
@@ -25,89 +29,44 @@ def is_visible(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEV
 
         Notes: Uses the observer's current date and location
     """
-    # Store the previous observer horizon and date since we change these
-    prev_horizon = observer.horizon
-    cdate = observer.date
+
     ret = []
     fin_elevations = []
     start_elevations = []
 
-    observer.horizon = str(min_el)
+    
     # Now loop over each body to check visibility
-    for s, dt in zip(stars, obs_len):
+    for star, obslen in zip(stars, obs_lens):
 
-        observer.date = ephem.Date(cdate)
-        s.compute(observer)
-        cur_el = np.degrees(s.alt)
+        constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
+
+        if obslen> 0:
+            findate = cdate + datetime.timedelta(seconds=obslen)
+        else:
+            findate = cdate + datetime.timedelta(seconds=1)
+            
+        time_range = astropy.time.Time([cdate,findate])
+
+        altaz = apf_obs.altaz(cdate,target=star)
+        cur_el = altaz.alt.value
         start_elevations.append(cur_el)
 
-        if dt > 0:
-            observer.date = ephem.Date(cdate + dt/86400.)
-            s.compute(observer)
-            fin_el = np.degrees(s.alt)
-            fin_elevations.append(fin_el)
-            if fin_el < min_el or fin_el > max_el:
-                ret.append(False)
-                continue
+        fin_altaz = apf_obs.altaz(findate,target=star)
+        fin_el = fin_altaz.alt.value
+        fin_elevations.append(fin_el)
+        
+        rv = astroplan.is_always_observable(constraints, apf_obs, star, time_range=time_range)
+        if len(rv) == 1:
+            ret.append(rv[0])
         else:
-            fin_elevations.append(cur_el)
-            fin_el = cur_el
-
-        if fin_el < min_el or fin_el > max_el:
             ret.append(False)
-            continue
-        if cur_el < min_el or cur_el > max_el:
-            ret.append(False)
-            continue
-        # Does the target remain visible through the observation?
-        # The next setting/rising functions throw an exception if the body never sets or rises
-        # ex. circumpolar 
-        try:
-            next_set = observer.next_setting(s)
-        except:
-            # If it never sets, no need to worry.
-            pass
-        else:
-            # Making the assumption that next_set is a datetime object. Might not be the case
-            if next_set < dt:
-                # The object will set before the observation finishes
-                ret.append(False)
-                continue
-        #  apflog( "is_visible(): Does the target remain visible through the observation?", echo=True)
-        observer.horizon = max_el
-        s.compute(observer)
+        
 
-        try:
-            next_rise = observer.next_rising(s)
-        except:
-            # If the body never rises above the max limit no problem
-            pass
-        else:
-            if next_rise < dt:
-                # The object rises above the max el before the observation finishes
-                ret.append(False)
-                continue
-        #   apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
-        observer.horizon = str(pref_min_el)
-        s.compute(observer)
-        if not s.neverup:
-            # will transit above preferred elevation and still rising
-            try:
-                if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el and np.degrees(s.az) < 180:
-                    # this star is currently low on the horizon but will not be above the preferred elevation for the requested exposure time
-                    ret.append(False)
-                    continue
-            except:
-                pass
-        # Everything seems to be fine, so the target is visible!
-        ret.append(True)
-#	apflog( "is_visible(): done searching targets", echo=True)
-    observer.horizon = prev_horizon
     return ret, np.array(start_elevations), np.array(fin_elevations)
 
 
 
-def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+def visibleSE(observer, cdate, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
                    max_el=SchedulerConsts.TARGET_ELEVATION_MAX,shiftwest=False):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
@@ -128,12 +87,12 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_E
     fin_elevations = []
     start_elevations = []
     scaled_elevations = []
-    observer.horizon = str(min_el)
 
-    sun = ephem.Sun(observer)
-    sun_el = np.degrees(sun.alt)
-    sun_az = np.degrees(sun.az)
+    sun_alt_az = apf_obs.sun_altaz(cdate)
 
+    sun_el = sun_alt_az.alt.value
+    sun_az = sun_alt_az.az.value
+    
     bottom_angle = SchedulerConsts.SUNEL_STARTLIM-15 # typically -24 degrees
     
     if sun_el > (bottom_angle) and sun_az > 180 and shiftwest:
@@ -145,93 +104,42 @@ def is_visible_se(observer, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_E
 
     
     # Now loop over each body to check visibility
-    for s, dt in zip(stars, obs_len):
+    for star, obs_len in zip(stars, obs_lens):
 
         # Is the target visible now?
+        constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
 
-        observer.date = ephem.Date(cdate)
-        s.compute(observer)
-        cur_el = np.degrees(s.alt)
-        cur_az = np.degrees(s.az)
-        start_elevations.append(cur_el)
-        
-        if cur_el < min_el or cur_el > max_el:
-            fin_elevations.append(cur_el)
-            scaled_elevations.append(cur_el)
-            ret.append(False)
-            continue
-
-        if dt > 0:
-            # Is the target visible at the end of the observations?
-            observer.date = ephem.Date(cdate + dt/86400.)
-            s.compute(observer)
-            fin_el = np.degrees(s.alt)
-            fin_elevations.append(fin_el)
+        if obslen> 0:
+            findate = cdate + datetime.timedelta(seconds=obslen)
         else:
-            fin_elevations.append(cur_el)
-            fin_el = cur_el
-        
-        diff = np.abs(s.a_dec - observer.lat)
-        transit_alt = 90.0 - np.degrees(diff)
-        se = 90.0 - (transit_alt - cur_el) 
+            findate = cdate + datetime.timedelta(seconds=1)
+            
+        time_range = astropy.time.Time([cdate,findate])
 
+        altaz = apf_obs.altaz(cdate,target=star)
+        cur_el = altaz.alt.value
+        start_elevations.append(cur_el)
+
+        fin_altaz = apf_obs.altaz(findate,target=star)
+        fin_el = fin_altaz.alt.value
+        fin_elevations.append(fin_el)
+        
+        rv = astroplan.is_always_observable(constraints, apf_obs, star, time_range=time_range)
+        if len(rv) == 1:
+            ret.append(rv[0])
+        else:
+            ret.append(False)
+
+        diff = (star.dec.value - apf_obs.location.lat.value)
+        transit_alt = 90.0 - diff
+        se = 90.0 - (transit_alt - cur_el) 
         if offset > 0:
             if cur_az < 180:
                 se -= offset
             else:
                 se = 90 - np.abs(preferred_angle - se)
-        
         scaled_elevations.append(se)
         
-        if fin_el < min_el or fin_el > max_el:
-            ret.append(False)
-            continue
-            
-
-        # Does the target remain visible through the observation?
-        # The next setting/rising functions throw an exception if the body never sets or rises
-        # ex. circumpolar 
-        try:
-            next_set = observer.next_setting(s)
-        except:
-            # If it never sets, no need to worry.
-            pass
-        else:
-            # Making the assumption that next_set is a datetime object. Might not be the case
-            if next_set < dt:
-                # The object will set before the observation finishes
-                ret.append(False)
-                continue
-        #  apflog( "is_visible(): Does the target remain visible through the observation?", echo=True)
-        observer.horizon = max_el
-        s.compute(observer)
-
-        try:
-            next_rise = observer.next_rising(s)
-        except:
-            # If the body never rises above the max limit no problem
-            pass
-        else:
-            if next_rise < dt:
-                # The object rises above the max el before the observation finishes
-                ret.append(False)
-                continue
-        #   apflog( "is_visible(): If the body never rises above the max limit no problem", echo=True)
-        observer.horizon = str(pref_min_el)
-        s.compute(observer)
-        if not s.neverup:
-            # will transit above preferred elevation and still rising
-            try:
-                if ((s.set_time-s.rise_time) > dt/86400.) and cur_el < pref_min_el and np.degrees(s.az) < 180:
-                    # this star is currently low on the horizon but will not be above the preferred elevation for the requested exposure time
-                    ret.append(False)
-                    continue
-            except:
-                pass
-        # Everything seems to be fine, so the target is visible!
-        ret.append(True)
-#	apflog( "is_visible(): done searching targets", echo=True)
-    observer.horizon = prev_horizon
     return ret, np.array(start_elevations), np.array(fin_elevations), np.array(scaled_elevations)
 
 
