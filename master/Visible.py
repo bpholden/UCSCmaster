@@ -21,12 +21,6 @@ def makeAPFObs():
     apf_long = astropy.coordinates.Longitude((-121,38,17.7),wrap_angle=astropy.units.deg*180,unit=astropy.units.deg)
     apf_height = 1274 * astropy.units.meter
     apf_loc = astropy.coordinates.EarthLocation.from_geodetic(apf_long,apf_lat,apf_height)
-##    apf_obs.lat  = '37:20:33.1'
-#    apf_obs.long = '-121:38:17.7'
-#    apf_obs.elevation = 1274
-# Minimum observation to observe things at
-#    apf_obs.horizon = horizon
-#    apf_obs.date = dt
 
     apf_obs = astroplan.Observer(name='APF Telescope',
                location=apf_loc,
