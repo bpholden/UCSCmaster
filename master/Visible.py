@@ -14,7 +14,7 @@ import astroplan
 import SchedulerConsts
 
 
-def makeAPFObs(horizon=str(TARGET_ELEVATION_MIN)):
+def makeAPFObs():
     # Generate a astropy.coordinate observer for the APF
 
     apf_lat = astropy.coordinates.Latitude((37,20,33.1),unit=astropy.units.deg)
