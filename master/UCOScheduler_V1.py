@@ -648,8 +648,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     # Note which of these are B-Stars for later.
     bstars = (star_table['Bstar'] == 'Y')|(star_table['Bstar'] == 'y')
 
-
-
     totexptimes = np.zeros(targNum, dtype=float)
     totexptimes = star_table['texp'] * star_table['APFnshots'] + 40 * (star_table['APFnshots']-1)
 
