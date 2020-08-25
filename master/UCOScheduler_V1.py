@@ -292,6 +292,8 @@ def computeSunsetRise(dt,horizon='0'):
     # computes time in seconds before sunset
 
     compute_time = Time(dt)
+
+    horizon_deg = float(horizon) * astropy.units.degree
     
     apf_obs = Visible.makeAPFObs(horizon=horizon)
     sunset = apf_obs.sun_set_time(compute_time,which='next')
