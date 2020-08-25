@@ -295,12 +295,12 @@ def computeSunsetRise(dt,horizon='0'):
 
     horizon_deg = float(horizon) * astropy.units.degree
     
-    apf_obs = Visible.makeAPFObs(horizon=horizon)
-    sunset = apf_obs.sun_set_time(compute_time,which='next')
+    apf_obs = Visible.makeAPFObs()
+    sunset = apf_obs.sun_set_time(compute_time,which='next',horizon=horizon_deg)
     sunset_sec = sunset.jd - compute_time.jd
     sunset_sec *= 86400.0 # convert to seconds
 
-    sunrise = apf_obs.sun_rise_time(compute_time,which='next')
+    sunrise = apf_obs.sun_rise_time(compute_time,which='next',horizon=horizon_deg)
     sunrise_sec = sunrise.jd - compute_time.jd
     sunrise_sec *= 86400.0 # convert to seconds
     return sunset_sec, sunrise_sec
