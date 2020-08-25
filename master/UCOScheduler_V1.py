@@ -337,7 +337,7 @@ def computeSunrise(dt,horizon='0'):
     return sunrise
 
 
-def conditionCuts(moon,seeing,slowdown,star_table):
+def conditionCuts(moon_phase,seeing,slowdown,star_table):
     """ available = conditionCuts(moon, seeing, slowdown, star_table)
 
     Checks if columns are in the star_table, then cuts on those, returns a boolean numpy array
@@ -356,7 +356,7 @@ def conditionCuts(moon,seeing,slowdown,star_table):
         available = np.ones(len(star_table['ra'], dtype=bool))
 
     if 'moon' in star_table.colnames:
-        available = (star_table['moon'] > moon) & available
+        available = (star_table['moon'] > moon_phase) & available
 
     if 'transparency' in star_table.colnames:
         ext = 2.5 * np.log10(slowdown)
@@ -380,7 +380,7 @@ def templateConditions(apf_obs, dt, seeing, slowdown):
     """
 
     moon_pos   = apf_obs.moon_altaz(dt)
-    moon_pos   = apf_obs.moon_phase(dt)
+    moon_phase = apf_obs.moon_phase(dt)
 
     
     if seeing < 15 and slowdown < 1.25:
