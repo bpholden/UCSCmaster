@@ -413,15 +413,28 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler
             
         name =parseStarname(ls[didx["Star Name"]])
         # Get the RA
-        ra_str = "%sh%sm%s" %(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
-        dec_str = "%sd%sm%s" %(ls[didx["Dec hr"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
-        
-        
+        raval,rahr,ramin,rasec = Coords.getRADeg(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
+        if raval is None:
+            # alarm
+            ra_str = None
+            apflog("Error in RA coordinates for %s" %(name),level='warn',echo=True)
+            continue
+        else:
+            ra_str = "%sh%sm%s" %(rahr,ramin,rasec)
+            
+        # Get the DEC
+        decval,decdeg,decmin,decsec = Coords.getDECDeg(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
+        if decval is None:
+            # alarm
+            apflog("Error in Dec coordinates for %s" %(name),level='warn',echo=True)
+            dec_str = None
+            continue
+        else:
+            dec_str = "%sd%sm%s" % (decdeg,decmin,decsec)
+
         mode = checkFlag("mode",didx,ls,"\A(b|B|a|A|c|C)",config["mode"])
         if type(mode) == str:
             mode = mode.upper()
-        star_table['raval'].append(ra_str)
-        star_table['decval'].append(dec_str)        
         star_table['mode'].append(mode)
         star_table['raoff'].append(checkFlag("raoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["raoff"]))
         star_table['decoff'].append(checkFlag("decoff",didx,ls,"\A((\+|\-)?\d+\.?\d*)",config["decoff"]))
@@ -433,11 +446,13 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler
             star_table['RA hr'].append(rahr)
             star_table['RA min'].append(ramin)
             star_table['RA sec'].append(rasec)
-
+            star_table['rastr'].append(ra_str)
+            
             star_table['dec'].append(decval)
             star_table["Dec deg"].append(decdeg)
             star_table["Dec min"].append(decmin)
             star_table["Dec sec"].append(decsec)
+            star_table['decstr'].append(dec_str)
 
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))
@@ -525,11 +540,18 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler
     return star_table
 
 def genStars(star_table):
+    """pyephem_objs = genStars(star_table)
 
+    given a star_table returned by parseCodex (or initStarTable) returns
+    a list of pyephem objects for every object in the table
+
+    Inputs star_table - astropy Table that must have the RA and Dec in
+    sexigresimal format with each column for each part of the
+    coordinates separate
+    """
     stars = []
-
-    for i in range(0,len(star_table)):
-        star = astropy.coordinates.SkyCoord(star_table['raval'][i],star_table['decval'][i])
+    for i in range(0,len(star_table['name'])):
+        star = SkyCoord(star_table['rastr'][i],star_table['decstr'][i])
         stars.append(star)
 
     return stars
