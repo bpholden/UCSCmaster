@@ -10,7 +10,7 @@ def makeStrs(deg,mn,sec,neg=False):
         sdeg = "-" + sdeg
     return sdeg, smn, ssec
 
-def getRARad(hr, mn, sec):
+def getRADeg(hr, mn, sec):
     rv = None, "-1", "0", "0"
     try:
         hr = float(hr)
@@ -23,7 +23,7 @@ def getRARad(hr, mn, sec):
         if sec < 0 or sec >= 60:
             return rv
         ra_hours = hr + mn/60. + sec/3600.
-        ra_hours *= 15 * np.pi/180.0
+        ra_hours *= 15 # * np.pi/180.0
 
         shr, smn, ssec = makeStrs(hr,mn,sec)
         
@@ -31,7 +31,7 @@ def getRARad(hr, mn, sec):
     except:
         return rv
 
-def getDECRad(deg, mn, sec, neg=False):
+def getDECDeg(deg, mn, sec, neg=False):
     rv = (None, "-90", "0", "0")
     try:
         deg = float(deg)
@@ -55,7 +55,7 @@ def getDECRad(deg, mn, sec, neg=False):
         neg = True
 
     dec = abs(deg) + abs(mn)/60. + abs(sec)/3600.
-    dec = dec * np.pi/180.
+    dec = dec # * np.pi/180.
     if neg:
         dec *= -1
 
