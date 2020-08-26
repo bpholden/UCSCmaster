@@ -547,7 +547,7 @@ def genStars(star_table):
     for i in range(0,len(star_table['name'])):
         rastr = "%sh%sm%ss" % (star_table['RA hr'][i],star_table['RA min'][i],star_table['RA sec'][i])
         decstr = "%sd%sm%ss" % (star_table['Dec deg'][i],star_table['Dec min'][i],star_table['Dec sec'][i])
-        star = SkyCoord(rastr,decstr)
+        star = astropy.coordinates.SkyCoord(rastr,decstr)
         stars.append(star)
 
     return stars
