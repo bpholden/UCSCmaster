@@ -341,13 +341,12 @@ def templateConditions(apf_obs, dt, seeing, slowdown):
 
     istrue - a simple Boolean
 
-    moon - phase value from pyephem, ranges from 0 to 100 (a percentage)
     seeing - size in pixels
     slowdown - relative to clear
 
     """
 
-    moon_pos   = apf_obs.moon_altaz(dt)
+    moon_po<s   = apf_obs.moon_altaz(dt)
     moon_phase = apf_obs.moon_phase(dt)
 
     
