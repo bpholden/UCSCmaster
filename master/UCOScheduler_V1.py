@@ -631,7 +631,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
             attempted = (star_table['name'] == n)
             available = available & np.logical_not(attempted) # Available and not observed
             
-    cadence_check = ( - star_table['lastobs']) 
+    cadence_check = (dt.jd - star_table['lastobs']) 
     good_cadence = cadence_check >  star_table['APFcad']
     available = available & good_cadence
 
