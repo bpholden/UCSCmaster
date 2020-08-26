@@ -312,7 +312,7 @@ def conditionCuts(moon_phase,seeing,slowdown,star_table):
 
     available - Boolean numpy array of available targets
 
-    moon - phase value from pyephem, ranges from 0 to 100 (a percentage)
+    moon_phase - phase value from astroplan, ranges from 0 (full) to pi (new) as an angle in radians
     seeing - size in pixels
     transparency - magnitudes of extinction
 
@@ -335,7 +335,7 @@ def conditionCuts(moon_phase,seeing,slowdown,star_table):
 
 
 def templateConditions(apf_obs, dt, seeing, slowdown):
-    """ istrue = conditionCuts(moon, seeing, slowdown)
+    """ istrue = templateCondition(obs, date, seeing, slowdown)
 
     Checks to see if moon, seeing and slowdown factor are within template conditions
 
