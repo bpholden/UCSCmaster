@@ -5,11 +5,15 @@ sys.path.append("../master")
 
 import numpy as np
 import pickle
-import ephem
+
 import optparse
 from datetime import datetime
 import re
 import os
+
+import astropy
+import astropy.units
+import astropy.time
 
 import UCOScheduler_V1 as ds
 import ExposureCalculations as ec
@@ -44,7 +48,7 @@ def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
     precision, true_error = ge.compute_real_uncertainty(totcounts,result['BV'])
     if actaz < 180:
         actel *= -1.
-    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , ephem.Date(curtime), ephem.julian_date(ephem.Date(barycentertime)), fexptime, totcounts,  actel,actaz, actfwhm, actslow, result['owner'])
+    outstr = "%s %s %.5f %.1f %.1f %.2f %.2f %.2f %.2f %s" %(result['NAME'] , curtime.isot, barycentertime.jd, fexptime, totcounts,  actel,actaz, actfwhm, actslow, result['owner'])
     print (outstr)
     outfp.write(outstr + "\n")
     return curtime, lastfwhm, lastslow
@@ -65,7 +69,7 @@ outdir = "."
 
 if options.date == "today":
     today = datetime.utcnow()
-    datestr = "%d/%02d/%02d" % (today.year,today.month,today.day)
+    datestr = "%d-%02d-%02d" % (today.year,today.month,today.day)
 else:
     datestr = options.date
 
@@ -74,13 +78,15 @@ if options.fixed != "":
     if not os.path.isfile(options.fixed):
         print ("%s is not a file" % (options.fixed))
 
-if not ns.checkdate(datestr):
+good, year, month, day = ns.checkdate(datestr)
+
+if not good:
     print ("%s is not an acceptable date string" % (datestr))
     sys.exit()
 
 if options.outfile == None:
-    fdatestr = re.sub("\/","-",datestr)
-    outfile = "%s.simout" % (fdatestr )
+
+    outfile = "%s.simout" % (datestr )
 else:
     outfile = options.outfile
 try:
@@ -111,16 +117,15 @@ otfn = "observed_targets"
 ot = open(otfn,"w")
 ot.close()
 observing = True
-curtime, endtime, apf_obs = ns.sun_times(datestr)
+curtime, endtime, apf_obs = ns.sun_times(year,month,day)
 bstar = options.bstar
 doTemp = True
 tempcount = 0
-hour_table = ds.makeHourTable(options.frac_sheetn,curtime.datetime())
+hour_table = ds.makeHourTable(options.frac_sheetn,curtime)
 
 while observing:
-    curtime = ephem.Date(curtime)
 
-    result = ds.getNext(curtime.datetime(), lastfwhm, lastslow, bstar=bstar, outfn=options.infile,template=doTemp,sheetns=options.googledex.split(","),outdir=outdir,frac_sheet=options.frac_sheetn,rank_sheetn=options.rank_sheetn)
+    result = ds.getNext(curtime, lastfwhm, lastslow, bstar=bstar, outfn=options.infile,template=doTemp,sheetns=options.googledex.split(","),outdir=outdir,frac_sheet=options.frac_sheetn,rank_sheetn=options.rank_sheetn)
     if result:
         if bstar:
             bstar = False

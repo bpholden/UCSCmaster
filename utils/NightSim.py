@@ -1,26 +1,50 @@
 import sys
-sys.path.append("../master")
-#from ExposureCalc import *
-
-import numpy as np
-import pickle
-import ephem
 import optparse
 from datetime import datetime
 import re
 import os
+import pytz
 
-def sun_times(datestr):
-    apf_obs = ephem.Observer()
-    apf_obs.lat  = '37:20:33.1'
-    apf_obs.long = '-121:38:17.7'
-    apf_obs.elevation = 1274
-    # Minimum observation to observe things at
-    apf_obs.horizon = -9.0*np.pi / 180.0
-    apf_obs.date = datestr
-    sunset = apf_obs.next_setting(ephem.Sun())
-    sunrise = apf_obs.next_rising(ephem.Sun())    
-    return sunset,sunrise, apf_obs
+import numpy as np
+import pickle
+import astropy
+import astropy.coordinates
+import astropy.time
+import astropy.units
+import astroplan
+
+
+
+
+def makeAPFObs():
+    # Generate a astropy.coordinate observer for the APF
+
+    apf_lat = astropy.coordinates.Latitude((37,20,33.1),unit=astropy.units.deg)
+    apf_long = astropy.coordinates.Longitude((-121,38,17.7),wrap_angle=astropy.units.deg*180,unit=astropy.units.deg)
+    apf_height = 1274 * astropy.units.meter
+    apf_loc = astropy.coordinates.EarthLocation.from_geodetic(apf_long,apf_lat,apf_height)
+
+    apf_obs = astroplan.Observer(name='APF Telescope',
+               location=apf_loc,
+               pressure=870 * astropy.units.hPa,
+               relative_humidity=0.3,
+               temperature=20 * astropy.units.deg_C,
+               timezone=pytz.timezone('US/Pacific'),
+               description="APF Telescope on Mount Hamilton, California")
+    
+    return apf_obs
+
+def sun_times(year,month,day):
+
+    apf_obs = makeAPFObs()
+
+    horizon_deg = -9 * astropy.units.deg
+    
+    compute_time = astropy.time.Time(datetime(year=year,month=month,day=day,hour=20))
+    
+    sunset = apf_obs.sun_set_time(compute_time,which='next',horizon=horizon_deg)
+    sunrise = apf_obs.sun_rise_time(compute_time,which='next',horizon=horizon_deg)
+    return sunset, sunrise, apf_obs
     
 def make_obs_sample(fn):
     slow,fwhm = np.loadtxt(fn,unpack=True)
@@ -81,22 +105,21 @@ def rand_obs_sample(slows,fwhms):
     return slows[sindx], fwhms[findx]
 
 def compute_el(curtime,star,apf_obs):
-    apf_obs.date = curtime
-    star.compute(apf_obs)
-    actel = np.degrees(star.alt)
-    actaz = np.degrees(star.az)
+    altaz = apf_obs.altaz(curtime,target=star)
+    actel = altaz.alt.value
+    actaz = altaz.az.value
     return actel,actaz
 
 
 def checkdate(datestr):
-    match = re.match("(\d{4})\/(\d{1,2})\/(\d{1,2})",datestr)
+    match = re.match("(\d{4})\-(\d{1,2})\-(\d{1,2})",datestr)
     if not match:
-        return False
+        return False, -1, 0, 0
     if int(match.group(2)) < 1 or int(match.group(2)) > 12:
-        return False
+        return False, -1, 0, 0
     if int(match.group(3)) < 1 or int(match.group(3)) > 31:
-        return False
+        return False, -1, 0, 0
     
-    return True
+    return True, int(match.group(1)), int(match.group(2)), int(match.group(3))
 
 
