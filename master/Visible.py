@@ -132,7 +132,7 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
         constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
 
         if obs_len> 0:
-            findate = cdate + timedelta(seconds=obs_len)
+            findate = cdate + timedelta(seconds=obs_len) # this actually works! 
         else:
             findate = cdate + timedelta(seconds=1)
             
