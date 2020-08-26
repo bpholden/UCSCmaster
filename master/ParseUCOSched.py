@@ -533,10 +533,10 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler
     return star_table
 
 def genStars(star_table):
-    """pyephem_objs = genStars(star_table)
+    """stars = genStars(star_table)
 
     given a star_table returned by parseCodex (or initStarTable) returns
-    a list of pyephem objects for every object in the table
+    a list of astropy.coordinate.SkyCoord objects for every object in the table
 
     Inputs star_table - astropy Table that must have the RA and Dec in
     sexigresimal format with each column for each part of the
@@ -558,7 +558,7 @@ def parseUCOSched(sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler-4f4
     star_table, stars = parseUCOSched(sheetns=["RECUR_A100"],certificate='cert.json',outfn="sched.dat",outdir=None,config={'I2': 'Y', 'decker': 'W', 'owner' : '', 'mode' : '', 'obsblock' : '', 'Bstar' : 'N' , 'raoff' : None, 'decoff' : None },force_download=False,prilim=0.5)
 
     star_table - an astropy table
-    stars - a list of pyEphem objects
+    stars - a list of astropy.coordinate.SkyCoord objects
 
     Inputs:
     sheetns - list of google sheet names
@@ -664,7 +664,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
 
         filename - where the observations are logged
         sheetns - list of sheets that will be updated
-        ctime - current time as a time stamp
+        ctime - current time as an astropy.time.Time object
         certificate - required for authentication
         outfn - the local copy of the star list
         outdir - directory of data files
