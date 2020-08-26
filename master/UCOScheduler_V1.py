@@ -563,10 +563,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         stamp = apfguide['midptfin'].read(binary=True)
         ptime = datetime.utcfromtimestamp(stamp)
     except:
-        if type(dt) == datetime:
+        if type(dt) == astropy.time.Time:
             ptime = dt
         else:
-            ptime = datetime.utcfromtimestamp(int(time.time()))
+            ptime =  astropy.time.Time.now()
 
     apflog("getNext(): Updating star list with previous observations",echo=True)
     observed, star_table = ParseUCOSched.updateLocalStarlist(ptime,outfn=outfn,toofn=toofn,observed_file="observed_targets")
@@ -631,7 +631,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
             attempted = (star_table['name'] == n)
             available = available & np.logical_not(attempted) # Available and not observed
             
-    cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) 
+    cadence_check = ( - star_table['lastobs']) 
     good_cadence = cadence_check >  star_table['APFcad']
     available = available & good_cadence
 
