@@ -550,10 +550,10 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     config['decoff'] = ''
 
 
-    apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
+    apflog( "getNext(): Finding target for time %s" % (dt.isot),echo=True)
 
     if slowdown > SLOWDOWN_MAX:
-        apflog( "getNext(): Slowndown value of %f exceeds maximum of %f at time %s" % (slowdown,SLOWDOWN_MAX,dt),echo=True)
+        apflog( "getNext(): Slowndown value of %f exceeds maximum of %f at time %s" % (slowdown,SLOWDOWN_MAX,dt.isot),echo=True)
         return None
 
 
