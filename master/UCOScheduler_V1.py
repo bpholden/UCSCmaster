@@ -347,7 +347,7 @@ def templateConditions(apf_obs, dt, seeing, slowdown):
 
     """
 
-    moon_po<s   = apf_obs.moon_altaz(dt)
+    moon_pos   = apf_obs.moon_altaz(dt)
     moon_phase = apf_obs.moon_phase(dt)
 
     
