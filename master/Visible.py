@@ -69,15 +69,15 @@ def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET
             
         time_range = astropy.time.Time([cdate,findate])
 
-        altaz = apf_obs.altaz(cdate,target=star)
+        altaz = observer.altaz(cdate,target=star)
         cur_el = altaz.alt.value
         start_elevations.append(cur_el)
 
-        fin_altaz = apf_obs.altaz(findate,target=star)
+        fin_altaz = observer.altaz(findate,target=star)
         fin_el = fin_altaz.alt.value
         fin_elevations.append(fin_el)
         
-        rv = astroplan.is_always_observable(constraints, apf_obs, star, time_range=time_range)
+        rv = astroplan.is_always_observable(constraints, observer, star, time_range=time_range)
         if len(rv) == 1:
             ret.append(rv[0])
         else:
@@ -110,7 +110,7 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
     start_elevations = []
     scaled_elevations = []
 
-    sun_alt_az = apf_obs.sun_altaz(cdate)
+    sun_alt_az = observer.sun_altaz(cdate)
 
     sun_el = sun_alt_az.alt.value
     sun_az = sun_alt_az.az.value
@@ -138,21 +138,21 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
             
         time_range = astropy.time.Time([cdate,findate])
 
-        altaz = apf_obs.altaz(cdate,target=star)
+        altaz = observer.altaz(cdate,target=star)
         cur_el = altaz.alt.value
         start_elevations.append(cur_el)
 
-        fin_altaz = apf_obs.altaz(findate,target=star)
+        fin_altaz = observer.altaz(findate,target=star)
         fin_el = fin_altaz.alt.value
         fin_elevations.append(fin_el)
         
-        rv = astroplan.is_always_observable(constraints, apf_obs, star, time_range=time_range)
+        rv = astroplan.is_always_observable(constraints, observer, star, time_range=time_range)
         if len(rv) == 1:
             ret.append(rv[0])
         else:
             ret.append(False)
 
-        diff = (star.dec.value - apf_obs.location.lat.value)
+        diff = (star.dec.value - observer.location.lat.value)
         transit_alt = 90.0 - diff
         se = 90.0 - (transit_alt - cur_el) 
         if offset > 0:
