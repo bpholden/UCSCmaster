@@ -352,7 +352,7 @@ def templateConditions(apf_obs, dt, seeing, slowdown):
 
     
     if seeing < 15 and slowdown < 1.25:
-        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon.phase,moon_pos.alt),echo=True,level='debug')
+        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon_phase.value,moon_pos.alt.value),echo=True,level='debug')
         if moon_phase.value > np.pi/2 and moon_pos.alt.value < 0:
             return True
         elif moon_phase.value > 3*np.pi/2 and moon_pos.alt.value < 45:
