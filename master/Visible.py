@@ -103,8 +103,8 @@ def visibleSE(observer, cdate, stars, obs_len, pref_min_el=SchedulerConsts.TARGE
         Notes: Uses the observer's current date and location
     """
     # Store the previous observer horizon and date since we change these
-    prev_horizon = observer.horizon
-    cdate = observer.date
+
+
     ret = []
     fin_elevations = []
     start_elevations = []
