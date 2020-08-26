@@ -7,7 +7,6 @@ import json
 import time
 import subprocess
 
-import ephem
 import numpy as np
 import astropy
 import astropy.table
