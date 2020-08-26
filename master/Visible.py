@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import os
 import sys
 import time
+import pytz
 
 import numpy as np
 import astropy
@@ -61,10 +62,10 @@ def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET
 
         constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
 
-        if obslen> 0:
-            findate = cdate + datetime.timedelta(seconds=obslen)
+        if obs_len> 0:
+            findate = cdate + timedelta(seconds=obs_len)
         else:
-            findate = cdate + datetime.timedelta(seconds=1)
+            findate = cdate + timedelta(seconds=1)
             
         time_range = astropy.time.Time([cdate,findate])
 
@@ -130,10 +131,10 @@ def visibleSE(observer, cdate, stars, obs_len, pref_min_el=SchedulerConsts.TARGE
         # Is the target visible now?
         constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
 
-        if obslen> 0:
-            findate = cdate + datetime.timedelta(seconds=obslen)
+        if obs_len> 0:
+            findate = cdate + timedelta(seconds=obs_len)
         else:
-            findate = cdate + datetime.timedelta(seconds=1)
+            findate = cdate + timedelta(seconds=1)
             
         time_range = astropy.time.Time([cdate,findate])
 
