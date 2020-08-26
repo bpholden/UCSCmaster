@@ -281,10 +281,8 @@ def computeDatetime(ctime):
     return dt
 
 
-def computeSunsetRise(dt,horizon='0'):
+def computeSunsetRise(compute_time,horizon='0'):
     # computes time in seconds before sunset
-
-    compute_time = Time(dt)
 
     horizon_deg = float(horizon) * astropy.units.degree
     
