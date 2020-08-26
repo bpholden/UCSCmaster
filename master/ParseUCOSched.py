@@ -625,17 +625,13 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
         obstime = obslog.times[index]
         owner = obslog.owners[index]
         if isinstance(obstime,float):
-            t = datetime.utcfromtimestamp(obstime)
+            t = astropy.time.Time(obstime,format='unix')
         else:
             hr, min = obstime
-            if type(intime) != datetime:
-                ctime = datetime.now()
-                td = timedelta(0,3600.*7)
-                intime = ctime + td
-            t = datetime(intime.year, intime.month, intime.day, hr, min)
+            t = astropy.time.Time(datetime(intime.datetime.year, intime.datetime.month, intime.datetime.day, hr, min))
 
 
-        jd = round(float(ephem.julian_date(t)), 4)
+        jd = round(float(t.jd), 3)
 
         selection = (star_table['name'] == name) & (star_table['sheetn'] == owner)
         if any(selection):
@@ -732,11 +728,11 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                 # value to calculate the full JD
                 if jd is None:
                     if isinstance(otime,float):
-                        t = datetime.utcfromtimestamp(otime)
+                        t = astropy.time.Time(otime,format='unix')
                     else:
                         hr, mn = otime
-                        t = datetime(ctime.year, ctime.month, ctime.day, hr, mn)
-                    jd = float(ephem.julian_date(t))
+                        t = astropy.time.Time(datetime(ctime.year, ctime.month, ctime.day, hr, mn))
+                    jd = t.jd
                 try:
                     pastdate = float(v[col])
                     try:
