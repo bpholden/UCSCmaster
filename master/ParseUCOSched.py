@@ -678,7 +678,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
     if len(obslog.names) == 0:
         return
     if ctime is None:
-        ctime = datetime.utcfromtimestamp(int(time.time()))
+        ctime = astropy.time.Time.now()
 
     outfn = os.path.join(outdir,outfn)
     star_table = readStarTable(outfn)
