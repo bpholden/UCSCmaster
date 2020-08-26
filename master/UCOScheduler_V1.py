@@ -55,7 +55,7 @@ def computePriorities(star_table,available,cur_dt,observed=None,hour_table=None,
         
     return new_pri
 
-def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
+def updateHourTable(hour_table,observed,ctime,outfn='hour_table'):
     '''
     updateHourTableobserved_logs,outfn='hour_table')
 
