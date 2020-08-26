@@ -210,8 +210,8 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     # lamp
     ret += 'lamp=none '
     # start time
-    ret += 'uth=' + str(t.hour) + ' '
-    ret += 'utm=' + str(t.minute) + ' '
+    ret += 'uth=' + str(t.datetime.hour) + ' '
+    ret += 'utm=' + str(t.datetime.minute) + ' '
     # Exp Count
     if star_table_row['expcount'] > EXP_LIM:
         ret += 'expcount=%.3g' % (EXP_LIM) + ' '
