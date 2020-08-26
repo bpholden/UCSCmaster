@@ -267,14 +267,14 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
 
 def computeDatetime(ctime):
     if type(ctime) == float:
-        dt = datetime.utcfromtimestamp(int(ctime))
+        dt = astropy.time.Time(ctime,format='unix')
     elif type(ctime) == datetime:
+        dt = astropy.time.Time(ctime)
+    elif type(ctime) == astropy.time.Time:
         dt = ctime
-    elif type(ctime) == ephem.Date:
-        dt = ctime.datetime()
     else:
         #punt and use current UT
-        dt = datetime.utcfromtimestamp(int(time.time()))
+        dt = astropy.time.Time.now()
     return dt
 
 
