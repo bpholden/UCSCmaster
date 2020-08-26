@@ -456,8 +456,8 @@ def makeObsBlock(star_table, idx, dt, focval):
 def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode=''):
     res = dict()
 
-    res['RA']     = stars[idx].a_ra
-    res['DEC']    = stars[idx].a_dec
+    res['RA']     = stars[idx].icrs.ra.value
+    res['DEC']    = stars[idx].icrs.dec.value
     res['PM_RA']  = star_table['pmRA'][idx]
     res['PM_DEC'] = star_table['pmDEC'][idx]
     res['VMAG']   = star_table['Vmag'][idx]
