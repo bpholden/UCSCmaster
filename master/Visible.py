@@ -168,25 +168,15 @@ def visibleSE(observer, cdate, stars, obs_len, pref_min_el=SchedulerConsts.TARGE
 
 if __name__ == '__main__':
     # Generate a pyephem observer for the APF
-    apf_obs = makeAPFobs()
-    apf_obs.lat  = '37:20:33.1'
-    apf_obs.long = '-121:38:17.7'
-    apf_obs.elevation = 1274
-    # Minimum observation to observe things at
-    apf_obs.horizon = str(SchedulerConsts.TARGET_ELEVATION_MIN)
-    apf_obs.date = datetime.utcfromtimestamp(int(time.time()))
+    apf_obs = makeAPFObs()
+    cur_date = datetime.utcfromtimestamp(int(time.time()))
 
-    star = ephem.FixedBody()
-    star._ra = ephem.hours(":".join(["1", "44", "4.083" ]))
-    star._dec = ephem.degrees(":".join(["-15", "56", "14.93"]))
-    ret, se, fe = is_visible(apf_obs,[star],[0.])
+    star = astropy.coordinates.SkyCoord("1h44m4.083s","-15d56m14.93s")
+    ret, se, fe = visible(apf_obs,cur_date,[star],[0.])
     print (ret, se, fe)
-    ret, se, fe = is_visible(apf_obs,[star],[400.])
+    ret, se, fe = visible(apf_obs,cur_date,[star],[400.])
     print (ret, se, fe)
 
     
-    star = ephem.FixedBody()
-    star._ra = ephem.hours(":".join(["1", "44", "4.083" ]))
-    star._dec = ephem.degrees(":".join(["-15", "56", "14.93"]))
-    ret, se, fe, sce = is_visible_se(apf_obs,[star],[400.],)
+    ret, se, fe, sce = visibleSE(apf_obs,cur_date,[star],[400.])
     print (ret, se, fe, sce)
