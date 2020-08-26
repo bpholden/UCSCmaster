@@ -416,21 +416,16 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler
         raval,rahr,ramin,rasec = Coords.getRADeg(ls[didx["RA hr"]], ls[didx["RA min"]], ls[didx["RA sec"]])
         if raval is None:
             # alarm
-            ra_str = None
             apflog("Error in RA coordinates for %s" %(name),level='warn',echo=True)
             continue
-        else:
-            ra_str = "%sh%sm%s" %(rahr,ramin,rasec)
+
             
         # Get the DEC
         decval,decdeg,decmin,decsec = Coords.getDECDeg(ls[didx["Dec deg"]], ls[didx["Dec min"]], ls[didx["Dec sec"]])
         if decval is None:
             # alarm
             apflog("Error in Dec coordinates for %s" %(name),level='warn',echo=True)
-            dec_str = None
             continue
-        else:
-            dec_str = "%sd%sm%s" % (decdeg,decmin,decsec)
 
         mode = checkFlag("mode",didx,ls,"\A(b|B|a|A|c|C)",config["mode"])
         if type(mode) == str:
@@ -446,13 +441,12 @@ def parseCodex(config,sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler
             star_table['RA hr'].append(rahr)
             star_table['RA min'].append(ramin)
             star_table['RA sec'].append(rasec)
-            star_table['rastr'].append(ra_str)
             
             star_table['dec'].append(decval)
             star_table["Dec deg"].append(decdeg)
             star_table["Dec min"].append(decmin)
             star_table["Dec sec"].append(decsec)
-            star_table['decstr'].append(dec_str)
+
 
         for coln in ("pmRA", "pmDEC"):
             star_table[coln].append(floatDefault(ls[didx[coln]]))
@@ -551,7 +545,9 @@ def genStars(star_table):
     """
     stars = []
     for i in range(0,len(star_table['name'])):
-        star = SkyCoord(star_table['rastr'][i],star_table['decstr'][i])
+        rastr = "%sh%sm%ss" % (star_table['RA hr'][i],star_table['RA min'][i],star_table['RA sec'][i])
+        decstr = "%sd%sm%ss" % (star_table['Dec deg'][i],star_table['Dec min'][i],star_table['Dec sec'][i])
+        star = SkyCoord(rastr,decstr)
         stars.append(star)
 
     return stars
