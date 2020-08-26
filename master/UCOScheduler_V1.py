@@ -265,15 +265,6 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
 
     return str(ret)
 
-def calc_elevations(stars, observer):
-    els = []
-    for s in stars:
-        observer.date = ephem.Date(observer.date)
-        s.compute(observer)
-        cur_el = np.degrees(s.alt)
-        els.append(cur_el)
-    return np.array(els)
-
 def computeDatetime(ctime):
     if type(ctime) == float:
         dt = datetime.utcfromtimestamp(int(ctime))
