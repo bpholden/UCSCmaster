@@ -58,7 +58,7 @@ def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET
 
     
     # Now loop over each body to check visibility
-    for star, obslen in zip(stars, obs_lens):
+    for star, obs_len in zip(stars, obs_lens):
 
         constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
 
@@ -88,7 +88,7 @@ def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET
 
 
 
-def visibleSE(observer, cdate, stars, obs_len, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
                    max_el=SchedulerConsts.TARGET_ELEVATION_MAX,shiftwest=False):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
