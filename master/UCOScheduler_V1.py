@@ -66,6 +66,8 @@ def updateHourTable(hour_table,observed,ctime,outfn='hour_table'):
 
     hours = dict()
 
+    dt = ctime.datetime
+    
     # observed objects have lists as attributes
     # in reverse time order, so most recent target observed is first.
     nobj = len(observed.names)
