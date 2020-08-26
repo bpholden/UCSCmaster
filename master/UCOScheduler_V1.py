@@ -537,7 +537,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     if not outdir:
         outdir = os.getcwd()
 
-    dt = computeDatetime(ctime)
+    dt = computeDatetime(ctime) # this is an astropy.time.Time object 
 
     config = dict()
     config['I2'] = 'Y'
