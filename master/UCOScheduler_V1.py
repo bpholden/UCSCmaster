@@ -10,6 +10,7 @@ import numpy as np
 import astropy
 import astropy.io
 import astropy.coordinates
+import astropy.time
 import astroplan
 
 from ExposureCalculations import getI2_M, getI2_K, getEXPMeter, getEXPMeter_Rate, getEXPTime
