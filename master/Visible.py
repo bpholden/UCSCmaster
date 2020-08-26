@@ -140,6 +140,7 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
 
         altaz = observer.altaz(cdate,target=star)
         cur_el = altaz.alt.value
+        cur_az = altaz.az.value
         start_elevations.append(cur_el)
 
         fin_altaz = observer.altaz(findate,target=star)
