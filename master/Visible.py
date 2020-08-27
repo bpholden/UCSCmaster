@@ -92,7 +92,7 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
         scaled_elevations[cur_azs>180] = 90 - np.abs(preferred_angle - scaled_elevations[cur_azs>180])
 
     # Now loop over each body to check visibility
-    for star, obs_len in zip(stars, obs_lens):
+    for i in range(0,len(obs_lens)):
 
         # Is the target visible now?
         constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
