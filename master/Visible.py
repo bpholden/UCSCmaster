@@ -110,7 +110,30 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
                 se = 90 - np.abs(preferred_angle - se)
         scaled_elevations.append(se)
         
-    return ret, np.array(start_elevations), np.array(fin_elevations), np.array(scaled_elevations)
+    return np.asarray(ret), start_elevations, fin_elevations, scaled_elevations
+
+def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+                   max_el=SchedulerConsts.TARGET_ELEVATION_MAX):
+    """ Args:
+            stars: A list of pyephem bodies to evaluate visibility of
+            observer: A pyephem observer to use a the visibility reference
+            obs_len: A list of observation lengths ( Seconds ). This is the time frame for which visibility is checked
+
+            Optional:
+            pref_min_el: Preferred minimum body elevation to be visible ( degrees )            
+            min_el: The minimum body elevation to be visible ( degrees ) - only use this if star never goes above preferred limit
+            max_el: The maximum body elevation to be visible ( degrees )
+        Returns:
+            Boolean list representing if body[i] is visible
+
+        Notes: Uses the observer's current date and location
+    """
+
+    ret, start_elevations, fin_elevations, scaled_els = visibleSE(observer, cdate, stars, obs_lens,pref_min_el=pref_min_el,min_el=min_el,max_el=max_el)
+
+    return ret, start_elevations, fin_elevations
+
+
 
 
 
