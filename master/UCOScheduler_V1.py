@@ -756,7 +756,6 @@ if __name__ == '__main__':
     rank_tablen='2020B_ranks'
     rank_table = makeRankTable(rank_tablen)
 
-#    sheetn=["2018B"]
     sheetn="RECUR_A100,2020B_A000,2020B_A008,2020B_A009,2020B_A010"
 
     # For some test input what would the best target be?
