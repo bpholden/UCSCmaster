@@ -98,9 +98,8 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
         time_range = [start_dates[i],fin_dates[i]]
         rv = astroplan.is_always_observable(constraints, observer, stars, time_range=time_range,time_grid_resolution=10*astropy.units.second)
         
-        rv = astroplan.is_always_observable(constraints, observer, star, time_range=time_range)
-        if len(rv) == 1:
-            ret.append(rv[0])
+        if len(rv) > 0:
+            ret.append(rv[i])
         else:
             ret.append(False)
 
