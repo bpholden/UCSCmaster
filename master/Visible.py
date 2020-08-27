@@ -35,59 +35,6 @@ def makeAPFObs():
 
 
 
-def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
-                   max_el=SchedulerConsts.TARGET_ELEVATION_MAX):
-    """ Args:
-            stars: A list of pyephem bodies to evaluate visibility of
-            observer: A pyephem observer to use a the visibility reference
-            obs_len: A list of observation lengths ( Seconds ). This is the time frame for which visibility is checked
-
-            Optional:
-            pref_min_el: Preferred minimum body elevation to be visible ( degrees )            
-            min_el: The minimum body elevation to be visible ( degrees ) - only use this if star never goes above preferred limit
-            max_el: The maximum body elevation to be visible ( degrees )
-        Returns:
-            Boolean list representing if body[i] is visible
-
-        Notes: Uses the observer's current date and location
-    """
-
-    ret = []
-    fin_elevations = []
-    start_elevations = []
-
-    
-    # Now loop over each body to check visibility
-    for star, obs_len in zip(stars, obs_lens):
-
-        constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
-
-        if obs_len> 0:
-            findate = cdate + timedelta(seconds=obs_len)
-        else:
-            findate = cdate + timedelta(seconds=1)
-            
-        time_range = astropy.time.Time([cdate,findate])
-
-        altaz = observer.altaz(cdate,target=star)
-        cur_el = altaz.alt.value
-        start_elevations.append(cur_el)
-
-        fin_altaz = observer.altaz(findate,target=star)
-        fin_el = fin_altaz.alt.value
-        fin_elevations.append(fin_el)
-        
-        rv = astroplan.is_always_observable(constraints, observer, star, time_range=time_range)
-        if len(rv) == 1:
-            ret.append(rv[0])
-        else:
-            ret.append(False)
-        
-
-    return ret, np.array(start_elevations), np.array(fin_elevations)
-
-
-
 def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
                    max_el=SchedulerConsts.TARGET_ELEVATION_MAX,shiftwest=False):
     """ Args:
