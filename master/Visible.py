@@ -134,14 +134,13 @@ def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET
 if __name__ == '__main__':
     # Generate a pyephem observer for the APF
     apf_obs = makeAPFObs()
-    cur_date = datetime.utcfromtimestamp(int(time.time()))
-
-    star = astropy.coordinates.SkyCoord("1h44m4.083s","-15d56m14.93s")
-    ret, se, fe = visible(apf_obs,cur_date,[star],[0.])
-    print (ret, se, fe)
-    ret, se, fe = visible(apf_obs,cur_date,[star],[400.])
-    print (ret, se, fe)
-
+    cur_date = astropy.time.Time.now()
     
-    ret, se, fe, sce = visibleSE(apf_obs,cur_date,[star],[400.])
+    star = astropy.coordinates.SkyCoord("1h44m4.083s","-15d56m14.93s")
+    ret, se, fe = visible(apf_obs,cur_date,star,np.asarray([0.]))
+    print (ret, se, fe)
+    ret, se, fe = visible(apf_obs,cur_date,star,np.asarray([400.]))
+    print (ret, se, fe)
+
+    ret, se, fe, sce = visibleSE(apf_obs,cur_date,star,np.asarray([400.]))
     print (ret, se, fe, sce)
