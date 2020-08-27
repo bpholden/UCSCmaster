@@ -95,23 +95,8 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
     for i in range(0,len(obs_lens)):
 
         # Is the target visible now?
-        constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
-
-        if obs_len> 0:
-            findate = cdate + timedelta(seconds=obs_len) # this actually works! 
-        else:
-            findate = cdate + timedelta(seconds=1)
-            
-        time_range = astropy.time.Time([cdate,findate])
-
-        altaz = observer.altaz(cdate,target=star)
-        cur_el = altaz.alt.value
-        cur_az = altaz.az.value
-        start_elevations.append(cur_el)
-
-        fin_altaz = observer.altaz(findate,target=star)
-        fin_el = fin_altaz.alt.value
-        fin_elevations.append(fin_el)
+        time_range = [start_dates[i],fin_dates[i]]
+        rv = astroplan.is_always_observable(constraints, observer, stars, time_range=time_range,time_grid_resolution=10*astropy.units.second)
         
         rv = astroplan.is_always_observable(constraints, observer, star, time_range=time_range)
         if len(rv) == 1:
