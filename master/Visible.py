@@ -72,7 +72,25 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
         offset = 0.0
         preferred_angle = 90 
 
+    obs_lens[obs_lens <=0] = 1.0
+
+    start_dates = [ cdate for i in range(0,len(obs_lens))]
+    fin_dates = start_dates + obs_lens / 86400.
+
+    altaz = observer.altaz(start_dates,target=stars)
+    start_elevations = altaz.alt.value
+    cur_azs = altaz.az.value
     
+    altaz = observer.altaz(fin_dates,target=stars)
+    fin_elevations = altaz.alt.value
+
+    diff = np.abs(stars.dec.value - observer.location.lat.value)
+    transit_alts = 90.0 - diff
+    scaled_elevations = 90.0 - (transit_alts - start_elevations)
+    if offset > 0:
+        scaled_elevations[cur_azs<180] -= offset
+        scaled_elevations[cur_azs>180] = 90 - np.abs(preferred_angle - scaled_elevations[cur_azs>180])
+
     # Now loop over each body to check visibility
     for star, obs_len in zip(stars, obs_lens):
 
