@@ -542,12 +542,8 @@ def genStars(star_table):
     sexigresimal format with each column for each part of the
     coordinates separate
     """
-    stars = []
-    for i in range(0,len(star_table['name'])):
-        rastr = "%sh%sm%ss" % (star_table['RA hr'][i],star_table['RA min'][i],star_table['RA sec'][i])
-        decstr = "%sd%sm%ss" % (star_table['Dec deg'][i],star_table['Dec min'][i],star_table['Dec sec'][i])
-        star = astropy.coordinates.SkyCoord(rastr,decstr)
-        stars.append(star)
+
+    stars = astropy.coordinates.SkyCoord(star_table['ra']*astropy.units.deg,star_table['dec']*astropy.units.deg)
 
     return stars
 
