@@ -748,7 +748,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
 if __name__ == '__main__':
 
-    dt = datetime.now()
+    dt = astropy.time.Time.now()
     
     frac_tablen='2020B_frac'
     hour_table = makeHourTable(frac_tablen,dt)
@@ -762,11 +762,11 @@ if __name__ == '__main__':
     # For some test input what would the best target be?
     otfn = "observed_targets"
     ot = open(otfn,"w")
-    starttime = time.time()
-    result = getNext(starttime, 7.99, 0.4, bstar=True,sheetns=sheetn.split(","),rank_sheetn=rank_tablen,frac_sheet=frac_tablen)
+
+    result = getNext(dt, 7.99, 0.4, bstar=True,sheetns=sheetn.split(","),rank_sheetn=rank_tablen,frac_sheet=frac_tablen)
     ot.write("%s\n" % (result["SCRIPTOBS"].pop()))
     ot.close()
-    starttime += 400
+    starttime += 400/86400.
     for i in range(5):
 
         result = getNext(starttime, 7.99, 0.4, bstar=False,sheetns=sheetn,template=True,rank_sheetn=rank_tablen,frac_sheet=frac_tablen)
@@ -781,6 +781,6 @@ if __name__ == '__main__':
             ot = open(otfn,"a")
             ot.write("%s\n" % (result["SCRIPTOBS"].pop()))
             ot.close()
-            starttime += result["EXP_TIME"]
+            starttime += result["EXP_TIME"]/86400.0
 
     print("Done")
