@@ -313,7 +313,7 @@ def conditionCuts(moon_phase,seeing,slowdown,star_table):
 
     available - Boolean numpy array of available targets
 
-    moon_phase - phase value from astroplan, ranges from 0 (full) to pi (new) as an angle in radians
+    moon_phase - phase value from astroplan, ranges from 1 (full) to 0 (new) 
     seeing - size in pixels
     transparency - magnitudes of extinction
 
@@ -348,14 +348,14 @@ def templateConditions(apf_obs, dt, seeing, slowdown):
     """
 
     moon_pos   = apf_obs.moon_altaz(dt)
-    moon_phase = apf_obs.moon_phase(dt)
+    moon_phase = apf_obs.moon_illumination(dt)
 
     
     if seeing < 15 and slowdown < 1.25:
-        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon_phase.value,moon_pos.alt.value),echo=True,level='debug')
-        if moon_phase.value > np.pi/2 and moon_pos.alt.value < 0:
+        apflog("moon.phase=%.2f moon.alt=%.2f" % (moon_phase,moon_pos.alt.value),echo=True,level='debug')
+        if moon_phase < 0.5 and moon_pos.alt.value < 0:
             return True
-        elif moon_phase.value > 3*np.pi/2 and moon_pos.alt.value < 45:
+        elif moon_phase < 0.25 and moon_pos.alt.value < 45:
             return True
         else:
             return False
@@ -515,10 +515,8 @@ def lastAttempted(observed):
 
 def behindMoon(apf_obs,dt,ras,decs):
     moon_pos   = apf_obs.moon_altaz(dt)
-    moon_phase_ang = apf_obs.moon_phase(dt)
+    moon_phase = apf_obs.moon_illumination(dt)
 
-    moon_phase = 1.0 - (moon_phase_ang.value / np.pi) 
-    
     md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
     minMoonDist = ( moon_phase  * md) + TARGET_MOON_DIST_MIN
     moonDist = np.sqrt((moon_pos.icrs.ra.value - ras)**2 + (moon_pos.icrs.dec.value - decs)**2)
