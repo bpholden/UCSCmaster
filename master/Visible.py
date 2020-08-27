@@ -103,15 +103,6 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
         else:
             ret.append(False)
 
-        diff = (star.dec.value - observer.location.lat.value)
-        transit_alt = 90.0 - diff
-        se = 90.0 - (transit_alt - cur_el) 
-        if offset > 0:
-            if cur_az < 180:
-                se -= offset
-            else:
-                se = 90 - np.abs(preferred_angle - se)
-        scaled_elevations.append(se)
         
     return np.asarray(ret), start_elevations, fin_elevations, scaled_elevations
 
