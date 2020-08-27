@@ -53,9 +53,10 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
 
 
     ret = []
-    fin_elevations = []
-    start_elevations = []
-    scaled_elevations = []
+    
+    obs_lens = np.asarray(obs_lens)
+    
+    constraints = [astroplan.AltitudeConstraint(min_el*astropy.units.deg, max_el*astropy.units.deg)]        
 
     sun_alt_az = observer.sun_altaz(cdate)
 
