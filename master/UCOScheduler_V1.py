@@ -764,7 +764,7 @@ if __name__ == '__main__':
     result = getNext(dt, 7.99, 0.4, bstar=True,sheetns=sheetn.split(","),rank_sheetn=rank_tablen,frac_sheet=frac_tablen)
     ot.write("%s\n" % (result["SCRIPTOBS"].pop()))
     ot.close()
-    starttime += 400/86400.
+    starttime = 400/86400.
     for i in range(5):
 
         result = getNext(starttime, 7.99, 0.4, bstar=False,sheetns=sheetn,template=True,rank_sheetn=rank_tablen,frac_sheet=frac_tablen)
