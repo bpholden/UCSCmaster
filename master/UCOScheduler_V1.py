@@ -765,7 +765,7 @@ if __name__ == '__main__':
     dt = datetime.now()
 
     cfn = os.path.join('.','time_left.csv')
-    if os.path.exists(cfn)
+    if os.path.exists(cfn):
         hour_constraints = astropy.io.ascii.read(cfn)
     else:
         hour_constraints = None
