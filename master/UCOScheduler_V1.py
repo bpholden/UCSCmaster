@@ -533,13 +533,6 @@ def behindMoon(moon,ras,decs):
 
     return moon_check
 
-        Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
-    """
-
-    if not outdir:
-        outdir = os.getcwd()
-
-    dt = computeDatetime(ctime)
 def configDefaults(owner):
     config = dict()
     config['I2'] = 'Y'
@@ -572,7 +565,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     if slowdown > SLOWDOWN_MAX:
         apflog( "getNext(): Slowndown value of %f exceeds maximum of %f at time %s" % (slowdown,SLOWDOWN_MAX,dt),echo=True)
         return None
-
 
     try:
         apfguide = ktl.Service('apfguide')
@@ -656,62 +648,48 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     good_cadence = cadence_check >  star_table['APFcad']
     available = available & good_cadence
 
-    # We just need a B star, so restrict our math to those
     if bstar:
-
+        # We just need a B star
         apflog("getNext(): Selecting B stars",echo=True)
         available = available & bstars
 
-        f = available
-
-        apflog("getNext(): Computing star elevations",echo=True)
-        fstars = [s for s,_ in zip(stars,f) if _ ]
-        vis,star_elevations,fin_star_elevations = Visible.is_visible(apf_obs, fstars, [400]*len(bstars[f]))
-
-        available[f] = available[f] & vis
-        cur_elevations[f] += star_elevations[vis]
-
-
-    # Just need a normal star for observing
     else:
-        # Available and not a BStar
 
         apflog("getNext(): Culling B stars",echo=True)
         available = available & np.logical_not(bstars)
 
-        # Calculate the exposure time for the target
-        # Want to pass the entire list of targets to this function
+    # Calculate the exposure time for the target
+    # Want to pass the entire list of targets to this function
 
-        apflog("getNext(): Computing exposure times",echo=True)
-        exp_counts = star_table['expcount']
+    apflog("getNext(): Computing exposure times",echo=True)
+    exp_counts = star_table['expcount']
 
-        # Is the exposure time too long?
-        apflog("getNext(): Removing really long exposures",echo=True)
+    # Is the exposure time too long?
+    apflog("getNext(): Removing really long exposures",echo=True)
 
-        time_left_before_sunrise = computeSunrise(dt,horizon='-9')
-        maxexptime = TARGET_EXPOSURE_TIME_MAX
-        if maxexptime > time_left_before_sunrise:
-            maxexptime = time_left_before_sunrise
-        if maxexptime < TARGET_EXPOSURE_TIME_MIN:
-            maxexptime = TARGET_EXPOSURE_TIME_MIN # this will try a target in case we get lucky
-            
-        time_check = totexptimes <= maxexptime
+    time_left_before_sunrise = computeSunrise(dt,horizon='-9')
+    maxexptime = TARGET_EXPOSURE_TIME_MAX
+    if maxexptime > time_left_before_sunrise:
+        maxexptime = time_left_before_sunrise
+    if maxexptime < TARGET_EXPOSURE_TIME_MIN:
+        maxexptime = TARGET_EXPOSURE_TIME_MIN # this will try a target in case we get lucky
 
-        available = available & time_check
+    time_check = totexptimes <= maxexptime
 
-        apflog("getNext(): Computing star elevations",echo=True)
-        fstars = [s for s,_ in zip(stars,available) if _ ]
-        vis,star_elevations,fin_star_elevations, scaled_els = Visible.is_visible_se(apf_obs, fstars, totexptimes[available],shiftwest=True)
-        currently_available = available
-        currently_available[available] = currently_available[available] & vis
+    available = available & time_check
 
-        cur_elevations[available] += star_elevations[vis]
-        scaled_elevations[available] += scaled_els[vis]
+    apflog("getNext(): Computing star elevations",echo=True)
+    fstars = [s for s,_ in zip(stars,available) if _ ]
+    vis,star_elevations,fin_star_elevations, scaled_els = Visible.visible(apf_obs, fstars, totexptimes[available],shiftwest=True)
+    currently_available = available
+    currently_available[available] = currently_available[available] & vis
 
+    cur_elevations[available] += star_elevations[vis]
+    scaled_elevations[available] += scaled_els[vis]
         
-        if slowdown > SLOWDOWN_THRESH or seeing > SEEING_THRESH:
-            bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
-            available = available & bright_enough
+    if slowdown > SLOWDOWN_THRESH or seeing > SEEING_THRESH:
+        bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
+        available = available & bright_enough
 
     # Now just sort by priority, then cadence. Return top target
     if len(star_table['name'][available]) < 1:
@@ -782,7 +760,7 @@ if __name__ == '__main__':
         hour_constraints = None
     
     frac_tablen='2020B_frac'
-    hour_table = makeHourTable(frac_tablen,dt)
+    hour_table = makeHourTable(frac_tablen,dt,hour_constraints=hour_constraints)
     
     rank_tablen='2020B_ranks'
     rank_table = makeRankTable(rank_tablen)
