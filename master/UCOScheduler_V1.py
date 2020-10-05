@@ -385,7 +385,7 @@ def findClosest(ras,decs,ra,dec):
 def enoughTime(star_table,stars,idx,apf_obs,dt):
     tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
     tot_time += 210 + (2*40 + 40*(star_table['APFnshots'][idx]-1)) + 2400 # two B star exposures + three 70 second acquisitions and the actual observation readout times
-    vis, star_elevations, fin_els = Visible.is_visible(apf_obs,[stars[idx]],[tot_time])
+    vis, star_elevations, fin_els, scaled_els = Visible.visible(apf_obs,[stars[idx]],[tot_time])
     time_left_before_sunrise = computeSunrise(dt,horizon='-9')
 
     try:
@@ -533,9 +533,6 @@ def behindMoon(moon,ras,decs):
 
     return moon_check
 
-def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_A100"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table',frac_sheet=None):
-    """ Determine the best target for UCSC team to observe for the given input.
-        Takes the time, seeing, and slowdown factor.
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
     """
 
@@ -543,7 +540,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         outdir = os.getcwd()
 
     dt = computeDatetime(ctime)
-
+def configDefaults(owner):
     config = dict()
     config['I2'] = 'Y'
     config['decker']='W'
@@ -555,6 +552,20 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     config['raoff'] = ''
     config['decoff'] = ''
 
+    return config
+
+def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_A100"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table',frac_sheet=None):
+    """ Determine the best target for UCSC team to observe for the given input.
+        Takes the time, seeing, and slowdown factor.
+        Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
+    """
+
+    if not outdir:
+        outdir = os.getcwd()
+
+    dt = computeDatetime(ctime)
+
+    config = configDefaults(owner)
 
     apflog( "getNext(): Finding target for time %s" % (dt),echo=True)
 
