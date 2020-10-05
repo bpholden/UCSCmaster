@@ -581,8 +581,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         hour_table = makeHourTable(frac_sheet,dt)
         hour_table = updateHourTable(hour_table,observed,dt)
     
-        
-    
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
 
