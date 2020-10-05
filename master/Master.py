@@ -140,7 +140,8 @@ def args():
     parser.add_argument('--rank_table', default='2020A_ranks', help="Optional name for table of sheet ranks")
     parser.add_argument('--sheet',default="RECUR_A100",help="Optional name for a Google spreadsheet")
     parser.add_argument('--owner',default='public',help="Optional name for file owners")    
-    parser.add_argument('--frac_table',default='2020A_frac',help="Table of fractions of the night")    
+    parser.add_argument('--frac_table',default='2020A_frac',help="Table of fractions of the night")
+    parser.add_argument('--time_left',default=None,help="File name for remaining time in programs")
     
     opt = parser.parse_args()
 
@@ -204,8 +205,19 @@ def downloadFiles(opt):
         if os.path.exists("rank_table.1"):
             shutil.copyfile("rank_table.1","rank_table")
 
+
+    if opt.time_left is None:
+        hour_constraints=None
+    else:
+        if os.path.exists(opt.time_left):
+            try:
+                hour_constraints = astropy.io.ascii.read(opt.time_left)
+            except Exception as e:
+                hour_constraints = None
+                apflog("Error: Cannot read file of time left %s : %s" % (opt.time_left,e))
+            
     try:
-        hour_table = ds.makeHourTable(opt.frac_table,datetime.now(),outdir=os.getcwd())
+        hour_table = ds.makeHourTable(opt.frac_table,datetime.now(),outdir=os.getcwd(),hour_constraints=hour_constraints)
     except Exception as e:
         apflog("Error: Cannot download frac_table?! %s" % (e),level="error")
 
