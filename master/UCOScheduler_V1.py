@@ -763,6 +763,12 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 if __name__ == '__main__':
 
     dt = datetime.now()
+
+    cfn = os.path.join('.','time_left.csv')
+    if os.path.exists(cfn)
+        hour_constraints = astropy.io.ascii.read(cfn)
+    else:
+        hour_constraints = None
     
     frac_tablen='2020B_frac'
     hour_table = makeHourTable(frac_tablen,dt)
