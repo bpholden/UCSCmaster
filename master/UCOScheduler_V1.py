@@ -375,7 +375,7 @@ def findClosest(ras,decs,ra,dec):
 def enoughTime(star_table,stars,idx,apf_obs,dt):
     tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
     tot_time += 210 + (2*40 + 40*(star_table['APFnshots'][idx]-1)) + 2400 # two B star exposures + three 70 second acquisitions and the actual observation readout times
-    vis, star_elevations, fin_els, scaled_els = Visible.visibleSE(apf_obs,[stars[idx]],[tot_time])
+    vis, star_elevations, fin_els, scaled_els = Visible.visible(apf_obs,[stars[idx]],[tot_time])
     time_left_before_sunrise = computeSunrise(dt,horizon='-9')
 
     try:
@@ -504,7 +504,7 @@ def lastAttempted(observed):
         if lastobj not in observed.names and lastobj not in last_objs_attempted:
             last_objs_attempted.append(lastobj)
 
-            apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
+            apflog( "lastAttempted(): Last objects attempted %s" % (last_objs_attempted),echo=True)
 
 
         else:
@@ -521,21 +521,12 @@ def behindMoon(apf_obs,dt,ras,decs):
     minMoonDist = ( moon_phase  * md) + TARGET_MOON_DIST_MIN
     moonDist = np.sqrt((moon_pos.icrs.ra.value - ras)**2 + (moon_pos.icrs.dec.value - decs)**2)
 
-    apflog("getNext(): Culling stars behind the moon",echo=True)
+    apflog("behindMoon(): Culling stars behind the moon",echo=True)
     moon_check = moonDist > minMoonDist
 
     return moon_check
 
-def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_A100"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table',frac_sheet=None):
-    """ Determine the best target for UCSC team to observe for the given input.
-        Takes the time, seeing, and slowdown factor.
-        Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
-    """
-
-    if not outdir:
-        outdir = os.getcwd()
-
-    dt = computeDatetime(ctime) # this is an astropy.time.Time object 
+def configDefaults(owner):
 
     config = dict()
     config['I2'] = 'Y'
@@ -548,13 +539,26 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     config['raoff'] = ''
     config['decoff'] = ''
 
+    return config
+
+def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_A100"],owner='public',outfn="googledex.dat",toofn="too.dat",outdir=None,focval=0,inst='',rank_sheetn='rank_table',frac_sheet=None):
+    """ Determine the best target for UCSC team to observe for the given input.
+        Takes the time, seeing, and slowdown factor.
+        Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
+    """
+
+    if not outdir:
+        outdir = os.getcwd()
+
+    dt = computeDatetime(ctime)
+
+    config = configDefaults(owner)
 
     apflog( "getNext(): Finding target for time %s" % (dt.isot),echo=True)
 
     if slowdown > SLOWDOWN_MAX:
         apflog( "getNext(): Slowndown value of %f exceeds maximum of %f at time %s" % (slowdown,SLOWDOWN_MAX,dt.isot),echo=True)
         return None
-
 
     try:
         apfguide = ktl.Service('apfguide')
@@ -573,8 +577,6 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     if frac_sheet is not None:
         hour_table = makeHourTable(frac_sheet,dt)
         hour_table = updateHourTable(hour_table,observed,dt)
-    
-        
     
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
@@ -633,61 +635,48 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     good_cadence = cadence_check >  star_table['APFcad']
     available = available & good_cadence
 
-    # We just need a B star, so restrict our math to those
     if bstar:
-
+        # We just need a B star
         apflog("getNext(): Selecting B stars",echo=True)
         available = available & bstars
 
-        f = available
-
-        apflog("getNext(): Computing star elevations",echo=True)
-        vis,star_elevations,fin_star_elevations = Visible.visible(apf_obs, dt, stars[f], [400]*len(bstars[f]))
-
-        available[f] = available[f] & vis
-        cur_elevations[f] += star_elevations[vis]
-
-
-    # Just need a normal star for observing
     else:
-        # Available and not a BStar
 
         apflog("getNext(): Culling B stars",echo=True)
         available = available & np.logical_not(bstars)
 
-        # Calculate the exposure time for the target
-        # Want to pass the entire list of targets to this function
+    # Calculate the exposure time for the target
+    # Want to pass the entire list of targets to this function
 
-        apflog("getNext(): Computing exposure times",echo=True)
-        exp_counts = star_table['expcount']
+    apflog("getNext(): Computing exposure times",echo=True)
+    exp_counts = star_table['expcount']
 
-        # Is the exposure time too long?
-        apflog("getNext(): Removing really long exposures",echo=True)
+    # Is the exposure time too long?
+    apflog("getNext(): Removing really long exposures",echo=True)
 
-        time_left_before_sunrise = computeSunrise(dt,horizon='-9')
-        maxexptime = TARGET_EXPOSURE_TIME_MAX
-        if maxexptime > time_left_before_sunrise:
-            maxexptime = time_left_before_sunrise
-        if maxexptime < TARGET_EXPOSURE_TIME_MIN:
-            maxexptime = TARGET_EXPOSURE_TIME_MIN # this will try a target in case we get lucky
-            
-        time_check = totexptimes <= maxexptime
+    time_left_before_sunrise = computeSunrise(dt,horizon='-9')
+    maxexptime = TARGET_EXPOSURE_TIME_MAX
+    if maxexptime > time_left_before_sunrise:
+        maxexptime = time_left_before_sunrise
+    if maxexptime < TARGET_EXPOSURE_TIME_MIN:
+        maxexptime = TARGET_EXPOSURE_TIME_MIN # this will try a target in case we get lucky
 
-        available = available & time_check
+    time_check = totexptimes <= maxexptime
 
-        apflog("getNext(): Computing star elevations",echo=True)
+    available = available & time_check
 
-        vis,star_elevations,fin_star_elevations, scaled_els = Visible.visibleSE(apf_obs, dt, stars[available], totexptimes[available],shiftwest=True)
-        currently_available = available
-        currently_available[available] = currently_available[available] & vis
+    apflog("getNext(): Computing star elevations",echo=True)
+    fstars = [s for s,_ in zip(stars,available) if _ ]
+    vis,star_elevations,fin_star_elevations, scaled_els = Visible.visible(apf_obs, fstars, totexptimes[available],shiftwest=True)
+    currently_available = available
+    currently_available[available] = currently_available[available] & vis
 
-        cur_elevations[available] += star_elevations[vis]
-        scaled_elevations[available] += scaled_els[vis]
-
+    cur_elevations[available] += star_elevations[vis]
+    scaled_elevations[available] += scaled_els[vis]
         
-        if slowdown > SLOWDOWN_THRESH or seeing > SEEING_THRESH:
-            bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
-            available = available & bright_enough
+    if slowdown > SLOWDOWN_THRESH or seeing > SEEING_THRESH:
+        bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
+        available = available & bright_enough
 
     # Now just sort by priority, then cadence. Return top target
     if len(star_table['name'][available]) < 1:
@@ -748,9 +737,15 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 if __name__ == '__main__':
 
     dt = astropy.time.Time.now()
+
+    cfn = os.path.join('.','time_left.csv')
+    if os.path.exists(cfn):
+        hour_constraints = astropy.io.ascii.read(cfn)
+    else:
+        hour_constraints = None
     
     frac_tablen='2020B_frac'
-    hour_table = makeHourTable(frac_tablen,dt)
+    hour_table = makeHourTable(frac_tablen,dt,hour_constraints=hour_constraints)
     
     rank_tablen='2020B_ranks'
     rank_table = makeRankTable(rank_tablen)
