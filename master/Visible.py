@@ -35,7 +35,7 @@ def makeAPFObs():
 
 
 
-def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
+def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
                    max_el=SchedulerConsts.TARGET_ELEVATION_MAX,shiftwest=False):
     """ Args:
             stars: A list of pyephem bodies to evaluate visibility of
@@ -106,41 +106,17 @@ def visibleSE(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARG
         
     return np.asarray(ret), start_elevations, fin_elevations, scaled_elevations
 
-def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET_ELEVATION_HIGH_MIN, min_el=SchedulerConsts.TARGET_ELEVATION_MIN,
-                   max_el=SchedulerConsts.TARGET_ELEVATION_MAX):
-    """ Args:
-            stars: A list of pyephem bodies to evaluate visibility of
-            observer: A pyephem observer to use a the visibility reference
-            obs_len: A list of observation lengths ( Seconds ). This is the time frame for which visibility is checked
-
-            Optional:
-            pref_min_el: Preferred minimum body elevation to be visible ( degrees )            
-            min_el: The minimum body elevation to be visible ( degrees ) - only use this if star never goes above preferred limit
-            max_el: The maximum body elevation to be visible ( degrees )
-        Returns:
-            Boolean list representing if body[i] is visible
-
-        Notes: Uses the observer's current date and location
-    """
-
-    ret, start_elevations, fin_elevations, scaled_els = visibleSE(observer, cdate, stars, obs_lens,pref_min_el=pref_min_el,min_el=min_el,max_el=max_el)
-
-    return ret, start_elevations, fin_elevations
-
-
-
-
 
 if __name__ == '__main__':
     # Generate a pyephem observer for the APF
+
     apf_obs = makeAPFObs()
     cur_date = astropy.time.Time.now()
     
     star = astropy.coordinates.SkyCoord("1h44m4.083s","-15d56m14.93s")
-    ret, se, fe = visible(apf_obs,cur_date,star,np.asarray([0.]))
-    print (ret, se, fe)
-    ret, se, fe = visible(apf_obs,cur_date,star,np.asarray([400.]))
-    print (ret, se, fe)
-
-    ret, se, fe, sce = visibleSE(apf_obs,cur_date,star,np.asarray([400.]))
+    ret, se, fe, sce = visible(apf_obs,cur_date,star,np.asarray([0.]))
     print (ret, se, fe, sce)
+    ret, se, fe, sce = visible(apf_obs,cur_date,star,np.asarray([400.]))
+    print (ret, se, fe, sce)
+
+
