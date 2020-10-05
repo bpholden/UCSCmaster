@@ -514,7 +514,7 @@ def lastAttempted(observed):
         if lastobj not in observed.names and lastobj not in last_objs_attempted:
             last_objs_attempted.append(lastobj)
 
-            apflog( "getNext(): Last objects attempted %s" % (last_objs_attempted),echo=True)
+            apflog( "lastAttempted(): Last objects attempted %s" % (last_objs_attempted),echo=True)
 
 
         else:
@@ -528,7 +528,7 @@ def behindMoon(moon,ras,decs):
     minMoonDist = ((moon.phase / 100.) * md) + TARGET_MOON_DIST_MIN
     moonDist = np.degrees(np.sqrt((moon.ra - ras)**2 + (moon.dec - decs)**2))
 
-    apflog("getNext(): Culling stars behind the moon",echo=True)
+    apflog("behindMoon(): Culling stars behind the moon",echo=True)
     moon_check = moonDist > minMoonDist
 
     return moon_check
