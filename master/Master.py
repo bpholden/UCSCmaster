@@ -205,8 +205,19 @@ def downloadFiles(opt):
         if os.path.exists("rank_table.1"):
             shutil.copyfile("rank_table.1","rank_table")
 
+
+    if opt.time_left is None:
+        hour_constraints=None
+    else:
+        if os.path.exists(opt.time_left):
+            try:
+                hour_constraints = astropy.io.ascii.read(opt.time_left)
+            except Exception as e:
+                hour_constraints = None
+                apflog("Error: Cannot read file of time left %s : %s" % (opt.time_left,e))
+            
     try:
-        hour_table = ds.makeHourTable(opt.frac_table,datetime.now(),outdir=os.getcwd())
+        hour_table = ds.makeHourTable(opt.frac_table,datetime.now(),outdir=os.getcwd(),hour_constraints=hour_constraints)
     except Exception as e:
         apflog("Error: Cannot download frac_table?! %s" % (e),level="error")
 
