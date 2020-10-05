@@ -84,6 +84,8 @@ def visible(observer, cdate, stars, obs_lens, pref_min_el=SchedulerConsts.TARGET
     altaz = observer.altaz(fin_dates,target=stars)
     fin_elevations = altaz.alt.value
 
+    stars = astropy.coordinates.sky_coordinate.SkyCoord(stars)
+    
     diff = np.abs(stars.dec.value - observer.location.lat.value)
     transit_alts = 90.0 - diff
     scaled_elevations = 90.0 - (transit_alts - start_elevations)
