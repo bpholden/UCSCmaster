@@ -375,7 +375,7 @@ def findClosest(ras,decs,ra,dec):
 def enoughTime(star_table,stars,idx,apf_obs,dt):
     tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
     tot_time += 210 + (2*40 + 40*(star_table['APFnshots'][idx]-1)) + 2400 # two B star exposures + three 70 second acquisitions and the actual observation readout times
-    vis, star_elevations, fin_els, scaled_els = Visible.visible(apf_obs,[stars[idx]],[tot_time])
+    vis, star_elevations, fin_els, scaled_els = Visible.visible(apf_obs,dt,[stars[idx]],[tot_time])
     time_left_before_sunrise = computeSunrise(dt,horizon='-9')
 
     try:
@@ -667,7 +667,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     apflog("getNext(): Computing star elevations",echo=True)
     fstars = [s for s,_ in zip(stars,available) if _ ]
-    vis,star_elevations,fin_star_elevations, scaled_els = Visible.visible(apf_obs, fstars, totexptimes[available],shiftwest=True)
+    vis,star_elevations,fin_star_elevations, scaled_els = Visible.visible(apf_obs, dt, fstars, totexptimes[available],shiftwest=True)
     currently_available = available
     currently_available[available] = currently_available[available] & vis
 
