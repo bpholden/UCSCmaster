@@ -86,7 +86,7 @@ pathvar : /bin:/usr/local/bin:/usr/bin:/sbin:/usr/sbin:/opt/kroot/bin:@LROOT@/bi
 pythonpathvar : /opt/kroot/rel/default/lib/python:/opt/kroot/rel/default/lib:@LROOT@/lib/python:@LROOT@/lib:@LROOT@/master:/sr/lib/python2.7/:/usr/lib/python2.7/site_packages:/local/u/user/.local/lib/python2.7/site-packages
 executable : @LROOT@/bin/master/Master
 argstr : -n %s -o %s -c uco --sheet %s --rank_table %s --frac_table %s --time_left %s
-args : name obsnum sheets rank_table frac_table 
+args : name obsnum sheets rank_table frac_table time_left
 name : apf
 obsnum : apf
 owner : public
