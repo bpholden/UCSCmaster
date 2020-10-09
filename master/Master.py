@@ -22,6 +22,7 @@ import functools
 import glob
 
 import numpy as np
+import astropy.io.ascii
 
 try:
     import ktl
