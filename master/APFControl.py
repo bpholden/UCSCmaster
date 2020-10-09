@@ -1485,7 +1485,7 @@ class APF:
                 robot['UCAMLAUNCHER_UCAM_COMMAND'].write('Run')
             except Exception as e:
                 apflog('Failed when writing apftask.UCAMLAUNCHER_UCAM_COMMAND to Run: %s' % (e),echo=True,level='Crit')
-                
+                return False
 
         return True
     
