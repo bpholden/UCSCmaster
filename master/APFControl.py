@@ -1479,10 +1479,10 @@ class APF:
             rv = self.ucam_restart(comb,fake=fake)
             return rv
 
-        ucamlaunch_sta = robot['UCAMLAUNCHER_UCAM_STATUS'].read(binary=True)
+        ucamlaunch_sta = self.robot['UCAMLAUNCHER_UCAM_STATUS'].read(binary=True)
         if ucamlaunch_sta == 0:
             try:
-                robot['UCAMLAUNCHER_UCAM_COMMAND'].write('Run')
+                self.robot['UCAMLAUNCHER_UCAM_COMMAND'].write('Run')
             except Exception as e:
                 apflog('Failed when writing apftask.UCAMLAUNCHER_UCAM_COMMAND to Run: %s' % (e),echo=True,level='Crit')
                 return False
