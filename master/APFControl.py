@@ -906,7 +906,7 @@ class APF:
         result, code = apftaskDo(cmd,debug=True,cwd=os.getcwd())
         if result:
             try:
-                estopstate = self.dome.read('ESTOPST')
+                estopstate = self.dome.read('ESTOPST',binary=True)
                 if estopstate:
                     return False
                 else:
