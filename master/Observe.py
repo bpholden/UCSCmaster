@@ -727,7 +727,7 @@ class Observe(threading.Thread):
                             apflog("Error: Cannot disable AZ drive", level="error",echo=True)
 
                     else:
-                        apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='error',echo=True)
+#                        apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='error',echo=True)
                 else:
                     apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds", level="error")
                     APFTask.waitFor(self.task, True, timeout=600)
