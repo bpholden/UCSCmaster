@@ -1216,7 +1216,6 @@ class APF:
         """
         This function will take a test exposure of a B-Star. By using scriptobs to take this exposure,
         the avg_fwhm and countrate keywords will be updated.
-        The resulting file will be stored as Heimdallr1.fits?
         :return:
         """
 
@@ -1235,7 +1234,7 @@ class APF:
 
         apflog("checkClouds(): File name=%s - Number=%d - Lines Done=%d" % (obs_file, int(obs_num), lines_done) )
 
-        APFLib.write(self.ucam["OUTFILE"], "heimdallr")
+        APFLib.write(self.ucam["OUTFILE"], "cloud")
         APFLib.write(self.ucam["OBSNUM"], self.cloudObsNum)
         APFLib.write(self.ucam["RECORD"], "No")
 
