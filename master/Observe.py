@@ -814,20 +814,20 @@ if __name__ == "__main__":
     APFTask.waitFor(parent, True,timeout=2)
     print(str(apf))
 
-    master = Master(apf,opt,task=parent)
+    observe = Observe(apf,opt,task=parent)
     APFTask.waitFor(parent, True,timeout=2)
-    master.start()
-    while master.signal:
+    observe.start()
+    while observe.signal:
         try:
             dt = datetime.now()
             print(dt)
             APFTask.wait(parent,True,timeout=100)
         except KeyboardInterrupt:
             apflog("Heimdallr has been killed by user.", echo=True)
-            master.stop()
+            observe.stop()
             sys.exit()
         except:
             apflog("Heimdallr killed by unknown.", echo=True)
-            master.stop()
+            observe.stop()
             sys.exit()
             
