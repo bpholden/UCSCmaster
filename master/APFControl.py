@@ -286,7 +286,7 @@ class APF:
             return
         try:
             apfmon_stat = self.ucamd0sta['binary']
-            if apfmon_stat == 5:
+            if apfmon_stat == 4:
                 # modify -s apfucam DISP0DWIM="ksetMacval DISP0STA READY"
                 if self.disp0sta.read(binary=True) == 0:
                     self.apfucam['DISP0DWIM'].write("ksetMacval DISP0STA READY")
