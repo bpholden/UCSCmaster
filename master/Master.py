@@ -429,7 +429,10 @@ if __name__ == '__main__':
         if opt.binning > 1:
             apfmon = ktl.Service('apfmon')
             d = time.time() + 22.*3600
-            apfmon['BINNINGDIS'].write(d,binary=True)
+            try:
+                apfmon['BINNINGDIS'].write(d,binary=True,timeout=2)
+            except:
+                apflog("cannot write apfmon7 keyword" % (e),level='Alert',echo=True)
             
         if opt.fixed != None:
             lastList = apf.robot["MASTER_STARLIST"].read()
@@ -529,8 +532,11 @@ if __name__ == '__main__':
         
 
     apfmon = ktl.Service('apfmon')
-    if apfmon['BINNINGDIS'].read(binary=True) > 0:
-        apfmon['BINNINGDIS'].write(0,binary=True)
+    try:
+        if apfmon['BINNINGDIS'].read(binary=True,timeout=2) > 0:
+            apfmon['BINNINGDIS'].write(0,binary=True)
+    except:
+        apflog("cannot read apfmon7 keyword" % (e),level='Alert',echo=True)
 
     try:
         apf.ok2open.monitor(start=False)
