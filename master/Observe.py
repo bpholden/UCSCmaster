@@ -363,10 +363,14 @@ class Observe(threading.Thread):
             when = "night"
             if sunset:
                 when = "sunset"
+            mstr = "Open at %s" % (when)
+            APFTask.set(self.task, suffix="MESSAGE", value=mstr, wait=False)                    
 
             result = self.APF.ucam_status()
             if result is False:
                 apflog("Failure in UCAM status and restart!", level='Alert', echo=True)
+            else:
+                apflog("UCAM OK", echo=True)
 
             result = self.APF.enableObsInst()
             if result == False:
@@ -375,6 +379,8 @@ class Observe(threading.Thread):
                 if not result:
                     apflog("Error: cannot enable instrument twice.", level='alert', echo=True)
                     return result
+            else:
+                apflog("Instrument OK", echo=True)
                 
             apflog("Running open at %s as sunel = %4.2f" % (when, float(sunel)),echo=True)
             (apfopen,what) =self.APF.isOpen()
@@ -697,7 +703,6 @@ class Observe(threading.Thread):
                                
                     
                 elif not rising or (rising and float(sunel) < (sunel_lim - 5)) and self.canOpen and not self.badweather:
-                    APFTask.set(self.task, suffix="MESSAGE", value="Open at night", wait=False)                    
                     success = opening(sunel)
                 else:
                     success = True
