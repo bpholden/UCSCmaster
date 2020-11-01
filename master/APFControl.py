@@ -939,9 +939,6 @@ class APF:
             else:
                 apflog("cannot home telescope" % (e),level='Alert',echo=True)
                 return False
-        except:
-            apflog("cannot home telescope and/or cannot read apfmon keyword" % (e),level='Alert',echo=True)
-            return False
 
     def checkHome(self,home=True):
         try:
