@@ -1478,10 +1478,23 @@ class APF:
             rv = self.ucam_restart(fake=fake)
             return rv
 
-        ucamsta = self.apfmon['UCAMSTA'].read(binary=True)
-        if ucamsta > 2:
-            rv = self.ucam_restart(comb,fake=fake)
+        try:
+            ucamsta0 = self.ucam['DISP0STA'].read(binary=True)
+            ucamsta1 = self.ucam['DISP1STA'].read(binary=True)
+        except Exception as e:
+            apflog('apfucam.DISP%STA failure, apfucam likely not running: %s' % (e),echo=True,level='Alert')
+            rv = self.ucam_restart(fake=fake)
             return rv
+        else:
+            if ucamsta1 > 0 and ucamsta0 > 0:
+                # Things are still starting up
+                if ucamsta0 > 2:
+                    # failure to connect
+                    rv = self.ucam_restart(comb,fake=fake)
+                    return rv
+                else:
+                    rv = APFTask.waitfor(self.task, True, expression="$apfucam.DISP0STA = 0 & $apfucam.DISP1STA = 0", timeout=600)
+                    return rv
 
         ucamlaunch_sta = self.robot['UCAMLAUNCHER_UCAM_STATUS'].read(binary=True)
         if ucamlaunch_sta == 0:
