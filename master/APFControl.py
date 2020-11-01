@@ -929,7 +929,11 @@ class APF:
         cmd = os.path.join(SCRIPTDIR,"slew") + " --home"
         rv, rc = apftaskDo(cmd)
         try:
-            homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
+            homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True,timeout=2)
+        except:
+            apflog("cannot read apfmon keyword" % (e),level='Alert',echo=True)
+            return False
+        else:
             if rc == 0 and homed == 2:
                 return True
             else:
@@ -941,7 +945,7 @@ class APF:
 
     def checkHome(self,home=True):
         try:
-            homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True)
+            homed = self.apfmon('ELHOMERIGHTSTA').read(binary=True,timeout=2)
         except Exception as e:
             apflog("apfmon.ELHOMERIGHTSTA cannot be read: %s" % (e),level='Alert',echo=True)
             return False
@@ -1080,7 +1084,7 @@ class APF:
             apflog("Didn't have move permission after 20 minutes. Going ahead with closeup.", echo=True)
             return False
         try:
-            if self.apfmon['FRONT_SHUTTER_CLOSEUPSTA'].read(binary=True) != 2:
+            if self.apfmon['FRONT_SHUTTER_CLOSEUPSTA'].read(binary=True,timeout=2) != 2:
                 # this is a check to see if the front shutter got caught running
                 # away, if so do not send any more shutter commands
                 apflog("Dome Shutters maybe running away!", level='error', echo=True)
