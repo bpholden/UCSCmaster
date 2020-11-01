@@ -100,7 +100,7 @@ class Observe(threading.Thread):
         return True
         
     def checkObsSuccess(self):
-        """ Master.checkObsSuccess() 
+        """ Observe.checkObsSuccess() 
             checks the value of SCRIPTOBS_LINE_RESULT to see if the last observation suceeded.
         """
         retval = False
@@ -110,7 +110,7 @@ class Observe(threading.Thread):
         return retval
 
     def checkObsFinished(self):
-        """ Master.checkObsFinished() 
+        """ Observe.checkObsFinished() 
             checks the value of SCRIPTOBS_LINE to see if we are on the last line of the block
             checks SCRIPTOBS_LINE_RESULT and SCRIPTOBS_OBSERVED to see if the last line is done
         """
@@ -123,8 +123,8 @@ class Observe(threading.Thread):
 
 
     def checkBstar(self,haveobserved):
-        """ Master.obsBstar(haveobserved) 
-            if observing has begun, and the last observation was a success, set Master.obsBstar to false, writes master_obsbstar to
+        """ Observe.obsBstar(haveobserved) 
+            if observing has begun, and the last observation was a success, set Observe.obsBstar to false, writes master_obsbstar to
             the current value of obsBstar
             The variable OBSBSTAR still overrides
         """
@@ -179,7 +179,7 @@ class Observe(threading.Thread):
             return False
 
     def shouldStartList(self):
-        """ Master.shouldStartList()
+        """ Observe.shouldStartList()
             should we start a fixed observing list or not? true if start time is None or if w/in + 1 hour - 0.5 hours of start time
         """
         if self.starttime == None:
@@ -197,7 +197,7 @@ class Observe(threading.Thread):
 
     
     def run(self):
-        """ Master.run() - runs the observing
+        """ Observe.run() - runs the observing
         """
         APF = self.APF
 
