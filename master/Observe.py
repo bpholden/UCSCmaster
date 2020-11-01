@@ -40,7 +40,7 @@ class Observe(threading.Thread):
         self.task = task
         self.user = opt.name
         self.owner = opt.owner
-        self.name = 'Heimdallr'
+        self.name = 'Observe'
         self.signal = True
         self.windshield = opt.windshield
         self.scriptobs = None
@@ -300,7 +300,7 @@ class Observe(threading.Thread):
                 self.APF.autofoc.write("robot_autofocus_enable")
                 
             if self.scriptobs is None:
-                apflog("Called getTarget, but there is not instance of scriptobs associated with Heimdallr. This is an error condition.", echo=True)
+                apflog("Called getTarget, but there is not instance of scriptobs associated with %s. This is an error condition." % (self.name), echo=True)
                 return 
             
             # Calculate the slowdown factor.
@@ -318,7 +318,7 @@ class Observe(threading.Thread):
 
             self.focval = self.APF.setAutofocVal()
             if self.target is None:
-                apflog("No acceptable target was found. Since there does not seem to be anything to observe, Heimdallr will now shut down.", echo=True)
+                apflog("No acceptable target was found. Since there does not seem to be anything to observe, %s will now shut down." % (self.name), echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
                 self.scriptobs.stdin.close()
                 self.APF.close()
@@ -823,11 +823,11 @@ if __name__ == "__main__":
             print(dt)
             APFTask.wait(parent,True,timeout=100)
         except KeyboardInterrupt:
-            apflog("Heimdallr has been killed by user.", echo=True)
+            apflog("%s has been killed by user." % (self.name), echo=True)
             observe.stop()
             sys.exit()
         except:
-            apflog("Heimdallr killed by unknown.", echo=True)
+            apflog("%s killed by unknown." % (self.name), echo=True)
             observe.stop()
             sys.exit()
             
