@@ -288,7 +288,7 @@ class APF:
             apfmon_stat = self.ucamd0sta['binary']
             if apfmon_stat == 4:
                 # modify -s apfucam DISP0DWIM="ksetMacval DISP0STA READY"
-                if self.disp0sta.read(binary=True) == 0:
+                if self.disp0sta.read(binary=True,timeout=2) == 0:
                     self.apfucam['DISP0DWIM'].write("ksetMacval DISP0STA READY")
         except:
             return
@@ -299,11 +299,11 @@ class APF:
         if counts['populated'] == False:
             return
         try:
-            cnts = float(counts.read(binary=True))
+            cnts = counts['binary']
         except:
             return
         try:
-            time = float(elapsed.read(binary=True))
+            time = float(elapsed.read(binary=True,timeout=2))
         except:
             return
 
@@ -332,7 +332,7 @@ class APF:
             return
 
         try:
-            eventval = event.read(binary=True)
+            eventval = event['binary']
             if eventval == 0 or eventval == 7 :
                 self.ncountrate = 0
         except:
@@ -340,8 +340,8 @@ class APF:
 
 
         try:
-            cnts = float(counts.read(binary=True))
-            time = float(elapsed.read(binary=True))
+            cnts = float(counts.read(binary=True,timeout=2))
+            time = float(elapsed.read(binary=True,timeout=2))
         except:
             return
         try:
@@ -400,7 +400,7 @@ class APF:
         if wx['populated'] == False:
             return
         try:
-            downval = self.down.read(binary=True)
+            downval = self.down.read(binary=True,timeout=2)
         except Exception as e:
             apflog("Exception in altwindmon: %s" % (e), level='error')
             return
@@ -437,8 +437,8 @@ class APF:
             return
         try:
             dewpt = float(dew)
-            m2 = self.m2temp.read(binary=True)
-            air = self.airtemp.read(binary=True)
+            m2 = self.m2temp.read(binary=True,timeout=2)
+            air = self.airtemp.read(binary=True,timeout=2)
         except:
             return
 
@@ -504,11 +504,11 @@ class APF:
         what = ''
         rv = False
         try:
-            ismcopen = self.mcopen.read(binary=True)
+            ismcopen = self.mcopen.read(binary=True,timeout=2)
         except:
             return False, ''
         try:
-            isshutterclosed = self.shclosed.read(binary=True)
+            isshutterclosed = self.shclosed.read(binary=True,timeout=2)
         except:
             return False, ''
             
@@ -564,12 +564,16 @@ class APF:
         return
 
     def instrPermit(self):
-        while not self.instr_perm.read(binary=True) or self.userkind.read(binary=True) != 3:
-            apflog("Waiting for instrument permission to be true and userkind to be robotic")
-            APFTask.waitfor(self.task, True, expression="$checkapf.INSTR_PERM = true", timeout=600)
-            APFTask.waitfor(self.task, True, expression="$checkapf.USERKIND = robotic", timeout=600)
-
-        return True
+        try:
+            while not self.instr_perm.read(binary=True,timeout=2) or self.userkind.read(binary=True,timeout=2) != 3:
+                apflog("Waiting for instrument permission to be true and userkind to be robotic")
+                APFTask.waitfor(self.task, True, expression="$checkapf.INSTR_PERM = true", timeout=600)
+                APFTask.waitfor(self.task, True, expression="$checkapf.USERKIND = robotic", timeout=600)
+        except Exception as e:
+            apflog("Cannot communicate with checkapf: %s" % (e),echo=True,level='alert')
+            return False
+        else:
+            return True
 
     def turnOffLamps(self):
         for lamp in ("HALOGEN2","HALOGEN1","THORIUM1","THORIUM2"):
@@ -643,13 +647,17 @@ class APF:
         rv = self.enableCalInst()
         if rv is False:
             try:
-                ip = self.checkapf['INSTR_PERM'].read()
+                ip = self.checkapf['INSTR_PERM'].read(timeout=2)
             except:
                 ip = 'Unknown'
             apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
             return rv
-        owner = self.apfschedule('OWNRHINT').read()        
-        self.apfschedule('OWNRHINT').write('public')        
+        try:
+            owner = self.apfschedule('OWNRHINT').read(timeout=10)
+        except Exception as e:
+            apflog("Cannot communicate with apfschedule %s" % (e), level='alert',echo=True)
+        else:
+            self.apfschedule('OWNRHINT').write('public')        
         
         lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
         if float(lastfocus_dict["lastfocus"]) > DEWARMAX or float(lastfocus_dict["lastfocus"]) < DEWARMIN:
