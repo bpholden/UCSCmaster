@@ -679,7 +679,11 @@ class APF:
             result = self.focus(flags=flags)
             if not result:
                 apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
-        self.apfschedule('OWNRHINT').write(owner)        
+
+        try:
+            self.apfschedule('OWNRHINT').write(owner,timeout=10)
+        except Exception as e:
+            apflog("Cannot communicate with apfschedule %s" % (e), level='alert',echo=True)
 
         return result
         
