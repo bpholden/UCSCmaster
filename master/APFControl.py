@@ -693,40 +693,50 @@ class APF:
             apflog("Test Mode: calibrate %s %s." % (script, time))
             APFTask.waitFor(self.task, True, timeout=10)
             return True
-        if time == 'pre' or 'post':
-
-            rv = self.enableCalInst()
-            if rv is False:
-                try:
-                    ip = self.instr_perm.read()
-                except:
-                    ip = 'Unknown'
-                apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
-                return rv
-            
+        
+        if time != 'pre' or 'post':
+            apflog("Couldn't understand argument %s, nothing was done." % time)
+            return False
+        
+        rv = self.enableCalInst()
+        if rv is False:
             try:
-                APFLib.write("apfmot.DEWARFOCRAW",ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True))
+                ip = self.instr_perm.read()
             except:
-                apflog("Cannot read the last best fitting focus value or write the dewar focus value", level='error')
-            if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
-                apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % (self.dewarfoc), level = "error", echo=True)
-                return False
-            apflog("Running calibrate %s %s" % (script, time), level = 'info')
-            owner = self.apfschedule('OWNRHINT').read()        
+                ip = 'Unknown'
+            apflog("Cannot enable instrument to move stages but instr_perm is %s" % (ip), level='alert',echo=True)
+            return rv
+            
+        try:
+            APFLib.write("apfmot.DEWARFOCRAW",ktl.read("apftask","FOCUSINSTR_LASTFOCUS",binary=True))
+        except:
+            apflog("Cannot read the last best fitting focus value or write the dewar focus value", level='error')
+        if self.dewarfoc > DEWARMAX or self.dewarfoc < DEWARMIN:
+            apflog("Warning: The dewar focus is currently %d. This is outside the typical range of acceptable values." % (self.dewarfoc), level = "error", echo=True)
+            return False
+        apflog("Running calibrate %s %s" % (script, time), level = 'info')
+        
+        try:
+            owner = self.apfschedule('OWNRHINT').read(timeout=10)        
+        except Exception as e:
+            apflog("Cannot communicate with apfschedule %s" % (e), level='alert',echo=True)
+        else:
             self.apfschedule('OWNRHINT').write('public')        
             
-            cmd = '%s %s %s' % (s_calibrate,script, time)
-            result, code = apftaskDo(cmd,debug=True,cwd=os.getcwd())
-            if not result:
-                apflog("%s %s failed with return code %d" % (s_calibrate, script, code),echo=True)
-            expression="($apftask.CALIBRATE_STATUS != 0) and ($apftask.CALIBRATE_STATUS != 1) "
-            if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
-                apflog("%s %s failed to exit" % (s_calibrate,script),echo=True)
-            self.apfschedule('OWNRHINT').write(owner)        
+        cmd = '%s %s %s' % (s_calibrate,script, time)
+        result, code = apftaskDo(cmd,debug=True,cwd=os.getcwd())
+        if not result:
+            apflog("%s %s failed with return code %d" % (s_calibrate, script, code),echo=True)
+        expression="($apftask.CALIBRATE_STATUS != 0) and ($apftask.CALIBRATE_STATUS != 1) "
+        if not APFTask.waitFor(self.task,True,expression=expression,timeout=30):
+            apflog("%s %s failed to exit" % (s_calibrate,script),echo=True)
+            
+        try:
+            self.apfschedule('OWNRHINT').write(owner,timeout=10)        
+        except Exception as e:
+            apflog("Cannot communicate with apfschedule %s" % (e), level='alert',echo=True)
                 
-            return result
-        else:
-            apflog("Couldn't understand argument %s, nothing was done." % time)
+        return result
 
     def focus(self,flags="-b"):
         """Runs the focus routine appropriate for the user."""
