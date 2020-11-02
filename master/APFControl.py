@@ -748,7 +748,10 @@ class APF:
         else:
             supplies = ('PS1_48V_ENA', 'PS2_48V_ENA')
             for keyword in supplies:
-                value = self.motor[keyword].read(binary=True)
+                try:
+                    value = self.motor[keyword].read(binary=True,timeout=2)
+                except Exception as e:
+                    apflog("Cannot read status of PS's:  %s"  % e,level='alert', echo=True)
                 if value != 1:
                     self.motor[keyword].write('Enabled', wait=False)
                     
