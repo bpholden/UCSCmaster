@@ -694,7 +694,7 @@ class APF:
             APFTask.waitFor(self.task, True, timeout=10)
             return True
         
-        if time != 'pre' or time != 'post':
+        if time != 'pre' and time != 'post':
             apflog("Couldn't understand argument %s, nothing was done." % time)
             return False
         
