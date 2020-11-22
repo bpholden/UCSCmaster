@@ -592,6 +592,7 @@ class Observe(threading.Thread):
                 apflog("No longer ok to open.", echo=True)
                 apflog("OPREASON: " + self.APF.checkapf["OPREASON"].read(), echo=True)
                 apflog("WEATHER: " + self.APF.checkapf['WEATHER'].read(), echo=True)
+                apflog("CLOSE TO DEW POINT: %s" % (str(self.APF.dewTooClose)), echo=True)
                 closing()
 
             # Check the slowdown factor to close for clouds
