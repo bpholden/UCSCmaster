@@ -718,7 +718,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
         wait_time = len(vals)
         time.sleep(wait_time)
 
-        for i, v in enumerate(vals):
+        for i, v in enumerate(vals[1:]):
             # Did we observe this target tonight?
             local_name = parseStarname(v[nmcol])
             
