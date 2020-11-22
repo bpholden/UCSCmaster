@@ -634,6 +634,9 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
         index = obslog.names.index(name)
         obstime = obslog.times[index]
         owner = obslog.owners[index]
+        if owner == 'public':
+            owner = 'RECUR_A100'
+            
         if isinstance(obstime,float):
             t = datetime.utcfromtimestamp(obstime)
         else:
@@ -700,6 +703,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
 
     if 'public' in needed_sheetns:
         needed_sheetns.remove('public')
+        needed_sheetns.append('RECUR_A100')
 
     nupdates = 0
     for sheetn in needed_sheetns:
@@ -729,6 +733,8 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                 otime = obslog.times[nameidx]
                 taketemp = obslog.temps[nameidx]
                 curowner = obslog.owners[nameidx]
+                if curowner == 'public':
+                    curowner = 'RECUR_A100'
                 jd = None
                 try:
                     star_table_row = star_table[(star_table['name'] == local_name)&(star_table['sheetn'] == sheetn)]
