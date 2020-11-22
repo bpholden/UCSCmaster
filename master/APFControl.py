@@ -240,7 +240,8 @@ class APF:
         # Grab some initial values for the state of the telescope
         
         self.wx.poll()
-        self.temp.poll()
+        self.airtemp.poll()
+        self.dewpt.poll()        
         self.counts.poll()
         self.ok2open.poll()
 
