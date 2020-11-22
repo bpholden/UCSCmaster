@@ -28,6 +28,10 @@ wxtimeout = timedelta(seconds=1800)
 SUNEL_HOR = -3.2
 DEWARMAX = 8650
 DEWARMIN = 8400
+TELFOCUSMIN = -0.00088
+TELFOCUSMAX = -0.00078
+
+
 
 if "LROOT" in os.environ:
     LROOT = os.environ["LROOT"]
@@ -170,7 +174,10 @@ class APF:
     eosgcam    = ktl.Service('eosgcam')
     fits3pre   = eosgcam('FITS3PRE')
     save3d     = eosgcam('SAVE3D')
+    gexptime   = eosgcam('GEXPTIME')
+    sumframe   = eosgcam('SUMFRAME')
 
+    
     apfmon     = ktl.Service('apfmon')
     ucamd0sta  = apfmon['UCAMDSTA0STA']
 
@@ -474,9 +481,22 @@ class APF:
         else:
             return False
 
-    def initGuidecam(self):
+    def initGuideCam(self):
         self.save3d.write(False,binary=True)
         self.fits3pre.write('')
+        if self.gexptime.read(binary=True) >= 1:
+            try:
+                self.sumframe.write(1,wait=False)
+                self.gexptime.write(1,wait=False)
+            except:
+                apflog("Cannot write eosgcam.SUMFRAME or eosgcam.GEXPTIME",level='warn',echo=True)
+        else:
+            try:
+                self.gexptime.write(1,wait=False)
+                self.sumframe.write(1,wait=False)
+            except:
+                apflog("Cannot write eosgcam.SUMFRAME or eosgcam.GEXPTIME",level='warn',echo=True)
+            
         return
     
     # Fucntion for checking what is currently open on the telescope

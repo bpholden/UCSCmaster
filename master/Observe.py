@@ -290,8 +290,6 @@ class Observe(threading.Thread):
             try:
                 self.obsBstar = ktl.read("apftask", "MASTER_OBSBSTAR",binary=True)
                 apflog("getTarget(): Setting obsBstar to %s" % (str(self.obsBstar)),echo=True)
-
-                
             except Exception, e:
                 apflog("getTarget(): Cannot read apftask.MASTER_OBSBSTAR: %s" % (e),level='error',echo=True)
                 self.obsBstar = True
@@ -313,6 +311,8 @@ class Observe(threading.Thread):
             else:
                 seeing = float(self.APF.avg_fwhm)
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
+
+            self.APF.initGuideCam()
             
             self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen)
 
