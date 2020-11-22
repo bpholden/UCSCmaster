@@ -709,6 +709,8 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
             vals = ws.get_all_values()
         else:
             continue
+        
+        nmcol = vals[0].index('Star Name')
         col = vals[0].index("lastobs")
         nobscol = vals[0].index("Nobs")
         tempcol = vals[0].index("Template")
@@ -718,7 +720,8 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
 
         for i, v in enumerate(vals):
             # Did we observe this target tonight?
-            local_name = parseStarname(v[0])
+            local_name = parseStarname(v[nmcol])
+            
             if local_name in obslog.names:
                 # We observed this target, so update the cell in the worksheet
                 # update_cell(row, col, val) - col and row are 1 indexed
