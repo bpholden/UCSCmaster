@@ -124,16 +124,13 @@ class APF:
     wx         = apfmet('M5WIND')
     down       = apfmet('M5DOWN')
     altwx      = apfmet('M3WIND')
-    temp       = apfmet('M5OUTEMP')
-
-    eosmets    = ktl.Service('eosmets')
-    airtemp    = eosmets('AIRTEMP')
 
     eosti8k    = ktl.Service('eosti8k')
     m2temp     = eosti8k('TM2CSUR')
 
     eoscool    = ktl.Service('eoscool')
     dewpt      = eoscool('DEWPAVG3')
+    airtemp    = eosmets('TEMPAVG4')
     
     robot        = ktl.Service('apftask')
     vmag         = robot['SCRIPTOBS_VMAG']
@@ -216,7 +213,6 @@ class APF:
         self.nerase.monitor()
 
         self.down.monitor()
-        self.temp.monitor()
         self.whatsopn.monitor()
 
         self.dewpt.monitor()
@@ -1196,10 +1192,10 @@ class APF:
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
         else:
             # State must be auto, so check wind
-            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and float(self.temp) > TEMP_LIMIT:
+            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and float(self.airtemp) > TEMP_LIMIT:
                 apflog("Setting scriptobs_windshield to Disable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
-            if currState == 'disable' and (self.wvel > WINDSHIELD_LIMIT or float(self.temp) < TEMP_LIMIT):
+            if currState == 'disable' and (self.wvel > WINDSHIELD_LIMIT or float(self.airtemp) < TEMP_LIMIT):
                 apflog("Setting scriptobs_windshield to Enable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
