@@ -1,5 +1,5 @@
 #!/usr/bin/env  /opt/kroot/bin/kpython
-
+from __future__ import print_function
 import sys
 import time
 
@@ -9,7 +9,7 @@ import ObservedLog
 
 if __name__ == "__main__":
     if len(sys.argv) <= 2:
-        print "needs a observed log and a local copy of the star table"
+        print("needs a observed log and a local copy of the star table")
         sys.exit()
     fn = sys.argv[1]
     outfn = sys.argv[2]
