@@ -106,6 +106,7 @@ class APF:
     ael        = tel('AEL')
     aaz        = tel('AAZ')
     aafocus    = tel('AAFOCUS')
+    focus      = tel('FOCUS')
 
     dome       = ktl.Service('eosdome')
     rspos      = dome('RSCURPOS')
