@@ -499,7 +499,7 @@ class APF:
             
         return
     
-    # Fucntion for checking what is currently open on the telescope
+    # Function for checking what is currently open on the telescope
     def isOpen(self):
         """Returns the state of checkapf.WHATSOPN as a tuple (bool, str)."""
         try:
