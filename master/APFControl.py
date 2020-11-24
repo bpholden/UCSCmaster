@@ -500,6 +500,23 @@ class APF:
                 apflog("Cannot write eosgcam.SUMFRAME or eosgcam.GEXPTIME",level='warn',echo=True)
             
         return
+
+    def checkTelFocus():
+        """Checks telescope focus, if outside of allowed range and the focustel task is not running, resets to a nominal value."""
+        try:
+            focustel_status = robot['FOCUSTEL_STATUS'].read(binary=True)
+        except:
+            apflog("Cannot read apftask.FOCUSTEL_STATUS",level='alert',echo=True)
+            return
+        if focustel_status >= 3:
+            if self.focus['binary'] < TELFOCUSMIN or self.focus['binary'] > TELFOCUSMAX:
+                try:
+                    apflog("Telescope eostele.FOCUS=%s, setting to %f" % (self.focus,TELFOCUSTYP),level='alert',echo=True)
+                    self.focus.write(TELFOCUSTYP,binary=True)
+                except:
+                    apflog("Cannot write eostele.FOCUS",level='alert',echo=True)
+                    return
+
     
     # Function for checking what is currently open on the telescope
     def isOpen(self):
