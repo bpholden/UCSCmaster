@@ -758,17 +758,20 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                     jd = float(ephem.julian_date(t))
                 try:
                     pastdate = float(v[col])
-                    try:
-                        n = int(v[nobscol])
-                    except:
-                        n = 0
+                except:
+                    pastdate = 0.0
+                try:
+                    n = int(v[nobscol])
+                except:
+                    n = 0
+                try:
                     if round(jd, 3) > pastdate and curowner == sheetn:
                         ws.update_cell(i+1, col+1, round(jd, 3) )
                         ws.update_cell(i+1, nobscol+1, n + 1 )
                         nupdates += 2
                         apflog( "Updated %s from %.4f to %.4f and %d in %s" % (v[0],pastdate,round(jd, 3),n+1,sheetn),echo=True)
                 except:
-                    print (v[0], v[col])
+                    apflog("Updated %s to %.4f and %d in %s" % (v[0],round(jd,3),1,sheetn),echo=True)
                     ws.update_cell(i+1, col+1, round(jd,3) )
                     ws.update_cell(i+1, nobscol+1, 1 )
                     nupdates += 2
