@@ -713,7 +713,8 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
             vals = ws.get_all_values()
         else:
             continue
-        
+
+        # The top of the sheet is a list of column names
         nmcol = vals[0].index('Star Name')
         col = vals[0].index("lastobs")
         nobscol = vals[0].index("Nobs")
@@ -723,6 +724,13 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
         time.sleep(wait_time)
 
         for i, v in enumerate(vals):
+            # Starting at the top of vals is important.
+            # the i is the row in the list of lists.
+            # v is the current row in the list.
+            # The columns that are updated are assigned above
+            # By starting at 0 in vals, we will be indexed to the same row as in the sheet
+
+            
             # Did we observe this target tonight?
             local_name = parseStarname(v[nmcol])
             
@@ -767,7 +775,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
                 try:
                     if round(jd, 3) > pastdate and curowner == sheetn:
                         ws.update_cell(i+1, col+1, round(jd, 3) )
-                        ws.update_cell(i+1, nobscol+1, n + 1 )
+                        ws.update_cell(i+1, nobscol+1, n + 1 ) # sheets are indexed at 1 not at 0 like python lists
                         nupdates += 2
                         apflog( "Updated %s from %.4f to %.4f and %d in %s" % (v[0],pastdate,round(jd, 3),n+1,sheetn),echo=True)
                 except:
