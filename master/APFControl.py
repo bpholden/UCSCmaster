@@ -1210,13 +1210,14 @@ class APF:
         cur_sunel = self.sunel.read(binary=True)
         too_close = rising and (cur_sunel > -20)
         focval = 0
-        if time.time() - lastfoc > FOCUSTIME and not too_close:
+        if time.time() - lastfoc > FOCUSTIME and not too_close and current_val == 'robot_autofocus_disable':
             self.autofoc.write("robot_autofocus_enable")
             focval = 1
             APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)
         else:
             if current_val == "robot_autofocus_enable":
                 self.autofoc.write("robot_autofocus_disable")
+                APFTask.set(self.task, suffix="MESSAGE", value="Disabling autofocus", wait=False)
         return focval
 
     def updateWindshield(self, state):
