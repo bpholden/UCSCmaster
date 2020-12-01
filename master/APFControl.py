@@ -556,12 +556,12 @@ class APF:
             
         return
 
-    def predTelFocus():
+    def predTelFocus(self):
         m1airdiff = self.m1temp - self.m2air - MEANTDIFF # last is mean difference
         predfoc = SLOPE*m1airdiff/1000. + TELFOCUSTYP # slope in mm per deg C
         return predfoc
     
-    def checkTelFocus():
+    def checkTelFocus(self):
         """Checks telescope focus, if outside of allowed range and the focustel task is not running, resets to a nominal value."""
         try:
             focustel_status = robot['FOCUSTEL_STATUS'].read(binary=True)
