@@ -454,7 +454,7 @@ class APF:
             apflog("Exception in m1tempmon: %s" % (e), level='error')
             return
         
-        if self.m1templist = []:
+        if self.m1templist == []:
             self.m1templist = [curm1temp]*20
         else:
             self.m1templist.append(curm1temp)
@@ -473,7 +473,7 @@ class APF:
             apflog("Exception in m2airmon: %s" % (e), level='error')
             return
         
-        if self.m2airlist = []:
+        if self.m2airlist == []:
             self.m2airlist = [curm2air]*20
         else:
             self.m2airlist.append(curm2air)
