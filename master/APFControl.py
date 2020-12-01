@@ -31,6 +31,7 @@ DEWARMIN = 8400
 TELFOCUSMIN = -0.00088
 TELFOCUSMAX = -0.00078
 TELFOCUSTYP = -0.00083
+TELFOCUSMAXOFF = 0.00002
 
 
 if "LROOT" in os.environ:
@@ -132,6 +133,8 @@ class APF:
 
     eosti8k    = ktl.Service('eosti8k')
     m2temp     = eosti8k('TM2CSUR')
+    m2airtemp  = eosti8k('TM2CAIR')
+    m1temp     = eosti8k('TM1S210')
 
     eoscool    = ktl.Service('eoscool')
     dewpt      = eoscool('DEWPAVG3')
@@ -509,10 +512,14 @@ class APF:
             apflog("Cannot read apftask.FOCUSTEL_STATUS",level='alert',echo=True)
             return
         if focustel_status >= 3:
-            if self.focus['binary'] < TELFOCUSMIN or self.focus['binary'] > TELFOCUSMAX:
+            m1airdiff = self.m1temp.read(binary=True) - self.m2airtemp.read(binary=True)
+            predfoc = -0.811 + m1airdiff*-0.0097 # in mm
+            predoc /= 1000. # meters
+            
+            if abs(self.focus['binary'] - predfoc)  > TELFOCUSMAXOFF:
                 try:
                     apflog("Telescope eostele.FOCUS=%s, setting to %f" % (self.focus,TELFOCUSTYP),level='alert',echo=True)
-                    self.focus.write(TELFOCUSTYP,binary=True)
+                    self.focus.write(predfoc,binary=True)
                 except:
                     apflog("Cannot write eostele.FOCUS",level='alert',echo=True)
                     return
