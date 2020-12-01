@@ -761,7 +761,7 @@ class APF:
         lastfocus_dict = APFTask.get("focusinstr", ["lastfocus","nominal"])
         if float(lastfocus_dict["lastfocus"]) > DEWARMAX or float(lastfocus_dict["lastfocus"]) < DEWARMIN:
             lastfocus_dict["lastfocus"] =  lastfocus_dict["nominal"]
-        result = self.focus()
+        result = self.runFocusinstr()
 
         dewarfocraw = self.dewarfoc.read(binary=True)
         
@@ -775,7 +775,7 @@ class APF:
             else:
                 apflog("Focusinstr has failed. Setting to %s and trying again." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
                 APFLib.write("apfmot.DEWARFOCRAW", lastfocus_dict["lastfocus"])
-            result = self.focus(flags=flags)
+            result = self.runFocusinstr(flags=flags)
             if not result:
                 apflog("Focusinstr has failed. Setting to %s and exiting." % (lastfocus_dict["lastfocus"]), level='error', echo=True)
 
@@ -837,7 +837,7 @@ class APF:
                 
         return result
 
-    def focus(self,flags="-b"):
+    def runFocusinstr(self,flags="-b"):
         """Runs the focus routine appropriate for the user."""
 
         if self.test: 
