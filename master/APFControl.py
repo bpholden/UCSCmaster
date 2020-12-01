@@ -30,9 +30,10 @@ DEWARMAX = 8650
 DEWARMIN = 8400
 TELFOCUSMIN = -0.00088
 TELFOCUSMAX = -0.00078
-TELFOCUSTYP = -0.00083
+TELFOCUSTYP = -0.0008362
 TELFOCUSMAXOFF = 0.00002
-
+MEANTDIFF = 2.319
+SLOPE = -0.00871
 
 if "LROOT" in os.environ:
     LROOT = os.environ["LROOT"]
@@ -97,8 +98,10 @@ class APF:
 
     # Initial temps
     m2list = []
+    m2airlist = []
     dewlist = []
     airlist = []
+    m1templist = []
     dewTooClose = False
     
     # KTL Services and Keywords
@@ -133,8 +136,8 @@ class APF:
 
     eosti8k    = ktl.Service('eosti8k')
     m2temp     = eosti8k('TM2CSUR')
-    m2airtemp  = eosti8k('TM2CAIR')
-    m1temp     = eosti8k('TM1S210')
+    m2airkw    = eosti8k('TM2CAIR')
+    m1tempkw   = eosti8k('TM1S210')
 
     eoscool    = ktl.Service('eoscool')
     dewpt      = eoscool('DEWPAVG3')
@@ -228,6 +231,13 @@ class APF:
 
         self.dewpt.monitor()
         self.dewpt.callback(self.dewptmon)
+
+        self.m1tempkw.monitor()
+        self.m1tempkw.callback(self.m1tempmon)
+        self.m2airkw.monitor()
+        self.m2airkw.callback(self.m2airmon)
+
+
         
         self.counts.monitor()
         self.teqmode.monitor()
@@ -270,9 +280,11 @@ class APF:
         s += "kcountrate = %5.2g cts/s\n" % self.kcountrate
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
+        s += "M1 = %5.2f deg C M2 = %5.2f deg C M2 Air = %5.2 deg C FCU4 = %5.2f def C Dewpt = %5.2f deg C" % (self.m1temp,np.average(self.m2list),self.m2air,np.average(self.airlist),np.average(self.dewlist))
         s += "Teq Mode - %s\n" % self.teqmode
         s += "M2 Focus Value = % 4.3f\n" % (float(self.aafocus['binary'])*1000.0)
         s += "M2 Focus Value = % 4.3f (focus kwd)\n" % (float(self.focus['binary'])*1000.0)
+        s += "Preferred M2 Focus Value =  % 4.3f\n" % (float(self.predTelFocus())*1000.0)
         s += "Okay to open = %s -- %s\n" % (repr(self.openOK), self.checkapf['OPREASON'].read() )
         s += "Current Weather = %s\n" % self.checkapf['WEATHER'].read()
         s += "Too close to the dewpoint? = %s\n" % self.dewTooClose
@@ -431,7 +443,46 @@ class APF:
 
         self.wvel = np.median(self.wslist)
         return
+
+
+    def m1tempmon(self,m1tempkw):
+        if m1tempkw['populated'] == False:
+            return
+        try:
+            curm1temp = float(m1tempkw['binary'])
+        except Exception as e:
+            apflog("Exception in m1tempmon: %s" % (e), level='error')
+            return
         
+        if self.m1templist = []:
+            self.m1templist = [curm1temp]*20
+        else:
+            self.m1templist.append(curm1temp)
+            self.m1templist = self.m1templist[-20:]
+
+        self.m1temp = np.average(self.m1templist)
+
+        return
+
+    def m2airmon(self,m2airkw):
+        if m2airkw['populated'] == False:
+            return
+        try:
+            curm2air = float(m2airkw['binary'])
+        except Exception as e:
+            apflog("Exception in m2airmon: %s" % (e), level='error')
+            return
+        
+        if self.m2airlist = []:
+            self.m2airlist = [curm2air]*20
+        else:
+            self.m2airlist.append(curm2air)
+            self.m2airlist = self.m2airlist[-20:]
+
+        self.m2air = np.average(self.m2airlist)
+
+        return
+
     # Callback for Deadman timer
     def dmtimemon(self,dmtime):
         if dmtime['populated'] == False:
@@ -453,16 +504,16 @@ class APF:
             return
 
         if self.dewlist == []:
-            self.dewlist = [dewpt]*10
-            self.airlist = [air]*10
-            self.m2list = [m2]*10
+            self.dewlist = [dewpt]*20
+            self.airlist = [air]*20
+            self.m2list = [m2]*20
         else:
             self.dewlist.append(dewpt)
             self.airlist.append(air)
             self.m2list.append(m2)
-            self.dewlist = self.dewlist[-10:]
-            self.airlist = self.airlist[-10:]
-            self.m2list = self.m2list[-10:]
+            self.dewlist = self.dewlist[-20:]
+            self.airlist = self.airlist[-20:]
+            self.m2list = self.m2list[-20:]
 
         dewlist = np.asarray(self.dewlist)
         airlist = np.asarray(self.airlist)
@@ -504,6 +555,11 @@ class APF:
             
         return
 
+    def predTelFocus():
+        m1airdiff = self.m1temp - self.m2air - MEANTDIFF # last is mean difference
+        predfoc = SLOPE*m1airdiff/1000. + TELFOCUSTYP # slope in mm per deg C
+        return predfoc
+    
     def checkTelFocus():
         """Checks telescope focus, if outside of allowed range and the focustel task is not running, resets to a nominal value."""
         try:
@@ -512,9 +568,7 @@ class APF:
             apflog("Cannot read apftask.FOCUSTEL_STATUS",level='alert',echo=True)
             return
         if focustel_status >= 3:
-            m1airdiff = self.m1temp.read(binary=True) - self.m2airtemp.read(binary=True)
-            predfoc = -0.811 + m1airdiff*-0.0097 # in mm
-            predoc /= 1000. # meters
+            predfoc = self.predTelFocus()
             
             if abs(self.focus['binary'] - predfoc)  > TELFOCUSMAXOFF:
                 try:
