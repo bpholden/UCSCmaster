@@ -237,7 +237,8 @@ class APF:
         self.m2airkw.monitor()
         self.m2airkw.callback(self.m2airmon)
 
-
+        self.m1temp = self.m1tempkw['binary']
+        self.m2air = self.m2airkw['binary']
         
         self.counts.monitor()
         self.teqmode.monitor()
