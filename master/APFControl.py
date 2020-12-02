@@ -927,7 +927,7 @@ class APF:
         return result
 
 
-    def runFocustel(self):
+    def runFocusTel(self):
         """Runs the telescope focus routine."""
         el = self.tel['EL'].read(binary=True)
         cfspos = self.fspos.read(binary=True)
@@ -994,7 +994,7 @@ class APF:
         except Exception as e:
             apflog("Cannot write SCRIPTOBS_LINE: %s" % (e), level='error',echo=True)
         if self.slew(star):
-            return self.runFocustel()
+            return self.runFocusTel()
         return False
     
                 
