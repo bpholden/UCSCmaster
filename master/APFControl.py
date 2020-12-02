@@ -30,10 +30,10 @@ DEWARMAX = 8650
 DEWARMIN = 8400
 TELFOCUSMIN = -0.00088
 TELFOCUSMAX = -0.00078
-TELFOCUSTYP = -0.0008362
+TELFOCUSTYP = -0.0008348
 TELFOCUSMAXOFF = 0.00002
-MEANTDIFF = 2.319
-SLOPE = -0.00871
+MEANDIFF = 1.3806
+SLOPE = -0.00920
 
 if "LROOT" in os.environ:
     LROOT = os.environ["LROOT"]
@@ -557,8 +557,8 @@ class APF:
         return
 
     def predTelFocus(self):
-        m1airdiff = self.m1temp - self.m2air - MEANTDIFF # last is mean difference
-        predfoc = SLOPE*m1airdiff/1000. + TELFOCUSTYP # slope in mm per deg C
+        m1m2diff = self.m1temp - np.average(self.m2list) - MEANDIFF # last is mean difference
+        predfoc = SLOPE*m1m2diff/1000. + TELFOCUSTYP # slope in mm per deg C
         return predfoc
     
     def checkTelFocus(self):
