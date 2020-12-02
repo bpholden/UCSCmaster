@@ -557,28 +557,22 @@ class APF:
         return
 
     def predTelFocus(self):
-        m1m2diff = self.m1temp - np.average(self.m2list) - MEANDIFF # last is mean difference
-        predfoc = SLOPE*m1m2diff/1000. + TELFOCUSTYP # slope in mm per deg C
+        m1m2diff = self.m1temp - np.average(self.m2list)  # last is the mean difference between M1 and M2
+        if m1m2diff < -3 or m1m2diff > 7:
+            apflog("Difference between M1 and M2 outside of calibration range, punting in APFControl.predTelFocus()",level='error',echo=True)
+            return 0.
+        m1m2diff -= MEANDIFF
+        predfoc = SLOPE*m1m2diff/1000. + TELFOCUSTYP # slope in mm per deg C, TELFOCUSTYP is the mean focus between 2016 - 2020
         return predfoc
     
-    def checkTelFocus(self):
-        """Checks telescope focus, if outside of allowed range and the focustel task is not running, resets to a nominal value."""
-        try:
-            focustel_status = robot['FOCUSTEL_STATUS'].read(binary=True)
-        except:
-            apflog("Cannot read apftask.FOCUSTEL_STATUS",level='alert',echo=True)
-            return
-        if focustel_status >= 3:
-            predfoc = self.predTelFocus()
-            
-            if abs(self.focus['binary'] - predfoc)  > TELFOCUSMAXOFF:
-                try:
-                    apflog("Telescope eostele.FOCUS=%s, setting to %f" % (self.focus,TELFOCUSTYP),level='alert',echo=True)
-                    self.focus.write(predfoc,binary=True)
-                except:
-                    apflog("Cannot write eostele.FOCUS",level='alert',echo=True)
-                    return
+    def checkTelFocusOffset(self,orig_predfoc):
+        """Computes offset in telescope focus based on difference in temperature over time"""
+        
+        predfoc = self.predTelFocus()
+        diff = predfoc - orig_predfoc
 
+        return diff
+        
     
     # Function for checking what is currently open on the telescope
     def isOpen(self):
@@ -949,7 +943,7 @@ class APF:
             return True
         else:
             apflog("Running focus_telescope routine.",echo=True)
-            cmd = os.path.join(SCRIPTDIR,'focus_telescope')
+            cmd = os.path.join(SCRIPTDIR,'focus_telescope -c %.3f' % (float(self.predTelFocus())*1000.0))
             result, code = apftaskDo(cmd,cwd=os.path.curdir)
             try:
                 self.guide['MODE'].write('Guide')
