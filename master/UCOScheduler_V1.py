@@ -495,18 +495,20 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
 
 def lastAttempted(observed):
 
-    if lastobj:
-        if lastobj not in observed.names and lastobj not in last_objs_attempted:
-            last_objs_attempted.append(lastobj)
+    failed_obs = None
 
-            apflog( "lastAttempted(): Last objects attempted %s" % (last_objs_attempted),echo=True)
+    try:
+        lastresult = ktl.read("apftask","SCRIPTOBS_LINE")
+        lastobj = lastresult.split()[0]
+    except:
+        return None
 
+    if lastobj not in observed.names:
+        apflog( "lastAttempted(): Last objects attempted %s" % (lastobj),echo=True)
+        failed_obs = lastobj
+        
+    return failed_obs
 
-        else:
-            last_objs_attempted = []
-            # we had a succes so we are zeroing this out
-
-    return last_objs_attempted
 
 def behindMoon(moon,ras,decs):
     md = TARGET_MOON_DIST_MAX - TARGET_MOON_DIST_MIN
