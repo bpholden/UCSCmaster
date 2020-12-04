@@ -552,6 +552,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         Returns a dict with target RA, DEC, Total Exposure time, and scritobs line
     """
 
+    global last_objs_attempted
+    
     if not outdir:
         outdir = os.getcwd()
 
