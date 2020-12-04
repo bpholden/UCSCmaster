@@ -494,20 +494,6 @@ def makeResult(stars,star_table,totexptimes,dt,idx,focval=0,bstar=False,mode='')
     return res
 
 def lastAttempted(observed):
-    global last_objs_attempted
-    try:
-        lastresult = ktl.read("apftask","SCRIPTOBS_LINE_RESULT",binary=True)
-    except:
-        return []
-
-    if lastresult == 2:
-        try:
-            lastline = ktl.read("apftask","SCRIPTOBS_LINE")
-            lastobj = lastline.split()[0]
-        except:
-            lastobj = None
-    else:
-        lastobj = None
 
     if lastobj:
         if lastobj not in observed.names and lastobj not in last_objs_attempted:
