@@ -588,8 +588,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     lastfailure = lastAttempted(observed)
     if lastfailure is not None:
         last_objs_attempted.append(lastfailure)
-    if len(last_objs_attempted) > 5:
-        apflog( "getNext(): 5 failed acquisition attempts",echo=True)
+    if len(last_objs_attempted) == 5:
+        apflog( "getNext(): 5 failed acquisition attempts",level="warn",echo=True)
         
 
     ###
