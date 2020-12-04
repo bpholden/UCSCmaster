@@ -22,8 +22,7 @@ except:
     from fake_apflog import *
 import Visible
 
-# some globals
-
+# a global
 last_objs_attempted = []
 
 # some constants
