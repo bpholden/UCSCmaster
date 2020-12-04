@@ -598,7 +598,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     last_objs_attempted = lastAttempted(observed)
     if len(last_objs_attempted) > 5:
         apflog( "getNext(): 5 failed acquisition attempts",echo=True)
-        last_objs_attempted = []
+        
 
     ###
     # Need to update the googledex with the lastObserved date for observed targets
