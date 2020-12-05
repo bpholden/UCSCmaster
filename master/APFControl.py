@@ -30,7 +30,8 @@ DEWARMAX = 8650
 DEWARMIN = 8400
 TELFOCUSMIN = -0.00088
 TELFOCUSMAX = -0.00078
-TELFOCUSTYP = -0.0008348
+#TELFOCUSTYP = -0.8348
+TELFOCUSTYP = -0.83588
 TELFOCUSMAXOFF = 0.00002
 MEANDIFF = 1.3806
 SLOPE = -0.00920
@@ -97,11 +98,16 @@ class APF:
     wdlist = []
 
     # Initial temps
-    m2list = []
-    m2airlist = []
+    m2templist   = []
+    m2airlist    = []
+    m1templist   = []
+    teltemplist  = []
+    fcu3templist = []
+    fcu4templist = []
+    avgtemps = np.zeros(6)
+
+    
     dewlist = []
-    airlist = []
-    m1templist = []
     dewTooClose = False
     
     # KTL Services and Keywords
@@ -281,7 +287,7 @@ class APF:
         s += "kcountrate = %5.2g cts/s\n" % self.kcountrate
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
-        s += "M1 = %5.2f deg C M2 = %5.2f deg C M2 Air = %5.2f deg C FCU4 = %5.2f deg C\n" % (self.m1temp,np.average(self.m2list),self.m2air,np.average(self.airlist))
+        s += "M1 = %5.2f deg C M2 = %5.2f deg C M2 Air = %5.2f deg C FCU4 = %5.2f deg C\n" % (self.avgtemps)
         s += "Dewpt = %5.2f deg C Teq Mode - %s\n" % (np.average(self.dewlist),self.teqmode)
         s += "M2 Focus Value = % 4.3f\n" % (float(self.aafocus['binary'])*1000.0)
         s += "M2 Focus Value = % 4.3f (focus kwd)\n" % (float(self.focus['binary'])*1000.0)
@@ -446,6 +452,23 @@ class APF:
         return
 
 
+    def listmon(self,keyword,outlist):
+        if keyword['populated'] == False:
+            return
+        try:
+            curval = float(keyword['binary'])
+         except Exception as e:
+            apflog("Exception in listmon: %s" % (e), level='error')
+            return
+
+        if outlist == []:
+            outlist = [curval]*20
+        else:
+            outlist.append(curval)
+            outlist = outlist[-20:]
+
+        return
+
     def m1tempmon(self,m1tempkw):
         if m1tempkw['populated'] == False:
             return
@@ -462,6 +485,7 @@ class APF:
             self.m1templist = self.m1templist[-20:]
 
         self.m1temp = np.average(self.m1templist)
+        self.avgtemps[0] = self.m1temp
 
         return
 
@@ -473,15 +497,34 @@ class APF:
         except Exception as e:
             apflog("Exception in m2airmon: %s" % (e), level='error')
             return
+        try:
+            curfcu3 = float(self.fcu3temp['binary'])
+        except Exception as e:
+            apflog("Exception in m2airmon: %s" % (e), level='error')
+            return
+        try:
+            curfcu4 = float(self.fcu4temp['binary'])
+        except Exception as e:
+            apflog("Exception in m2airmon: %s" % (e), level='error')
+            return
         
         if self.m2airlist == []:
             self.m2airlist = [curm2air]*20
+            self.fcu3list = self.fcu3list[curfcu3]*20
+            self.fcu4list = self.fcu4list[curfcu4]*20
         else:
             self.m2airlist.append(curm2air)
             self.m2airlist = self.m2airlist[-20:]
+            self.fcu3list = self.fcu3list[-20:]
+            self.fcu4list = self.fcu4list[-20:]
 
+            
         self.m2air = np.average(self.m2airlist)
 
+        self.avgtemps[3] = self.m2air
+        self.avgtemps[4] = np.average(self.fcu3list)
+        self.avgtemps[5] = np.average(self.fcu4list)
+        
         return
 
     # Callback for Deadman timer
@@ -506,21 +549,19 @@ class APF:
 
         if self.dewlist == []:
             self.dewlist = [dewpt]*20
-            self.airlist = [air]*20
             self.m2list = [m2]*20
         else:
             self.dewlist.append(dewpt)
-            self.airlist.append(air)
             self.m2list.append(m2)
             self.dewlist = self.dewlist[-20:]
-            self.airlist = self.airlist[-20:]
-            self.m2list = self.m2list[-20:]
+            self.m2templist = self.m2templist[-20:]
 
         dewlist = np.asarray(self.dewlist)
-        airlist = np.asarray(self.airlist)
         m2list  = np.asarray(self.m2list)
 
-        if np.average(airlist-dewlist) < 2 or np.average(m2list-dewlist) < 4:
+        self.avgtemps[1] = np.average(m2list)
+        
+        if np.average(m2airlist-dewlist) < 2 or np.average(m2list-dewlist) < 4:
             self.dewTooClose = True
         else:
             self.dewTooClose = False
@@ -557,12 +598,12 @@ class APF:
         return
 
     def predTelFocus(self):
-        m1m2diff = self.m1temp - np.average(self.m2list)  # last is the mean difference between M1 and M2
-        if m1m2diff < -3 or m1m2diff > 7:
-            apflog("Difference between M1 and M2 outside of calibration range, punting in APFControl.predTelFocus()",level='error',echo=True)
-            return 0.
-        m1m2diff -= MEANDIFF
-        predfoc = SLOPE*m1m2diff/1000. + TELFOCUSTYP # slope in mm per deg C, TELFOCUSTYP is the mean focus between 2016 - 2020
+        
+        # m1 m2 tavg m2air tf3 tf4
+        slopes = np.asarray([-0.00900056,  0.01875785,  0.01473356, -0.00662667, -0.00040923, -0.01710658])
+        midtemps = np.asarray([15.79785703, 14.44149427, 14.84133129, 13.48769243, 16.02902533, 16.08045829])
+        predfoc = np.sum(slopes*(self.avgtemps-midtemps)) + TELFOCUSTYP # slope in mm per deg C, TELFOCUSTYP is the mean focus between 2016 - 2020
+        predoc /= 1000.0 # convert to meters
         return predfoc
     
     def checkTelFocusOffset(self,orig_predfoc):
