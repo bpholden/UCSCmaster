@@ -51,7 +51,7 @@ def computePriorities(star_table,available,cur_dt,observed=None,hour_table=None,
         
     return new_pri
 
-def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
+def updateHourTable(hour_table,observed,dt,outfn='hour_table',outdir=None):
     '''
     updateHourTableobserved_logs,outfn='hour_table')
 
@@ -59,6 +59,10 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table'):
     
     '''
 
+    if not outdir :
+        outdir = os.getcwd()
+
+    outfn = os.path.join(outdir,outfn)
 
     hours = dict()
 
