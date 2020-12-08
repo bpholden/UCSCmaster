@@ -106,7 +106,6 @@ class APF:
     fcu4templist = []
     avgtemps = np.zeros(6)
 
-    
     dewlist = []
     dewTooClose = False
     
@@ -214,7 +213,6 @@ class APF:
 
         self.ok2open.monitor()
         self.ok2open.callback(self.okmon)
-
         
         self.dmtimer.monitor()
         self.dmtimer.callback(self.dmtimemon)
@@ -239,13 +237,11 @@ class APF:
         self.dewpt.callback(self.dewptmon)
 
         self.m1tempkw.monitor()
-        self.m1tempkw.callback(self.m1tempmon)
-        self.m2airkw.monitor()
-        self.m2airkw.callback(self.m2airmon)
-
-        self.m1temp = self.m1tempkw['binary']
-        self.m2air = self.m2airkw['binary']
+        self.m1tempkw.callback(self.m1TempMon)
         
+        self.m2airkw.monitor()
+        self.m2airkw.callback(self.airTempMon)
+
         self.counts.monitor()
         self.teqmode.monitor()
         self.vmag.monitor()
@@ -287,7 +283,7 @@ class APF:
         s += "kcountrate = %5.2g cts/s\n" % self.kcountrate
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
-        s += "M1 = %5.2f deg C M2 = %5.2f deg C M2 Air = %5.2f deg C FCU4 = %5.2f deg C\n" % (self.avgtemps)
+        s += "M1 = %5.2f deg C M2 = %5.2f deg C Tel Avg = %5.2f deg C M2 Air = %5.2f deg C FCU4 = %5.2f deg C\n" % tuple(self.avgtemps)
         s += "Dewpt = %5.2f deg C Teq Mode - %s\n" % (np.average(self.dewlist),self.teqmode)
         s += "M2 Focus Value = % 4.3f\n" % (float(self.aafocus['binary'])*1000.0)
         s += "M2 Focus Value = % 4.3f (focus kwd)\n" % (float(self.focus['binary'])*1000.0)
@@ -469,13 +465,13 @@ class APF:
 
         return
 
-    def m1tempmon(self,m1tempkw):
+    def m1TempMon(self,m1tempkw):
         if m1tempkw['populated'] == False:
             return
         try:
             curm1temp = float(m1tempkw['binary'])
         except Exception as e:
-            apflog("Exception in m1tempmon: %s" % (e), level='error')
+            apflog("Exception in m1TempMon: %s" % (e), level='error')
             return
         
         if self.m1templist == []:
@@ -489,23 +485,24 @@ class APF:
 
         return
 
-    def m2airmon(self,m2airkw):
+    def airTempMon(self,m2airkw):
         if m2airkw['populated'] == False:
             return
+        
         try:
             curm2air = float(m2airkw['binary'])
         except Exception as e:
-            apflog("Exception in m2airmon: %s" % (e), level='error')
+            apflog("Exception in airTempMon: %s" % (e), level='error')
             return
         try:
             curfcu3 = float(self.fcu3temp['binary'])
         except Exception as e:
-            apflog("Exception in m2airmon: %s" % (e), level='error')
+            apflog("Exception in airTempMon: %s" % (e), level='error')
             return
         try:
             curfcu4 = float(self.fcu4temp['binary'])
         except Exception as e:
-            apflog("Exception in m2airmon: %s" % (e), level='error')
+            apflog("Exception in airTempMon: %s" % (e), level='error')
             return
         
         if self.m2airlist == []:
@@ -524,6 +521,26 @@ class APF:
         self.avgtemps[3] = self.m2air
         self.avgtemps[4] = np.average(self.fcu3list)
         self.avgtemps[5] = np.average(self.fcu4list)
+        
+        return
+    
+    def telTempMon(self,teltemp):
+        if teltemp['populated'] == False:
+            return
+        
+        try:
+            teltemp = float(teltemp['binary'])
+        except Exception as e:
+            apflog("Exception in telTempMon: %s" % (e), level='error')
+            return
+        
+        if self.teltemplist == []:
+            self.teltemplist = [teltemp]*20
+        else:
+            self.teltemplist = self.teltemplist.append(teltemp)
+            self.teltemplist = self.teltemplist[-20:]
+
+        self.avgtemps[2] = np.average(self.telavglist)
         
         return
 
@@ -1676,8 +1693,8 @@ if __name__ == '__main__':
     print(str(apf))
 
     while True:
-        print(str(apf))
         APFTask.wait(task,True,timeout=10)
+        print(str(apf))
 
 
         
