@@ -448,20 +448,23 @@ class APF:
         return
 
 
-    def listmon(self,keyword,outlist):
+    def listMon(self,keyword):
         if keyword['populated'] == False:
             return
+
+        name = keyword['name']
+        
         try:
             curval = float(keyword['binary'])
-         except Exception as e:
-            apflog("Exception in listmon: %s" % (e), level='error')
+        except Exception as e:
+            apflog("Exception in listMon: %s" % (e), level='error')
             return
 
-        if outlist == []:
-            outlist = [curval]*20
+        if self.lists[name] == []:
+            self.lists[name] = [curval]*20
         else:
-            outlist.append(curval)
-            outlist = outlist[-20:]
+            self.lists[name].append(curval)
+            self.lists[name] = self.lists[name][-20:]
 
         return
 
