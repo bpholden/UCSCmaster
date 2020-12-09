@@ -85,8 +85,7 @@ class APF:
     """ Class which creates a monitored state object to track the condition of the APF telescope. """
 
     # Initial seeing conditions
-    seeinglist = []
-    speedlist  = []
+
     cwd        = os.getcwd()
     slowdown   = 0.0 
     ncountrate = 0
@@ -95,7 +94,6 @@ class APF:
 
     # Initial Wind conditions
     wslist = []
-    wdlist = []
 
     # Initial temps
     mon_lists = dict()
