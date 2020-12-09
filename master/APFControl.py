@@ -137,6 +137,12 @@ class APF:
     m2temp     = eosti8k('TM2CSUR')
     m2airkw    = eosti8k('TM2CAIR')
     m1tempkw   = eosti8k('TM1S210')
+    taveragekw = eosti8k('TAVERAGE')
+    t045       = eosti8k('TTRUS045')
+    t135       = eosti8k('TTRUS135')
+    t225       = eosti8k('TTRUS225')
+    t315       = eosti8k('TTRUS315')
+    
 
     eoscool    = ktl.Service('eoscool')
     dewpt      = eoscool('DEWPAVG3')
