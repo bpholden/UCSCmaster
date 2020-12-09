@@ -98,13 +98,9 @@ class APF:
     wdlist = []
 
     # Initial temps
-    m2templist   = []
-    m2airlist    = []
-    m1templist   = []
-    teltemplist  = []
-    fcu3templist = []
-    fcu4templist = []
-    avgtemps = np.zeros(6)
+    mon_lists = dict()
+    for kw in ('TM1S210','TM2CSUR','TM2CAIR','TAVERAGE','TTRUS045','TTRUS135','TTRUS225','TTRUS315','DEWPNOW3','TEMPNOW3','TEMPNOW4','M5WIND'):
+        mon_lists[kw] = []
 
     dewlist = []
     dewTooClose = False
@@ -200,13 +196,13 @@ class APF:
         self.test = test
         self.task = task
         
-        self.cloudObsNum = 1
-
+        self.avgtemps = np.zeros(6)
+        
         self.rising = self.sunRising()
         
         # Set the callbacks and monitors
         self.wx.monitor()
-        self.wx.callback(self.windmon)
+        self.wx.callback(self.listMon)
 
         self.altwx.monitor()
         self.altwx.callback(self.altwindmon)
@@ -234,13 +230,13 @@ class APF:
         self.whatsopn.monitor()
 
         self.dewpt.monitor()
-        self.dewpt.callback(self.dewptmon)
+        self.dewpt.callback(self.listMon)
 
         self.m1tempkw.monitor()
-        self.m1tempkw.callback(self.m1TempMon)
+        self.m1tempkw.callback(self.listMon)
         
         self.m2airkw.monitor()
-        self.m2airkw.callback(self.airTempMon)
+        self.m2airkw.callback(self.listMon)
 
         self.counts.monitor()
         self.teqmode.monitor()
