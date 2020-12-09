@@ -1392,59 +1392,6 @@ class APF:
         else:
             return False
     
-    def checkClouds(self, target):
-        """
-        This function will take a test exposure of a B-Star. By using scriptobs to take this exposure,
-        the avg_fwhm and countrate keywords will be updated.
-        :return:
-        """
-
-        apflog("checkClouds(): starting transparency check", echo=True)
-        
-        # Things to reset after this
-        apflog("checkClouds(): Storing current UCAM keywords for later...", echo=True)
-        # UCAM outfile
-        obs_file = self.user.read()
-        # UCAM Obsnumber
-        obs_num = self.obsnum.read()
-        robot['MASTER_LAST_OBS_UCSC'].write(obs_num)
-        # scriptobs_lines_done
-        lines_done = int(self.robot["SCRIPTOBS_LINES_DONE"])
-        APFLib.write(self.autofoc, "robot_autofocus_enable")
-
-        apflog("checkClouds(): File name=%s - Number=%d - Lines Done=%d" % (obs_file, int(obs_num), lines_done) )
-
-        APFLib.write(self.ucam["OUTFILE"], "cloud")
-        APFLib.write(self.ucam["OBSNUM"], self.cloudObsNum)
-        APFLib.write(self.ucam["RECORD"], "No")
-
-
-        apftaskDo(os.path.join(SCRIPTDIR,'prep-obs'))
-        args = [os.path.join(SCRIPTDIR,'scriptobs'), '-dir', os.path.join(self.cwd,'checkClouds/')]
-
-        apflog("checkClouds(): Observing %s as a test star to check the clouds/seeing/transparency" % target["NAME"], echo=True)
-        outfile = open('robot.log', 'a')
-        p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=outfile, stderr=outfile)
-        foo, bar = p.communicate(target["SCRIPTOBS"])
-        outfile.close()
-        ret = p.returncode
-        if ret != 0:
-            apflog("checkClouds(): The cloud cover test exposure has failed.", echo=True)
-        else:
-            apflog("checkClouds(): Cloud check was successful", echo=True)
-            self.cloudObsNum += 2
-
-        apflog("checkClouds(): Resetting UCAM keywords to previous values.", echo=True)
-        APFLib.write(self.ucam["RECORD"], "Yes")
-        APFLib.write(self.user, obs_file)
-        APFLib.write(self.obsnum, obs_num)
-        APFLib.write(self.robot["SCRIPTOBS_LINES_DONE"], lines_done)
-        APFTask.waitFor(self.task, True, timeout=5)
-        apflog("checkClouds(): Keywords successfully written.", echo=True)
-        apflog("checkClouds(): New values")
-        apflog("checkClouds(): File=%s - Num=%d - LinesDone=%d" % (self.ucam["OUTFILE"].read(), int(self.ucam["OBSNUM"].read()), int(self.robot["SCRIPTOBS_LINES_DONE"].read()) ) )
-        return
-
     def DMReset(self):
         try:
             APFLib.write(self.checkapf['ROBOSTATE'], "master operating",timeout=10)
