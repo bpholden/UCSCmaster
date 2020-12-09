@@ -54,7 +54,7 @@ def compute_simulation(result,curtime,star,apf_obs,slowdowns,fwhms,outfp):
 parser = optparse.OptionParser()
 parser.add_option("-d","--date",dest="date",default="today")
 parser.add_option("-f","--fixed",dest="fixed",default="")
-parser.add_option("-g","--googledex",dest="googledex",default="RECUR_A100,2020B_A000,2020B_A001,2020B_A002,2020B_A003,2020B_A004,2020B_A005,2020B_A006,2020B_A00&,2020B_A008,2020B_A009,2020B_A010")
+parser.add_option("-g","--googledex",dest="googledex",default="RECUR_A100,2020B_A000,2020B_A001,2020B_A002,2020B_A003,2020B_A004,2020B_A005,2020B_A006,2020B_A007,2020B_A008,2020B_A009,2020B_A010")
 parser.add_option("--frac_table",dest="frac_sheetn",default="2020B_frac")
 parser.add_option("--rank_table",dest="rank_sheetn",default="2020B_ranks")
 parser.add_option("-i","--infile",dest="infile",default="googledex.dat")

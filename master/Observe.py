@@ -38,11 +38,22 @@ class Observe(threading.Thread):
         self.setDaemon(True)
         self.APF = apf
         self.task = task
-        self.user = opt.name
-        self.owner = opt.owner
+        if opt.name:
+            self.user = opt.name
+        else:
+            self.user = 'apf'
+        if opt.owner:
+            self.owner = opt.owner
+        else:
+            self.owner = 'public'
+
+        if opt.windshield:
+            self.windshield = opt.windshield
+        else:
+            self.windshield = 'auto'
+
         self.name = 'Observe'
         self.signal = True
-        self.windshield = opt.windshield
         self.scriptobs = None
 
         self.BV = None
@@ -53,12 +64,35 @@ class Observe(threading.Thread):
         self.obsBstar = True
         self.lastObsSuccess = True
         self.lastObsFinished = True
-        self.fixedList = opt.fixed
-        self.sheetn = opt.sheet
-        self.rank_tablen = opt.rank_table
-        self.starttime = opt.start
-        self.raster = opt.raster
-        self.debug = opt.test
+        
+        if opt.fixed:
+            self.fixedList = opt.fixed
+        else:
+            self.fixedList = None
+        if opt.sheet:
+            self.sheetn = opt.sheet
+        else:
+            self.sheetn = 'RECUR_A100'
+        if opt.rank_table:
+            self.rank_tablen = opt.rank_table
+        else:
+            self.rank_tablen = None
+        if opt.frac_table:
+            self.frac_tablen = opt.frac_table
+        else:
+            self.frac_tablen = None
+        if opt.start:
+            self.starttime = opt.start
+        else:
+            self.starttime = None
+        if opt.raster:
+            self.raster = opt.raster
+        else:
+            self.raster = False
+        if opt.test:
+            self.debug = opt.test
+        else:
+            self.debug = False
         self.doTemp = True
         self.nTemps = 0
         self.focval = 0
@@ -314,7 +348,7 @@ class Observe(threading.Thread):
 
             self.APF.initGuideCam()
             
-            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen)
+            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen,frac_sheet=self.frac_tablen)
 
             self.focval = self.APF.setAutofocVal()
             if self.target is None:
@@ -808,7 +842,8 @@ if __name__ == "__main__":
     opt.windshield = 'auto'
     opt.fixed = None
     opt.sheet = 'Bstars'
-    opt.rank_table = '2020A_ranks'
+    opt.rank_table = '2020B_ranks'
+    opt.frac_table = '2020B_fracs'
     opt.start = None
     opt.test = True
     opt.raster = False
@@ -826,11 +861,11 @@ if __name__ == "__main__":
             print(dt)
             APFTask.wait(parent,True,timeout=100)
         except KeyboardInterrupt:
-            apflog("%s has been killed by user." % (self.name), echo=True)
+            apflog("%s has been killed by user." % (observe.name), echo=True)
             observe.stop()
             sys.exit()
         except:
-            apflog("%s killed by unknown." % (self.name), echo=True)
+            apflog("%s killed by unknown." % (observe.name), echo=True)
             observe.stop()
             sys.exit()
             
