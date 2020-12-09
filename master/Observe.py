@@ -56,6 +56,7 @@ class Observe(threading.Thread):
         self.fixedList = opt.fixed
         self.sheetn = opt.sheet
         self.rank_tablen = opt.rank_table
+        self.frac_tablen = opt.frac_table
         self.starttime = opt.start
         self.raster = opt.raster
         self.debug = opt.test
@@ -314,7 +315,7 @@ class Observe(threading.Thread):
 
             self.APF.initGuideCam()
             
-            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen)
+            self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen,frac_sheet=self.frac_tablen)
 
             self.focval = self.APF.setAutofocVal()
             if self.target is None:
