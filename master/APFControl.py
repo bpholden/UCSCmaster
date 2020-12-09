@@ -277,7 +277,7 @@ class APF:
         s += "Sun elevation = %4.2f %s\n" % (self.sunel, "Rising" if self.rising else "Setting")
         s += "Telescope -- AZ=%4.2f  EL=%4.2f \n" % (self.aaz, self.ael)
         s += "Front/Rear Shutter=%4.2f / %4.2f\n"%(self.fspos, self.rspos)
-        s += "Wind = %3.1f mph \n" % (self.wvel)
+        s += "Wind = %3.1f mph \n" % (np.average(self.mon_lists['M5WIND']))
         s += "Slowdown = %5.2f x\n" % self.slowdown
         s += "countrate = %5.2g cts/s\n" % self.countrate
         s += "kcountrate = %5.2g cts/s\n" % self.kcountrate
