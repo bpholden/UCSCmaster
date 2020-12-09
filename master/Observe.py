@@ -861,11 +861,11 @@ if __name__ == "__main__":
             print(dt)
             APFTask.wait(parent,True,timeout=100)
         except KeyboardInterrupt:
-            apflog("%s has been killed by user." % (self.name), echo=True)
+            apflog("%s has been killed by user." % (observe.name), echo=True)
             observe.stop()
             sys.exit()
         except:
-            apflog("%s killed by unknown." % (self.name), echo=True)
+            apflog("%s killed by unknown." % (observe.name), echo=True)
             observe.stop()
             sys.exit()
             
