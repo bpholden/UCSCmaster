@@ -418,7 +418,6 @@ class APF:
             self.wslist.append(wvel)
             self.wslist = self.wslist[-20:]
 
-        self.wvel = np.median(self.wslist)
         return
 
     def altwindmon(self,wx):
@@ -444,7 +443,6 @@ class APF:
             self.wslist.append(wvel)
             self.wslist = self.wslist[-20:]
 
-        self.wvel = np.median(self.wslist)
         return
 
 
