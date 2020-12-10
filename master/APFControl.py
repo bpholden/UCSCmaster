@@ -471,15 +471,11 @@ class APF:
 
         if self.dewlist == []:
             self.dewlist = [dewpt]*20
-            self.m2list = [m2]*20
         else:
             self.dewlist.append(dewpt)
-            self.m2list.append(m2)
             self.dewlist = self.dewlist[-20:]
-            self.m2templist = self.m2templist[-20:]
 
         dewlist = np.asarray(self.dewlist)
-        m2list  = np.asarray(self.m2list)
 
         self.avgtemps[1] = np.average(m2list)
         
