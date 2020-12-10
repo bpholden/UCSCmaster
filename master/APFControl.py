@@ -459,7 +459,7 @@ class APF:
             apflog("Exception in dmtimemon: %s" % (e), level='error')
 
 
-    def dewptmon(self,dew):
+    def dewPtMon(self,dew):
         if dew['populated'] == False:
             return
         try:
