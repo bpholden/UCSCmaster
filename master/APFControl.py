@@ -134,7 +134,7 @@ class APF:
     altwx      = apfmet('M3WIND')
 
     eosti8k    = ktl.Service('eosti8k')
-    m2temp     = eosti8k('TM2CSUR')
+    m2tempkw   = eosti8k('TM2CSUR')
     m2airkw    = eosti8k('TM2CAIR')
     m1tempkw   = eosti8k('TM1S210')
     taveragekw = eosti8k('TAVERAGE')
