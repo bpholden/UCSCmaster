@@ -233,14 +233,12 @@ class APF:
         self.down.monitor()
         self.whatsopn.monitor()
 
-        self.dewpt.monitor()
-        self.dewpt.callback(self.listMon)
+        for kw in (self.wx,self.m1tempkw,self.m2tempkw,self.m2airkw,self.taveragekw,self.t045kw,self.t135kw,self.t225kw,self.t315kw):
+            kw.monitor()
+            kw.callback(self.listMon)
 
-        self.m1tempkw.monitor()
-        self.m1tempkw.callback(self.listMon)
-        
-        self.m2airkw.monitor()
-        self.m2airkw.callback(self.listMon)
+        self.dewpt.monitor()
+        self.dewpt.callback(self.dewPtMon)
 
         self.counts.monitor()
         self.teqmode.monitor()
