@@ -205,9 +205,6 @@ class APF:
         self.rising = self.sunRising()
         
         # Set the callbacks and monitors
-        self.wx.monitor()
-        self.wx.callback(self.listMon)
-
         self.altwx.monitor()
         self.altwx.callback(self.altwindmon)
 
