@@ -461,9 +461,7 @@ class APF:
         if dew['populated'] == False:
             return
         try:
-            dewpt = float(dew)
-            m2 = self.m2temp.read(binary=True,timeout=2)
-            air = self.airtemp.read(binary=True,timeout=2)
+            dewpt = float(dew['binary'])
         except:
             return
 
@@ -475,9 +473,11 @@ class APF:
 
         dewlist = np.asarray(self.dewlist)
 
-        self.avgtemps[1] = np.average(m2list)
+        curdew = np.average(dewlist)
+        curm2 = np.average(np.asarray(self.mon_list['TM2CSUR']))
+        curm2air = np.average(np.asarray(self.mon_list['TM2CAIR']))
         
-        if np.average(m2airlist-dewlist) < 2 or np.average(m2list-dewlist) < 4:
+        if curm2air - curdew < 2 or curm2 - curdew < 4:
             self.dewTooClose = True
         else:
             self.dewTooClose = False
