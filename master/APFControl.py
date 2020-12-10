@@ -402,23 +402,6 @@ class APF:
 
 
     # Callback for the windspeed
-    def windmon(self,wx):
-        if wx['populated'] == False:
-            return
-        try:
-            wvel = float(wx)
-        except Exception as e:
-            apflog("Exception in windmon: %s" % (e), level='error')
-            return
-        
-        if self.wslist == []:
-            self.wslist = [wvel]*20
-
-        else:
-            self.wslist.append(wvel)
-            self.wslist = self.wslist[-20:]
-
-        return
 
     def altwindmon(self,wx):
         if wx['populated'] == False:
@@ -464,85 +447,6 @@ class APF:
             self.lists[name].append(curval)
             self.lists[name] = self.lists[name][-20:]
 
-        return
-
-    def m1TempMon(self,m1tempkw):
-        if m1tempkw['populated'] == False:
-            return
-        try:
-            curm1temp = float(m1tempkw['binary'])
-        except Exception as e:
-            apflog("Exception in m1TempMon: %s" % (e), level='error')
-            return
-        
-        if self.m1templist == []:
-            self.m1templist = [curm1temp]*20
-        else:
-            self.m1templist.append(curm1temp)
-            self.m1templist = self.m1templist[-20:]
-
-        self.m1temp = np.average(self.m1templist)
-        self.avgtemps[0] = self.m1temp
-
-        return
-
-    def airTempMon(self,m2airkw):
-        if m2airkw['populated'] == False:
-            return
-        
-        try:
-            curm2air = float(m2airkw['binary'])
-        except Exception as e:
-            apflog("Exception in airTempMon: %s" % (e), level='error')
-            return
-        try:
-            curfcu3 = float(self.fcu3temp['binary'])
-        except Exception as e:
-            apflog("Exception in airTempMon: %s" % (e), level='error')
-            return
-        try:
-            curfcu4 = float(self.fcu4temp['binary'])
-        except Exception as e:
-            apflog("Exception in airTempMon: %s" % (e), level='error')
-            return
-        
-        if self.m2airlist == []:
-            self.m2airlist = [curm2air]*20
-            self.fcu3list = self.fcu3list[curfcu3]*20
-            self.fcu4list = self.fcu4list[curfcu4]*20
-        else:
-            self.m2airlist.append(curm2air)
-            self.m2airlist = self.m2airlist[-20:]
-            self.fcu3list = self.fcu3list[-20:]
-            self.fcu4list = self.fcu4list[-20:]
-
-            
-        self.m2air = np.average(self.m2airlist)
-
-        self.avgtemps[3] = self.m2air
-        self.avgtemps[4] = np.average(self.fcu3list)
-        self.avgtemps[5] = np.average(self.fcu4list)
-        
-        return
-    
-    def telTempMon(self,teltemp):
-        if teltemp['populated'] == False:
-            return
-        
-        try:
-            teltemp = float(teltemp['binary'])
-        except Exception as e:
-            apflog("Exception in telTempMon: %s" % (e), level='error')
-            return
-        
-        if self.teltemplist == []:
-            self.teltemplist = [teltemp]*20
-        else:
-            self.teltemplist = self.teltemplist.append(teltemp)
-            self.teltemplist = self.teltemplist[-20:]
-
-        self.avgtemps[2] = np.average(self.telavglist)
-        
         return
 
     # Callback for Deadman timer
