@@ -97,7 +97,7 @@ class APF:
 
     # Initial temps
     mon_lists = dict()
-    for kw in ('TM1S210','TM2CSUR','TM2CAIR','TAVERAGE','TTRUS045','TTRUS135','TTRUS225','TTRUS315','DEWPNOW3','TEMPNOW3','TEMPNOW4','M5WIND'):
+    for kw in ('TM1S210','TM2CSUR','TM2CAIR','TAVERAGE','TTRUS045','TTRUS135','TTRUS225','TTRUS315','TEMPNOW3','TEMPNOW4','M5WIND'):
         mon_lists[kw] = []
 
     dewlist = []
