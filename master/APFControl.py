@@ -1156,7 +1156,10 @@ class APF:
         apflog("Running power_down_telescope script")
         result, code = apftaskDo(cmd)
         if not result:
-            apflog("power_down_telescope has failed. Human intervention likely required.", level='error', echo=True)
+            if self.slew_allowed.read(binary=True) == True:
+                apflog("apftask.SLEW_ALLOWED is True, power_down_telescope will not run.", level='warn', echo=True)
+            else:
+                apflog("power_down_telescope has failed. Human intervention likely required.", level='error', echo=True)
         else:
             pass
         if result:    
