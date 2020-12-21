@@ -85,7 +85,10 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table',outdir=None):
             cur = prev
 
     for ky in hours.keys():
-        hour_table['cur'][hour_table['sheetn'] == ky] = hours[ky]
+        if ky == 'public':
+            hour_table['cur'][hour_table['sheetn'] == 'RECUR_A100'] = hours[ky]
+        else:
+            hour_table['cur'][hour_table['sheetn'] == ky] = hours[ky]
 
     try:
         hour_table.write(outfn,format='ascii',overwrite=True)
