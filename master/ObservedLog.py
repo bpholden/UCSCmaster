@@ -144,8 +144,8 @@ def getObserved(filename):
 if __name__ == "__main__":
     fn = 'observed_targets.1'
     if os.path.exists(fn):
-        ol = ObservedLog(fn)
-
+        ol = ObservedLog(filename=fn)
+        print(ol)
         print(ol.names)
         print(ol.times)
         print(ol.temps)
