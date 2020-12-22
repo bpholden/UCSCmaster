@@ -616,7 +616,7 @@ def updateLocalStarlist(intime, observed_file="observed_targets",outfn='parsesch
     if not outdir :
         outdir = os.getcwd()
 
-    obslog = ObservedLog.ObservedLog(os.path.join(outdir,observed_file))
+    obslog = ObservedLog.ObservedLog(filename=os.path.join(outdir,observed_file))
 
     outfn = os.path.join(outdir,outfn)
     if os.path.exists(outfn):
@@ -687,7 +687,7 @@ def updateSheetLastobs(observed_file, sheetns=["Bstar"],ctime=None,certificate='
     if not outdir :
         outdir = os.getcwd()
 
-    obslog = ObservedLog.ObservedLog(os.path.join(outdir,observed_file))
+    obslog = ObservedLog.ObservedLog(filename=os.path.join(outdir,observed_file))
     if len(obslog.names) == 0:
         return
     if ctime is None:
