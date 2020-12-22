@@ -7,7 +7,7 @@ except:
 
 
 class ObservedLog():
-    def __init__(self,filename):
+    def __init__(self,filename=None):
         self.names = []
         self.times = []
         self.temps = []
@@ -15,7 +15,8 @@ class ObservedLog():
         self.sheetns = []
         self.filename = filename
 
-        self.read_observed_log()
+        if filename is not None:
+            self.read_observed_log()
 
     def __str__(self):
         return "< ObservedLog %s >" % self.filename
