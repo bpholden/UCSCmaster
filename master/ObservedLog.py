@@ -17,6 +17,13 @@ class ObservedLog():
 
         self.read_observed_log()
 
+    def __str__(self):
+        return "< ObservedLog %s >" % self.filename
+
+    def __repr__(self):
+        return "< ObservedLog %s >" % self.filename
+
+            
     def parse_key_vals(self,line):
         keyvals = dict()
         ovals = []
