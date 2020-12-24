@@ -39,7 +39,6 @@ def computePriorities(star_table,available,cur_dt,observed=None,hour_table=None,
     if hour_table is not None:
         too_much = hour_table['cur']  > hour_table['tot']
         done_sheets = hour_table['sheetn'][too_much]
-        apflog("Sheets %s have exceeded their allocation for the night" % (done_sheets),echo=True)
     else:
         done_sheets = []
 
