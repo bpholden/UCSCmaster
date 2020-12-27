@@ -694,6 +694,9 @@ class Observe(threading.Thread):
                 else:
                     self.scriptobs.stdin.close()
                     self.APF.killRobot()
+                omsg = "Stopping scriptobs"
+                if current_msg['message'] != omsg:
+                    APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
             
             # If the sun is rising and scriptobs has stopped, run closeup
             if float(cursunel) > sunel_lim and running == False and rising == True:
@@ -746,6 +749,9 @@ class Observe(threading.Thread):
                     
                 elif not rising or (rising and float(cursunel) < (sunel_lim - 5)) and self.canOpen and not self.badweather:
                     success = opening(cursunel)
+                    omsg = "Opening at %s" % (cursunel)
+                    APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
+
                 else:
                     success = True
                 if success == False:
@@ -809,6 +815,9 @@ class Observe(threading.Thread):
                         lvl = "warn"
                     apflog("scriptobs is not running just after being started!", level=lvl, echo=True)
                     APFTask.set(self.task, suffix="MESSAGE",value="scriptobs is not running just after being started!",wait=False)                    
+                omsg = "Starting scriptobs"
+                if current_msg['message'] != omsg:
+                    APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
 
                 
             # Keep an eye on the deadman timer if we are open 
