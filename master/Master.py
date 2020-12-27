@@ -355,7 +355,7 @@ if __name__ == '__main__':
         waitstr = "Will now wait %.1f seconds before starting focusinstr" % (stime)
         apflog(waitstr, echo=True)
         APFTask.set(parent, suffix="MESSAGE", value=waitstr, wait=False)
-        startstr = "Estimating that will be at %s for a sunset at %s" % (s_str,sun_str)
+        startstr = "Estimating focusinstr will start at %s for a sunset at %s" % (s_str,sun_str)
         apflog(startstr, echo=True)
         APFTask.set(parent, suffix="MESSAGE", value=startstr, wait=False)
         
