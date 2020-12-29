@@ -50,8 +50,6 @@ def computePriorities(star_table,available,cur_dt,observed=None,hour_table=None,
             else:
                 apflog("Sheet %s has exceeded it's allocation for the night" % (sheetn),echo=True)
 
-    
-        
     return new_pri
 
 def updateHourTable(hour_table,observed,dt,outfn='hour_table',outdir=None):
@@ -59,7 +57,7 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table',outdir=None):
     updateHourTableobserved_logs,outfn='hour_table')
 
     Updates hour_table with history of observations.
-    
+
     '''
 
     if not outdir :
@@ -76,7 +74,7 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table',outdir=None):
             own = observed.owners[i]
             if own not in hours.keys():
                     hours[own] = 0.0
-                    
+
     cur = dt
     for i in range(0,nobj):
             hr, mn = observed.times[i]
@@ -99,7 +97,7 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table',outdir=None):
         apflog("Cannot write table %s: %s" % (outfn,e),level='error',echo=True)
 
     return hour_table
-    
+
 
 def makeHourTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='frac_table',hour_constraints=None):
 
@@ -146,7 +144,7 @@ def makeHourTable(sheet_table_name,dt,outfn='hour_table',outdir=None,frac_fn='fr
             for runname in hour_constraints['runname']:
                 if hour_constraints['left'][hour_constraints['runname']==runname] < hour_table['tot'][hour_table['sheetn']==runname]:
                      hour_table['tot'][hour_table['sheetn']==runname] = hour_constraints['left'][hour_constraints['runname']==runname]
-                     
+
 
     try:
         hour_table.write(outfn,format='ascii')
@@ -551,7 +549,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     """
 
     global last_objs_attempted
-    
+
     if not outdir:
         outdir = os.getcwd()
 
@@ -582,7 +580,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     if frac_sheet is not None:
         hour_table = makeHourTable(frac_sheet,dt)
         hour_table = updateHourTable(hour_table,observed,dt)
-    
+
     # Parse the Googledex
     # Note -- RA and Dec are returned in Radians
 
@@ -600,7 +598,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         last_objs_attempted.append(lastfailure)
     if len(last_objs_attempted) == 5:
         apflog( "getNext(): 5 failed acquisition attempts",level="warn",echo=True)
-        
+
 
     ###
     # Need to update the googledex with the lastObserved date for observed targets
@@ -644,8 +642,8 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
         for n in last_objs_attempted:
             attempted = (star_table['name'] == n)
             available = available & np.logical_not(attempted) # Available and not observed
-            
-    cadence_check = (ephem.julian_date(dt) - star_table['lastobs']) 
+
+    cadence_check = (ephem.julian_date(dt) - star_table['lastobs'])
     good_cadence = cadence_check >  star_table['APFcad']
     available = available & good_cadence
 
@@ -687,7 +685,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     cur_elevations[available] += star_elevations[vis]
     scaled_elevations[available] += scaled_els[vis]
-        
+
     if slowdown > SLOWDOWN_THRESH or seeing > SEEING_THRESH:
         bright_enough = star_table['Vmag'] < SLOWDOWN_VMAG_LIM
         available = available & bright_enough
@@ -715,7 +713,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
 
     allidx, = np.where(sort_i)
     idx = allidx[sort_j][0]
-        
+
     t_n = star_table['name'][idx]
     o_n = star_table['sheetn'][idx]
     p_n = final_priorities[idx]
@@ -759,10 +757,10 @@ if __name__ == '__main__':
         hour_constraints = astropy.io.ascii.read(cfn)
     else:
         hour_constraints = None
-    
+
     frac_tablen='2020B_frac'
     hour_table = makeHourTable(frac_tablen,dt,hour_constraints=hour_constraints)
-    
+
     rank_tablen='2020B_ranks'
     rank_table = makeRankTable(rank_tablen)
 
