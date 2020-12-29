@@ -192,13 +192,13 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     # Add the DEC as three elements, DEG, MIN, SEC
     decstr = "%s %s %s " % (star_table_row['Dec deg'],star_table_row['Dec min'],star_table_row['Dec sec'])
 
-    ret = str(star_table_row['name']) + ' ' + rastr + decstr + '2000 '
+    ret = "%s %s %s 2000 " % (str(star_table_row['name']),rastr, decstr)
 
     # Proper motion RA and DEC
-    ret += 'pmra=%s ' % str(star_table_row['pmRA'])
-    ret += 'pmdec=%s ' % str(star_table_row['pmDEC'])
+    ret += 'pmra=%.4f ' % (star_table_row['pmRA'])
+    ret += 'pmdec=%.4f ' % (star_table_row['pmDEC'])
     # V Mag
-    ret += 'vmag=%s ' % str(star_table_row['Vmag'])
+    ret += 'vmag=%.2f ' % str(star_table_row['Vmag'])
 
     # T Exp
     if temp:
@@ -211,7 +211,7 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     # lamp
     ret += 'lamp=none '
     # start time
-    ret += 'uth=%s utm=%s ' % (str(t.hour),str(t.minute))
+    ret += 'uth=%02d utm=%02d ' % (int(t.hour),int(t.minute))
 
     # Exp Count
     if star_table_row['expcount'] > EXP_LIM:
@@ -238,7 +238,7 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     else:
         count = int(star_table_row['APFnshots'])
 
-    ret += 'count=%d ' % (int(count))
+    ret += 'count=%d ' % (count)
 
     ret += 'foc=%d ' % (int(focval))
 
