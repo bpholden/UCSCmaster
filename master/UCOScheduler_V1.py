@@ -198,7 +198,7 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     ret += 'pmra=%.4f ' % (star_table_row['pmRA'])
     ret += 'pmdec=%.4f ' % (star_table_row['pmDEC'])
     # V Mag
-    ret += 'vmag=%.2f ' % str(star_table_row['Vmag'])
+    ret += 'vmag=%.2f ' % (star_table_row['Vmag'])
 
     # T Exp
     if temp:
