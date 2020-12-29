@@ -381,7 +381,6 @@ def templateConditions(moon, seeing, slowdown):
 
 def findClosest(ras,decs,ra,dec):
 
-
     distances = np.sqrt((ra - ras)**2 + (dec - decs)**2)
 
     min_ind = distances.argmin()
