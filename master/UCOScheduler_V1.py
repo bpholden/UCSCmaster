@@ -185,42 +185,41 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
 
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
-    ret = str(star_table_row['name']) + ' '
-    # Add the RA as three elements, HR, MIN, SEC
-    rastr = "%s %s %s" % (star_table_row['RA hr'],star_table_row['RA min'],star_table_row['RA sec'])
-    ret += rastr + ' '
-    # Add the DEC as three elements, DEG, MIN, SEC
-    decstr = "%s %s %s" % (star_table_row['Dec deg'],star_table_row['Dec min'],star_table_row['Dec sec'])
 
-    ret += decstr + ' '
-    # Epoch
-    ret += '2000 '
+    # Add the RA as three elements, HR, MIN, SEC
+    rastr = "%s %s %s " % (star_table_row['RA hr'],star_table_row['RA min'],star_table_row['RA sec'])
+
+    # Add the DEC as three elements, DEG, MIN, SEC
+    decstr = "%s %s %s " % (star_table_row['Dec deg'],star_table_row['Dec min'],star_table_row['Dec sec'])
+
+    ret = str(star_table_row['name']) + ' ' + rastr + decstr + '2000 '
+
     # Proper motion RA and DEC
-    ret += 'pmra=' + str(star_table_row['pmRA']) + ' '
-    ret += 'pmdec=' + str(star_table_row['pmDEC']) + ' '
+    ret += 'pmra=%s ' % str(star_table_row['pmRA'])
+    ret += 'pmdec=%s ' % str(star_table_row['pmDEC'])
     # V Mag
-    ret += 'vmag=' + str(star_table_row['Vmag']) + ' '
+    ret += 'vmag=%s ' % str(star_table_row['Vmag'])
 
     # T Exp
     if temp:
-        ret += 'texp=' + str(1200) + ' '
+        ret += 'texp=1200 '
     else:
-        ret += 'texp=' + str(int(star_table_row['texp'])) + ' '
+        ret += 'texp=%d ' % int(star_table_row['texp'])
 
     # I2
     ret += 'I2=%s ' % (I2)
     # lamp
     ret += 'lamp=none '
     # start time
-    ret += 'uth=' + str(t.hour) + ' '
-    ret += 'utm=' + str(t.minute) + ' '
+    ret += 'uth=%s utm=%s ' % (str(t.hour),str(t.minute))
+
     # Exp Count
     if star_table_row['expcount'] > EXP_LIM:
-        ret += 'expcount=%.3g' % (EXP_LIM) + ' '
+        ret += 'expcount=%.3g ' % (EXP_LIM)
     elif temp:
-        ret += 'expcount=%.3g' % (1e9) + ' '
+        ret += 'expcount=%.3g ' % (1e9)
     else:
-        ret += 'expcount=%.3g' % (star_table_row['expcount']) + ' '
+        ret += 'expcount=%.3g ' % (star_table_row['expcount'])
     # Decker
     ret += 'decker=%s ' % (decker)
     # do flag
@@ -239,17 +238,17 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     else:
         count = int(star_table_row['APFnshots'])
 
-    ret += 'count=' + str(count)
+    ret += 'count=%d ' % (int(count))
 
-    ret += ' foc=' + str(int(focval))
+    ret += 'foc=%d ' % (int(focval))
 
     if owner != '':
         if owner == 'RECUR_A100':
             owner = 'public'
-        ret += ' owner=' + str(owner)
+        ret += 'owner=%s ' % str(owner)
 
     if coverid != '':
-        ret += ' coverid=' + str(coverid)
+        ret += 'coverid=%s ' % str(coverid)
 
     if star_table_row['mode'] != None:
         if star_table_row['mode'] == BLANK:
