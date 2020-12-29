@@ -389,16 +389,16 @@ def findClosest(ras,decs,ra,dec):
     return min_ind
 
 
-def enoughTime(star_table,stars,idx,apf_obs,dt):
+def enoughTimeTemplates(star_table,stars,idx,apf_obs,dt):
     tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
     tot_time += 210 + (2*40 + 40*(star_table['APFnshots'][idx]-1)) + 2400 # two B star exposures + three 70 second acquisitions and the actual observation readout times
     vis, star_elevations, fin_els, scaled_els = Visible.visible(apf_obs,[stars[idx]],[tot_time])
     time_left_before_sunrise = computeSunrise(dt,horizon='-9')
 
     try:
-        apflog( "enoughTime(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
+        apflog("enoughTimeTemplates(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
     except:
-        apflog("enoughTime(): cannot log times!?!",echo=True)
+        apflog("enoughTimeTemplates(): cannot log times!?!",echo=True)
 
     if tot_time < time_left_before_sunrise  and vis and time_left_before_sunrise < 14*3600.:
         return True
@@ -514,7 +514,7 @@ def lastAttempted(observed):
     if lastobj not in observed.names:
         apflog( "lastAttempted(): Last objects attempted %s" % (lastobj),echo=True)
         failed_obs = lastobj
-        
+
     return failed_obs
 
 
@@ -735,7 +735,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     if do_templates and star_table['Template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
 
-        if enoughTime(star_table,stars,idx,apf_obs,dt):
+        if enoughTimeTemplates(star_table,stars,idx,apf_obs,dt):
             bline = makeScriptobsLine(star_table[bidx],dt,decker="N",I2="Y", owner=res['owner'],focval=2)
             line  = makeScriptobsLine(star_table[idx],dt,decker="N",I2="N", owner=res['owner'],temp=True)
             bfinline = makeScriptobsLine(star_table[bfinidx],dt,decker="N",I2="Y",owner=res['owner'],focval=0)
