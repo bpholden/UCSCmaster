@@ -7,7 +7,7 @@ except:
 
 
 class ObservedLog():
-    def __init__(self,filename):
+    def __init__(self,filename=None):
         self.names = []
         self.times = []
         self.temps = []
@@ -15,8 +15,16 @@ class ObservedLog():
         self.sheetns = []
         self.filename = filename
 
-        self.read_observed_log()
+        if filename is not None:
+            self.read_observed_log()
 
+    def __str__(self):
+        return "< ObservedLog %s >" % self.filename
+
+    def __repr__(self):
+        return "< ObservedLog %s >" % self.filename
+
+            
     def parse_key_vals(self,line):
         keyvals = dict()
         ovals = []
@@ -137,8 +145,8 @@ def getObserved(filename):
 if __name__ == "__main__":
     fn = 'observed_targets.1'
     if os.path.exists(fn):
-        ol = ObservedLog(fn)
-
+        ol = ObservedLog(filename=fn)
+        print(ol)
         print(ol.names)
         print(ol.times)
         print(ol.temps)

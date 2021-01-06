@@ -199,14 +199,17 @@ class Observe(threading.Thread):
         chk_done = "$checkapf.MOVE_PERM == true"
         result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=600)
         if result:
-            rv = self.APF.powerDownTelescope()
+            rv = self.APF.servoFailure()
             if rv:
-                apflog("APF power cycled.", echo=True)
+                rv = self.powerDownTelescope()
+                if rv:
+                    apflog("Power cycled telescope",echo=True)
+                else:
+                    apflog("Failure power cycling telescope",echo=True,level="alert")
+                    
                 return rv
             else:
-                apflog("Error: APF Telescope power cycle failed.", level="error", echo=True)
-                closing(force=True)
-                return False
+                apflog("No current servo faults",echo=True)
         elif result is False and "DomeShutter" in self.APF.isOpen()[1]:
             apflog("Error: After 10 min move permission did not return, and the dome is still open.", level='error', echo=True)
             closing(force=True)
@@ -450,14 +453,19 @@ class Observe(threading.Thread):
 
             APFTask.set(self.task, suffix="LAST_OBS_UCSC", value=self.APF.ucam["OBSNUM"].read())
 
+            rv = self.APF.disableInst()
             rv = self.APF.close(force=force)
             if rv:
                 return
-            if self.APF.powerDownTelescope() is False:
-                apflog("Error: Cannot close and power off telescope ", level="alert", echo=True)
-                
-            rv = self.APF.disableInst()
-            
+            rv = self.APF.servoFailure()
+            if rv is False:
+                apflog("Servo Failure, cannot close and power off telescope ", level="alert", echo=True)
+                rv = self.powerDownTelescope()
+                if rv:
+                    apflog("Power cycled telescope",echo=True)
+                else:
+                    apflog("Failure power cycling telescope",echo=True,level="alert")
+
             return
 
 
@@ -686,6 +694,9 @@ class Observe(threading.Thread):
                 else:
                     self.scriptobs.stdin.close()
                     self.APF.killRobot()
+                omsg = "Stopping scriptobs"
+                if current_msg['message'] != omsg:
+                    APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
             
             # If the sun is rising and scriptobs has stopped, run closeup
             if float(cursunel) > sunel_lim and running == False and rising == True:
@@ -738,6 +749,9 @@ class Observe(threading.Thread):
                     
                 elif not rising or (rising and float(cursunel) < (sunel_lim - 5)) and self.canOpen and not self.badweather:
                     success = opening(cursunel)
+                    omsg = "Opening at %s" % (cursunel)
+                    APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
+
                 else:
                     success = True
                 if success == False:
@@ -801,6 +815,9 @@ class Observe(threading.Thread):
                         lvl = "warn"
                     apflog("scriptobs is not running just after being started!", level=lvl, echo=True)
                     APFTask.set(self.task, suffix="MESSAGE",value="scriptobs is not running just after being started!",wait=False)                    
+                omsg = "Starting scriptobs"
+                if current_msg['message'] != omsg:
+                    APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
 
                 
             # Keep an eye on the deadman timer if we are open 

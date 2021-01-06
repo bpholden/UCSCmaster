@@ -47,7 +47,8 @@ def computePriorities(star_table,available,cur_dt,observed=None,hour_table=None,
             if sheetn not in done_sheets:
                 cur = star_table['sheetn'] == sheetn
                 new_pri[cur] += rank_table['rank'][rank_table['sheetn'] == sheetn]
-
+            else:
+                apflog("Sheet %s has exceeded it's allocation for the night" % (sheetn),echo=True)
 
     return new_pri
 
@@ -85,7 +86,10 @@ def updateHourTable(hour_table,observed,dt,outfn='hour_table',outdir=None):
             cur = prev
 
     for ky in hours.keys():
-        hour_table['cur'][hour_table['sheetn'] == ky] = hours[ky]
+        if ky == 'public':
+            hour_table['cur'][hour_table['sheetn'] == 'RECUR_A100'] = hours[ky]
+        else:
+            hour_table['cur'][hour_table['sheetn'] == ky] = hours[ky]
 
     try:
         hour_table.write(outfn,format='ascii',overwrite=True)
@@ -181,42 +185,41 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
 
     """Takes a line from the star table and generates the appropriate line to pass to scriptobs. """
     # Start with the target name
-    ret = str(star_table_row['name']) + ' '
-    # Add the RA as three elements, HR, MIN, SEC
-    rastr = "%s %s %s" % (star_table_row['RA hr'],star_table_row['RA min'],star_table_row['RA sec'])
-    ret += rastr + ' '
-    # Add the DEC as three elements, DEG, MIN, SEC
-    decstr = "%s %s %s" % (star_table_row['Dec deg'],star_table_row['Dec min'],star_table_row['Dec sec'])
 
-    ret += decstr + ' '
-    # Epoch
-    ret += '2000 '
+    # Add the RA as three elements, HR, MIN, SEC
+    rastr = "%s %s %s " % (star_table_row['RA hr'],star_table_row['RA min'],star_table_row['RA sec'])
+
+    # Add the DEC as three elements, DEG, MIN, SEC
+    decstr = "%s %s %s " % (star_table_row['Dec deg'],star_table_row['Dec min'],star_table_row['Dec sec'])
+
+    ret = "%s %s %s 2000 " % (str(star_table_row['name']),rastr, decstr)
+
     # Proper motion RA and DEC
-    ret += 'pmra=' + str(star_table_row['pmRA']) + ' '
-    ret += 'pmdec=' + str(star_table_row['pmDEC']) + ' '
+    ret += 'pmra=%.4f ' % (star_table_row['pmRA'])
+    ret += 'pmdec=%.4f ' % (star_table_row['pmDEC'])
     # V Mag
-    ret += 'vmag=' + str(star_table_row['Vmag']) + ' '
+    ret += 'vmag=%.2f ' % (star_table_row['Vmag'])
 
     # T Exp
     if temp:
-        ret += 'texp=' + str(1200) + ' '
+        ret += 'texp=1200 '
     else:
-        ret += 'texp=' + str(int(star_table_row['texp'])) + ' '
+        ret += 'texp=%d ' % int(star_table_row['texp'])
 
     # I2
     ret += 'I2=%s ' % (I2)
     # lamp
     ret += 'lamp=none '
     # start time
-    ret += 'uth=' + str(t.hour) + ' '
-    ret += 'utm=' + str(t.minute) + ' '
+    ret += 'uth=%02d utm=%02d ' % (int(t.hour),int(t.minute))
+
     # Exp Count
     if star_table_row['expcount'] > EXP_LIM:
-        ret += 'expcount=%.3g' % (EXP_LIM) + ' '
+        ret += 'expcount=%.3g ' % (EXP_LIM)
     elif temp:
-        ret += 'expcount=%.3g' % (1e9) + ' '
+        ret += 'expcount=%.3g ' % (1e9)
     else:
-        ret += 'expcount=%.3g' % (star_table_row['expcount']) + ' '
+        ret += 'expcount=%.3g ' % (star_table_row['expcount'])
     # Decker
     ret += 'decker=%s ' % (decker)
     # do flag
@@ -235,17 +238,17 @@ def makeScriptobsLine(star_table_row, t, decker="W", I2="Y", owner='public', foc
     else:
         count = int(star_table_row['APFnshots'])
 
-    ret += 'count=' + str(count)
+    ret += 'count=%d ' % (count)
 
-    ret += ' foc=' + str(int(focval))
+    ret += 'foc=%d ' % (int(focval))
 
     if owner != '':
         if owner == 'RECUR_A100':
             owner = 'public'
-        ret += ' owner=' + str(owner)
+        ret += 'owner=%s ' % str(owner)
 
     if coverid != '':
-        ret += ' coverid=' + str(coverid)
+        ret += 'coverid=%s ' % str(coverid)
 
     if star_table_row['mode'] != None:
         if star_table_row['mode'] == BLANK:
@@ -377,7 +380,6 @@ def templateConditions(moon, seeing, slowdown):
 
 def findClosest(ras,decs,ra,dec):
 
-
     distances = np.sqrt((ra - ras)**2 + (dec - decs)**2)
 
     min_ind = distances.argmin()
@@ -385,16 +387,16 @@ def findClosest(ras,decs,ra,dec):
     return min_ind
 
 
-def enoughTime(star_table,stars,idx,apf_obs,dt):
+def enoughTimeTemplates(star_table,stars,idx,apf_obs,dt):
     tot_time = star_table['APFnshots'][idx]*star_table['texp'][idx]
     tot_time += 210 + (2*40 + 40*(star_table['APFnshots'][idx]-1)) + 2400 # two B star exposures + three 70 second acquisitions and the actual observation readout times
     vis, star_elevations, fin_els, scaled_els = Visible.visible(apf_obs,[stars[idx]],[tot_time])
     time_left_before_sunrise = computeSunrise(dt,horizon='-9')
 
     try:
-        apflog( "enoughTime(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
+        apflog("enoughTimeTemplates(): time for obs= %.1f  time until sunrise= %.1f " % (tot_time,  time_left_before_sunrise),echo=True)
     except:
-        apflog("enoughTime(): cannot log times!?!",echo=True)
+        apflog("enoughTimeTemplates(): cannot log times!?!",echo=True)
 
     if tot_time < time_left_before_sunrise  and vis and time_left_before_sunrise < 14*3600.:
         return True
@@ -731,7 +733,7 @@ def getNext(ctime, seeing, slowdown, bstar=False,template=False,sheetns=["RECUR_
     if do_templates and star_table['Template'][idx] == 'N' and star_table['I2'][idx] == 'Y':
         bidx,bfinidx = findBstars(star_table,idx,bstars)
 
-        if enoughTime(star_table,stars,idx,apf_obs,dt):
+        if enoughTimeTemplates(star_table,stars,idx,apf_obs,dt):
             bline = makeScriptobsLine(star_table[bidx],dt,decker="N",I2="Y", owner=res['owner'],focval=2)
             line  = makeScriptobsLine(star_table[idx],dt,decker="N",I2="N", owner=res['owner'],temp=True)
             bfinline = makeScriptobsLine(star_table[bfinidx],dt,decker="N",I2="Y",owner=res['owner'],focval=0)

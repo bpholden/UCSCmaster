@@ -1110,7 +1110,10 @@ class APF:
         apflog("Running power_down_telescope script")
         result, code = apftaskDo(cmd)
         if not result:
-            apflog("power_down_telescope has failed. Human intervention likely required.", level='error', echo=True)
+            if self.slew_allowed.read(binary=True) == True:
+                apflog("apftask.SLEW_ALLOWED is True, power_down_telescope will not run.", level='warn', echo=True)
+            else:
+                apflog("power_down_telescope has failed. Human intervention likely required.", level='error', echo=True)
         else:
             pass
         if result:    
@@ -1128,9 +1131,10 @@ class APF:
             val = self.tel[nm].read(binary=True)
             if val:
                 servo_failed = True
+                apflog("Error: Servo Amplifier Fault: %s %s" % (nm,val), level="alert", echo=True)
                 
         if servo_failed:
-            return self.powerDownTelescope()
+            return True
         else:
             return False
         
@@ -1174,9 +1178,13 @@ class APF:
             result, code = apftaskDo(cmd)
             if not result:
                 apflog("Closeup failed with exit code %d" % code, echo=True)
-                if attempts == 2:
-                    if self.servoFailure():
-                        apflog("Servo amplifier failure, power cycled telescope",echo=True)
+                if self.servoFailure():
+                    apflog("Servo amplifier failure, power cycling telescope",echo=True,level="error")
+                    rv = self.powerDownTelescope()
+                    if rv:
+                        apflog("Power cycled telescope",echo=True)
+                    else:
+                        apflog("Failure power cycling telescope",echo=True,level="alert")
                 if attempts == 3:
                     lstr = "Closeup has failed 3 times consecutively. Human intervention likely required."
                     areopen, whatsopen = self.isOpen()
