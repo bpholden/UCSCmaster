@@ -39,58 +39,17 @@ executable : @LROOT@/bin/master/fake_master
 path : @LROOT@/bin/master
 pathvar : /bin:/usr/local/bin:/usr/bin:/sbin:/usr/sbin:/opt/kroot/bin:@LROOT@/robot:@LROOT@/bin:/opt/ds9/bin:/opt/eos/shortcuts:/opt/idl/bin:@LROOT@/bin/master
 pythonpathvar : /opt/kroot/rel/default/lib/python:/opt/kroot/rel/default/lib:@LROOT@/lib/python:@LROOT@/lib:@LROOT@/master:/usr/lib/python2.7/:/usr/lib/python2.7/site_packages:/local/u/user/.local/lib/python2.7/site-packages
-argstr :  
-args : 
-name : 
-obsnum : 
-owner : 
+argstr :
+args :
+name :
+obsnum :
+owner :
 starlist :
 sheets :
-rank_table : "2020A_ranks"
-calib : 
-user : 10009
-
-[ucsc]
-observer: Brad Holden
-Phone : 831-421-1210
-Email : holden@ucolick.org
-Locat : Office / Home
-executable : @LROOT@/bin/master/Master 
-path : @LROOT@/bin/master
-pathvar : /bin:/usr/local/bin:/usr/bin:/sbin:/usr/sbin:/opt/kroot/bin:@LROOT@/bin/robot:@LROOT@/bin:/opt/ds9/bin:/opt/eos/shortcuts:/opt/idl/bin::@LROOT@/bin/master
-pythonpathvar : /opt/kroot/rel/default/lib/python:/opt/kroot/rel/default/lib:@LROOT@/lib/python:@LROOT@/lib:@LROOT@/master:/sr/lib/python2.7/:/usr/lib/python2.7/site_packages:/local/u/user/.local/lib/python2.7/site-packages
-argstr :  -n %s -o %s --sheet %s
-args : name obsnum sheets
-name : ucsc 
-obsnum : ucsc
-owner : Vogt
-starlist :
-sheets : ""
-rank_table : "2020A_ranks"
-calib : 
-user : 10009
-
-[ucb]
-observer: Brad Holden
-Phone : 9-3387 / 831-421-1210
-Email : holden@ucolick.org
-Locat : Office / Home
-path : @LROOT@/bin/master
-pathvar : /bin:/usr/local/bin:/usr/bin:/sbin:/usr/sbin:/opt/kroot/bin:@LROOT@/bin/robot:@LROOT@/bin:/opt/ds9/bin:/opt/eos/shortcuts:/opt/idl/bin:@LROOT@/bin/master
-pythonpathvar : /local/u/user/.local/lib/python2.7/site-packages:/opt/kroot/rel/default/lib/python:/opt/kroot/rel/default/lib:@LROOT@/lib/python:@LROOT@/lib:/usr/lib/python2.7/:/usr/lib/python2.7/site_packages
-executable : @LROOT@/bin/master/Master
-argstr : -n %s -o %s -c ucb --sheet %s
-args : name obsnum sheets
-name : ucb
-obsnum : 100
-owner : Howard
-starlist :
-sheets : ""
 rank_table : "2020A_ranks"
 calib :
 user : 10009
 
-   
 [2020B]
 observer: Brad Holden
 Phone : 9-3387 / 831-421-1210
