@@ -269,7 +269,6 @@ class APF:
         # Grab some initial values for the state of the telescope
 
         self.wx.poll()
-        self.airtemp.poll()
         self.dewpt.poll()
         self.counts.poll()
         self.ok2open.poll()
@@ -1266,10 +1265,10 @@ class APF:
         else:
             # State must be auto, so check wind
             curwvel = np.median(self.wslist)
-            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and float(self.airtemp) > TEMP_LIMIT:
+            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and float(self.m2airkw) > TEMP_LIMIT:
                 apflog("Setting scriptobs_windshield to Disable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
-            if currState == 'disable' and (self.wvel > WINDSHIELD_LIMIT or float(self.airtemp) < TEMP_LIMIT):
+            if currState == 'disable' and (self.wvel > WINDSHIELD_LIMIT or float(self.m2airkw) < TEMP_LIMIT):
                 apflog("Setting scriptobs_windshield to Enable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
