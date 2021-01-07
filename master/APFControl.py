@@ -96,9 +96,7 @@ class APF:
     wslist = []
 
     # Initial temps
-    mon_lists = dict()
-    for kw in ('TM1S210','TM2CSUR','TM2CAIR','TAVERAGE','TTRUS045','TTRUS135','TTRUS225','TTRUS315','TEMPNOW3','TEMPNOW4','M5WIND'):
-        mon_lists[kw] = []
+
 
     dewlist = []
     dewTooClose = False
@@ -200,7 +198,9 @@ class APF:
         self.test = test
         self.task = task
 
-        self.avgtemps = np.zeros(6)
+        self.mon_lists = dict()
+        for kw in ('TM1S210','TM2CSUR','TM2CAIR','TAVERAGE','TTRUS045','TTRUS135','TTRUS225','TTRUS315','TEMPNOW3','TEMPNOW4','M5WIND'):
+            self.mon_lists[kw] = []
 
         self.rising = self.sunRising()
 
