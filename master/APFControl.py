@@ -235,7 +235,7 @@ class APF:
         self.down.monitor()
         self.whatsopn.monitor()
 
-        for kw in (self.m1tempkw,self.m2tempkw,self.m2airkw,self.taveragekw,self.t045kw,self.t135kw,self.t225kw,self.t315kw):
+        for kw in (self.m1tempkw,self.m2tempkw,self.m2airkw,self.taveragekw,self.t045kw,self.t135kw,self.t225kw,self.t315kw,self.temp3now,self.temp4now):
             kw.monitor()
             kw.callback(self.listMon)
             kw.poll()
