@@ -446,7 +446,7 @@ class APF:
             self.mon_lists[name] = [curval]*20
         else:
             self.mon_lists[name].append(curval)
-            self.mon_lists[name] = self.lists[name][-20:]
+            self.mon_lists[name] = self.mon_lists[name][-20:]
 
         return
 
