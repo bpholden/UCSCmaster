@@ -144,7 +144,8 @@ class APF:
 
     eoscool    = ktl.Service('eoscool')
     dewpt      = eoscool('DEWPAVG3')
-    airtemp    = eoscool('TEMPNOW4')
+    temp3now   = eoscool('TEMPNOW3')
+    temp4now   = eoscool('TEMPNOW4')
 
     robot        = ktl.Service('apftask')
     vmag         = robot['SCRIPTOBS_VMAG']
