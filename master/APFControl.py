@@ -238,7 +238,7 @@ class APF:
         for kw in (self.m1tempkw,self.m2tempkw,self.m2airkw,self.taveragekw,self.t045kw,self.t135kw,self.t225kw,self.t315kw,self.temp3now,self.temp4now):
             kw.monitor()
             kw.callback(self.listMon)
-            kw.poll()
+            kw.read()
 
         self.avgtemps = [np.average(self.mon_lists[nm]) for nm in ('TM1S210','TM2CSUR','TAVERAGE','TM2CAIR','TEMPNOW3','TEMPNOW4')]
         self.avgtemps=np.asarray(self.avgtemps)
@@ -268,10 +268,10 @@ class APF:
 
         # Grab some initial values for the state of the telescope
 
-        self.wx.poll()
-        self.dewpt.poll()
-        self.counts.poll()
-        self.ok2open.poll()
+        self.wx.read()
+        self.dewpt.read()
+        self.counts.read()
+        self.ok2open.read()
 
     def __str__(self):
         # Determine if the sun rising / setting check is working
@@ -1553,7 +1553,7 @@ if __name__ == '__main__':
     apf = APF(task=task,test=False)
 
     # Give the monitors some time to start up
-    APFTask.waitFor(task, True,timeout=10)
+    APFTask.waitFor(task, True,timeout=2)
 
     print(str(apf))
 
