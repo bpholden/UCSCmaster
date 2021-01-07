@@ -240,10 +240,6 @@ class APF:
             kw.callback(self.listMon)
             kw.read()
 
-        self.avgtemps = [np.average(self.mon_lists[nm]) for nm in ('TM1S210','TM2CSUR','TAVERAGE','TM2CAIR','TEMPNOW3','TEMPNOW4')]
-        self.avgtemps=np.asarray(self.avgtemps)
-
-
         self.dewpt.monitor()
         self.dewpt.callback(self.dewPtMon)
 
@@ -272,6 +268,9 @@ class APF:
         self.dewpt.read()
         self.counts.read()
         self.ok2open.read()
+        self.avgtemps = [np.average(self.mon_lists[nm]) for nm in ('TM1S210','TM2CSUR','TAVERAGE','TM2CAIR','TEMPNOW3','TEMPNOW4')]
+        self.avgtemps=np.asarray(self.avgtemps)
+
 
     def __str__(self):
         # Determine if the sun rising / setting check is working
