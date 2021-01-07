@@ -205,6 +205,10 @@ class APF:
         self.rising = self.sunRising()
 
         # Set the callbacks and monitors
+
+        self.wx.monitor()
+        self.wx.callback(self.listMon)
+
         self.altwx.monitor()
         self.altwx.callback(self.altwindmon)
 
@@ -230,9 +234,10 @@ class APF:
         self.down.monitor()
         self.whatsopn.monitor()
 
-        for kw in (self.wx,self.m1tempkw,self.m2tempkw,self.m2airkw,self.taveragekw,self.t045kw,self.t135kw,self.t225kw,self.t315kw):
+        for kw in (self.m1tempkw,self.m2tempkw,self.m2airkw,self.taveragekw,self.t045kw,self.t135kw,self.t225kw,self.t315kw):
             kw.monitor()
             kw.callback(self.listMon)
+            kw.poll()
 
         self.avgtemps = [np.average(self.mon_lists[nm]) for nm in ('TM1S210','TM2CSUR','TAVERAGE','TM2CAIR','TEMPNOW3','TEMPNOW4')]
         self.avgtemps=np.asarray(self.avgtemps)
