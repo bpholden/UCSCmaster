@@ -529,7 +529,7 @@ class APF:
         slopes = np.asarray([-0.00900056,  0.01875785,  0.01473356, -0.00662667, -0.00040923, -0.01710658])
         midtemps = np.asarray([15.79785703, 14.44149427, 14.84133129, 13.48769243, 16.02902533, 16.08045829])
         predfoc = np.sum(slopes*(self.avgtemps-midtemps)) + TELFOCUSTYP # slope in mm per deg C, TELFOCUSTYP is the mean focus between 2016 - 2020
-        predoc /= 1000.0 # convert to meters
+        predfoc /= 1000.0 # convert to meters
         return predfoc
 
     def checkTelFocusOffset(self,orig_predfoc):
