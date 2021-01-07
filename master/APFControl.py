@@ -285,7 +285,7 @@ class APF:
         s += "ncountrate = %d frames \n" % self.ncountrate
         s += "elapsed = %5.2f sec \n" % self.elapsed
         s += "M1 = %5.2f deg C M2 = %5.2f deg C Tel Avg = %5.2f deg C M2 Air = %5.2f deg C FCU4 = %5.2f deg C\n" % tuple(self.avgtemps)
-        s += "Dewpt = %5.2f deg C Teq Mode - %s\n" % (np.average(self.mon_lists['DEWPNOW3']),self.teqmode)
+        s += "Dewpt = %5.2f deg C Teq Mode - %s\n" % (np.average(self.mon_lists['DEWPAVG3']),self.teqmode)
         s += "M2 Focus Value = % 4.3f\n" % (float(self.aafocus['binary'])*1000.0)
         s += "M2 Focus Value = % 4.3f (focus kwd)\n" % (float(self.focus['binary'])*1000.0)
         s += "Preferred M2 Focus Value =  % 4.3f\n" % (float(self.predTelFocus())*1000.0)
