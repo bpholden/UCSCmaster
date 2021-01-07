@@ -145,7 +145,7 @@ class APF:
 
 
     eoscool    = ktl.Service('eoscool')
-    dewpt      = eoscool('DEWPNOW3')
+    dewpt      = eoscool('DEWPAVG3')
     airtemp    = eoscool('TEMPNOW4')
 
     robot        = ktl.Service('apftask')
@@ -515,7 +515,7 @@ class APF:
         # m1 m2 tavg m2air tf3 tf4
         self.avgtemps = [self.mon_lists[nm] for nm in ('TM1S210','TM2CSUR','TAVERAGE','TM2CAIR','TEMPNOW3','TEMPNOW4')]
         self.avgtemps=np.asarray(self.avgtemps)
-        
+
         slopes = np.asarray([-0.00900056,  0.01875785,  0.01473356, -0.00662667, -0.00040923, -0.01710658])
         midtemps = np.asarray([15.79785703, 14.44149427, 14.84133129, 13.48769243, 16.02902533, 16.08045829])
         predfoc = np.sum(slopes*(self.avgtemps-midtemps)) + TELFOCUSTYP # slope in mm per deg C, TELFOCUSTYP is the mean focus between 2016 - 2020
