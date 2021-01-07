@@ -1193,10 +1193,10 @@ class APF:
             if not result:
                 apflog("Closeup failed with exit code %d" % code, echo=True)
                 if self.servoFailure():
-                    apflog("Servo amplifier failure, power cycling telescope",echo=True,level="error")
+                    apflog("Servo amplifier failure, may power cycle telescope",echo=True,level='warn')
                     rv = self.powerDownTelescope()
                     if rv:
-                        apflog("Power cycled telescope",echo=True)
+                        apflog("Power cycled telescope",echo=True,level="error")
                     else:
                         apflog("Failure power cycling telescope",echo=True,level="alert")
                 if attempts == 3:
