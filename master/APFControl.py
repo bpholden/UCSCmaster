@@ -442,11 +442,11 @@ class APF:
             apflog("Exception in listMon: %s" % (e), level='error')
             return
 
-        if self.lists[name] == []:
-            self.lists[name] = [curval]*20
+        if self.mon_lists[name] == []:
+            self.mon_lists[name] = [curval]*20
         else:
-            self.lists[name].append(curval)
-            self.lists[name] = self.lists[name][-20:]
+            self.mon_lists[name].append(curval)
+            self.mon_lists[name] = self.lists[name][-20:]
 
         return
 
@@ -477,8 +477,8 @@ class APF:
         dewlist = np.asarray(self.dewlist)
 
         curdew = np.average(dewlist)
-        curm2 = np.average(np.asarray(self.mon_list['TM2CSUR']))
-        curm2air = np.average(np.asarray(self.mon_list['TM2CAIR']))
+        curm2 = np.average(np.asarray(self.mon_lists['TM2CSUR']))
+        curm2air = np.average(np.asarray(self.mon_lists['TM2CAIR']))
 
         if curm2air - curdew < 2 or curm2 - curdew < 4:
             self.dewTooClose = True
@@ -519,9 +519,8 @@ class APF:
     def predTelFocus(self):
 
         # m1 m2 tavg m2air tf3 tf4
-        self.avgtemps = [self.mon_lists[nm] for nm in ('TM1S210','TM2CSUR','TAVERAGE','TM2CAIR','TEMPNOW3','TEMPNOW4')]
+        self.avgtemps = [np.average(self.mon_lists[nm]) for nm in ('TM1S210','TM2CSUR','TAVERAGE','TM2CAIR','TEMPNOW3','TEMPNOW4')]
         self.avgtemps=np.asarray(self.avgtemps)
-
         slopes = np.asarray([-0.00900056,  0.01875785,  0.01473356, -0.00662667, -0.00040923, -0.01710658])
         midtemps = np.asarray([15.79785703, 14.44149427, 14.84133129, 13.48769243, 16.02902533, 16.08045829])
         predfoc = np.sum(slopes*(self.avgtemps-midtemps)) + TELFOCUSTYP # slope in mm per deg C, TELFOCUSTYP is the mean focus between 2016 - 2020
