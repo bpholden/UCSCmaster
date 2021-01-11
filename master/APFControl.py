@@ -1241,10 +1241,12 @@ class APF:
         cur_sunel = self.sunel.read(binary=True)
         too_close = rising and (cur_sunel > -20)
         focval = 0
-        if time.time() - lastfoc > FOCUSTIME and not too_close and current_val == 'robot_autofocus_disable':
+        focus_diff = self.checkTelFocusOffset()
+
+        if focus_diff > 0.01/1000. and not too_close and current_val == 'robot_autofocus_disable':
             self.autofoc.write("robot_autofocus_enable")
             focval = 1
-            APFTask.set(self.task, suffix="MESSAGE", value="More than %.1f hours since telescope focus" % (FOCUSTIME/3600.), wait=False)
+            APFTask.set(self.task, suffix="MESSAGE", value="Telefocus more than %6.3f microns from nominal " % (focus_diff*1000.), wait=False)
         else:
             if current_val == "robot_autofocus_enable":
                 self.autofoc.write("robot_autofocus_disable")
