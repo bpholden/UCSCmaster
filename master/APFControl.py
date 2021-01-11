@@ -1241,7 +1241,7 @@ class APF:
         cur_sunel = self.sunel.read(binary=True)
         too_close = rising and (cur_sunel > -20)
         focval = 0
-        focus_diff = self.checkTelFocusOffset()
+        focus_diff = self.checkTelFocusOffset(self.focus['binary'])
 
         if focus_diff > 0.01/1000. and not too_close and current_val == 'robot_autofocus_disable':
             self.autofoc.write("robot_autofocus_enable")
