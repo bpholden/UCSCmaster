@@ -260,6 +260,7 @@ class APF:
         self.ael.monitor()
         self.fspos.monitor()
         self.rspos.monitor()
+        self.focus.monitor()
         self.aafocus.monitor()
 
         # Grab some initial values for the state of the telescope
