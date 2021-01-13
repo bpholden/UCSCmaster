@@ -350,10 +350,11 @@ class Observe(threading.Thread):
                 apflog("getTarget(): Current AVG_FWHM = %4.2f" % seeing)
 
             self.APF.initGuideCam()
-            
+            self.APF.updateWindshield(self.windshield)
+            self.focval = self.APF.setAutofocVal()
+
             self.target = ds.getNext(time.time(), seeing, slowdown, bstar=self.obsBstar,sheetns=self.sheetn, owner=self.owner, template=self.doTemp,focval=self.focval,rank_sheetn=self.rank_tablen,frac_sheet=self.frac_tablen)
 
-            self.focval = self.APF.setAutofocVal()
             if self.target is None:
                 apflog("No acceptable target was found. Since there does not seem to be anything to observe, %s will now shut down." % (self.name), echo=True)
                 # Send scriptobs EOF to finish execution - wouldn't want to leave a zombie scriptobs running
