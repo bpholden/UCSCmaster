@@ -276,8 +276,7 @@ class APF:
     def __str__(self):
         # Determine if the sun rising / setting check is working
         now = datetime.now()
-        self.avgtemps = [np.average(self.mon_lists[nm]) for nm in ('TM1S210','TM2CSUR','TAVERAGE','TM2CAIR','TEMPNOW3','TEMPNOW4')]
-        self.avgtemps=np.asarray(self.avgtemps)
+        self.avgTelTemps()
         s = ''
         s += "At %s state of telescope is:\n" % str(now)
         s += "Sun elevation = %4.2f %s\n" % (self.sunel, "Rising" if self.rising else "Setting")
