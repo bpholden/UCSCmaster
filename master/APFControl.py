@@ -1297,6 +1297,7 @@ class APF:
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
         else:
             # State must be auto, so check wind
+            apflog("Current median wind speed is %.2f with the limit %.2f" % (self.wvel,WINDSHIELD_LIMIT), level='debug')
             if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and float(self.airtemp) > TEMP_LIMIT:
                 apflog("Setting scriptobs_windshield to Disable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
