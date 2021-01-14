@@ -1268,8 +1268,8 @@ class APF:
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
         else:
             # State must be auto, so check wind
-            curwvel = np.median(self.wslist)
-            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and float(self.m2airkw) > TEMP_LIMIT:
+            apflog("Current median wind speed is %.2f with the limit %.2f" % (self.wvel,WINDSHIELD_LIMIT), level='debug')
+            if currState == 'enable' and self.wvel <= WINDSHIELD_LIMIT and float(self.airtemp) > TEMP_LIMIT:
                 apflog("Setting scriptobs_windshield to Disable")
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Disable")
             if currState == 'disable' and (self.wvel > WINDSHIELD_LIMIT or float(self.m2airkw) < TEMP_LIMIT):
@@ -1277,7 +1277,7 @@ class APF:
                 APFLib.write(self.robot["SCRIPTOBS_WINDSHIELD"], "Enable")
 
     def eveningStar(self):
-        """Aim the APF at the desired target. This calls prep-obs, slewlock, and focus-telescope. """
+        """Aim the APF at the desired target. This calls prep-obs, slewlock, and focus-telescope."""
         if self.isOpen()[0] == False:
             apflog("APF is not open. Can't target a star while closed.",level='error',echo=True)
             return
