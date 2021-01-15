@@ -778,7 +778,7 @@ class Observe(threading.Thread):
                         try:
                             Apflib.write(self.APF.dome['AZENABLE'], 'disable', timeout=10)
                         except:
-                            apflog("Error: Cannot disable AZ drive", level="error",echo=True)
+                            apflog("Error: Cannot disable AZ drive", level="warn",echo=True)
 
                     else:
                         if self.APF.openOK:
