@@ -625,6 +625,7 @@ class Observe(threading.Thread):
             wind_vel = self.APF.wvel
             ripd, running = self.APF.findRobot()
             cursunel = self.APF.sunel
+            current_msg = APFTask.get("master", ["MESSAGE"])
 
             # Check and close for weather
             self.badweather = self.APF.dewTooClose or not self.APF.openOK
@@ -696,7 +697,7 @@ class Observe(threading.Thread):
                     self.scriptobs.stdin.close()
                     self.APF.killRobot()
                 omsg = "Stopping scriptobs"
-                if current_msg['message'] != omsg:
+                if current_msg['MESSAGE'] != omsg:
                     APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
 
             # If the sun is rising and scriptobs has stopped, run closeup
@@ -817,7 +818,7 @@ class Observe(threading.Thread):
                     apflog("scriptobs is not running just after being started!", level=lvl, echo=True)
                     APFTask.set(self.task, suffix="MESSAGE",value="scriptobs is not running just after being started!",wait=False)
                 omsg = "Starting scriptobs"
-                if current_msg['message'] != omsg:
+                if current_msg['MESSAGE'] != omsg:
                     APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
 
 
@@ -827,15 +828,15 @@ class Observe(threading.Thread):
                 self.APF.DMReset()
 #                apflog("The APF is open, the DM timer is clicking down, and scriptobs is %s." % ( str(running)),level="debug")
 
-            current_msg = APFTask.get("master", ["message"])
+
             if not self.APF.isOpen()[0] and not rising:
                 omsg = "Waiting for sunset"
-                if current_msg['message'] != omsg:
+                if current_msg['MESSAGE'] != omsg:
                     APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
                 APFTask.waitFor(self.task, True, timeout=5)
             if  self.APF.isOpen()[0] and float(cursunel) > sunel_lim and not rising:
                 omsg = "Waiting for sunset"
-                if current_msg['message'] != omsg:
+                if current_msg['MESSAGE'] != omsg:
                     APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
                 APFTask.waitFor(self.task, True, timeout=5)
 
