@@ -717,78 +717,79 @@ class Observe(threading.Thread):
                 self.stop()
 
             # Open
-            if not self.APF.isReadyForObserving()[0] and float(cursunel) < SchedulerConsts.SUNEL_HOR and self.APF.openOK and self.canOpen and not self.badweather:
-                if float(cursunel) > sunel_lim and not rising:
-                    APFTask.set(self.task, suffix="MESSAGE", value="Open at sunset", wait=False)
-                    success = opening(cursunel, sunset=True)
-                    if success is False:
-                        if self.APF.openOK:
-                            apflog("Error: Cannot open the dome", level="alert",echo=True)
+            if self.APF.openOK and self.canOpen and not self.badweather:
+                if not self.APF.isReadyForObserving()[0] and float(cursunel) < SchedulerConsts.SUNEL_HOR:
+                    if float(cursunel) > sunel_lim and not rising:
+                        APFTask.set(self.task, suffix="MESSAGE", value="Open at sunset", wait=False)
+                        success = opening(cursunel, sunset=True)
+                        if success is False:
+                            if self.APF.openOK:
+                                apflog("Error: Cannot open the dome", level="alert",echo=True)
+                            else:
+                                # lost permision during opening, happens more often than you think
+                                apflog("Error: No longer have opening permission", level="error",echo=True)
+
                         else:
-                            # lost permision during opening, happens more often than you think
-                            apflog("Error: No longer have opening permission", level="error",echo=True)
+                            rv = self.APF.eveningStar()
+                            if not rv:
+                                apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
+
+                            chk_done = "$eostele.SUNEL < %f" % (SchedulerConsts.SUNEL_STARTLIM*np.pi/180.0)
+                            while float(cursunel) > SchedulerConsts.SUNEL_STARTLIM and not rising:
+                                outstr = "Sun is setting and sun at elevation of %.3f" % (float(cursunel))
+                                apflog(outstr,level='info', echo=True)
+                                result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
+                                self.APF.DMReset()
+                                if self.APF.openOK is False:
+                                    closetime = datetime.now()
+                                    APFTask.set(self.task, suffix="MESSAGE", value="Closing for weather", wait=False)
+                                    apflog("No longer ok to open.", echo=True)
+                                    apflog("OPREASON: " + self.APF.checkapf["OPREASON"].read(), echo=True)
+                                    apflog("WEATHER: " + self.APF.checkapf['WEATHER'].read(), echo=True)
+                                    closing()
+                                    break
+
+
+                    elif not rising or (rising and float(cursunel) < (sunel_lim - 5)) and self.canOpen and not self.badweather:
+                        success = opening(cursunel)
+                        omsg = "Opening at %s" % (cursunel)
+                        APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
 
                     else:
-                        rv = self.APF.eveningStar()
-                        if not rv:
-                            apflog("evening star targeting and telescope focus did not work",level='warn', echo=True)
+                        success = True
+                    if success == False:
+                        self.APF.close()
+                        if self.APF.openOK:
+                            apflog("Error: Cannot open the dome", echo=True, level='error')
+                        else:
+                            apflog("Error: Lost permission during opening", echo=True)
 
-                        chk_done = "$eostele.SUNEL < %f" % (SchedulerConsts.SUNEL_STARTLIM*np.pi/180.0)
-                        while float(cursunel) > SchedulerConsts.SUNEL_STARTLIM and not rising:
-                            outstr = "Sun is setting and sun at elevation of %.3f" % (float(cursunel))
-                            apflog(outstr,level='info', echo=True)
-                            result = APFTask.waitFor(self.task, True, expression=chk_done, timeout=60)
-                            self.APF.DMReset()
-                            if self.APF.openOK is False:
-                                closetime = datetime.now()
-                                APFTask.set(self.task, suffix="MESSAGE", value="Closing for weather", wait=False)
-                                apflog("No longer ok to open.", echo=True)
-                                apflog("OPREASON: " + self.APF.checkapf["OPREASON"].read(), echo=True)
-                                apflog("WEATHER: " + self.APF.checkapf['WEATHER'].read(), echo=True)
-                                closing()
-                                break
-
-
-                elif not rising or (rising and float(cursunel) < (sunel_lim - 5)) and self.canOpen and not self.badweather:
-                    success = opening(cursunel)
-                    omsg = "Opening at %s" % (cursunel)
-                    APFTask.set(self.task, suffix="MESSAGE", value=omsg, wait=False)
-
-                else:
-                    success = True
-                if success == False:
-                    self.APF.close()
-                    if self.APF.openOK:
-                        apflog("Error: Cannot open the dome", echo=True, level='error')
-                    else:
-                        apflog("Error: Lost permission during opening", echo=True)
-
-            # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
-            if self.APF.openOK and not rising and not self.APF.isOpen()[0] and not self.badweather:
-                APFTask.set(self.task, suffix="MESSAGE", value="Powering up for APFTeq", wait=False)
-                if self.APF.clearestop():
-                    try:
-                        APFLib.write(self.APF.dome['AZENABLE'], 'enable', timeout=10)
-                    except:
-                        apflog("Error: Cannot enable AZ drive", level="error")
-
-                    self.APF.setTeqMode('Evening')
-                    vent_open = "$eosdome.VD4STATE = VENT_OPENED"
-                    result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
-                    if result:
+                # If we can open, try to set stuff up so the vent doors can be controlled by apfteq
+                if not rising and not self.APF.isOpen()[0] and float(cursunel) > SchedulerConsts.SUNEL_HOR:
+                    APFTask.set(self.task, suffix="MESSAGE", value="Powering up for APFTeq", wait=False)
+                    if self.APF.clearestop():
                         try:
-                            Apflib.write(self.APF.dome['AZENABLE'], 'disable', timeout=10)
+                            APFLib.write(self.APF.dome['AZENABLE'], 'enable', timeout=10)
                         except:
-                            apflog("Error: Cannot disable AZ drive", level="warn",echo=True)
+                            apflog("Error: Cannot enable AZ drive", level="error")
 
-                    else:
-                        if self.APF.openOK:
-                            apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='info',echo=True)
+                        self.APF.setTeqMode('Evening')
+                        vent_open = "$eosdome.VD4STATE = VENT_OPENED"
+                        result = APFTask.waitfor(self.task, True, expression=vent_open, timeout=180)
+                        if result:
+                            try:
+                                Apflib.write(self.APF.dome['AZENABLE'], 'disable', timeout=10)
+                            except:
+                                apflog("Error: Cannot disable AZ drive", level="warn",echo=True)
+
                         else:
-                            apflog("Error: Lost permission during attempt at opening", level='info',echo=True)
-                else:
-                    apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds", level="error")
-                    APFTask.waitFor(self.task, True, timeout=600)
+                            if self.APF.openOK:
+                                apflog("Error: Vent doors did not open, is apfteq and eosdome running correctly?", level='info',echo=True)
+                            else:
+                                apflog("Error: Lost permission during attempt at opening", level='info',echo=True)
+                    else:
+                        apflog("Error: Cannot clear emergency stop, sleeping for 600 seconds", level="error")
+                        APFTask.waitFor(self.task, True, timeout=600)
 
 
 
