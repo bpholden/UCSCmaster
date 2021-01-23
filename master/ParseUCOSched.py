@@ -74,7 +74,7 @@ def parseStarname(starname):
     m = re.search("\+",ostarname)
     while m:
         ostarname = re.sub("\+","p",ostarname)
-
+        m = re.search("\+",ostarname)
 
     return ostarname
 
