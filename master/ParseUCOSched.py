@@ -552,12 +552,13 @@ def genStars(star_table):
     coordinates separate
     """
     stars = []
-    for i in range(0,len(star_table['name'])):
-        star = ephem.FixedBody()
-        star.name = star_table['name'][i]
-        star._ra = ephem.hours(str(":".join([star_table["RA hr"][i], star_table["RA min"][i], star_table["RA sec"][i]])))
-        star._dec = ephem.degrees(str(":".join([star_table["Dec deg"][i], star_table["Dec min"][i], star_table["Dec sec"][i]])))
-        stars.append(star)
+    if 'name' in star_table.colnames:
+        for i in range(0,len(star_table['name'])):
+            star = ephem.FixedBody()
+            star.name = star_table['name'][i]
+            star._ra = ephem.hours(str(":".join([star_table["RA hr"][i], star_table["RA min"][i], star_table["RA sec"][i]])))
+            star._dec = ephem.degrees(str(":".join([star_table["Dec deg"][i], star_table["Dec min"][i], star_table["Dec sec"][i]])))
+            stars.append(star)
 
     return stars
 
@@ -601,7 +602,8 @@ def parseUCOSched(sheetns=["RECUR_A100"],certificate='UCSC_Dynamic_Scheduler-4f4
 
     stars = genStars(star_table)
 
-    astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
+    if len(stars) > 0:
+        astropy.io.ascii.write(star_table,outfn, format='ecsv', overwrite=True)
 
     return (star_table, stars)
 
